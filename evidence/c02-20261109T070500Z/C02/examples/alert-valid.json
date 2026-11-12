@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "alert_id": "alt-20261109-001",
+  "source_id": "src-prom-metrics",
+  "service_id": "transaction-service",
+  "environment": "lab",
+  "alert_type": "high_error_rate",
+  "severity": "critical",
+  "event_time": "2026-11-09T09:05:00Z",
+  "window_start": "2026-11-09T09:00:00Z",
+  "window_end": "2026-11-09T09:05:00Z",
+  "build_version": "0.1.0-sim",
+  "error_code": "HTTP_500_TX_FAILURE",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "summary": "Synthetic alert fixture: transaction-service 5xx error ratio exceeded threshold in lab window",
+  "source_ref": "prom:alert:rule-tx-5xx:20261109T090500Z"
+}
+

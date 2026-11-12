@@ -1,0 +1,89 @@
+requirement_id,source_section,source_priority,source_statement,planned_chapters,disposition,decision_ref,validation_ref
+BR-001,BRD-7,Must,"Menyediakan maket digital microservices yang berfungsi mandiri",C03;C05;C22,INCLUDED,TBD-07,AT-001;AT-013
+BR-002,BRD-7,Must,"Menjalankan fault injection yang aman dan berulang",C04;C22,INCLUDED,TBD-07,AT-002;AT-008;AT-013
+BR-003,BRD-7,Must,"Menampilkan penjelasan gangguan log berbasis telemetry aktual",C05;C09;C13;C14;C21,INCLUDED,TBD-04;TBD-07,AT-003;AT-009;AT-014
+BR-004,BRD-7,Must,"Menggabungkan data tool langsung dan pengetahuan SOP/runbook",C07;C09;C11;C13,INCLUDED,TBD-04;TBD-06,AT-005;AT-006;AT-007
+BR-005,BRD-7,Must,"Menghasilkan dossier yang dapat dipahami manusia",C12;C16;C19,INCLUDED,TBD-11,AT-010;AT-014
+BR-006,BRD-7,Must,"Membedakan fakta, hipotesis, dan ketidakpastian",C14;C18;C21,INCLUDED,TBD-10,EV-01;EV-02;AT-009
+BR-007,BRD-7,Must,"Menjaga agent hanya memiliki kemampuan read-only",C08;C09;C11;C18,INCLUDED,ADR-S03,MCP-01;MCP-02;AT-005
+BR-008,BRD-7,Must,"Memiliki evaluation dataset terisolasi dari agent",C02;C04;C06;C17;C21,INCLUDED,TBD-13;ADR-S08,AT-008;AT-014
+BR-009,BRD-7,Must,"Menyediakan hasil pengukuran dan keterbatasan yang transparan",C17;C21;C23;C24,INCLUDED,TBD-08;TBD-10,AT-014;AT-015
+BR-010,BRD-7,Must,"Memungkinkan demo diulang melalui konfigurasi yang terdokumentasi",C03;C04;C22,INCLUDED,TBD-03,AT-013
+BR-011,BRD-7,Should,"Membandingkan Hybrid RAG dengan baseline retrieval",C07;C18;C21,INCLUDED,TBD-06;ADR-S04,AT-006;AT-014
+BR-012,BRD-7,Should,"Memungkinkan human reviewer mengedit/menolak output",C12;C16,INCLUDED,TBD-11,AT-010;HUM-01
+BR-013,BRD-7,Should,"Menampilkan dependency impact graph sederhana",C05;C10;C14,INCLUDED,TBD-07,AT-016
+BR-014,BRD-7,Should,"Menyediakan dashboard observability dan AI quality",C15;C16,INCLUDED,ADR-S06,NFR-018;AT-015
+BR-015,BRD-7,Could,"Mendukung integrasi sistem ticketing dummy",C16,CONDITIONAL,ADR-S07,AT-017
+BR-016,BRD-7,Won't,"Menghasilkan tindakan otomatis terhadap sistem produksi",C01;C08;C09;C24,EXCLUDED_BY_SOURCE,DEC-001,MCP-01;AT-005
+FR-SIM-001,BRD-8.1,Must,"Sistem menjalankan sedikitnya 3 service terhubung pada jaringan lab",C03;C05,INCLUDED,TBD-07,AT-001
+FR-SIM-002,BRD-8.1,Must,"Semua service mempublikasikan service name, env, instance/build version",C02;C03;C05,INCLUDED,TBD-07,AT-001;AT-003
+FR-SIM-003,BRD-8.1,Must,"Traffic generator mendukung normal load dan spike",C03,INCLUDED,TBD-03;TBD-07,AT-001;AT-013
+FR-SIM-004,BRD-8.1,Must,"Fault injector dapat mengaktifkan dan mengakhiri error tanpa akses agent",C04,INCLUDED,TBD-07,AT-002;AT-008
+FR-SIM-005,BRD-8.1,Must,"Ground truth menyimpan fault type, target, onset, impacted services dan expected symptom",C04,INCLUDED,TBD-13,AT-002;AT-008
+FR-SIM-006,BRD-8.1,Should,"Skenario mendukung cascade / multi-service impact",C04;C10;C14,INCLUDED,TBD-07,AT-016
+FR-SIM-007,BRD-8.1,Should,"Reset environment ke known clean state",C04,INCLUDED,TBD-03;TBD-07,AT-002;AT-013
+FR-OBS-001,BRD-8.2,Must,"Structured logs memiliki timestamp, severity, service, correlation/trace ID, event type",C03;C05,INCLUDED,ADR-S02,AT-003
+FR-OBS-002,BRD-8.2,Must,"Metrics mengukur error rate, request rate, latency minimal per service",C05;C09,INCLUDED,ADR-S02,AT-003
+FR-OBS-003,BRD-8.2,Must,"Distributed tracing memperlihatkan dependency calls",C03;C05;C09,INCLUDED,ADR-S02,AT-001;AT-003
+FR-OBS-004,BRD-8.2,Must,"Alert intake menerima incident signal atau trigger terkontrol",C05;C10,INCLUDED,ADR-S02,AT-003
+FR-OBS-005,BRD-8.2,Must,"Intake melakukan validasi, dedup fingerprint, dan time-window normalization",C10;C11,INCLUDED,ADR-S05,OPS-01;AT-003
+FR-OBS-006,BRD-8.2,Should,"Dependency graph menautkan upstream/downstream",C05;C10,INCLUDED,TBD-07,AT-016
+FR-OBS-007,BRD-8.2,Must,"Hilangnya satu sumber telemetry dicatat eksplisit",C09;C11;C14,INCLUDED,ADR-S02,EV-02;AT-009
+FR-RAG-001,BRD-8.3,Must,"Mengimpor runbook, SOP simulasi, known-errors dan architecture docs",C06,INCLUDED,TBD-13,AT-006;AT-007
+FR-RAG-002,BRD-8.3,Must,"Ingestion mencakup normalisasi, chunking, embedding, dan indexing",C06,INCLUDED,TBD-04;ADR-S04,AT-006
+FR-RAG-003,BRD-8.3,Must,"Retrieval mendukung lexical + dense ranking dan fusion",C07,INCLUDED,TBD-06;ADR-S04,AT-006
+FR-RAG-004,BRD-8.3,Must,"Retrieval memfilter service, environment, status, dan versi efektif",C06;C07;C14,INCLUDED,TBD-06,RAG-01;RAG-02;AT-007
+FR-RAG-005,BRD-8.3,Must,"Dossier mencantumkan doc ID, section, version, dan source URI lokal",C07;C12;C16,INCLUDED,TBD-11,AT-006;AT-010
+FR-RAG-006,BRD-8.3,Must,"Dataset evaluation untuk RAG dipisahkan dari indexing QA dan tuning holdout",C02;C06;C17,INCLUDED,TBD-13;ADR-S08,AT-008;AT-014
+FR-RAG-007,BRD-8.3,Should,"Reranker menyeleksi kandidat hasil fusion",C07,INCLUDED,ADR-S04,AT-006;AT-014
+FR-RAG-008,BRD-8.3,Should,"Dokumen baru/update/delete dapat di-reindex deterministik",C06;C07,INCLUDED,TBD-06,RAG-01;AT-007
+FR-RAG-009,BRD-8.3,Must,"Jika tidak ada runbook yang sesuai, sistem menyatakan ketiadaan referensi",C07;C11;C14,INCLUDED,ADR-S04,AT-007;AT-009
+FR-AGT-001,BRD-8.4,Must,"Workflow memiliki state: RECEIVED -> CORRELATED -> TRIAGED -> EVIDENCE_COLLECTED -> RETRIEVED -> HYPOTHESES -> VALIDATED -> DRAFTED -> HUMAN_REVIEW",C11,INCLUDED,TBD-05;ADR-S01,AT-004
+FR-AGT-002,BRD-8.4,Must,"Tool adapter menyediakan fungsi read-only yang dibatasi schema",C08;C09,INCLUDED,ADR-S03,MCP-01;MCP-02;AT-005
+FR-AGT-003,BRD-8.4,Must,"Agent dilarang memanggil tool restart/deploy/write maupun arbitrary shell/SQL",C08;C09;C11,INCLUDED,ADR-S03,MCP-01;AT-005
+FR-AGT-004,BRD-8.4,Must,"Tool memiliki cap window, result count, timeout, dan call budget",C08;C09;C11,INCLUDED,ADR-S05,MCP-02;AT-005
+FR-AGT-005,BRD-8.4,Must,"Investigator menyusun minimal hipotesis utama dan alternatif bila evidence mendukung",C13;C14,INCLUDED,TBD-04,AT-014
+FR-AGT-006,BRD-8.4,Must,"Validator menolak/melabeli klaim tanpa bukti, timestamp salah atau SOP tidak relevan",C11;C14,INCLUDED,TBD-10,EV-01;EV-02;AT-009
+FR-AGT-007,BRD-8.4,Must,"Kegagalan tool/LLM/RAG menghasilkan safe fallback dan INCONCLUSIVE bila perlu",C09;C11;C13;C14,INCLUDED,TBD-04;ADR-S05,OPS-02;AT-012
+FR-AGT-008,BRD-8.4,Must,"Config workflow/model/prompt/tool-schema memiliki version identifier",C02;C11;C13;C15,INCLUDED,ADR-S01,AT-013;AT-014
+FR-AGT-009,BRD-8.4,Should,"Workflow dapat di-cancel/retry tanpa duplikasi dossier",C11;C12,INCLUDED,TBD-05;ADR-S05,AT-004;AT-012
+FR-AGT-010,BRD-8.4,Should,"Agent dapat menjelaskan mengapa evidence mendukung atau menolak hipotesis",C13;C14;C16,INCLUDED,TBD-04,AT-010;AT-014
+FR-OUT-001,BRD-8.5,Must,"Menghasilkan dossier human-readable serta structured JSON/Markdown",C12,INCLUDED,TBD-11,AT-010
+FR-OUT-002,BRD-8.5,Must,"Dossier menampilkan service, environment, severity, timeline dan incident window",C12,INCLUDED,TBD-11,AT-010
+FR-OUT-003,BRD-8.5,Must,"Dossier memuat evidence, source/time, hipotesis, status, SOP citation, unknowns",C12;C14,INCLUDED,TBD-11,AT-009;AT-010
+FR-OUT-004,BRD-8.5,Must,"Reviewer dapat approve/reject atau memberi koreksi",C12;C16,INCLUDED,TBD-08;TBD-11,HUM-01;AT-010
+FR-OUT-005,BRD-8.5,Must,"Sistem mengekspor hasil demo dan laporan evaluasi terpisah dari dossier",C16;C17;C22,INCLUDED,TBD-13,AT-010;AT-014
+FR-OUT-006,BRD-8.5,Should,"UI menampilkan status workflow, links observability, latency dan error",C15;C16,INCLUDED,TBD-11,AT-010
+FR-OUT-007,BRD-8.5,Could,"Ticket dummy dibuat dari dossier yang disetujui",C16,CONDITIONAL,ADR-S07,AT-017
+RULE-001,BRD-9,Rule,"Hanya synthetic data yang diperbolehkan di PoC",C01;C04;C06,INCLUDED,TBD-13,SEC-03;AT-001
+RULE-002,BRD-9,Rule,"Agent tidak mengakses ground truth selama investigasi",C02;C04;C17,INCLUDED,TBD-13,AT-008
+RULE-003,BRD-9,Rule,"Hanya tools observasi yang boleh diakses agent",C08;C09;C11,INCLUDED,ADR-S03,MCP-01;AT-005
+RULE-004,BRD-9,Rule,"Hasil retrieval merupakan dokumen/data tak tepercaya, bukan instruksi sistem",C08;C11;C13,INCLUDED,ADR-S03,SEC-02;AT-011
+RULE-005,BRD-9,Rule,"SOP hanya berlaku jika status aktif, waktu efektif, service, environment, version sesuai",C06;C07;C14,INCLUDED,TBD-06,RAG-01;RAG-02;AT-007
+RULE-006,BRD-9,Rule,"Bukti yang hilang tidak boleh direkayasa oleh LLM",C09;C14,INCLUDED,TBD-10,EV-02;AT-009;AT-012
+RULE-007,BRD-9,Rule,"Hipotesis supported/likely tidak dipromosikan menjadi proven root cause secara otomatis",C13;C14;C16,INCLUDED,TBD-10,EV-01;AT-009;HUM-01
+RULE-008,BRD-9,Rule,"Reviewer manusia memiliki keputusan akhir pada dossier",C12;C16,INCLUDED,TBD-08,HUM-01;AT-010
+RULE-009,BRD-9,Rule,"Error dalam simulasi tidak boleh mengubah sistem di luar lab",C02;C03;C04,INCLUDED,TBD-03,AT-001;AT-002
+RULE-010,BRD-9,Rule,"Semua hasil eksperimen mencatat seed, prompt/model, KB version, code commit, dan timestamp",C02;C17,INCLUDED,ADR-S08,AT-013;AT-014
+RULE-011,BRD-9,Rule,"Benchmark manual dan AI memakai kasus dengan tingkat kesulitan sebanding",C02;C19,INCLUDED,ADR-S08,AT-014
+RULE-012,BRD-9,Rule,"Target KPI dan gate final harus disahkan sebelum acceptance testing formal",C01;C08,INCLUDED,TBD-10,AT-014
+NFR-001,BRD-11,Must,"Seluruh services berjalan pada local/isolated lab; tidak ada akses produksi",C01;C02;C03,INCLUDED,TBD-03,AT-001
+NFR-002,BRD-11,Must,"One-command documented start/stop + scenario replay; seed dan config dicatat",C03;C04;C22,INCLUDED,TBD-03,AT-013
+NFR-003,BRD-11,Must,"Tidak ada write tool untuk investigator; synthetic PII/secret fixture tidak keluar ke log AI",C08;C09;C15,INCLUDED,TBD-13;ADR-S03,MCP-01;SEC-03;AT-005
+NFR-004,BRD-11,Must,"Setiap material claim mempunyai evidence ID atau ditandai unsupported",C14,INCLUDED,TBD-10,EV-01;EV-02;AT-009
+NFR-005,BRD-11,Must,"Incident ID dikorelasi dengan tool calls, retrieval refs, model/prompt version, reviewer action",C08;C11;C15;C16,INCLUDED,ADR-S06,AT-004;AT-010
+NFR-006,BRD-11,Must,"LLM/tool/RAG failure tidak menyebabkan crash tanpa jejak; manual fallback tersedia",C09;C11;C13;C15,INCLUDED,TBD-04;ADR-S05,OPS-02;AT-012
+NFR-007,BRD-11,Should,"P95 intake-to-dossier <=120 detik pada benchmark lab (target dari proposal, belum final)",C11;C15;C20,INCLUDED,TBD-10,AT-014
+NFR-008,BRD-11,Should,"P95 <=2 detik pada corpus PoC representatif (target dari proposal, belum final)",C07;C15,INCLUDED,TBD-10,AT-006;AT-014
+NFR-009,BRD-11,Should,"Lab bersifat best-effort; tidak ada SLA enterprise yang diklaim",C01;C20;C23,INCLUDED,TBD-03,AT-013
+NFR-010,BRD-11,Should,"Test 5/20/50 concurrent events jika kapasitas lab mendukung; laporkan resource ceiling",C20,INCLUDED,TBD-03;ADR-S05,OPS-01
+NFR-011,BRD-11,Must,"Ground-truth label, evaluator output, dan dossier versi immutable per run/append-only record",C04;C12;C16;C17,INCLUDED,TBD-13,AT-008;AT-010;AT-013
+NFR-012,BRD-11,Must,"Tanpa PII asli; synthetic secrets/PII harus diperlakukan sebagai test fixtures",C01;C06;C08;C15,INCLUDED,TBD-13,SEC-03
+NFR-013,BRD-11,Should,"Token, calls, embeddings, CPU/memory, approximate cost per incident dicatat",C15;C20,INCLUDED,TBD-09,AT-015
+NFR-014,BRD-11,Should,"Versioned interfaces, config, runbooks, architecture decision log, basic CI tests",C02;C03;C11;C20,INCLUDED,ADR-S01,AT-013
+NFR-015,BRD-11,Should,"Containers atau equivalent reproducible environment; system requirements documented",C03;C22,INCLUDED,TBD-03,AT-001;AT-013
+NFR-016,BRD-11,Must,"Missing evidence tidak diganti tebakan; error ditampilkan dengan reason code",C09;C13;C14,INCLUDED,TBD-10,EV-02;AT-009;AT-012
+NFR-017,BRD-11,Must,"Credentials tidak disimpan di repository atau dossier; environment/secrets file excluded",C02;C03;C08;C15,INCLUDED,TBD-13,SEC-03
+NFR-018,BRD-11,Should,"Trace duration, tool errors, LLM token use, retrieval ranking dan review outcome",C15;C16,INCLUDED,ADR-S06,AT-015
+NFR-019,BRD-11,Should,"Holdout frozen; perubahan prompt/model dicatat sebagai eksperimen baru",C02;C08;C17,INCLUDED,ADR-S08,AT-014
+NFR-020,BRD-11,Must,"Reviewer dapat membaca output tanpa pengetahuan framework, melalui report atau web UI sederhana",C12;C16,INCLUDED,TBD-11,AT-010

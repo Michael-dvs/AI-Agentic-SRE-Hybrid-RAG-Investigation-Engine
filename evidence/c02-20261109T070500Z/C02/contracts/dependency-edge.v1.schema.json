@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:dependency-edge:1",
+  "title": "Service Dependency Edge Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "edge_id",
+    "from_service_id",
+    "to_service_id",
+    "environment",
+    "deployment_version",
+    "relation_type",
+    "source_kind",
+    "source_ref",
+    "observed_at",
+    "freshness_status",
+    "confidence",
+    "error_propagation_observed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "edge_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "from_service_id": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "to_service_id": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "staging-sim", "prod-sim"]
+    },
+    "deployment_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "relation_type": {
+      "type": "string",
+      "enum": ["sync_http", "async_queue", "storage_call"]
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": ["catalog_declared", "trace_observed"]
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "freshness_status": {
+      "type": "string",
+      "enum": ["fresh", "stale"]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "error_propagation_observed": {
+      "type": "boolean"
+    }
+  }
+}
+

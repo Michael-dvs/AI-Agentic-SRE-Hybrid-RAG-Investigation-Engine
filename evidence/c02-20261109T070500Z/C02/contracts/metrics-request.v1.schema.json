@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:metrics-request:1",
+  "title": "Bounded Read-Only Metrics Request Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service_id",
+    "environment",
+    "metric_enum",
+    "start",
+    "end",
+    "max_points"
+  ],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "metric_enum": {
+      "enum": ["request_rate", "error_rate", "latency_p95"]
+    },
+    "start": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "end": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "max_points": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
+

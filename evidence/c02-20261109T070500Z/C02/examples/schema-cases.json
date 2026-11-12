@@ -1,0 +1,1060 @@
+[
+  {
+    "case_id": "service-catalog-valid",
+    "schema_id": "urn:sre-sim:contract:service-catalog:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "service_id": "api-gateway",
+      "service.name": "api-gateway",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "gateway",
+      "instance_id": "api-gateway-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": ["auth-service", "transaction-service"],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T07:00:00Z"
+    }
+  },
+  {
+    "case_id": "service-catalog-invalid-unknown-service",
+    "schema_id": "urn:sre-sim:contract:service-catalog:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "service_id": "unmapped-rogue-service",
+      "service.name": "unmapped-rogue-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "gateway",
+      "instance_id": "rogue-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T07:00:00Z"
+    }
+  },
+  {
+    "case_id": "telemetry-log-valid",
+    "schema_id": "urn:sre-sim:contract:telemetry-log:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "timestamp": "2026-11-09T09:01:12Z",
+      "severity": "ERROR",
+      "service.name": "transaction-service",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "instance_id": "transaction-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "event_type": "db_connection_error",
+      "correlation_id": "corr-99887766",
+      "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "span_id": "00f067aa0ba902b7",
+      "trace_absent_reason": null,
+      "error_code": "DB_CONN_TIMEOUT",
+      "message": "Database connection timed out after 2000ms [REDACTED_TOKEN]",
+      "sanitized": true
+    }
+  },
+  {
+    "case_id": "telemetry-log-invalid-zero-trace-id",
+    "schema_id": "urn:sre-sim:contract:telemetry-log:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "timestamp": "2026-11-09T09:01:12Z",
+      "severity": "ERROR",
+      "service.name": "transaction-service",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "instance_id": "transaction-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "event_type": "db_connection_error",
+      "correlation_id": "corr-99887766",
+      "trace_id": "00000000000000000000000000000000",
+      "span_id": "00f067aa0ba902b7",
+      "trace_absent_reason": null,
+      "error_code": "DB_CONN_TIMEOUT",
+      "message": "Invalid all-zero OTel trace ID",
+      "sanitized": true
+    }
+  },
+  {
+    "case_id": "telemetry-metric-valid",
+    "schema_id": "urn:sre-sim:contract:telemetry-metric:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "service_id": "transaction-service",
+      "service.name": "transaction-service",
+      "environment": "lab",
+      "build_version": "0.1.0-sim",
+      "metric_enum": "error_rate",
+      "value": 0.18,
+      "unit": "ratio",
+      "sample_at": "2026-11-09T09:02:00Z",
+      "window_seconds": 60,
+      "aggregation": "ratio",
+      "source_ref": "src-prom-metrics",
+      "data_quality": "complete"
+    }
+  },
+  {
+    "case_id": "telemetry-metric-invalid-enum",
+    "schema_id": "urn:sre-sim:contract:telemetry-metric:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "service_id": "transaction-service",
+      "service.name": "transaction-service",
+      "environment": "lab",
+      "build_version": "0.1.0-sim",
+      "metric_enum": "arbitrary_promql_expression",
+      "value": 0.18,
+      "unit": "ratio",
+      "sample_at": "2026-11-09T09:02:00Z",
+      "window_seconds": 60,
+      "aggregation": "ratio",
+      "source_ref": "src-prom-metrics",
+      "data_quality": "complete"
+    }
+  },
+  {
+    "case_id": "alert-event-valid",
+    "schema_id": "urn:sre-sim:contract:alert-event:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "alert_id": "alt-20261109-0001",
+      "source_id": "src-prom-metrics",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "alert_type": "high_error_rate",
+      "severity": "critical",
+      "event_time": "2026-11-09T09:03:00Z",
+      "window_start": "2026-11-09T08:58:00Z",
+      "window_end": "2026-11-09T09:03:00Z",
+      "build_version": "0.1.0-sim",
+      "error_code": "DB_CONN_TIMEOUT",
+      "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "summary": "High error rate on transaction-service (18%)",
+      "source_ref": "src-prom-metrics:alert:0001"
+    }
+  },
+  {
+    "case_id": "alert-event-invalid-gt-leak-field",
+    "schema_id": "urn:sre-sim:contract:alert-event:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "alert_id": "alt-20261109-0001",
+      "source_id": "src-prom-metrics",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "alert_type": "high_error_rate",
+      "severity": "critical",
+      "event_time": "2026-11-09T09:03:00Z",
+      "window_start": "2026-11-09T08:58:00Z",
+      "window_end": "2026-11-09T09:03:00Z",
+      "build_version": "0.1.0-sim",
+      "error_code": "DB_CONN_TIMEOUT",
+      "trace_id": null,
+      "summary": "Alert with forbidden GT scenario_id field",
+      "source_ref": "src-prom-metrics:alert:0001",
+      "scenario_id": "SC-04"
+    }
+  },
+  {
+    "case_id": "dependency-edge-valid",
+    "schema_id": "urn:sre-sim:contract:dependency-edge:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "edge_id": "edge-tx-to-db-lab",
+      "from_service_id": "transaction-service",
+      "to_service_id": "db-dummy",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "storage_call",
+      "source_kind": "trace_observed",
+      "source_ref": "src-tempo-traces",
+      "observed_at": "2026-11-09T09:02:30Z",
+      "freshness_status": "fresh",
+      "confidence": 0.95,
+      "error_propagation_observed": true
+    }
+  },
+  {
+    "case_id": "dependency-edge-invalid-confidence-over-1",
+    "schema_id": "urn:sre-sim:contract:dependency-edge:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "edge_id": "edge-tx-to-db-lab",
+      "from_service_id": "transaction-service",
+      "to_service_id": "db-dummy",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "storage_call",
+      "source_kind": "trace_observed",
+      "source_ref": "src-tempo-traces",
+      "observed_at": "2026-11-09T09:02:30Z",
+      "freshness_status": "fresh",
+      "confidence": 1.5,
+      "error_propagation_observed": true
+    }
+  },
+  {
+    "case_id": "metrics-shape-valid",
+    "schema_id": "urn:sre-sim:contract:metrics-request:1",
+    "expected_valid": true,
+    "instance": {
+      "service_id": "svc-a",
+      "environment": "lab",
+      "metric_enum": "error_rate",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z",
+      "max_points": 50
+    }
+  },
+  {
+    "case_id": "metrics-extra-privilege-field",
+    "schema_id": "urn:sre-sim:contract:metrics-request:1",
+    "expected_valid": false,
+    "instance": {
+      "service_id": "svc-a",
+      "environment": "lab",
+      "metric_enum": "error_rate",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z",
+      "max_points": 50,
+      "allowed_groups": ["admin"]
+    }
+  },
+  {
+    "case_id": "metrics-invalid-date",
+    "schema_id": "urn:sre-sim:contract:metrics-request:1",
+    "expected_valid": false,
+    "instance": {
+      "service_id": "svc-a",
+      "environment": "lab",
+      "metric_enum": "error_rate",
+      "start": "2026-13-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z",
+      "max_points": 50
+    }
+  },
+  {
+    "case_id": "logs-request-valid",
+    "schema_id": "urn:sre-sim:contract:logs-request:1",
+    "expected_valid": true,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z",
+      "error_code": "DB_CONN_TIMEOUT",
+      "max_hits": 25
+    }
+  },
+  {
+    "case_id": "logs-request-invalid-logql-injection",
+    "schema_id": "urn:sre-sim:contract:logs-request:1",
+    "expected_valid": false,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z",
+      "error_code": "{job=\"*\"} |= \"secret\"",
+      "max_hits": 25
+    }
+  },
+  {
+    "case_id": "trace-request-valid",
+    "schema_id": "urn:sre-sim:contract:trace-request:1",
+    "expected_valid": true,
+    "instance": {
+      "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z"
+    }
+  },
+  {
+    "case_id": "trace-request-invalid-non-hex-trace-id",
+    "schema_id": "urn:sre-sim:contract:trace-request:1",
+    "expected_valid": false,
+    "instance": {
+      "trace_id": "trace-invalid-id-not-32-hex-chars",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "start": "2026-11-09T09:00:00Z",
+      "end": "2026-11-09T09:05:00Z"
+    }
+  },
+  {
+    "case_id": "dependencies-request-valid",
+    "schema_id": "urn:sre-sim:contract:dependencies-request:1",
+    "expected_valid": true,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "reference_time": "2026-11-09T09:03:00Z",
+      "max_depth": 2
+    }
+  },
+  {
+    "case_id": "dependencies-request-invalid-zero-depth",
+    "schema_id": "urn:sre-sim:contract:dependencies-request:1",
+    "expected_valid": false,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "reference_time": "2026-11-09T09:03:00Z",
+      "max_depth": 0
+    }
+  },
+  {
+    "case_id": "tool-result-unavailable-valid",
+    "schema_id": "urn:sre-sim:contract:tool-result:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "tool_name": "get_trace_summary",
+      "request_id": "req-example-01",
+      "status": "unavailable",
+      "source_ref": null,
+      "observed_at": "2026-11-09T09:05:01Z",
+      "query_window": {
+        "start": "2026-11-09T09:00:00Z",
+        "end": "2026-11-09T09:05:00Z"
+      },
+      "sampling": {
+        "applied": false,
+        "method": null,
+        "returned_count": 0,
+        "source_count": null
+      },
+      "truncated": false,
+      "data_quality": "unavailable",
+      "sanitized": true,
+      "records": [],
+      "error_code": "SOURCE_UNAVAILABLE"
+    }
+  },
+  {
+    "case_id": "tool-result-invalid-unsanitized-flag",
+    "schema_id": "urn:sre-sim:contract:tool-result:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "tool_name": "get_trace_summary",
+      "request_id": "req-example-02",
+      "status": "ok",
+      "source_ref": "SRC-OBS-TEMPO",
+      "observed_at": "2026-11-09T09:05:01Z",
+      "query_window": {
+        "start": "2026-11-09T09:00:00Z",
+        "end": "2026-11-09T09:05:00Z"
+      },
+      "sampling": {
+        "applied": false,
+        "method": null,
+        "returned_count": 1,
+        "source_count": 1
+      },
+      "truncated": false,
+      "data_quality": "complete",
+      "sanitized": false,
+      "records": [{"span_id": "00f067aa0ba902b7"}],
+      "error_code": null
+    }
+  },
+  {
+    "case_id": "knowledge-chunk-valid",
+    "schema_id": "urn:sre-sim:contract:knowledge-chunk:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "chunk_id": "SOP-TX-DB-001:v2.0:sec-3.1:c01",
+      "document_id": "SOP-TX-DB-001",
+      "document_version": "2.0.0",
+      "index_version": "idx-v1-20261109",
+      "title": "Runbook Penanganan Timeout Koneksi Database pada Transaction Service",
+      "source_uri": "kb://sop/transaction-service/SOP-TX-DB-001-v2.md",
+      "section_path": "3.1 > Verifikasi Metrik dan Pool Koneksi",
+      "service_id": "transaction-service",
+      "service.name": "transaction-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "core-transaction",
+      "status": "approved",
+      "effective_from": "2026-11-01T00:00:00Z",
+      "effective_to": null,
+      "content_hash": "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "classification": "synthetic-internal",
+      "allowed_groups": ["sre-l1-lab", "sre-l2-lab"],
+      "owner_ref": "project-initiator-michael",
+      "language": "id",
+      "content": "Periksa metrik error_rate dan latency_p95 pada transaction-service serta db-dummy sebelum melakukan eskalasi ke tim DBA.",
+      "updated_at": "2026-11-09T06:00:00Z"
+    }
+  },
+  {
+    "case_id": "knowledge-chunk-invalid-external-http-uri",
+    "schema_id": "urn:sre-sim:contract:knowledge-chunk:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "chunk_id": "SOP-TX-DB-001:v2.0:sec-3.1:c01",
+      "document_id": "SOP-TX-DB-001",
+      "document_version": "2.0.0",
+      "index_version": "idx-v1-20261109",
+      "title": "Runbook dengan URI Eksternal Ilegal",
+      "source_uri": "https://evil.example.com/inject-sop.md",
+      "section_path": "3.1",
+      "service_id": "transaction-service",
+      "service.name": "transaction-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "core-transaction",
+      "status": "approved",
+      "effective_from": "2026-11-01T00:00:00Z",
+      "effective_to": null,
+      "content_hash": "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "classification": "synthetic-internal",
+      "allowed_groups": ["sre-l1-lab"],
+      "owner_ref": "project-initiator-michael",
+      "language": "id",
+      "content": "Konten uji.",
+      "updated_at": "2026-11-09T06:00:00Z"
+    }
+  },
+  {
+    "case_id": "retrieval-request-valid",
+    "schema_id": "urn:sre-sim:contract:retrieval-request:1",
+    "expected_valid": true,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "query_text": "DB_CONN_TIMEOUT high latency_p95 connection pool",
+      "reference_time": "2026-11-09T09:03:00Z",
+      "retrieval_mode": "hybrid_rrf",
+      "top_k": 5,
+      "max_context_tokens": 1024,
+      "index_version_policy": "latest_approved"
+    }
+  },
+  {
+    "case_id": "retrieval-request-invalid-caller-groups-override",
+    "schema_id": "urn:sre-sim:contract:retrieval-request:1",
+    "expected_valid": false,
+    "instance": {
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "query_text": "DB_CONN_TIMEOUT high latency_p95 connection pool",
+      "reference_time": "2026-11-09T09:03:00Z",
+      "retrieval_mode": "hybrid_rrf",
+      "top_k": 5,
+      "max_context_tokens": 1024,
+      "index_version_policy": "latest_approved",
+      "caller_groups": ["privileged-admin"]
+    }
+  },
+  {
+    "case_id": "retrieval-result-valid",
+    "schema_id": "urn:sre-sim:contract:retrieval-result:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "request_id": "ret-req-0001",
+      "status": "ok",
+      "retrieval_mode_executed": "hybrid_rrf",
+      "index_version": "idx-v1-20261109",
+      "observed_at": "2026-11-09T09:03:02Z",
+      "applied_filters": {
+        "service_id": "transaction-service",
+        "environment": "lab",
+        "reference_time": "2026-11-09T09:03:00Z",
+        "status_required": "approved",
+        "caller_scope_ref": "scope-sre-l1-lab"
+      },
+      "citations": [
+        {
+          "chunk_id": "SOP-TX-DB-001:v2.0:sec-3.1:c01",
+          "document_id": "SOP-TX-DB-001",
+          "document_version": "2.0.0",
+          "title": "Runbook Penanganan Timeout Koneksi Database pada Transaction Service",
+          "section_path": "3.1 > Verifikasi Metrik dan Pool Koneksi",
+          "source_uri": "kb://sop/transaction-service/SOP-TX-DB-001-v2.md",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "status": "approved",
+          "effective_from": "2026-11-01T00:00:00Z",
+          "effective_to": null,
+          "content_hash": "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+          "score": 0.03278,
+          "score_type": "rrf_fusion",
+          "source_branch": "hybrid",
+          "sanitized_excerpt": "Periksa metrik error_rate dan latency_p95 pada transaction-service serta db-dummy.",
+          "applicability_verified": true
+        }
+      ],
+      "truncated": false,
+      "context_tokens_used": 128,
+      "latency_ms": 18.4,
+      "gap_reason": null
+    }
+  },
+  {
+    "case_id": "retrieval-result-invalid-obsolete-citation",
+    "schema_id": "urn:sre-sim:contract:retrieval-result:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "request_id": "ret-req-0002",
+      "status": "ok",
+      "retrieval_mode_executed": "hybrid_rrf",
+      "index_version": "idx-v1-20261109",
+      "observed_at": "2026-11-09T09:03:02Z",
+      "applied_filters": {
+        "service_id": "transaction-service",
+        "environment": "lab",
+        "reference_time": "2026-11-09T09:03:00Z",
+        "status_required": "approved",
+        "caller_scope_ref": "scope-sre-l1-lab"
+      },
+      "citations": [
+        {
+          "chunk_id": "SOP-TX-DB-001:v1.0:sec-3.1:c01",
+          "document_id": "SOP-TX-DB-001",
+          "document_version": "1.0.0",
+          "title": "Runbook Lama Obsolete",
+          "section_path": "3.1",
+          "source_uri": "kb://sop/transaction-service/SOP-TX-DB-001-v1.md",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "status": "obsolete",
+          "effective_from": "2025-01-01T00:00:00Z",
+          "effective_to": "2026-11-01T00:00:00Z",
+          "content_hash": "b1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+          "score": 0.04,
+          "score_type": "rrf_fusion",
+          "source_branch": "hybrid",
+          "sanitized_excerpt": "Prosedur usang.",
+          "applicability_verified": true
+        }
+      ],
+      "truncated": false,
+      "context_tokens_used": 64,
+      "latency_ms": 12.1,
+      "gap_reason": null
+    }
+  },
+  {
+    "case_id": "workflow-event-valid",
+    "schema_id": "urn:sre-sim:contract:workflow-event:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "event_id": "wf-evt-0001",
+      "incident_id": "inc-20261109-0001",
+      "idempotency_key": "idem-inc-20261109-0001-drafted-v1",
+      "occurred_at": "2026-11-09T09:03:15Z",
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "producer_ref": "CMP-INV-08",
+      "workflow_version": "wf-v1.0.0",
+      "policy_version": "pol-v1.0.0",
+      "terminal_outcome": null,
+      "reason_code": "OK",
+      "artifact_ref": "artifacts/runs/run-20261109-0001/dossier-v1.json"
+    }
+  },
+  {
+    "case_id": "workflow-event-invalid-state",
+    "schema_id": "urn:sre-sim:contract:workflow-event:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "event_id": "wf-evt-0002",
+      "incident_id": "inc-20261109-0001",
+      "idempotency_key": "idem-inc-20261109-0001-auto-remediated",
+      "occurred_at": "2026-11-09T09:03:15Z",
+      "from_state": "DRAFTED",
+      "to_state": "AUTO_REMEDIATED",
+      "producer_ref": "CMP-INV-03",
+      "workflow_version": "wf-v1.0.0",
+      "policy_version": "pol-v1.0.0",
+      "terminal_outcome": null,
+      "reason_code": "OK",
+      "artifact_ref": null
+    }
+  },
+  {
+    "case_id": "dossier-valid",
+    "schema_id": "urn:sre-sim:contract:dossier:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "incident_id": "inc-20261109-0001",
+      "dossier_version": 1,
+      "dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "severity": "critical",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "alert_received_at": "2026-11-09T09:03:00Z",
+      "window_start": "2026-11-09T08:58:00Z",
+      "window_end": "2026-11-09T09:03:00Z",
+      "dossier_ready_at": "2026-11-09T09:03:20Z",
+      "investigation_mode": "agentic_llm",
+      "impact_summary": {
+        "affected_services": ["transaction-service", "api-gateway"],
+        "observed_symptoms": "Lonjakan error_rate (18%) dan DB_CONN_TIMEOUT pada transaction-service.",
+        "error_budget_impact": "severe"
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-11-09T09:01:12Z",
+          "event_kind": "error_log",
+          "source_ref": "SRC-OBS-LOKI",
+          "summary": "DB_CONN_TIMEOUT tercatat pada transaction-service-lab-01."
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "ev-metrics-01",
+          "tool_name": "get_service_metrics",
+          "source_ref": "SRC-OBS-PROMETHEUS",
+          "observed_at": "2026-11-09T09:03:05Z",
+          "query_window": {
+            "start": "2026-11-09T08:58:00Z",
+            "end": "2026-11-09T09:03:00Z"
+          },
+          "data_quality": "complete",
+          "truncated": false,
+          "sanitized": true,
+          "summary": "error_rate = 0.18 ratio pada transaction-service."
+        }
+      ],
+      "missing_sources": [
+        {
+          "tool_name": "get_trace_summary",
+          "error_code": "SOURCE_UNAVAILABLE",
+          "recorded_at": "2026-11-09T09:03:08Z",
+          "impact_note": "Backend Tempo tidak merespons; verifikasi span hilir tidak tersedia."
+        }
+      ],
+      "hypotheses": [
+        {
+          "hypothesis_id": "hyp-01",
+          "rank": 1,
+          "statement": "Degradasi koneksi ke db-dummy menyebabkan timeout pada transaction-service.",
+          "support_status": "SUPPORTED",
+          "supporting_evidence_ids": ["ev-metrics-01"],
+          "contradicting_evidence_ids": [],
+          "reason_summary": "Didukung oleh lonjakan error_rate dan log DB_CONN_TIMEOUT dalam jendela insiden.",
+          "unknowns": ["Span latency ke db-dummy belum terkonfirmasi karena Tempo unavailable."]
+        }
+      ],
+      "sop_citations": [
+        {
+          "chunk_id": "SOP-TX-DB-001:v2.0:sec-3.1:c01",
+          "doc_id": "SOP-TX-DB-001",
+          "version": "2.0.0",
+          "section_path": "3.1 > Verifikasi Metrik dan Pool Koneksi",
+          "source_uri": "kb://sop/transaction-service/SOP-TX-DB-001-v2.md",
+          "applicability_verified": true
+        }
+      ],
+      "unknowns": ["Status trace span db-dummy tidak tersedia karena SOURCE_UNAVAILABLE."],
+      "recommended_checks": [
+        {
+          "check_id": "chk-01",
+          "description": "Operator L1/L2 memeriksa kesehatan koneksi db-dummy sesuai SOP-TX-DB-001 bagian 3.1.",
+          "risk_level": "high",
+          "requires_human_approval": true,
+          "auto_execution_allowed": false,
+          "related_sop_doc_id": "SOP-TX-DB-001"
+        }
+      ],
+      "review_summary": {
+        "status": "PENDING_REVIEW",
+        "latest_review_event_id": null,
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "reproducibility": {
+        "workflow_version": "wf-v1.0.0",
+        "policy_version": "pol-v1.0.0",
+        "model_version": "candidate-remote-llm-v1",
+        "prompt_version": "prm-v1.0.0",
+        "tool_schema_version": "1.0",
+        "kb_index_version": "idx-v1-20261109",
+        "correlation_ids": ["corr-99887766"]
+      }
+    }
+  },
+  {
+    "case_id": "dossier-invalid-supported-without-evidence",
+    "schema_id": "urn:sre-sim:contract:dossier:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "incident_id": "inc-20261109-0001",
+      "dossier_version": 1,
+      "dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "severity": "critical",
+      "service_id": "transaction-service",
+      "environment": "lab",
+      "alert_received_at": "2026-11-09T09:03:00Z",
+      "window_start": "2026-11-09T08:58:00Z",
+      "window_end": "2026-11-09T09:03:00Z",
+      "dossier_ready_at": "2026-11-09T09:03:20Z",
+      "investigation_mode": "agentic_llm",
+      "impact_summary": {
+        "affected_services": ["transaction-service"],
+        "observed_symptoms": "Lonjakan error_rate.",
+        "error_budget_impact": "severe"
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-11-09T09:01:12Z",
+          "event_kind": "error_log",
+          "source_ref": "SRC-OBS-LOKI",
+          "summary": "Error log."
+        }
+      ],
+      "evidence": [],
+      "missing_sources": [],
+      "hypotheses": [
+        {
+          "hypothesis_id": "hyp-01",
+          "rank": 1,
+          "statement": "Klaim SUPPORTED tanpa bukti supporting_evidence_ids harus ditolak.",
+          "support_status": "SUPPORTED",
+          "supporting_evidence_ids": [],
+          "contradicting_evidence_ids": [],
+          "reason_summary": "Tidak ada bukti.",
+          "unknowns": []
+        }
+      ],
+      "sop_citations": [],
+      "unknowns": [],
+      "recommended_checks": [
+        {
+          "check_id": "chk-01",
+          "description": "Pemeriksaan manual oleh operator.",
+          "risk_level": "medium",
+          "requires_human_approval": true,
+          "auto_execution_allowed": false,
+          "related_sop_doc_id": null
+        }
+      ],
+      "review_summary": {
+        "status": "PENDING_REVIEW",
+        "latest_review_event_id": null,
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "reproducibility": {
+        "workflow_version": "wf-v1.0.0",
+        "policy_version": "pol-v1.0.0",
+        "model_version": "candidate-remote-llm-v1",
+        "prompt_version": "prm-v1.0.0",
+        "tool_schema_version": "1.0",
+        "kb_index_version": "idx-v1-20261109",
+        "correlation_ids": ["corr-99887766"]
+      }
+    }
+  },
+  {
+    "case_id": "review-event-valid",
+    "schema_id": "urn:sre-sim:contract:review-event:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "review_event_id": "rev-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "reviewer_ref": "project-initiator-michael",
+      "reviewer_role": "PROJECT_OWNER_LAB",
+      "reviewed_at": "2026-11-09T09:06:00Z",
+      "decision": "approve",
+      "rationale": "Bukti metrik dan penanda missing trace akurat; langkah verifikasi sesuai SOP-TX-DB-001 v2.0.",
+      "edited_dossier_version": null,
+      "escalation_target": "dba-oncall-sim",
+      "auto_action_triggered": false
+    }
+  },
+  {
+    "case_id": "review-event-invalid-auto-action-true",
+    "schema_id": "urn:sre-sim:contract:review-event:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "review_event_id": "rev-20261109-0002",
+      "incident_id": "inc-20261109-0001",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "reviewer_ref": "project-initiator-michael",
+      "reviewer_role": "PROJECT_OWNER_LAB",
+      "reviewed_at": "2026-11-09T09:06:00Z",
+      "decision": "approve",
+      "rationale": "Mencoba memicu auto-remediation saat sign-off.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": true
+    }
+  },
+  {
+    "case_id": "audit-event-valid",
+    "schema_id": "urn:sre-sim:contract:audit-event:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "audit_event_id": "aud-20261109-0001",
+      "occurred_at": "2026-11-09T09:03:05Z",
+      "incident_id": "inc-20261109-0001",
+      "correlation_id": "corr-99887766",
+      "actor_ref": "principal_tool_gateway",
+      "action": "TOOL_DENIAL",
+      "target_ref": "restart_service",
+      "target_version": null,
+      "policy_version": "pol-v1.0.0",
+      "workflow_version": "wf-v1.0.0",
+      "request_fingerprint": "d4e5f6a1b2c30123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "result_code": "DENY",
+      "reason_code": "TOOL_NOT_ALLOWED",
+      "sanitized": true,
+      "evidence_refs": [],
+      "prev_event_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "event_hash": "e5f6a1b2c3d40123456789abcdef0123456789abcdef0123456789abcdef0123"
+    }
+  },
+  {
+    "case_id": "audit-event-invalid-bad-hash",
+    "schema_id": "urn:sre-sim:contract:audit-event:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "audit_event_id": "aud-20261109-0002",
+      "occurred_at": "2026-11-09T09:03:05Z",
+      "incident_id": "inc-20261109-0001",
+      "correlation_id": "corr-99887766",
+      "actor_ref": "principal_tool_gateway",
+      "action": "TOOL_DENIAL",
+      "target_ref": "restart_service",
+      "target_version": null,
+      "policy_version": "pol-v1.0.0",
+      "workflow_version": "wf-v1.0.0",
+      "request_fingerprint": "not-a-sha256",
+      "result_code": "DENY",
+      "reason_code": "TOOL_NOT_ALLOWED",
+      "sanitized": true,
+      "evidence_refs": [],
+      "prev_event_hash": null,
+      "event_hash": "not-a-sha256"
+    }
+  },
+  {
+    "case_id": "runtime-manifest-valid",
+    "schema_id": "urn:sre-sim:contract:runtime-manifest:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "environment": "lab",
+      "started_at": "2026-11-09T09:03:00Z",
+      "completed_at": "2026-11-09T09:06:05Z",
+      "code_revision": "git-c02-baseline",
+      "workflow_version": "wf-v1.0.0",
+      "policy_version": "pol-v1.0.0",
+      "model_version": "candidate-remote-llm-v1",
+      "prompt_version": "prm-v1.0.0",
+      "tool_schema_version": "1.0",
+      "kb_index_version": "idx-v1-20261109",
+      "service_catalog_version": "cat-20261109-v1",
+      "replay_seed_ref": "seed-ref-opaque-0001",
+      "terminal_state": "CLOSED",
+      "dossier_ref": "artifacts/runs/run-20261109-0001/dossier-v1.json",
+      "dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123"
+    }
+  },
+  {
+    "case_id": "runtime-manifest-invalid-split-leakage",
+    "schema_id": "urn:sre-sim:contract:runtime-manifest:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "environment": "lab",
+      "started_at": "2026-11-09T09:03:00Z",
+      "completed_at": "2026-11-09T09:06:05Z",
+      "code_revision": "git-c02-baseline",
+      "workflow_version": "wf-v1.0.0",
+      "policy_version": "pol-v1.0.0",
+      "model_version": "candidate-remote-llm-v1",
+      "prompt_version": "prm-v1.0.0",
+      "tool_schema_version": "1.0",
+      "kb_index_version": "idx-v1-20261109",
+      "service_catalog_version": "cat-20261109-v1",
+      "replay_seed_ref": "seed-ref-opaque-0001",
+      "terminal_state": "CLOSED",
+      "dossier_ref": "artifacts/runs/run-20261109-0001/dossier-v1.json",
+      "dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "split_id": "H-G4"
+    }
+  },
+  {
+    "case_id": "evaluation-manifest-valid",
+    "schema_id": "urn:sre-sim:contract:evaluation-manifest:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "evaluation_manifest_id": "eval-man-0001",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "scenario_id": "SC-04",
+      "split_id": "dev",
+      "split_freeze_hash": "f6a1b2c3d4e50123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "fault_seed": 42001,
+      "fault_onset_at": "2026-11-09T09:00:00Z",
+      "fault_end_at": "2026-11-09T09:05:00Z",
+      "expected_root_cause_services": ["db-dummy"],
+      "expected_fault_types": ["dependency_unavailable_cascade"],
+      "expected_relevant_chunk_ids": ["SOP-TX-DB-001:v2.0:sec-3.1:c01"],
+      "is_healthy_control": false,
+      "is_multi_fault": false,
+      "required_terminal_state": "CLOSED",
+      "closed_dossier_version": 1,
+      "closed_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "label_frozen_at": "2026-11-09T08:55:00Z"
+    }
+  },
+  {
+    "case_id": "evaluation-manifest-invalid-unclosed-state",
+    "schema_id": "urn:sre-sim:contract:evaluation-manifest:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "evaluation_manifest_id": "eval-man-0002",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "scenario_id": "SC-04",
+      "split_id": "dev",
+      "split_freeze_hash": "f6a1b2c3d4e50123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "fault_seed": 42001,
+      "fault_onset_at": "2026-11-09T09:00:00Z",
+      "fault_end_at": "2026-11-09T09:05:00Z",
+      "expected_root_cause_services": ["db-dummy"],
+      "expected_fault_types": ["dependency_unavailable_cascade"],
+      "expected_relevant_chunk_ids": ["SOP-TX-DB-001:v2.0:sec-3.1:c01"],
+      "is_healthy_control": false,
+      "is_multi_fault": false,
+      "required_terminal_state": "DRAFTED",
+      "closed_dossier_version": 1,
+      "closed_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "label_frozen_at": "2026-11-09T08:55:00Z"
+    }
+  },
+  {
+    "case_id": "evaluation-result-valid",
+    "schema_id": "urn:sre-sim:contract:evaluation-result:1",
+    "expected_valid": true,
+    "instance": {
+      "schema_version": "1.0",
+      "evaluation_id": "eval-res-0001",
+      "evaluation_manifest_id": "eval-man-0001",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "evaluated_at": "2026-11-09T09:10:00Z",
+      "evaluator_version": "eval-v1.0.0",
+      "rubric_version": "rubric-v1.0.0",
+      "dossier_closure_verified": true,
+      "closed_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "leakage_check_passed": true,
+      "eligible_kpis": ["KPI-01", "KPI-02", "KPI-03", "KPI-04", "KPI-05", "KPI-06", "KPI-07"],
+      "metrics": {
+        "retrieval_hit_rate_at_5": 1.0,
+        "retrieval_classical_recall_at_5": 1.0,
+        "top3_primary_cause_match": true,
+        "top3_all_causes_match": true,
+        "supported_claims_count": 2,
+        "unsupported_claims_count": 0,
+        "total_material_claims_count": 2,
+        "tti_seconds": 20.0,
+        "paid_api_cost_usd": 0
+      },
+      "human_rubric_scores": {
+        "correctness": 5,
+        "evidence_sufficiency": 5,
+        "actionability": 4,
+        "clarity": 5,
+        "uncertainty_handling": 5,
+        "assessment_kind": "self_review_lab_owner"
+      },
+      "failure_class": "NONE",
+      "exclusion_reason": null,
+      "reviewer_ref": "project-initiator-michael"
+    }
+  },
+  {
+    "case_id": "evaluation-result-invalid-paid-cost-nonzero",
+    "schema_id": "urn:sre-sim:contract:evaluation-result:1",
+    "expected_valid": false,
+    "instance": {
+      "schema_version": "1.0",
+      "evaluation_id": "eval-res-0002",
+      "evaluation_manifest_id": "eval-man-0001",
+      "run_id": "run-20261109-0001",
+      "incident_id": "inc-20261109-0001",
+      "evaluated_at": "2026-11-09T09:10:00Z",
+      "evaluator_version": "eval-v1.0.0",
+      "rubric_version": "rubric-v1.0.0",
+      "dossier_closure_verified": true,
+      "closed_dossier_hash": "c3d4e5f6a1b20123456789abcdef0123456789abcdef0123456789abcdef0123",
+      "leakage_check_passed": true,
+      "eligible_kpis": ["KPI-07"],
+      "metrics": {
+        "retrieval_hit_rate_at_5": null,
+        "retrieval_classical_recall_at_5": null,
+        "top3_primary_cause_match": null,
+        "top3_all_causes_match": null,
+        "supported_claims_count": 0,
+        "unsupported_claims_count": 0,
+        "total_material_claims_count": 0,
+        "tti_seconds": null,
+        "paid_api_cost_usd": 1.25
+      },
+      "human_rubric_scores": {
+        "correctness": 3,
+        "evidence_sufficiency": 3,
+        "actionability": 3,
+        "clarity": 3,
+        "uncertainty_handling": 3,
+        "assessment_kind": "self_review_lab_owner"
+      },
+      "failure_class": "NONE",
+      "exclusion_reason": null,
+      "reviewer_ref": "project-initiator-michael"
+    }
+  }
+]

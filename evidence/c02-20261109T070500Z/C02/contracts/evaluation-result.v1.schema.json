@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:evaluation-result:1",
+  "title": "Immutable Offline Evaluation Result Contract v1",
+  "description": "Post-closure offline evaluation result recording KPI numerators, denominators, leakage checks, and rubric scores.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evaluation_id",
+    "evaluation_manifest_id",
+    "run_id",
+    "incident_id",
+    "evaluated_at",
+    "evaluator_version",
+    "rubric_version",
+    "dossier_closure_verified",
+    "closed_dossier_hash",
+    "leakage_check_passed",
+    "eligible_kpis",
+    "metrics",
+    "human_rubric_scores",
+    "failure_class",
+    "exclusion_reason",
+    "reviewer_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "evaluation_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "evaluation_manifest_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run-[a-z0-9-]+$"
+    },
+    "incident_id": {
+      "type": "string",
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "evaluator_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "rubric_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "dossier_closure_verified": {
+      "const": true
+    },
+    "closed_dossier_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "leakage_check_passed": {
+      "type": "boolean"
+    },
+    "eligible_kpis": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["KPI-01", "KPI-02", "KPI-03", "KPI-04", "KPI-05", "KPI-06", "KPI-07"]
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retrieval_hit_rate_at_5",
+        "retrieval_classical_recall_at_5",
+        "top3_primary_cause_match",
+        "top3_all_causes_match",
+        "supported_claims_count",
+        "unsupported_claims_count",
+        "total_material_claims_count",
+        "tti_seconds",
+        "paid_api_cost_usd"
+      ],
+      "properties": {
+        "retrieval_hit_rate_at_5": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "retrieval_classical_recall_at_5": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "top3_primary_cause_match": {
+          "type": ["boolean", "null"]
+        },
+        "top3_all_causes_match": {
+          "type": ["boolean", "null"]
+        },
+        "supported_claims_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsupported_claims_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_material_claims_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tti_seconds": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "paid_api_cost_usd": {
+          "type": "number",
+          "const": 0
+        }
+      }
+    },
+    "human_rubric_scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctness",
+        "evidence_sufficiency",
+        "actionability",
+        "clarity",
+        "uncertainty_handling",
+        "assessment_kind"
+      ],
+      "properties": {
+        "correctness": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "evidence_sufficiency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "actionability": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "clarity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "uncertainty_handling": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "assessment_kind": {
+          "type": "string",
+          "enum": ["self_review_lab_owner", "independent_sme_review"]
+        }
+      }
+    },
+    "failure_class": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "NONE",
+        "ZERO_CLAIMS_FALLBACK",
+        "RETRIEVAL_MISS",
+        "FALSE_HYPOTHESIS_RANKING",
+        "UNSUPPORTED_CLAIM_HALLUCINATION",
+        "GUARDRAIL_VIOLATION",
+        "WORKFLOW_TIMEOUT",
+        "INVALIDATED_LEAKAGE"
+      ]
+    },
+    "exclusion_reason": {
+      "type": ["string", "null"],
+      "maxLength": 512
+    },
+    "reviewer_ref": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128
+    }
+  }
+}
+

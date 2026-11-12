@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:logs-request:1",
+  "title": "Bounded Read-Only Error Logs Search Request Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service_id",
+    "environment",
+    "start",
+    "end",
+    "error_code",
+    "max_hits"
+  ],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "start": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "end": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "error_code": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z0-9_:-]{2,64}$"
+    },
+    "max_hits": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
+

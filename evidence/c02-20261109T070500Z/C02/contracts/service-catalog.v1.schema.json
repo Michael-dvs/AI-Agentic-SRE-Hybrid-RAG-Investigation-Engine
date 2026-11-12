@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:service-catalog:1",
+  "title": "Synthetic Service Catalog Entry Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "service_id",
+    "service.name",
+    "environment",
+    "application",
+    "component",
+    "instance_id",
+    "build_version",
+    "owner_ref",
+    "dependency_refs",
+    "health_endpoints",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "service_id": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "service.name": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "staging-sim", "prod-sim"]
+    },
+    "application": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "component": {
+      "type": "string",
+      "enum": ["gateway", "auth", "transaction", "ledger", "notification_worker", "storage_dummy"]
+    },
+    "instance_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "build_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "owner_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "dependency_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "api-gateway",
+          "auth-service",
+          "transaction-service",
+          "ledger-service",
+          "notification-service",
+          "db-dummy",
+          "svc-a",
+          "svc-b",
+          "svc-c"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "health_endpoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["liveness_path", "readiness_path", "metrics_path"],
+      "properties": {
+        "liveness_path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "readiness_path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "metrics_path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    }
+  }
+}
+

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:tool-result:1",
+  "title": "Bounded Read-Only Tool Result Envelope Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool_name",
+    "request_id",
+    "status",
+    "source_ref",
+    "observed_at",
+    "query_window",
+    "sampling",
+    "truncated",
+    "data_quality",
+    "sanitized",
+    "records",
+    "error_code"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "tool_name": {
+      "type": "string",
+      "enum": [
+        "get_service_metrics",
+        "search_error_logs",
+        "get_trace_summary",
+        "get_service_dependencies"
+      ]
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9._:-]{4,128}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "partial", "unavailable", "rejected"]
+    },
+    "source_ref": {
+      "type": ["string", "null"],
+      "maxLength": 256
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "query_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      }
+    },
+    "sampling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applied", "method", "returned_count", "source_count"],
+      "properties": {
+        "applied": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": ["string", "null"],
+          "enum": [null, "head_limit", "step_downsample", "span_cap"]
+        },
+        "returned_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_count": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "data_quality": {
+      "type": "string",
+      "enum": ["complete", "partial", "unavailable"]
+    },
+    "sanitized": {
+      "const": true
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "error_code": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "TOOL_NOT_ALLOWED",
+        "SCHEMA_INVALID",
+        "WINDOW_EXCEEDED",
+        "LIMIT_EXCEEDED",
+        "INVALID_TIME_RANGE",
+        "BUDGET_EXHAUSTED",
+        "DEADLINE_EXCEEDED",
+        "CANCELLED",
+        "SOURCE_UNAVAILABLE",
+        "BACKEND_TIMEOUT",
+        "REDACTION_FAILED",
+        "SERVICE_UNMAPPED"
+      ]
+    }
+  }
+}

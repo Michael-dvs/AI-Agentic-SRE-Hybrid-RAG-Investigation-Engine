@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:telemetry-metric:1",
+  "title": "RED Metric Observation Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "service_id",
+    "service.name",
+    "environment",
+    "build_version",
+    "metric_enum",
+    "value",
+    "unit",
+    "sample_at",
+    "window_seconds",
+    "aggregation",
+    "source_ref",
+    "data_quality"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "service_id": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "service.name": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "staging-sim", "prod-sim"]
+    },
+    "build_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "metric_enum": {
+      "type": "string",
+      "enum": ["request_rate", "error_rate", "latency_p95"]
+    },
+    "value": {
+      "type": "number",
+      "minimum": 0
+    },
+    "unit": {
+      "type": "string",
+      "enum": ["requests/s", "ratio", "ms"]
+    },
+    "sample_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "window_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600
+    },
+    "aggregation": {
+      "type": "string",
+      "enum": ["rate", "ratio", "p95"]
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "data_quality": {
+      "type": "string",
+      "enum": ["complete", "partial"]
+    }
+  }
+}
+

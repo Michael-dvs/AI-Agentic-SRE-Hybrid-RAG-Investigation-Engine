@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:workflow-event:1",
+  "title": "Investigation Workflow State Transition Event Contract v1",
+  "description": "Durable state transition record emitted by the deterministic workflow coordinator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "incident_id",
+    "idempotency_key",
+    "occurred_at",
+    "from_state",
+    "to_state",
+    "producer_ref",
+    "workflow_version",
+    "policy_version",
+    "terminal_outcome",
+    "reason_code",
+    "artifact_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "incident_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128,
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "from_state": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "RECEIVED",
+        "CORRELATED",
+        "TRIAGED",
+        "EVIDENCE_COLLECTED",
+        "RETRIEVED",
+        "HYPOTHESES",
+        "VALIDATED",
+        "DRAFTED",
+        "HUMAN_REVIEW",
+        "CLOSED"
+      ]
+    },
+    "to_state": {
+      "type": "string",
+      "enum": [
+        "RECEIVED",
+        "CORRELATED",
+        "TRIAGED",
+        "EVIDENCE_COLLECTED",
+        "RETRIEVED",
+        "HYPOTHESES",
+        "VALIDATED",
+        "DRAFTED",
+        "HUMAN_REVIEW",
+        "CLOSED",
+        "LEARNED",
+        "REJECTED",
+        "MANUAL_TRIAGE_REQUIRED",
+        "CANCELLED",
+        "FAILED_SAFE"
+      ]
+    },
+    "producer_ref": {
+      "type": "string",
+      "enum": [
+        "CMP-INV-01",
+        "CMP-INV-02",
+        "CMP-INV-03",
+        "CMP-INV-07",
+        "CMP-INV-08",
+        "CMP-GOV-01",
+        "CMP-GOV-04"
+      ]
+    },
+    "workflow_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "terminal_outcome": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "CLOSED_APPROVED",
+        "CLOSED_REJECTED",
+        "CLOSED_MANUAL_FALLBACK",
+        "TERMINATED_REJECTED",
+        "TERMINATED_MANUAL_TRIAGE",
+        "TERMINATED_CANCELLED",
+        "TERMINATED_FAILED_SAFE"
+      ]
+    },
+    "reason_code": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "OK",
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "SERVICE_UNMAPPED",
+        "SCHEMA_INVALID",
+        "BUDGET_EXHAUSTED",
+        "DEADLINE_EXCEEDED",
+        "CANCELLED",
+        "SOURCE_UNAVAILABLE",
+        "BACKEND_TIMEOUT",
+        "LLM_FALLBACK_DETERMINISTIC",
+        "MANUAL_FALLBACK_ACTIVE",
+        "VERSION_CONFLICT"
+      ]
+    },
+    "artifact_ref": {
+      "type": ["string", "null"],
+      "maxLength": 256
+    }
+  }
+}
+

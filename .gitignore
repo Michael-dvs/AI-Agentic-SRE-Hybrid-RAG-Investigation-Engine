@@ -1,0 +1,25 @@
+# Environment & secrets protection (NFR-017)
+.env
+.env.*
+!.env.example
+
+# Python caches & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# macOS metadata
+.DS_Store
+
+# Temporary sqlite test databases
+*.sqlite3
+*.db
+
+# Restricted Ground Truth & Evaluator Storage (RULE-002 / AT-008)
+restricted/
+

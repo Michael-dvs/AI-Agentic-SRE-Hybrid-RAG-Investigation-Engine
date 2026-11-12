@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:audit-event:1",
+  "title": "Independent Immutable Security Audit Event Contract v1",
+  "description": "Append-only security audit record stored in the independent audit sink, distinct from AI observability traces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audit_event_id",
+    "occurred_at",
+    "incident_id",
+    "correlation_id",
+    "actor_ref",
+    "action",
+    "target_ref",
+    "target_version",
+    "policy_version",
+    "workflow_version",
+    "request_fingerprint",
+    "result_code",
+    "reason_code",
+    "sanitized",
+    "evidence_refs",
+    "prev_event_hash",
+    "event_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "audit_event_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "incident_id": {
+      "type": ["string", "null"],
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "actor_ref": {
+      "type": "string",
+      "enum": [
+        "principal_intake",
+        "principal_investigator",
+        "principal_tool_gateway",
+        "principal_kb_ingestor",
+        "principal_reviewer",
+        "principal_fault_harness",
+        "principal_evaluator"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "ALERT_ADMISSION",
+        "TOOL_INVOCATION",
+        "TOOL_DENIAL",
+        "KB_RETRIEVAL",
+        "KB_INGEST_PUBLISH",
+        "REDACTION_GATE",
+        "LLM_DISPATCH",
+        "LLM_FALLBACK",
+        "WORKFLOW_TRANSITION",
+        "DOSSIER_DRAFTED",
+        "HUMAN_REVIEW_DECISION",
+        "EVALUATION_GT_JOIN"
+      ]
+    },
+    "target_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "target_version": {
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "workflow_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "request_fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "result_code": {
+      "type": "string",
+      "enum": ["ALLOW", "DENY", "FALLBACK", "ERROR"]
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "TOOL_NOT_ALLOWED",
+        "SCHEMA_INVALID",
+        "WINDOW_EXCEEDED",
+        "LIMIT_EXCEEDED",
+        "INVALID_TIME_RANGE",
+        "BUDGET_EXHAUSTED",
+        "DEADLINE_EXCEEDED",
+        "CANCELLED",
+        "SOURCE_UNAVAILABLE",
+        "BACKEND_TIMEOUT",
+        "REDACTION_FAILED",
+        "NO_APPLICABLE_RUNBOOK",
+        "RETRIEVAL_UNAVAILABLE",
+        "VERSION_CONFLICT",
+        "UNSUPPORTED_SCHEMA",
+        "PREMATURE_EVALUATION_BLOCKED"
+      ]
+    },
+    "sanitized": {
+      "const": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 128
+      }
+    },
+    "prev_event_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
+

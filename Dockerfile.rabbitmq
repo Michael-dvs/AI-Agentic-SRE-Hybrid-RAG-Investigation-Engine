@@ -1,0 +1,11 @@
+FROM alpine:latest
+
+RUN apk add --no-cache rabbitmq-server && \
+    mkdir -p /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq && \
+    printf "loopback_users = none\ndefault_user = sre_sim\ndefault_pass = sre_sim_synth_pass_local\n" > /etc/rabbitmq/rabbitmq.conf && \
+    chown -R rabbitmq:rabbitmq /var/lib/rabbitmq /var/log/rabbitmq /etc/rabbitmq
+
+USER rabbitmq
+EXPOSE 5672
+
+CMD ["rabbitmq-server"]

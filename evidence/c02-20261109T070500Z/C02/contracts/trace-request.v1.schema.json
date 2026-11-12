@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:trace-request:1",
+  "title": "Bounded Read-Only Trace Summary Request Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "service_id",
+    "environment",
+    "start",
+    "end"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "pattern": "^(?!0{32}$)[0-9a-f]{32}$"
+    },
+    "service_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "start": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "end": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    }
+  }
+}
+

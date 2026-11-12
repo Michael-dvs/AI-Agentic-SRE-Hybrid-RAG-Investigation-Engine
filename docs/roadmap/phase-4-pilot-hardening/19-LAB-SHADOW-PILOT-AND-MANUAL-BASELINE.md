@@ -1,0 +1,77 @@
+# C19 — Lab Shadow Pilot and Manual Baseline
+
+## 1. Chapter Information
+- **Phase:** F4 — Pilot & Hardening
+- **Status:** DRAFT
+- **Documentation status:** COMPLETE / REVIEW_REQUIRED
+- **Implementation status:** NOT_STARTED
+- **Dependencies:** [C16 — Human Review and Handover](../phase-3-reasoning-observability/16-HUMAN-REVIEW-AND-HANDOVER.md), [C18 — Red-Team, Holdout, and G3](../phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md) (`G3 PASS`), protokol *pairing/timing/anti-carryover* (`ADR-S08`, `TBD-08`)
+- **Next chapter:** [C20 — Capacity, Resilience, and Rollback](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md)
+- **Related requirements:** `BR-005`, `FR-OUT-004`, `FR-OUT-006`, `RULE-008`, `RULE-011`, `NFR-018`, `NFR-020`, `KPI-06`, `KPI-08`, `BEN-01`, `BEN-02`, `BEN-04`, `DEP-05`, `RISK-03`, `RISK-09`, `UC-10`, `UC-11`
+- **Related acceptance tests:** `HUM-01` & `AT-010` (verifikasi operasional pada *lab shadow pilot*), `AT-014` (build & test owner pengumpulan *matched manual baseline* untuk `KPI-08` dan penilaian rubrik reviewer untuk `KPI-06`; dikonsolidasikan di C21)
+
+## 2. Objective & Expected Outcome
+Chapter ini bertujuan menjalankan *Lab Shadow Pilot* di atas trafik dan gangguan simulasi terkontrol (bukan trafik produksi bank) serta mengukur *Matched Manual Investigation Baseline* guna mengevaluasi kegunaan praktis dossier bagi reviewer (`KPI-06`) dan efisiensi waktu investigasi relatif (`KPI-08`, `BEN-01`). Sesuai [Master Implementation Roadmap](../00-IMPLEMENTATION-MASTER-ROADMAP.md) §2.2 dan `BRD §2.4`, angka historis 15–30 menit di dalam proposal lama tidak boleh diklaim sebagai hasil nyata PoC; efisiensi hanya boleh dihitung apabila tersedia pengukuran manual pada skenario dengan tingkat kesulitan sebanding (`RULE-011`).
+
+Setelah chapter ini selesai, alur *shadow pilot* di lab telah diuji pada variasi insiden tanpa membocorkan split `H-G4`, rekaman waktu investigasi manual yang terkendali (*blinded manual baseline*) beserta protokol anti-*carryover* tersedia (atau keterbatasannya dideklarasikan secara jujur bila dilakukan oleh solo developer sesuai `TBD-02`/`TBD-08`), penilaian rubrik kualitas dossier (skala 1–5 atas *correctness, evidence sufficiency, actionability, clarity, uncertainty handling*, `BRD §15.4`) telah terkumpul, dan daftar temuan friksi operasional siap diperbaiki pada tahap *hardening* [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md).
+
+## 3. Scope & Boundaries
+### In Scope
+- Pelaksanaan *shadow pilot* di lingkungan lab terisolasi di mana *workflow* AI berjalan secara paralel terhadap pemicu gangguan simulasi pada kasus pilot/`DEV` tanpa membuka segel `H-G4` (`NFR-001`, `NFR-019`).
+- Pengukuran *Blinded Manual Baseline* (`BRD §6.1`, `RULE-011`) menggunakan dasbor/kueri telemetri dan dokumen SOP yang setara sebelum pelaku melihat output AI atau kunci *ground truth*; jika memakai pasangan kasus `H-G4` untuk perbandingan akhir, rekaman mentah waktu manual disegel di penyimpanan evaluator dan tidak digunakan untuk *tuning*.
+- Pengumpulan penilaian reviewer atas dossier menggunakan rubrik 5 dimensi (`BRD §15.4`), pencatatan aksi `approve`/`reject`/`edit` (`KPI-06`, `HUM-01`, `AT-010`), serta pembedaan antara *system time-to-dossier* (`KPI-07`) dan waktu telaah manusia (*human review effort*).
+- Identifikasi cacat kebergunaan (*usability defects*), friksi *startup/fallback*, dan observasi biaya/sumber daya awal sebagai masukan ke [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md).
+
+### Out of Scope
+- Menghubungkan *shadow pilot* ke sistem pemantauan produksi, *alert* nyata bank, atau tim *on-call* operasional nyata (`BRD §4.2`).
+- Mengklaim penghematan waktu $\ge 40\%$ (`KPI-08`) atau validasi SME independen apabila protokol perbandingan manual tidak adil atau hanya dilakukan tanpa pemisahan *carryover* (`BRD §2.4`, `TBD-08`).
+- Menggunakan skenario `H-G4` untuk iterasi perbaikan prompt/kode selama *shadow pilot* (`NFR-019`).
+
+## 4. Prerequisites
+- Gate G3 ([C18](../phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md)) berstatus `PASS`.
+- Permukaan *Human Review* ([C16](../phase-3-reasoning-observability/16-HUMAN-REVIEW-AND-HANDOVER.md)) dan dashboard/ekspor AI observability ([C15](../phase-3-reasoning-observability/15-AI-OBSERVABILITY-AUDIT-AND-COST.md)) berjalan stabil.
+- Protokol *matched manual baseline*, aturan *anti-carryover*, dan deklarasi peran reviewer (`TBD-08`, `ADR-S08`) telah disahkan pada Gate G1.
+
+## 5. Implementation Roadmap
+1. **Penyiapan Protokol Anti-Carryover dan Eksekusi Blinded Manual Baseline (`RULE-011`, `BRD §6.1`)**
+   - *Apa yang harus dilakukan:* Siapkan lembar kerja dan pencatat waktu (*timer*) untuk alur investigasi manual (`AS-IS`: terima *alert* $\rightarrow$ eksplorasi metrik/log/trace $\rightarrow$ cari SOP $\rightarrow$ tulis hipotesis & bukti). Pastikan sesi manual dijalankan **sebelum** pelaku melihat dossier AI atau label *ground truth* untuk skenario yang dipasangkan; segel hasil mentah di evaluator jika menyangkut pasangan evaluasi final.
+   - *Mengapa diperlukan:* Mencegah efek ingatan (*carryover bias*) yang membuat perbandingan waktu manual vs AI menjadi tidak sah (`RISK-09`).
+   - *Expected output:* Dokumen dan rekaman `manual-timing-protocol-and-records`.
+   - *Cara memverifikasi:* Periksa *timestamp* log bahwa sesi manual selesai dan dikunci sebelum dossier AI untuk insiden pasangan tersebut dibuka oleh penguji.
+2. **Pelaksanaan Sesi Lab Shadow Pilot pada Skenario Pilot/Dev (`BRD §17`)**
+   - *Apa yang harus dilakukan:* Jalankan *shadow workflow* secara berkesinambungan di atas trafik dan injeksi gangguan lab (mencakup kasus normal, gangguan layanan tunggal, *cascade*, SOP usang, dan *degraded mode* dari himpunan non-`H-G4`), lalu amati perilaku *intake*, progres *workflow*, dan kesiapan dossier di permukaan review [C16](../phase-3-reasoning-observability/16-HUMAN-REVIEW-AND-HANDOVER.md).
+   - *Mengapa diperlukan:* Menguji keandalan operasional dan pengalaman pengguna secara realistis di lab sebelum pembekuan rilis final.
+   - *Expected output:* Rekaman eksekusi `pilot-run-log`.
+   - *Cara memverifikasi:* Pastikan seluruh insiden *pilot* tercatat dari *alert* hingga `HUMAN_REVIEW` / `CLOSED` tanpa intervensi kode tersembunyi.
+3. **Penilaian Rubrik Reviewer dan Verifikasi Kontrol `HUM-01` / `AT-010`**
+   - *Apa yang harus dilakukan:* Lakukan review atas setiap dossier hasil *shadow pilot* menggunakan rubrik 5 dimensi (*correctness, evidence sufficiency, actionability, clarity, uncertainty handling*), rekam keputusan `APPROVED` (tanpa atau dengan *minor/substantial rework*) atau `REJECTED`, serta catat durasi telaah manusia. Cantumkan deklarasi eksplisit `SELF_EVALUATED_DEVELOPER_LABELS` apabila tidak ada SME eksternal (`TBD-08`).
+   - *Mengapa diperlukan:* Menyediakan bukti terstruktur bagi `KPI-06`, `BEN-02`, dan `NFR-020` tanpa memalsukan independensi reviewer.
+   - *Expected output:* Kumpulan skor dan catatan koreksi pada `review-rubric`.
+   - *Cara memverifikasi:* Pastikan setiap dossier memiliki skor rubrik lengkap, atribut sumber reviewer yang jujur, dan 0 aksi otomatis pasca-persetujuan (`HUM-01`).
+4. **Analisis Friksi Operasional dan Pencatatan Defect Pilot (`pilot-defects`)**
+   - *Apa yang harus dilakukan:* Rangkum seluruh cacat kebergunaan (*usability*), hambatan navigasi bukti/SOP, anomali performa kontainer, serta batasan metodologi baseline manual ke dalam `pilot-defects`.
+   - *Mengapa diperlukan:* Memberikan daftar perbaikan terfokus untuk diselesaikan dan dibekukan pada [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md) sebelum *final benchmark* [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md).
+   - *Expected output:* Berkas registri `pilot-defects` dengan prioritas perbaikan menuju [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md).
+   - *Cara memverifikasi:* Pastikan setiap temuan memiliki tingkat keparahan dan rencana tindak lanjut yang jelas.
+
+5. **Pengemasan Paket Bukti `E19` dan Pemeriksaan Keutuhan Segel `H-G4`**
+   - *Apa yang harus dilakukan:* Kumpulkan seluruh artefak (`pilot-run-log`, `manual-timing-protocol-and-records`, `review-rubric`, `pilot-defects`) ke dalam paket bukti `E19` dan verifikasi ulang bahwa segel split `H-G4` tidak pernah dibuka selama aktivitas *shadow pilot*.
+   - *Mengapa diperlukan:* Menjaga validitas *Final Blind Holdout* `H-G4` (`NFR-019`) sebelum pembekuan rilis di [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md).
+   - *Expected output:* Paket bukti lengkap `E19` pada `evidence/<run_id>/C19/`.
+   - *Cara memverifikasi:* Pastikan keempat berkas `E19` tersedia lengkap dan hash/log akses `H-G4` tetap bersih (0 akses).
+
+## 6. Expected Deliverables
+- Rekaman eksekusi *Lab Shadow Pilot* (`pilot-run-log`) pada lingkungan simulasi.
+- Protokol dan rekaman waktu *Blinded Manual Baseline* (`manual-timing-protocol-and-records`) beserta deklarasi batas validitas/bias (`RULE-011`, `TBD-08`).
+- Hasil penilaian rubrik reviewer 5 dimensi dan tingkat *rework* (`review-rubric`) untuk `KPI-06`.
+- Daftar temuan dan cacat pilot (`pilot-defects`) serta paket bukti tersanitasi `E19` pada `evidence/<run_id>/C19/`.
+
+## 7. Validation & Exit Criteria
+- `HUM-01`, `AT-010`, & `NFR-020`: Permukaan review terbukti dapat digunakan untuk memeriksa bukti, mengedit/menolak/menyetujui dossier, dan menahan rekomendasi kritis tanpa memicu remediasi otomatis.
+- `AT-014` (input `KPI-06` & `KPI-08`): Rubrik penilaian reviewer dan rekaman waktu baseline manual tersedia sesuai protokol `ADR-S08`; jika terdapat keterbatasan karena pengerjaan solo (`TBD-02`), keterbatasan tersebut dinyatakan secara eksplisit agar [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md) tidak membuat klaim efisiensi yang menyesatkan.
+- Seluruh aktivitas *shadow pilot* terbukti tidak membaca atau membocorkan skenario *final holdout* `H-G4`.
+
+## 8. Risks, Open Decisions & Handover
+- **Risiko:** Bias *self-review* dan *carryover* karena pengembang tunggal (`project-initiator-michael`) memahami desain skenario (`TBD-02`); mitigasi dengan memisahkan waktu pengukuran manual sebelum melihat output AI, mematuhi rubrik objektif berbasis bukti, dan mencantumkan *caveat* `SELF_EVALUATED` di seluruh laporan.
+- **Open Decisions:** Apakah `KPI-08` dilaporkan sebagai perbandingan berpasangan terukur atau diberi penanda *caveat/not-evaluable* untuk klaim efisiensi organisasi ditentukan berdasarkan validitas rekaman `manual-timing-protocol-and-records` sesuai aturan [Master Implementation Roadmap](../00-IMPLEMENTATION-MASTER-ROADMAP.md) §8.5.
+- **Handover ke [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md) dan [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md):** Daftar perbaikan kebergunaan/operasional (`pilot-defects`) untuk dituntaskan di [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md), serta rekaman baseline manual dan rubrik reviewer (`E19`) untuk dikonsolidasikan di [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md).

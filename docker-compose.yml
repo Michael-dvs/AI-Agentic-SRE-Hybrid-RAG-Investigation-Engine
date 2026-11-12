@@ -1,0 +1,411 @@
+name: sre-agentic-sim
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common-env: &common-env
+  SIM_ENVIRONMENT: ${SIM_ENVIRONMENT:-lab}
+  SIM_APPLICATION: ${SIM_APPLICATION:-sre-simulation-poc}
+  BUILD_VERSION: ${BUILD_VERSION:-0.1.0-sim}
+  OWNER_REF: ${OWNER_REF:-project-initiator-michael}
+  AUTH_SERVICE_URL: http://auth-service:8000
+  TRANSACTION_SERVICE_URL: http://transaction-service:8000
+  LEDGER_SERVICE_URL: http://ledger-service:8000
+  NOTIFICATION_SERVICE_URL: http://notification-service:8000
+  DATABASE_URL: ${DATABASE_URL:-postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger}
+  RABBITMQ_URL: ${RABBITMQ_URL:-amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F}
+  RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-notifications.transaction.completed}
+  RABBITMQ_DLQ: ${RABBITMQ_DLQ:-notifications.transaction.dlq}
+  RABBITMQ_ENABLED: ${RABBITMQ_ENABLED:-true}
+  OTEL_COLLECTOR_URL: ${OTEL_COLLECTOR_URL:-http://otel-collector:4318}
+  OTEL_EXPORT_ENABLED: ${OTEL_EXPORT_ENABLED:-true}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    platform: linux/arm64
+    container_name: sre-sim-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sre_sim}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sre_sim_synth_pass_local}
+      POSTGRES_DB: ${POSTGRES_DB:-sre_sim_ledger}
+    volumes:
+      - sim_postgres_data:/var/lib/postgresql/data
+    networks:
+      - sim_internal_net
+    expose:
+      - "5432"
+    mem_limit: 192m
+    cpus: 0.50
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sre_sim} -d ${POSTGRES_DB:-sre_sim_ledger}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: Dockerfile.rabbitmq
+    image: sre-agentic-sim-rabbitmq:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-sre_sim}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-sre_sim_synth_pass_local}
+    networks:
+      - sim_internal_net
+    expose:
+      - "5672"
+    mem_limit: 256m
+    cpus: 0.75
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  loki:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-loki
+    restart: unless-stopped
+    command: ["uvicorn", "observability.backends:loki_app", "--host", "0.0.0.0", "--port", "3100", "--workers", "1", "--no-access-log"]
+    volumes:
+      - ./observability/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    ports:
+      - "127.0.0.1:${LOKI_HOST_PORT:-13100}:3100"
+    networks:
+      - sim_obs_net
+    mem_limit: 512m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3100/healthz', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  tempo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-tempo
+    restart: unless-stopped
+    command: ["uvicorn", "observability.backends:tempo_app", "--host", "0.0.0.0", "--port", "3200", "--workers", "1", "--no-access-log"]
+    volumes:
+      - ./observability/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+    ports:
+      - "127.0.0.1:${TEMPO_HOST_PORT:-13200}:3200"
+    networks:
+      - sim_obs_net
+    mem_limit: 384m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3200/healthz', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-otel-collector
+    restart: unless-stopped
+    command: ["uvicorn", "observability.backends:otel_collector_app", "--host", "0.0.0.0", "--port", "4318", "--workers", "1", "--no-access-log"]
+    environment:
+      LOKI_URL: http://loki:3100
+      TEMPO_URL: http://tempo:3200
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    depends_on:
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${OTEL_HOST_PORT:-14318}:4318"
+    networks:
+      - sim_obs_net
+    mem_limit: 192m
+    cpus: 0.30
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4318/healthz', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-auth-service
+    restart: unless-stopped
+    command: ["uvicorn", "services.auth_service.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      SERVICE_ID: auth-service
+      SERVICE_NAME: auth-service
+      SERVICE_COMPONENT: auth
+      INSTANCE_ID: auth-service-lab-01
+      DEPENDENCY_REFS: ""
+    networks:
+      - sim_internal_net
+      - sim_obs_net
+    expose:
+      - "8000"
+    mem_limit: 128m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  ledger-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-ledger-service
+    restart: unless-stopped
+    command: ["uvicorn", "services.ledger_service.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      SERVICE_ID: ledger-service
+      SERVICE_NAME: ledger-service
+      SERVICE_COMPONENT: ledger
+      INSTANCE_ID: ledger-service-lab-01
+      DEPENDENCY_REFS: "db-dummy"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sim_internal_net
+      - sim_obs_net
+    expose:
+      - "8000"
+    mem_limit: 128m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-notification-service
+    restart: unless-stopped
+    command: ["uvicorn", "services.notification_service.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      SERVICE_ID: notification-service
+      SERVICE_NAME: notification-service
+      SERVICE_COMPONENT: notification_worker
+      INSTANCE_ID: notification-service-lab-01
+      DEPENDENCY_REFS: ""
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - sim_internal_net
+      - sim_obs_net
+    expose:
+      - "8000"
+    mem_limit: 128m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 8s
+
+  transaction-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-transaction-service
+    restart: unless-stopped
+    command: ["uvicorn", "services.transaction_service.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      SERVICE_ID: transaction-service
+      SERVICE_NAME: transaction-service
+      SERVICE_COMPONENT: transaction
+      INSTANCE_ID: transaction-service-lab-01
+      DEPENDENCY_REFS: "ledger-service,notification-service"
+    depends_on:
+      ledger-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+    networks:
+      - sim_internal_net
+      - sim_obs_net
+    expose:
+      - "8000"
+    mem_limit: 128m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-api-gateway
+    restart: unless-stopped
+    command: ["uvicorn", "services.api_gateway.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      SERVICE_ID: api-gateway
+      SERVICE_NAME: api-gateway
+      SERVICE_COMPONENT: gateway
+      INSTANCE_ID: api-gateway-lab-01
+      DEPENDENCY_REFS: "auth-service,transaction-service"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      transaction-service:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${GATEWAY_HOST_PORT:-18080}:8000"
+    networks:
+      - sim_internal_net
+      - sim_obs_net
+    mem_limit: 128m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  prometheus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sre-agentic-sim-service:0.1.0-sim
+    platform: linux/arm64
+    container_name: sre-sim-prometheus
+    restart: unless-stopped
+    command: ["uvicorn", "observability.backends:prometheus_app", "--host", "0.0.0.0", "--port", "9090", "--workers", "1", "--no-access-log"]
+    environment:
+      <<: *common-env
+      LOKI_URL: http://loki:3100
+      API_GATEWAY_URL: http://api-gateway:8000
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${PROMETHEUS_HOST_PORT:-19090}:9090"
+    networks:
+      - sim_obs_net
+    mem_limit: 512m
+    cpus: 0.35
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9090/-/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    platform: linux/arm64
+    container_name: sre-sim-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_USERS_DEFAULT_THEME=dark
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${GRAFANA_HOST_PORT:-13000}:3000"
+    networks:
+      - sim_obs_net
+    mem_limit: 256m
+    cpus: 0.25
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 5s
+
+networks:
+  sim_internal_net:
+    driver: bridge
+    name: sre_sim_internal_net
+  sim_obs_net:
+    driver: bridge
+    name: sre_sim_obs_net
+
+volumes:
+  sim_postgres_data:
+    name: sre_sim_postgres_data

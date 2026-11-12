@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:dependencies-request:1",
+  "title": "Bounded Read-Only Service Dependencies Request Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service_id",
+    "environment",
+    "reference_time",
+    "max_depth"
+  ],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "reference_time": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "max_depth": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
+

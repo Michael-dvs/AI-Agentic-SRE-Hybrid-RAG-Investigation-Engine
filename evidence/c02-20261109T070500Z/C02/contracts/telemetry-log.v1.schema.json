@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:telemetry-log:1",
+  "title": "Structured Telemetry Log Event Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "timestamp",
+    "severity",
+    "service.name",
+    "service_id",
+    "environment",
+    "instance_id",
+    "build_version",
+    "event_type",
+    "correlation_id",
+    "trace_id",
+    "span_id",
+    "trace_absent_reason",
+    "error_code",
+    "message",
+    "sanitized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
+    },
+    "service.name": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "service_id": {
+      "type": "string",
+      "enum": [
+        "api-gateway",
+        "auth-service",
+        "transaction-service",
+        "ledger-service",
+        "notification-service",
+        "db-dummy",
+        "svc-a",
+        "svc-b",
+        "svc-c"
+      ]
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "staging-sim", "prod-sim"]
+    },
+    "instance_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "build_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "correlation_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9._:-]{4,128}$"
+    },
+    "trace_id": {
+      "type": ["string", "null"],
+      "pattern": "^(?!0{32}$)[0-9a-f]{32}$"
+    },
+    "span_id": {
+      "type": ["string", "null"],
+      "pattern": "^(?!0{16}$)[0-9a-f]{16}$"
+    },
+    "trace_absent_reason": {
+      "type": ["string", "null"],
+      "enum": [null, "BACKGROUND_WORKER_NO_ACTIVE_SPAN", "TRACE_CONTEXT_NOT_PROPAGATED", "TRACER_DISABLED"]
+    },
+    "error_code": {
+      "type": ["string", "null"],
+      "maxLength": 128
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "sanitized": {
+      "type": "boolean"
+    }
+  }
+}
+

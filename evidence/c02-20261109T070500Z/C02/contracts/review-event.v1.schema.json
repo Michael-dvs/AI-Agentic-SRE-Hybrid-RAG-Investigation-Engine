@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:review-event:1",
+  "title": "Human Reviewer Decision Event Contract v1",
+  "description": "Human review sign-off, rejection, or revision record bound to a specific dossier version and SHA-256 hash.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "review_event_id",
+    "incident_id",
+    "target_dossier_version",
+    "target_dossier_hash",
+    "reviewer_ref",
+    "reviewer_role",
+    "reviewed_at",
+    "decision",
+    "rationale",
+    "edited_dossier_version",
+    "escalation_target",
+    "auto_action_triggered"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "review_event_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "incident_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128,
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "target_dossier_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "target_dossier_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewer_ref": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128
+    },
+    "reviewer_role": {
+      "type": "string",
+      "enum": ["L1_OPERATOR", "L2_SRE_REVIEWER", "PROJECT_OWNER_LAB"]
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["approve", "reject", "edit", "escalate_manual"]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 2048
+    },
+    "edited_dossier_version": {
+      "type": ["integer", "null"],
+      "minimum": 2
+    },
+    "escalation_target": {
+      "type": ["string", "null"],
+      "maxLength": 128
+    },
+    "auto_action_triggered": {
+      "const": false
+    }
+  }
+}
+

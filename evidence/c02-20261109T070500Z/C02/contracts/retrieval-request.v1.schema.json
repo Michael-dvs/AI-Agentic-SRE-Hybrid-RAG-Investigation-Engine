@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:retrieval-request:1",
+  "title": "Authorized Knowledge Retrieval Request Contract v1",
+  "description": "Model-visible bounded retrieval request. Caller entitlement groups are injected server-side out-of-band.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service_id",
+    "environment",
+    "query_text",
+    "reference_time",
+    "retrieval_mode",
+    "top_k",
+    "max_context_tokens",
+    "index_version_policy"
+  ],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "sim-staging", "sim-prod-like"]
+    },
+    "query_text": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512
+    },
+    "reference_time": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "retrieval_mode": {
+      "type": "string",
+      "enum": ["lexical_only", "dense_only", "hybrid_rrf", "hybrid_rerank"]
+    },
+    "top_k": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "max_context_tokens": {
+      "type": "integer",
+      "minimum": 64,
+      "maximum": 4096
+    },
+    "index_version_policy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  }
+}
+

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:runtime-manifest:1",
+  "title": "Public Investigation Runtime Manifest Contract v1",
+  "description": "Investigator-visible run metadata recording versions, policy refs, and opaque identifiers without exposing ground-truth labels or holdout splits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "incident_id",
+    "environment",
+    "started_at",
+    "completed_at",
+    "code_revision",
+    "workflow_version",
+    "policy_version",
+    "model_version",
+    "prompt_version",
+    "tool_schema_version",
+    "kb_index_version",
+    "service_catalog_version",
+    "replay_seed_ref",
+    "terminal_state",
+    "dossier_ref",
+    "dossier_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 128,
+      "pattern": "^run-[a-z0-9-]+$"
+    },
+    "incident_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128,
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["lab", "sim-staging", "sim-prod-like"]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "code_revision": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 64
+    },
+    "workflow_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "prompt_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "tool_schema_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "kb_index_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "service_catalog_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "replay_seed_ref": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128,
+      "pattern": "^seed-ref-[a-z0-9-]+$"
+    },
+    "terminal_state": {
+      "type": "string",
+      "enum": [
+        "CLOSED",
+        "LEARNED",
+        "REJECTED",
+        "MANUAL_TRIAGE_REQUIRED",
+        "CANCELLED",
+        "FAILED_SAFE"
+      ]
+    },
+    "dossier_ref": {
+      "type": ["string", "null"],
+      "maxLength": 256
+    },
+    "dossier_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
+
