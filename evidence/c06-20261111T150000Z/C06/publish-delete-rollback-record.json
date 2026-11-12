@@ -1,0 +1,38 @@
+{
+  "initial_publish": {
+    "index_version": "kb-idx-20261111-v1",
+    "manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+    "chunk_count": 71,
+    "timestamp": "2026-11-11T15:00:58.621219Z"
+  },
+  "supersede_lifecycle_test": {
+    "operation": "supersede_document",
+    "document_id": "SOP-GW-001",
+    "new_version": "2.0.0",
+    "status_transition": "obsolete_transition_applied",
+    "chunks_superseded_to_obsolete": 4,
+    "new_chunks_added": 1,
+    "prior_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+    "new_manifest_hash": "f4c078320e6451eae87973d76ccd9888ed63610eb84b0c91b1875bc0f2b40a20",
+    "timestamp": "2026-11-11T15:00:58.623273Z"
+  },
+  "tombstone_lifecycle_test": {
+    "operation": "tombstone_document",
+    "document_id": "SOP-GW-ERR-504",
+    "reason": "deprecated_endpoint",
+    "chunks_withdrawn": 4,
+    "prior_manifest_hash": "f4c078320e6451eae87973d76ccd9888ed63610eb84b0c91b1875bc0f2b40a20",
+    "new_manifest_hash": "98cd8043cb1b23f64346fc2e8eed100983a1aaa99c9b4db716a764b7010d51d0",
+    "timestamp": "2026-11-11T15:00:58.623884Z"
+  },
+  "rollback_lifecycle_test": {
+    "operation": "rollback_index",
+    "restored_index_version": "kb-idx-20261111-v1",
+    "active_alias": "kb_active_alias",
+    "reason": "emergency_rollback_to_v1",
+    "manifest_hash_verified": true,
+    "verified_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+    "chunk_count": 71,
+    "timestamp": "2026-11-11T15:00:58.624595Z"
+  }
+}

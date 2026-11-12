@@ -1,0 +1,73 @@
+# Deterministic Prometheus & Log-Metric Alert Rules for C05 (ADR-S02, FR-OBS-004)
+# Mapped to C02 contract alert-event.v1.schema.json alert_type enum:
+#   - high_error_rate
+#   - high_latency_p95
+#   - dependency_unavailable
+#   - connection_pool_exhausted
+#   - auth_failure_spike
+#   - queue_consumer_lag
+
+groups:
+  - name: sre_sim_red_and_dependency_alerts
+    interval: 5s
+    rules:
+      - alert: SimHighErrorRate
+        expr: sim_red_error_rate_ratio >= 0.20 and sim_red_request_rate_rps > 0
+        for: 0s
+        labels:
+          alert_type: high_error_rate
+          severity: critical
+          source_id: src-prom-metrics
+        annotations:
+          summary: "Service {{ $labels.service_id }} error rate ratio exceeded 0.20 threshold"
+
+      - alert: SimHighLatencyP95
+        expr: sim_red_latency_p95_ms >= 250.0 and sim_red_request_rate_rps > 0
+        for: 0s
+        labels:
+          alert_type: high_latency_p95
+          severity: high
+          source_id: src-prom-metrics
+        annotations:
+          summary: "Service {{ $labels.service_id }} P95 latency exceeded 250ms SLO threshold"
+
+      - alert: SimDependencyUnavailable
+        expr: sim_dependency_unavailable_errors_total > 0
+        for: 0s
+        labels:
+          alert_type: dependency_unavailable
+          severity: critical
+          source_id: src-loki-logs
+        annotations:
+          summary: "Downstream dependency unavailable detected on {{ $labels.service_id }}"
+
+      - alert: SimConnectionPoolExhausted
+        expr: sim_pool_exhausted_errors_total > 0
+        for: 0s
+        labels:
+          alert_type: connection_pool_exhausted
+          severity: critical
+          source_id: src-loki-logs
+        annotations:
+          summary: "Database connection pool exhaustion detected on {{ $labels.service_id }}"
+
+      - alert: SimAuthFailureSpike
+        expr: sim_auth_failure_errors_total > 0
+        for: 0s
+        labels:
+          alert_type: auth_failure_spike
+          severity: high
+          source_id: src-loki-logs
+        annotations:
+          summary: "Authentication policy/verifier failure spike detected on {{ $labels.service_id }}"
+
+      - alert: SimQueueConsumerLag
+        expr: sim_queue_consumer_lag_events_total > 0
+        for: 0s
+        labels:
+          alert_type: queue_consumer_lag
+          severity: high
+          source_id: src-sim-services
+        annotations:
+          summary: "Asynchronous queue consumer lag backlog detected on {{ $labels.service_id }}"
+

@@ -1,0 +1,28 @@
+# Prometheus configuration for C05 Synthetic Microservices Lab (ADR-S02)
+# Scrapes RED metrics from the 5 synthetic FastAPI services over sim_obs_net.
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    environment: lab
+    application: sre-simulation-poc
+
+rule_files:
+  - /app/observability/alert-rules.yml
+
+scrape_configs:
+  - job_name: sre-sim-microservices
+    metrics_path: /metrics
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - api-gateway:8000
+          - auth-service:8000
+          - transaction-service:8000
+          - ledger-service:8000
+          - notification-service:8000
+        labels:
+          environment: lab
+          application: sre-simulation-poc
+

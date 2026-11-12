@@ -1,0 +1,46 @@
+[
+  {
+    "test_id": "NEG-RAG-01-SC10",
+    "requirement": "RAG-01, SC-10, AT-007",
+    "description": "Prevent obsolete SOP-LEDGER-001 v1.0.0 citation when query reference_time >= 2026-06-01",
+    "status": "PASS",
+    "obsolete_citations_leaked": 0,
+    "active_version_returned": "2.0.0",
+    "details": "Obsolete v1.0.0 cleanly blocked at pre-filter stage. v2.0.0 returned as active citation."
+  },
+  {
+    "test_id": "NEG-RAG-02-ISOLATION",
+    "requirement": "RAG-02",
+    "description": "Strict isolation between services sharing similar error codes (e.g. 504 gateway vs 504 ledger)",
+    "status": "PASS",
+    "cross_service_citations_leaked": 0,
+    "details": "Only api-gateway chunks returned; SOP-LEDGER-ERR-504 strictly excluded."
+  },
+  {
+    "test_id": "NEG-SEC-01-ENTITLEMENT",
+    "requirement": "SEC-01",
+    "description": "Block synthetic-restricted document for callers lacking required group",
+    "status": "PASS",
+    "unauthorized_leaks": 0,
+    "authorized_access_successful": true,
+    "details": "Unprivileged caller (sre-core-l1) received 0 restricted citations; privileged caller received SOP-SEC-KEY-ROTATION."
+  },
+  {
+    "test_id": "NEG-RAG-009-NO-MATCH",
+    "requirement": "FR-RAG-009, RULE-006",
+    "description": "Honest no_match return for out-of-scope queries with zero hallucinations",
+    "status": "PASS",
+    "status_returned": "no_match",
+    "gap_reason_returned": "NO_APPLICABLE_RUNBOOK",
+    "citations_count": 0
+  },
+  {
+    "test_id": "NEG-NFR-016-OUTAGE",
+    "requirement": "NFR-016, AT-012",
+    "description": "Honest unavailable return when retrieval index backend experiences simulated outage",
+    "status": "PASS",
+    "status_returned": "unavailable",
+    "gap_reason_returned": "RETRIEVAL_UNAVAILABLE",
+    "citations_count": 0
+  }
+]

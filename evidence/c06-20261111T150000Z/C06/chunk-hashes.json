@@ -1,0 +1,712 @@
+[
+  {
+    "chunk_id": "chk-ARCH-GW-001-v1.1.0-001",
+    "document_id": "ARCH-GW-001",
+    "document_version": "1.1.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-GW-001: Arsitektur Reverse Proxy Ingress Gateway",
+    "content_hash": "00457ed3f8a6b980af1576c24e67dcdf6dfccaf3fd888bd18b52e416ddf0252a",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-GW-001-v1.1.0-002",
+    "document_id": "ARCH-GW-001",
+    "document_version": "1.1.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-GW-001: Arsitektur Reverse Proxy Ingress Gateway > 1. Topologi Jaringan dan Tanggung Jawab",
+    "content_hash": "4ec329184910ffc133219ce28315fe5212b2bb445fbd52122e7b7b70a8fcb474",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-GW-001-v1.1.0-003",
+    "document_id": "ARCH-GW-001",
+    "document_version": "1.1.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-GW-001: Arsitektur Reverse Proxy Ingress Gateway > 2. Kebijakan Circuit Breaking dan Timeout",
+    "content_hash": "b1aba526d13e0d01afb42af015e369dde7c292e5153c36929ba07e4094b643de",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-001-v1.2.0-001",
+    "document_id": "SOP-GW-001",
+    "document_version": "1.2.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway",
+    "content_hash": "9a527d102f4d6928998931af16ab1b632a43522e606658e05c95ca13b7232ed1",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-001-v1.2.0-002",
+    "document_id": "SOP-GW-001",
+    "document_version": "1.2.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 1. Identifikasi dan Triage Awal",
+    "content_hash": "80835a7e9a2ad12e76bf52c3200d54645540d22a81dceb3b59370f3696fa957e",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-001-v1.2.0-003",
+    "document_id": "SOP-GW-001",
+    "document_version": "1.2.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 2. Prosedur Mitigasi Operasional",
+    "content_hash": "f2afa1e0f5bb63a11b0b7f04b2181c3d7c0378f3c601c43ad10355a54686e766",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-001-v1.2.0-004",
+    "document_id": "SOP-GW-001",
+    "document_version": "1.2.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 3. Langkah Eskalasi dan Handover",
+    "content_hash": "1b10884bacbebb23bbc7a4e335d190a08b273af817dad6e2bfb09602c8eeab71",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+    "document_id": "SOP-GW-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+    "content_hash": "286a178e2026685957c09b4ccd8427c4e179a368309a379f8f59d969ce454d7d",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-002",
+    "document_id": "SOP-GW-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 1. Gejala dan Karakteristik Error",
+    "content_hash": "1d0155a17c80cbdabc55e8469b01d2c8492c5aebc5d2bf3f1d7e71b07556a9b9",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-003",
+    "document_id": "SOP-GW-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 2. Prosedur Investigasi Keterlambatan Upstream",
+    "content_hash": "7b486c406cf2e3116cb5c9f6e4577e5cef6947df27fcae15b0be0b863d6e8d7b",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-004",
+    "document_id": "SOP-GW-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 3. Verifikasi Pasca-Penanganan",
+    "content_hash": "1f1c703cf9fecc42dbc88d070ab5aadcea5cc973916f09163e8be2e649674693",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-AUTH-001-v1.0.0-001",
+    "document_id": "KNOWN-ERR-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token",
+    "content_hash": "d5d4360230635f3f35213584b1a808bb50c9139bf72b19b81b7784221bf9915e",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-AUTH-001-v1.0.0-002",
+    "document_id": "KNOWN-ERR-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token > 1. Deskripsi Masalah",
+    "content_hash": "053b7b9692c817bea3be831edb2799bc78d262a8e6f914034747c7dc60e668c5",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-AUTH-001-v1.0.0-003",
+    "document_id": "KNOWN-ERR-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token > 2. Solusi Permanen dan Solusi Sementara (Workaround)",
+    "content_hash": "84f1e208c57690eea4c4ce6acd0c52ced008904c985d3e077ce4162dc649f6a8",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-001-v1.0.0-001",
+    "document_id": "SOP-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi",
+    "content_hash": "3a056ace121af85a1e2cd692029649c6e692961a30d513cce685f798f774cbd1",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-001-v1.0.0-002",
+    "document_id": "SOP-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 1. Indikator dan Pemicu Alert",
+    "content_hash": "d994b3b220ff8003ed6121d29e66d6b54608d4b879573eda97976d8b528faf42",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-001-v1.0.0-003",
+    "document_id": "SOP-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 2. Prosedur Investigasi dan Validasi",
+    "content_hash": "26d68b5c2055f169d2975d0338d248869b249a370b0c531066f7478d81f2ed5e",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-001-v1.0.0-004",
+    "document_id": "SOP-AUTH-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 3. Eskalasi dan Resolusi",
+    "content_hash": "a9a84754b9dd068aa10c23401b901c9638e6e801dd22c8ead61c8abdc94f55b1",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-001",
+    "document_id": "SOP-AUTH-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi",
+    "content_hash": "cb376d4a7120011b96a220d3ba16c96ea2f4de1441f43b63070e32c1b5dc82c5",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-002",
+    "document_id": "SOP-AUTH-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 1. Identifikasi Anomali Internal Auth",
+    "content_hash": "166d8b63f920f3f032973cfec11535eccfdf5dff7388e02517edcb028974d628",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-003",
+    "document_id": "SOP-AUTH-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan",
+    "content_hash": "ead4259a713716fee456abf523832ef40c80698bc61757f5972b5f93e28222e1",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-DB-001-v1.0.0-001",
+    "document_id": "ARCH-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database",
+    "content_hash": "d7e7753c18f705e439bb45672dd78d4e3f96648fdbf6b0f154ffaee80715df98",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-DB-001-v1.0.0-002",
+    "document_id": "ARCH-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 1. Topologi Persistence dan Skema Database",
+    "content_hash": "45d8ff36d647fb7255400ea767451e10a9f05569d8d90a7029b0ac26683e3cfb",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-DB-001-v1.0.0-003",
+    "document_id": "ARCH-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 2. Batas Alokasi Memori dan Resource Ceiling",
+    "content_hash": "68e0087f173bff50e0b1bd5405787c937e5b472691914d4434859d5ca676102c",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-DB-001-v1.0.0-001",
+    "document_id": "SOP-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL",
+    "content_hash": "a8ee1bdcc4c54410656b9588189cfa2abb166bf241caa311b1137a7269757b7b",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-DB-001-v1.0.0-002",
+    "document_id": "SOP-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 1. Identifikasi dan Pengawasan Sinyal Database",
+    "content_hash": "7a2884bcf55b3182ebcaa06393b2395003b48e4812837eea6fc8b86d4eeeb9f0",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-DB-001-v1.0.0-003",
+    "document_id": "SOP-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi",
+    "content_hash": "faba706659c8164e4f9b027b816d5cc586facefd034d182043694197dda3193d",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-DB-001-v1.0.0-004",
+    "document_id": "SOP-DB-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "db-dummy",
+    "section_path": "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 3. Verifikasi Pasca-Remediasi",
+    "content_hash": "5ba8c04b7f8ccc28e905e3ab2af313694ce9957f5336f8f804ef1ad6b4a96267",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-001",
+    "document_id": "KNOWN-ERR-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+    "content_hash": "61ecb15a59d97515acc3440d4b86de1eaceb40786036aac6a21fbfe8cad8b6cf",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-002",
+    "document_id": "KNOWN-ERR-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala",
+    "content_hash": "0951682cf91d7af307a336b7fb9eea12f4719dbf5d04d62f452d08268b3a2cc3",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-003",
+    "document_id": "KNOWN-ERR-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+    "content_hash": "055d7acf098fbfb2844a30274b3eb78e41ace522bcd64c910318f3707253b632",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v1.0.0-001",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "obsolete",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI USANG - OBSOLETE)",
+    "content_hash": "6c5404a78c404da0e052579333820c135466d845b6a5a5212d71deb0464af84c",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v1.0.0-002",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "obsolete",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI USANG - OBSOLETE) > 1. Prosedur Penanganan Usang (TIDAK BERLAKU)",
+    "content_hash": "a3de69c1f016a1ca357c5f75915ce4092e609c21fc6d343aac7874d5a59c018d",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v1.0.0-003",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "1.0.0",
+    "status": "obsolete",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI USANG - OBSOLETE) > 2. Peringatan Risiko Keusangan",
+    "content_hash": "ce0cea37f2b6cc9adecb673d7680dd993ce05031a9eca948ddc20ca1f6e27564",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-001",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "2.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF)",
+    "content_hash": "c11166260089e1b2dc9250956c337435831b1045c2acc42b6b3d314c1df42a64",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-002",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "2.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger",
+    "content_hash": "99727f37a3a65f7b5f10dda8e39af0d60600f1ea803779b38a5d924174619ebc",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-003",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "2.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman",
+    "content_hash": "06d153ba79641cccd3b596dba6bdf13f40b6239df1d5b464255202cd9295a927",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-004",
+    "document_id": "SOP-LEDGER-001",
+    "document_version": "2.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 3. Verifikasi Pasca-Mitigasi dan Eskalasi",
+    "content_hash": "ca154076c9d781879af005b05755a38c49b673e572aebc018aa05b52b9dbc549",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-001",
+    "document_id": "SOP-LEDGER-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+    "content_hash": "1c1ced8deee21da169fec85b01b055126de2513c2c152ecfb29372b0c938bcba",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+    "document_id": "SOP-LEDGER-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+    "content_hash": "667d3be8517fc5f0688f99715fe465a20c25e64675db4957d2072c6169411e86",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-003",
+    "document_id": "SOP-LEDGER-ERR-504",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "ledger-service",
+    "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger",
+    "content_hash": "595d0fa3a6caf412c9f541b2f6a68242495108dfe4aa1edca4f9e8795e449b19",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-NOTIF-001-v1.0.0-001",
+    "document_id": "KNOWN-ERR-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+    "content_hash": "90032991d0b31eb499790dfd7717d31b7f4fe11b67fa95854ba924bdf630c4d8",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-NOTIF-001-v1.0.0-002",
+    "document_id": "KNOWN-ERR-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+    "content_hash": "65910ca3e728420de8d109a6b8639f34eab3882171745498e923db3e96cb063c",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-KNOWN-ERR-NOTIF-001-v1.0.0-003",
+    "document_id": "KNOWN-ERR-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 2. Solusi Sementara dan Penanganan",
+    "content_hash": "9eeaab8f7554ca8133807bf3b38f98400ebd33e5f48a4195f9103ad728f23fe1",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-001-v1.0.0-001",
+    "document_id": "SOP-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+    "content_hash": "9f06f379a986808b8d20ed1db4daf2549cd4867c886498c7cf62d3d18a933bf5",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-001-v1.0.0-002",
+    "document_id": "SOP-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+    "content_hash": "e18a1fb69175c84eaffee2d3d96aab52dbcbd69d142dfde356ca70dcb360496b",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-001-v1.0.0-003",
+    "document_id": "SOP-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi",
+    "content_hash": "e40c5d5a3449a416d9a2bece697925c0933540f351731d363da0fc1f4c9edba9",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-001-v1.0.0-004",
+    "document_id": "SOP-NOTIF-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan",
+    "content_hash": "f256bb8a6a199b220ee630ae35ffe59d2c905543df473f0b74062ccbbbcd7fcd",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-QUEUE-001-v1.0.0-001",
+    "document_id": "SOP-NOTIF-QUEUE-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+    "content_hash": "7db3e8b2543b513e4586a8a3228085e6f2b5a52fffa4732d92748358ed0840fd",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-QUEUE-001-v1.0.0-002",
+    "document_id": "SOP-NOTIF-QUEUE-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+    "content_hash": "e2d2ec07a20f4f6cb93e660989bee199d51909161f21aa09c30aefb2013fe2b0",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-NOTIF-QUEUE-001-v1.0.0-003",
+    "document_id": "SOP-NOTIF-QUEUE-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "notification-service",
+    "section_path": "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+    "content_hash": "4194f0d3ca5f46f8577c22efe0ab20dae5e29e5ab2f2f46ff480291ffe689a0b",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-001",
+    "document_id": "ARCH-SIM-ECOSYSTEM",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE",
+    "content_hash": "1e1230ca26e158a885eee922d944cb6c0e0f72de1c0d2bc2afa1f74fea7127bd",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-002",
+    "document_id": "ARCH-SIM-ECOSYSTEM",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)",
+    "content_hash": "0d87dc3682ebeacff39e0fbd8e893d01316f5e5a9da09701dc9e9fae50f65688",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-003",
+    "document_id": "ARCH-SIM-ECOSYSTEM",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)",
+    "content_hash": "e75d8ff96430a70e4ef3f2335c5fa1a04f9386625e75e2a47cac761127ee2459",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-004",
+    "document_id": "ARCH-SIM-ECOSYSTEM",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "api-gateway",
+    "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 3. Integrasi Telemetri Observabilitas",
+    "content_hash": "dfd0ff8dcb817317e8494c37831cc292d249a26f74369d40e6114e3a9ed46da6",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-001",
+    "document_id": "SOP-SEC-KEY-ROTATION",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-SEC-KEY-ROTATION: Prosedur Rahasia Rotasi Kunci Kriptografi",
+    "content_hash": "14d258e2160ab127d4440938d75f5c38cc19dd170d33c31d2e07dd13b9cd4fa6",
+    "classification": "synthetic-restricted"
+  },
+  {
+    "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-002",
+    "document_id": "SOP-SEC-KEY-ROTATION",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-SEC-KEY-ROTATION: Prosedur Rahasia Rotasi Kunci Kriptografi > 1. Tujuan dan Ruang Lingkup Keamanan",
+    "content_hash": "cc545a3236c7abb6b9e58812e2117aff7c6353b761722242a1359681932d51de",
+    "classification": "synthetic-restricted"
+  },
+  {
+    "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-003",
+    "document_id": "SOP-SEC-KEY-ROTATION",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-SEC-KEY-ROTATION: Prosedur Rahasia Rotasi Kunci Kriptografi > 2. Prosedur Rotasi Kunci Bertahap",
+    "content_hash": "0b6a6d2497e88694bb919b25faed610abd55f6d0d978840a9f313c7a9fc3b78a",
+    "classification": "synthetic-restricted"
+  },
+  {
+    "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-004",
+    "document_id": "SOP-SEC-KEY-ROTATION",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "auth-service",
+    "section_path": "SOP-SEC-KEY-ROTATION: Prosedur Rahasia Rotasi Kunci Kriptografi > 3. Protokol Penanganan Kebocoran Darurat",
+    "content_hash": "07585b9466c4be6034c6b40946a46483815454f9fdcb29f3977fb2702696e284",
+    "classification": "synthetic-restricted"
+  },
+  {
+    "chunk_id": "chk-POSTMORTEM-TX-001-v1.0.0-001",
+    "document_id": "POSTMORTEM-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial",
+    "content_hash": "fd6b4020d3dc6195a696bf33942d7f7e7c93de1518cefee1b9d45fb582fae31f",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-POSTMORTEM-TX-001-v1.0.0-002",
+    "document_id": "POSTMORTEM-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial > 1. Ringkasan Insiden dan Dampak",
+    "content_hash": "fdfc51d9c84310febefd3779c23f2aa8c5b4dcc4d2cbe17b2c3d869c7320efb2",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-POSTMORTEM-TX-001-v1.0.0-003",
+    "document_id": "POSTMORTEM-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial > 2. Analisis Kronologi dan Deteksi Telemetri",
+    "content_hash": "0d945964d3494953cbe738649375645c7ff897549cb1c2ecbac9db25abb8b420",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-POSTMORTEM-TX-001-v1.0.0-004",
+    "document_id": "POSTMORTEM-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial > 3. Tindakan Perbaikan (Action Items)",
+    "content_hash": "26cb3c2f3876768ee8f1c028ec194903487b6379b82e5561a01767451076fa67",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-001-v1.0.0-001",
+    "document_id": "SOP-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi",
+    "content_hash": "7b9963008120d0e73c891258c19293ac402a452f048e6fede8ee1a356a7bd4ac",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-001-v1.0.0-002",
+    "document_id": "SOP-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 1. Indikasi Masalah dan Dampak Bisnis",
+    "content_hash": "f40dfdb69e244cd4ab4060888de5e58b00bd36e8973848482d59d94f77a7972f",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-001-v1.0.0-003",
+    "document_id": "SOP-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 2. Prosedur Investigasi dan Mitigasi",
+    "content_hash": "0b8fe17d729560c0f20ba39dce14ba3fe06a6bc16c4b61f7c0da6910b25bd435",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-001-v1.0.0-004",
+    "document_id": "SOP-TX-001",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 3. Eskalasi dan Handover",
+    "content_hash": "28e645b4de0fbfec594d58b3ce4d8bdec4bc1f1f10f37e8c6585f018478a2e8f",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-001",
+    "document_id": "SOP-TX-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi",
+    "content_hash": "c39b4eebad270ba13e670554c2a987af6684dd25d216d51f5812fa7e0d12c028",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-002",
+    "document_id": "SOP-TX-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik Insiden",
+    "content_hash": "c6764ecc07cab1aebe91994bd053cbb1793edd01e0533ca5de61cf0e3fc6ef97",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-003",
+    "document_id": "SOP-TX-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik",
+    "content_hash": "9ec8eac80e23c3519aba42c284fa903de017b6c744b482ef1e5ad503fb8e220d",
+    "classification": "synthetic-internal"
+  },
+  {
+    "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-004",
+    "document_id": "SOP-TX-ERR-500",
+    "document_version": "1.0.0",
+    "status": "approved",
+    "service_id": "transaction-service",
+    "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 3. Resolusi dan Pemulihan",
+    "content_hash": "c32c87758b1aba5a621a121ddf11d5d8756c392581771ec29ee00652cd9b8018",
+    "classification": "synthetic-internal"
+  }
+]

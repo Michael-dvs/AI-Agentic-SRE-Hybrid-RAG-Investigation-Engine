@@ -1,0 +1,621 @@
+{
+  "run_id": "c05-20261111T113000Z",
+  "captured_at": "2026-11-11T11:34:38.980433Z",
+  "webhook_principal": "principal:alert-intake",
+  "scenarios": {
+    "SC-01_normal_baseline": {
+      "alert_count": 0,
+      "false_positive_critical_alerts": 0,
+      "alerts": []
+    },
+    "SC-02_http_5xx": {
+      "alert_count": 2,
+      "alerts": [
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-high_error_rate-9f1100889de0",
+          "source_id": "src-prom-metrics",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "high_error_rate",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:34.892263Z",
+          "window_start": "2026-11-11T11:33:34.892263Z",
+          "window_end": "2026-11-11T11:34:34.892263Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+          "trace_id": "d3b3b24e1bc9892a54799fa955d9d9b1",
+          "summary": "Service api-gateway error_rate=0.38 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-transaction-service-high_error_rate-9418b65d8f08",
+          "source_id": "src-prom-metrics",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "alert_type": "high_error_rate",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:34.892263Z",
+          "window_start": "2026-11-11T11:33:34.892263Z",
+          "window_end": "2026-11-11T11:34:34.892263Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+          "trace_id": "d3b3b24e1bc9892a54799fa955d9d9b1",
+          "summary": "Service transaction-service error_rate=0.30 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"transaction-service\"}"
+        }
+      ],
+      "signed_deliveries": [
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-high_error_rate-9f1100889de0",
+            "source_id": "src-prom-metrics",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "high_error_rate",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:34.892263Z",
+            "window_start": "2026-11-11T11:33:34.892263Z",
+            "window_end": "2026-11-11T11:34:34.892263Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+            "trace_id": "d3b3b24e1bc9892a54799fa955d9d9b1",
+            "summary": "Service api-gateway error_rate=0.38 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "e034721f78fe5b145df07337ce03621db678bf680e301ed6fc5043c4c1e48b20",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-transaction-service-high_error_rate-9418b65d8f08",
+            "source_id": "src-prom-metrics",
+            "service_id": "transaction-service",
+            "environment": "lab",
+            "alert_type": "high_error_rate",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:34.892263Z",
+            "window_start": "2026-11-11T11:33:34.892263Z",
+            "window_end": "2026-11-11T11:34:34.892263Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+            "trace_id": "d3b3b24e1bc9892a54799fa955d9d9b1",
+            "summary": "Service transaction-service error_rate=0.30 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"transaction-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "0d5cc3fa4d1d87592fcd3523f9cc0555861aee03b55a54260ae1ea9a4260d4a3",
+            "Content-Type": "application/json"
+          }
+        }
+      ]
+    },
+    "SC-03_db_latency_cascade": {
+      "alert_count": 4,
+      "alerts": [
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-high_error_rate-f7967640d7bc",
+          "source_id": "src-prom-metrics",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "high_error_rate",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:37.207167Z",
+          "window_start": "2026-11-11T11:33:37.207167Z",
+          "window_end": "2026-11-11T11:34:37.207167Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "HTTP_500",
+          "trace_id": "e25dc30017681187875b2b7c096e5c06",
+          "summary": "Service api-gateway error_rate=0.20 exceeded critical threshold 0.20 (error_code=HTTP_500)",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-high_latency_p95-7be852f2dc3e",
+          "source_id": "src-prom-metrics",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:37.207167Z",
+          "window_start": "2026-11-11T11:33:37.207167Z",
+          "window_end": "2026-11-11T11:34:37.207167Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "SLO_LATENCY_P95_BREACH",
+          "trace_id": "e25dc30017681187875b2b7c096e5c06",
+          "summary": "Service api-gateway latency_p95=468.0ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"api-gateway\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-ledger-service-high_latency_p95-d58b507b3fcf",
+          "source_id": "src-prom-metrics",
+          "service_id": "ledger-service",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:37.207167Z",
+          "window_start": "2026-11-11T11:33:37.207167Z",
+          "window_end": "2026-11-11T11:34:37.207167Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "WARN_DB_SLOW_QUERY",
+          "trace_id": "e25dc30017681187875b2b7c096e5c06",
+          "summary": "Service ledger-service latency_p95=411.0ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"ledger-service\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-transaction-service-high_latency_p95-c12565bc3a16",
+          "source_id": "src-prom-metrics",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:37.207167Z",
+          "window_start": "2026-11-11T11:33:37.207167Z",
+          "window_end": "2026-11-11T11:34:37.207167Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "SLO_LATENCY_P95_BREACH",
+          "trace_id": "e25dc30017681187875b2b7c096e5c06",
+          "summary": "Service transaction-service latency_p95=454.7ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"transaction-service\"}"
+        }
+      ],
+      "signed_deliveries": [
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-high_error_rate-f7967640d7bc",
+            "source_id": "src-prom-metrics",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "high_error_rate",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:37.207167Z",
+            "window_start": "2026-11-11T11:33:37.207167Z",
+            "window_end": "2026-11-11T11:34:37.207167Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "HTTP_500",
+            "trace_id": "e25dc30017681187875b2b7c096e5c06",
+            "summary": "Service api-gateway error_rate=0.20 exceeded critical threshold 0.20 (error_code=HTTP_500)",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "934c9d9b25687662de57f3ce0043fb9f709bf3753a54192bf6bf135e861d93e4",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-high_latency_p95-7be852f2dc3e",
+            "source_id": "src-prom-metrics",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:37.207167Z",
+            "window_start": "2026-11-11T11:33:37.207167Z",
+            "window_end": "2026-11-11T11:34:37.207167Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "SLO_LATENCY_P95_BREACH",
+            "trace_id": "e25dc30017681187875b2b7c096e5c06",
+            "summary": "Service api-gateway latency_p95=468.0ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"api-gateway\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "b5a7d0ffdb351a6568ae283285a5b03e019e8019b1f4506e19bcd367aea63613",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-ledger-service-high_latency_p95-d58b507b3fcf",
+            "source_id": "src-prom-metrics",
+            "service_id": "ledger-service",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:37.207167Z",
+            "window_start": "2026-11-11T11:33:37.207167Z",
+            "window_end": "2026-11-11T11:34:37.207167Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "WARN_DB_SLOW_QUERY",
+            "trace_id": "e25dc30017681187875b2b7c096e5c06",
+            "summary": "Service ledger-service latency_p95=411.0ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"ledger-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "cae4f615408952a20cce6be4487012e6754d84b456e54a7d7282e221d1689553",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-transaction-service-high_latency_p95-c12565bc3a16",
+            "source_id": "src-prom-metrics",
+            "service_id": "transaction-service",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:37.207167Z",
+            "window_start": "2026-11-11T11:33:37.207167Z",
+            "window_end": "2026-11-11T11:34:37.207167Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "SLO_LATENCY_P95_BREACH",
+            "trace_id": "e25dc30017681187875b2b7c096e5c06",
+            "summary": "Service transaction-service latency_p95=454.7ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"transaction-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "ca3138bba9828151754dffc15a6fc492ba519861c144b7c8754d9c736f4a82b9",
+            "Content-Type": "application/json"
+          }
+        }
+      ]
+    },
+    "SC-04_dependency_down_cascade": {
+      "alert_count": 8,
+      "alerts": [
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-high_error_rate-7dfcc1f71e1f",
+          "source_id": "src-prom-metrics",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "high_error_rate",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Service api-gateway error_rate=0.27 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-high_latency_p95-13b88e926619",
+          "source_id": "src-prom-metrics",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Service api-gateway latency_p95=425.2ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"api-gateway\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-ledger-service-high_latency_p95-a548ff6fb23a",
+          "source_id": "src-prom-metrics",
+          "service_id": "ledger-service",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Service ledger-service latency_p95=411.0ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"ledger-service\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-transaction-service-high_error_rate-1049dc63eeb9",
+          "source_id": "src-prom-metrics",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "alert_type": "high_error_rate",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Service transaction-service error_rate=0.27 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"transaction-service\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-transaction-service-high_latency_p95-45ee27c5a367",
+          "source_id": "src-prom-metrics",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "alert_type": "high_latency_p95",
+          "severity": "high",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Service transaction-service latency_p95=410.2ms exceeded high SLO threshold 250.0ms",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"transaction-service\"}"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-api-gateway-dependency_unavailable-a6357606094e",
+          "source_id": "src-loki-logs",
+          "service_id": "api-gateway",
+          "environment": "lab",
+          "alert_type": "dependency_unavailable",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Downstream dependency unavailable reported by api-gateway (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=api-gateway&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-ledger-service-dependency_unavailable-22c1c72627ba",
+          "source_id": "src-loki-logs",
+          "service_id": "ledger-service",
+          "environment": "lab",
+          "alert_type": "dependency_unavailable",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Downstream dependency unavailable reported by ledger-service (ERR_DEPENDENCY_UNAVAILABLE)",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=ledger-service&error_code=ERR_DEPENDENCY_UNAVAILABLE"
+        },
+        {
+          "schema_version": "1.0",
+          "alert_id": "alt-transaction-service-dependency_unavailable-304c9c7fd16b",
+          "source_id": "src-loki-logs",
+          "service_id": "transaction-service",
+          "environment": "lab",
+          "alert_type": "dependency_unavailable",
+          "severity": "critical",
+          "event_time": "2026-11-11T11:34:38.396203Z",
+          "window_start": "2026-11-11T11:33:38.396203Z",
+          "window_end": "2026-11-11T11:34:38.396203Z",
+          "build_version": "0.1.0-sim",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "trace_id": "4c2f588becaeab5ae99370144eae5924",
+          "summary": "Downstream dependency unavailable reported by transaction-service (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=transaction-service&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE"
+        }
+      ],
+      "signed_deliveries": [
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-high_error_rate-7dfcc1f71e1f",
+            "source_id": "src-prom-metrics",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "high_error_rate",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Service api-gateway error_rate=0.27 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "519507571c15da438e8c9916a30b5d860d65cece15d7f965afef10f03b6283a5",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-high_latency_p95-13b88e926619",
+            "source_id": "src-prom-metrics",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Service api-gateway latency_p95=425.2ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"api-gateway\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "3ce795d9e760419f6da0488cc937e91167e01c52d7ea5a42cee8e7d5706856b3",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-ledger-service-high_latency_p95-a548ff6fb23a",
+            "source_id": "src-prom-metrics",
+            "service_id": "ledger-service",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Service ledger-service latency_p95=411.0ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"ledger-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "5aee3486b3ef2873d00c2f11b80aa27a4e91e275e3374bcab81a25f34bec4e5d",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-transaction-service-high_error_rate-1049dc63eeb9",
+            "source_id": "src-prom-metrics",
+            "service_id": "transaction-service",
+            "environment": "lab",
+            "alert_type": "high_error_rate",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Service transaction-service error_rate=0.27 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"transaction-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "0c6efa135146dec680aaaf0251079813df8d42af298f753475a9d481b97fa87b",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-transaction-service-high_latency_p95-45ee27c5a367",
+            "source_id": "src-prom-metrics",
+            "service_id": "transaction-service",
+            "environment": "lab",
+            "alert_type": "high_latency_p95",
+            "severity": "high",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Service transaction-service latency_p95=410.2ms exceeded high SLO threshold 250.0ms",
+            "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_latency_p95_ms{service_id=\"transaction-service\"}"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "f170872ee7511298cbecff51053964c0827f1a1715a2e4e57b2262ae26829505",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-api-gateway-dependency_unavailable-a6357606094e",
+            "source_id": "src-loki-logs",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "alert_type": "dependency_unavailable",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Downstream dependency unavailable reported by api-gateway (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+            "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=api-gateway&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "6b273466b956ed0b1de803d12d6b68b618734c1f3170a1c237978130c8c85204",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-ledger-service-dependency_unavailable-22c1c72627ba",
+            "source_id": "src-loki-logs",
+            "service_id": "ledger-service",
+            "environment": "lab",
+            "alert_type": "dependency_unavailable",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Downstream dependency unavailable reported by ledger-service (ERR_DEPENDENCY_UNAVAILABLE)",
+            "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=ledger-service&error_code=ERR_DEPENDENCY_UNAVAILABLE"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "e0104e859bd237d8908730a6bdf77ea273864b7daf20a8b9f226d3ba8bdfee65",
+            "Content-Type": "application/json"
+          }
+        },
+        {
+          "alert": {
+            "schema_version": "1.0",
+            "alert_id": "alt-transaction-service-dependency_unavailable-304c9c7fd16b",
+            "source_id": "src-loki-logs",
+            "service_id": "transaction-service",
+            "environment": "lab",
+            "alert_type": "dependency_unavailable",
+            "severity": "critical",
+            "event_time": "2026-11-11T11:34:38.396203Z",
+            "window_start": "2026-11-11T11:33:38.396203Z",
+            "window_end": "2026-11-11T11:34:38.396203Z",
+            "build_version": "0.1.0-sim",
+            "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+            "trace_id": "4c2f588becaeab5ae99370144eae5924",
+            "summary": "Downstream dependency unavailable reported by transaction-service (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+            "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=transaction-service&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE"
+          },
+          "webhook_headers": {
+            "X-Principal-ID": "principal:alert-intake",
+            "X-Webhook-Token": "SYNTH-ALERT-WEBHOOK-KEY-C05",
+            "X-Alert-Signature": "053cf7fe6aae7d2c3bb83dbb4706d1c79d75178384fa71d9c62a07bb9f52d009",
+            "Content-Type": "application/json"
+          }
+        }
+      ]
+    }
+  }
+}

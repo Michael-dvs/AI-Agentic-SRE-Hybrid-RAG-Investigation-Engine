@@ -1,0 +1,283 @@
+[
+  {
+    "query_id": "QRY-DEV-001",
+    "query_text": "Bagaimana langkah mitigasi saat terjadi lonjakan error rate HTTP 5xx pada API Gateway?",
+    "target_service_id": "api-gateway",
+    "expected_document_ids": ["SOP-GW-001"],
+    "expected_section_paths": ["SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 2. Prosedur Mitigasi Operasional"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Triage alert SimHighErrorRate pada ingress gateway"
+  },
+  {
+    "query_id": "QRY-DEV-002",
+    "query_text": "Penanganan kode error ERR_UPSTREAM_TIMEOUT HTTP 504 pada gateway",
+    "target_service_id": "api-gateway",
+    "expected_document_ids": ["SOP-GW-ERR-504"],
+    "expected_section_paths": ["SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 2. Prosedur Investigasi Keterlambatan Upstream"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Timeout downstream panggilan HTTP ingress"
+  },
+  {
+    "query_id": "QRY-DEV-003",
+    "query_text": "Arsitektur reverse proxy dan circuit breaker threshold pada gateway",
+    "target_service_id": "api-gateway",
+    "expected_document_ids": ["ARCH-GW-001"],
+    "expected_section_paths": ["ARCH-GW-001: Arsitektur Reverse Proxy Ingress Gateway > 2. Kebijakan Circuit Breaking dan Timeout"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Konfigurasi timeout dan circuit breaker ingress"
+  },
+  {
+    "query_id": "QRY-DEV-004",
+    "query_text": "Investigasi alert SimAuthFailureSpike dan penanganan token verifikasi gagal",
+    "target_service_id": "auth-service",
+    "expected_document_ids": ["SOP-AUTH-001"],
+    "expected_section_paths": ["SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 2. Prosedur Investigasi dan Validasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Lonjakan HTTP 401 dan ERR_AUTH_REJECTED"
+  },
+  {
+    "query_id": "QRY-DEV-005",
+    "query_text": "Penanganan HTTP 500 unhandled exception pada internal auth service",
+    "target_service_id": "auth-service",
+    "expected_document_ids": ["SOP-AUTH-ERR-500"],
+    "expected_section_paths": ["SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Error 500 internal pada modul decoding autentikasi"
+  },
+  {
+    "query_id": "QRY-DEV-006",
+    "query_text": "Penyebab token ditolak akibat mismatch key verifikasi pada auth service",
+    "target_service_id": "auth-service",
+    "expected_document_ids": ["KNOWN-ERR-AUTH-001"],
+    "expected_section_paths": ["KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token > 2. Solusi Permanen dan Solusi Sementara (Workaround)"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Known error ketidakcocokan konfigurasi secret JWT"
+  },
+  {
+    "query_id": "QRY-DEV-007",
+    "query_text": "Mitigasi kegagalan dependensi downstream pada transaction service",
+    "target_service_id": "transaction-service",
+    "expected_document_ids": ["SOP-TX-001"],
+    "expected_section_paths": ["SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 2. Prosedur Investigasi dan Mitigasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Alert SimDependencyUnavailable pada transaksi transfer"
+  },
+  {
+    "query_id": "QRY-DEV-008",
+    "query_text": "Penanganan error 500 internal pada pemrosesan transaksi finansial",
+    "target_service_id": "transaction-service",
+    "expected_document_ids": ["SOP-TX-ERR-500"],
+    "expected_section_paths": ["SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Error 500 transaksi internal"
+  },
+  {
+    "query_id": "QRY-DEV-009",
+    "query_text": "Analisis kronologi cascade failure dari ledger ke transaction service",
+    "target_service_id": "transaction-service",
+    "expected_document_ids": ["POSTMORTEM-TX-001"],
+    "expected_section_paths": ["POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial > 2. Analisis Kronologi dan Deteksi Telemetri"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Post-mortem historis kegagalan berantai"
+  },
+  {
+    "query_id": "QRY-DEV-010",
+    "query_text": "SOP resmi aktif mitigasi latensi database PostgreSQL ledger",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["SOP-LEDGER-001"],
+    "expected_section_paths": ["SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "SOP versi 2 aktif penanganan latensi database ledger"
+  },
+  {
+    "query_id": "QRY-DEV-011",
+    "query_text": "Penanganan query timeout SQL 504 pada ledger service",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["SOP-LEDGER-ERR-504"],
+    "expected_section_paths": ["SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Timeout SQL internal database ledger"
+  },
+  {
+    "query_id": "QRY-DEV-012",
+    "query_text": "Mengatasi kebocoran sesi idle in transaction pada connection pool ledger",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["KNOWN-ERR-LEDGER-001"],
+    "expected_section_paths": ["KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Pembersihan koneksi idle in transaction"
+  },
+  {
+    "query_id": "QRY-DEV-013",
+    "query_text": "Penanganan antrean pesan dan consumer lag pada notification service",
+    "target_service_id": "notification-service",
+    "expected_document_ids": ["SOP-NOTIF-001"],
+    "expected_section_paths": ["SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Alert SimQueueConsumerLag notifikasi"
+  },
+  {
+    "query_id": "QRY-DEV-014",
+    "query_text": "Langkah mitigasi backlog RabbitMQ dan tuning prefetch count notifikasi",
+    "target_service_id": "notification-service",
+    "expected_document_ids": ["SOP-NOTIF-QUEUE-001"],
+    "expected_section_paths": ["SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Backlog antrean pesan RabbitMQ"
+  },
+  {
+    "query_id": "QRY-DEV-015",
+    "query_text": "Known error blocking asyncio loop pada consumer event notifikasi",
+    "target_service_id": "notification-service",
+    "expected_document_ids": ["KNOWN-ERR-NOTIF-001"],
+    "expected_section_paths": ["KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 2. Solusi Sementara dan Penanganan"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Heartbeat closure pada RabbitMQ consumer"
+  },
+  {
+    "query_id": "QRY-DEV-016",
+    "query_text": "Investigasi saturasi connection pool dan kueri macet di PostgreSQL db-dummy",
+    "target_service_id": "db-dummy",
+    "expected_document_ids": ["SOP-DB-001"],
+    "expected_section_paths": ["SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Pemeriksaan pg_stat_activity dan cancel backend"
+  },
+  {
+    "query_id": "QRY-DEV-017",
+    "query_text": "Batas alokasi memori dan sizing connection pool PostgreSQL lab",
+    "target_service_id": "db-dummy",
+    "expected_document_ids": ["ARCH-DB-001"],
+    "expected_section_paths": ["ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 2. Batas Alokasi Memori dan Resource Ceiling"],
+    "relevance_label": "supplementary",
+    "split": "dev",
+    "notes": "Spesifikasi max_connections dan RAM ceiling"
+  },
+  {
+    "query_id": "QRY-DEV-018",
+    "query_text": "Aliran data transaksi sinkron dari gateway ke ledger service",
+    "target_service_id": "api-gateway",
+    "expected_document_ids": ["ARCH-SIM-ECOSYSTEM.md"],
+    "expected_section_paths": ["ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Topologi alur request sinkron"
+  },
+  {
+    "query_id": "QRY-DEV-019",
+    "query_text": "Eskalasi insiden lonjakan error HTTP 5xx pada gateway ke tim SRE L2",
+    "target_service_id": "api-gateway",
+    "expected_document_ids": ["SOP-GW-001"],
+    "expected_section_paths": ["SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 3. Langkah Eskalasi dan Handover"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Prosedur handover insiden gateway"
+  },
+  {
+    "query_id": "QRY-DEV-020",
+    "query_text": "Pengecekan clock skew dan masa berlaku token autentikasi",
+    "target_service_id": "auth-service",
+    "expected_document_ids": ["SOP-AUTH-001"],
+    "expected_section_paths": ["SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 2. Prosedur Investigasi dan Validasi"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Verifikasi sinkronisasi waktu dan expiry token"
+  },
+  {
+    "query_id": "QRY-DEV-021",
+    "query_text": "Restart graceful container auth-service saat terjadi error internal",
+    "target_service_id": "auth-service",
+    "expected_document_ids": ["SOP-AUTH-ERR-500"],
+    "expected_section_paths": ["SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Restart mandiri auth service"
+  },
+  {
+    "query_id": "QRY-DEV-022",
+    "query_text": "Penyelamatan idempotency key transaksi saat terjadi downstream error",
+    "target_service_id": "transaction-service",
+    "expected_document_ids": ["SOP-TX-001"],
+    "expected_section_paths": ["SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 2. Prosedur Investigasi dan Mitigasi"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Idempotency key unlock"
+  },
+  {
+    "query_id": "QRY-DEV-023",
+    "query_text": "Pemeriksaan format data nominal transaksi finansial pada transaction service",
+    "target_service_id": "transaction-service",
+    "expected_document_ids": ["SOP-TX-ERR-500"],
+    "expected_section_paths": ["SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik"],
+    "relevance_label": "supplementary",
+    "split": "dev",
+    "notes": "Validasi skema payload transaksi"
+  },
+  {
+    "query_id": "QRY-DEV-024",
+    "query_text": "Langkah drain connection pool database ledger secara bertahap",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["SOP-LEDGER-001"],
+    "expected_section_paths": ["SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Connection draining ledger pool"
+  },
+  {
+    "query_id": "QRY-DEV-025",
+    "query_text": "Pemeriksaan row-level lock contention pada update saldo ledger",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["SOP-LEDGER-ERR-504"],
+    "expected_section_paths": ["SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Pemeriksaan baris terkunci pada saldo"
+  },
+  {
+    "query_id": "QRY-DEV-026",
+    "query_text": "Konfigurasi idle in transaction session timeout pada PostgreSQL",
+    "target_service_id": "ledger-service",
+    "expected_document_ids": ["KNOWN-ERR-LEDGER-001"],
+    "expected_section_paths": ["KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Timeout sesi idle database"
+  },
+  {
+    "query_id": "QRY-DEV-027",
+    "query_text": "Pemeriksaan poison pill message pada dead letter queue notifikasi",
+    "target_service_id": "notification-service",
+    "expected_document_ids": ["SOP-NOTIF-001"],
+    "expected_section_paths": ["SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"],
+    "relevance_label": "relevant",
+    "split": "dev",
+    "notes": "Pembersihan DLQ notifikasi"
+  },
+  {
+    "query_id": "QRY-DEV-028",
+    "query_text": "Penghentian kueri database macet menggunakan pg_cancel_backend",
+    "target_service_id": "db-dummy",
+    "expected_document_ids": ["SOP-DB-001"],
+    "expected_section_paths": ["SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"],
+    "relevance_label": "critical",
+    "split": "dev",
+    "notes": "Cancel backend kueri PostgreSQL"
+  }
+]
+

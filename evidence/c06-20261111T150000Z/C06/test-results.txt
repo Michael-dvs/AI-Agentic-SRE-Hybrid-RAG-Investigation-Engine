@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 8 items
+
+tests/test_c06_knowledge_and_ingestion.py::test_c06_corpus_structure_and_document_count PASSED [ 12%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_all_chunks_schema_compliance PASSED [ 25%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_redaction_sanitizer_sec03 PASSED [ 37%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_zero_ground_truth_leakage_at008 PASSED [ 50%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_obsolete_lifecycle_and_version_transition_sc10_rag01 PASSED [ 62%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_multi_service_and_access_isolation_rag02_sec01 PASSED [ 75%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_determinism_and_lifecycle_rollback PASSED [ 87%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_evaluation_queries_separation_fr_rag_006 PASSED [100%]
+
+============================== 8 passed in 0.71s ===============================

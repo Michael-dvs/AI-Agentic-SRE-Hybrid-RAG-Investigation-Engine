@@ -1,0 +1,25 @@
+# Tempo single-node configuration for C05 Synthetic Microservices Lab (ADR-S02)
+# Supports reversible trace-source outage simulation for SC-09 (EV-02 / AT-009).
+
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: 0.0.0.0:4318
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+    wal:
+      path: /tmp/tempo/wal
+
+compactor:
+  compaction:
+    block_retention: 168h
+

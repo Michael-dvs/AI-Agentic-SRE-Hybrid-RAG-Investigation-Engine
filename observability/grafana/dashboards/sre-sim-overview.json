@@ -1,0 +1,39 @@
+{
+  "uid": "sre-sim-overview-v1",
+  "title": "SRE Agentic Lab - RED Metrics, Logs & Traces Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "tags": ["sre-sim", "c05", "observability"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Service Request Rate (RPS)",
+      "datasource": {"type": "prometheus", "uid": "prom-sim-lab"},
+      "targets": [{"expr": "sim_red_request_rate_rps", "refId": "A"}]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Service Error Rate Ratio",
+      "datasource": {"type": "prometheus", "uid": "prom-sim-lab"},
+      "targets": [{"expr": "sim_red_error_rate_ratio", "refId": "A"}]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Service P95 Latency (ms)",
+      "datasource": {"type": "prometheus", "uid": "prom-sim-lab"},
+      "targets": [{"expr": "sim_red_latency_p95_ms", "refId": "A"}]
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Structured Microservice Logs (Loki)",
+      "datasource": {"type": "loki", "uid": "loki-sim-lab"},
+      "targets": [{"expr": "{environment=\"lab\"}", "refId": "A"}]
+    }
+  ]
+}
+

@@ -1,0 +1,13 @@
+CONTAINER ID   NAME                           CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O       PIDS
+355ae0d8aea4   sre-sim-api-gateway            0.96%     53.71MiB / 128MiB   41.96%    643kB / 941kB     0B / 0B         4
+9f0b3cbe65ba   sre-sim-auth-service           0.22%     41.18MiB / 128MiB   32.17%    272kB / 463kB     0B / 0B         2
+71baceb5b2b8   sre-sim-grafana                0.30%     40MiB / 256MiB      15.62%    2.66kB / 2.15kB   0B / 0B         2
+063d107c421a   sre-sim-ledger-service         0.59%     46.43MiB / 128MiB   36.27%    588kB / 708kB     0B / 0B         2
+8d0c7a3d78bd   sre-sim-loki                   0.20%     42.12MiB / 512MiB   8.23%     677kB / 528kB     0B / 0B         2
+265746b82209   sre-sim-notification-service   0.84%     43.05MiB / 128MiB   33.64%    286kB / 589kB     0B / 0B         3
+2a9f484f47ba   sre-sim-otel-collector         0.22%     63.94MiB / 192MiB   33.30%    1.6MB / 1.65MB    0B / 0B         6
+05c7c3a44fea   sre-sim-postgres               0.97%     20.27MiB / 192MiB   10.56%    288kB / 337kB     0B / 586kB      6
+a6a6ea047c69   sre-sim-prometheus             0.12%     53.29MiB / 512MiB   10.41%    91.2kB / 88.8kB   0B / 0B         3
+77249ff5645d   sre-sim-rabbitmq               0.71%     103.4MiB / 256MiB   40.41%    129MB / 56.3MB    213kB / 987kB   38
+7237f3670628   sre-sim-tempo                  0.18%     40.9MiB / 384MiB    10.65%    653kB / 311kB     0B / 0B         2
+d14027aeb2af   sre-sim-transaction-service    0.76%     55.65MiB / 128MiB   43.48%    529kB / 746kB     0B / 0B         3

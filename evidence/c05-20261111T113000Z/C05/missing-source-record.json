@@ -1,0 +1,51 @@
+{
+  "run_id": "c05-20261111T113000Z",
+  "captured_at": "2026-11-11T11:34:33.983154Z",
+  "outage_activation": {
+    "status": "OUTAGE_ACTIVE",
+    "component": "tempo",
+    "unavailable": true,
+    "reason": "SC-09_trace_backend_outage",
+    "updated_at": "2026-11-11T11:34:33.961669Z"
+  },
+  "trace_request": {
+    "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "service_id": "api-gateway",
+    "environment": "lab",
+    "start": "2026-11-11T11:34:33.352586Z",
+    "end": "2026-11-11T11:34:33.894153Z"
+  },
+  "unavailable_tool_result": {
+    "schema_version": "1.0",
+    "tool_name": "get_trace_summary",
+    "request_id": "req-trace-c05-001",
+    "status": "unavailable",
+    "source_ref": "http://127.0.0.1:13200/api/traces/4bf92f3577b34da6a3ce929d0e0e4736",
+    "observed_at": "2026-11-11T11:34:33.970052Z",
+    "query_window": {
+      "start": "2026-11-11T11:34:33.352586Z",
+      "end": "2026-11-11T11:34:33.894153Z"
+    },
+    "sampling": {
+      "applied": false,
+      "method": null,
+      "returned_count": 0,
+      "source_count": null
+    },
+    "truncated": false,
+    "data_quality": "unavailable",
+    "sanitized": true,
+    "records": [],
+    "error_code": "SOURCE_UNAVAILABLE"
+  },
+  "outage_recovery": {
+    "status": "RECOVERED",
+    "component": "tempo",
+    "unavailable": false,
+    "reason": "operator_reset",
+    "updated_at": "2026-11-11T11:34:33.974741Z"
+  },
+  "post_recovery_tool_result_status": "ok",
+  "post_recovery_data_quality": "complete",
+  "fabricated_spans_detected": false
+}

@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 10 items
+
+tests/test_c07_hybrid_retrieval.py::test_schema_compliance_across_modes PASSED [ 10%]
+tests/test_c07_hybrid_retrieval.py::test_malformed_request_rejected PASSED [ 20%]
+tests/test_c07_hybrid_retrieval.py::test_rag_01_sc10_obsolete_sop_prevention PASSED [ 30%]
+tests/test_c07_hybrid_retrieval.py::test_rag_02_cross_service_isolation PASSED [ 40%]
+tests/test_c07_hybrid_retrieval.py::test_sec_01_restricted_document_authorization PASSED [ 50%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_no_match PASSED [ 60%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_outage PASSED [ 70%]
+tests/test_c07_hybrid_retrieval.py::test_citation_provenance_and_hash_integrity PASSED [ 80%]
+tests/test_c07_hybrid_retrieval.py::test_context_token_bounding_and_truncation PASSED [ 90%]
+tests/test_c07_hybrid_retrieval.py::test_dev_benchmark_reproducibility PASSED [100%]
+
+============================== 10 passed in 4.01s ==============================

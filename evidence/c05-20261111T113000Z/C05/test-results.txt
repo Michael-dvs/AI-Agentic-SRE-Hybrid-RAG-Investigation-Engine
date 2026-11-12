@@ -1,0 +1,32 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 23 items
+
+tests/test_c03_compose_live.py::test_live_compose_readiness_and_topology_contracts PASSED [  4%]
+tests/test_c03_compose_live.py::test_live_sync_postgres_and_async_rabbitmq_notification_chain PASSED [  8%]
+tests/test_c03_compose_live.py::test_live_traffic_generator_normal_and_spike_profiles PASSED [ 13%]
+tests/test_c03_compose_live.py::test_live_compose_restart_and_postgres_data_persistence PASSED [ 17%]
+tests/test_c03_services.py::test_c02_contracts_compliance_for_all_five_services PASSED [ 21%]
+tests/test_c03_services.py::test_end_to_end_sync_and_async_transaction_flow PASSED [ 26%]
+tests/test_c03_services.py::test_idempotency_and_duplicate_prevention PASSED [ 30%]
+tests/test_c03_services.py::test_notification_bounded_retries_and_idempotency PASSED [ 34%]
+tests/test_c03_services.py::test_invalid_inputs_and_auth_rejections PASSED [ 39%]
+tests/test_c03_services.py::test_dependency_failure_responses_and_persistence PASSED [ 43%]
+tests/test_c03_services.py::test_deterministic_traffic_generator_and_external_target_rejection PASSED [ 47%]
+tests/test_c04_fault_harness.py::test_scenario_catalog_public_vs_restricted_separation PASSED [ 52%]
+tests/test_c04_fault_harness.py::test_restricted_gt_registry_immutability_and_access_control PASSED [ 56%]
+tests/test_c04_fault_harness.py::test_fault_control_endpoint_security_and_limits PASSED [ 60%]
+tests/test_c04_fault_harness.py::test_external_target_url_rejected_by_runner PASSED [ 65%]
+tests/test_c04_fault_harness.py::test_all_eight_core_scenarios_and_recipe_hooks_in_process PASSED [ 69%]
+tests/test_c04_fault_harness.py::test_live_docker_compose_c04_isolation_and_fault_recovery PASSED [ 73%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_telemetry_correlation_and_schema_compliance PASSED [ 78%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_alert_evaluation_and_zero_false_positives_on_sc01 PASSED [ 82%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_dependency_cascade_attribution_sc03_and_sc04 PASSED [ 86%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_missing_trace_source_sc09_reversible_outage PASSED [ 91%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_otel_collector_strips_forbidden_gt_fields_and_zero_leakage PASSED [ 95%]
+tests/test_c05_telemetry_and_catalog.py::test_live_docker_compose_c05_observability_stack PASSED [100%]
+
+============================= 23 passed in 14.13s ==============================

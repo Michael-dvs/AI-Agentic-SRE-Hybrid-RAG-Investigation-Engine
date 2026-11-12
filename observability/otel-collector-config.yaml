@@ -1,0 +1,47 @@
+# OpenTelemetry Collector configuration for C05 Synthetic Microservices Lab (ADR-S02)
+# Enforces RULE-002 (zero ground-truth mounts/labels) and NFR-016 (bounded memory <= 192 MiB).
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 160
+    spike_limit_mib: 32
+  batch:
+    send_batch_size: 256
+    timeout: 1s
+  attributes/sanitize:
+    actions:
+      - key: scenario_id
+        action: delete
+      - key: ground_truth
+        action: delete
+      - key: expected_root_cause
+        action: delete
+      - key: split_id
+        action: delete
+
+exporters:
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+  otlphttp/tempo:
+    endpoint: http://tempo:3200
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/sanitize, batch]
+      exporters: [loki]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/sanitize, batch]
+      exporters: [otlphttp/tempo]
+

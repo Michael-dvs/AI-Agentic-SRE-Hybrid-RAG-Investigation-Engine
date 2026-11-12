@@ -1,0 +1,173 @@
+{
+  "total_citations_audited": 15,
+  "hash_match_rate": 1.0,
+  "uri_valid_rate": 1.0,
+  "status_approved_rate": 1.0,
+  "audit_records": [
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-001",
+      "document_id": "SOP-LEDGER-001",
+      "document_version": "2.0.0",
+      "content_hash": "c11166260089e1b2dc9250956c337435831b1045c2acc42b6b3d314c1df42a64",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-001-v2.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-002",
+      "document_id": "SOP-LEDGER-001",
+      "document_version": "2.0.0",
+      "content_hash": "99727f37a3a65f7b5f10dda8e39af0d60600f1ea803779b38a5d924174619ebc",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-001-v2.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-004",
+      "document_id": "SOP-LEDGER-001",
+      "document_version": "2.0.0",
+      "content_hash": "ca154076c9d781879af005b05755a38c49b673e572aebc018aa05b52b9dbc549",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-001-v2.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-003",
+      "document_id": "SOP-LEDGER-001",
+      "document_version": "2.0.0",
+      "content_hash": "06d153ba79641cccd3b596dba6bdf13f40b6239df1d5b464255202cd9295a927",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-001-v2.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-001",
+      "document_id": "SOP-LEDGER-ERR-504",
+      "document_version": "1.0.0",
+      "content_hash": "1c1ced8deee21da169fec85b01b055126de2513c2c152ecfb29372b0c938bcba",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-ERR-504.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+      "document_id": "SOP-GW-ERR-504",
+      "document_version": "1.0.0",
+      "content_hash": "286a178e2026685957c09b4ccd8427c4e179a368309a379f8f59d969ce454d7d",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-002",
+      "document_id": "SOP-GW-ERR-504",
+      "document_version": "1.0.0",
+      "content_hash": "1d0155a17c80cbdabc55e8469b01d2c8492c5aebc5d2bf3f1d7e71b07556a9b9",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-004",
+      "document_id": "SOP-GW-ERR-504",
+      "document_version": "1.0.0",
+      "content_hash": "1f1c703cf9fecc42dbc88d070ab5aadcea5cc973916f09163e8be2e649674693",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-001-v1.2.0-001",
+      "document_id": "SOP-GW-001",
+      "document_version": "1.2.0",
+      "content_hash": "9a527d102f4d6928998931af16ab1b632a43522e606658e05c95ca13b7232ed1",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-001.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-001-v1.2.0-002",
+      "document_id": "SOP-GW-001",
+      "document_version": "1.2.0",
+      "content_hash": "80835a7e9a2ad12e76bf52c3200d54645540d22a81dceb3b59370f3696fa957e",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-001.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-004",
+      "document_id": "SOP-SEC-KEY-ROTATION",
+      "document_version": "1.0.0",
+      "content_hash": "07585b9466c4be6034c6b40946a46483815454f9fdcb29f3977fb2702696e284",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/auth-service/security/SOP-SEC-KEY-ROTATION.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-003",
+      "document_id": "SOP-SEC-KEY-ROTATION",
+      "document_version": "1.0.0",
+      "content_hash": "0b6a6d2497e88694bb919b25faed610abd55f6d0d978840a9f313c7a9fc3b78a",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/auth-service/security/SOP-SEC-KEY-ROTATION.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-002",
+      "document_id": "SOP-SEC-KEY-ROTATION",
+      "document_version": "1.0.0",
+      "content_hash": "cc545a3236c7abb6b9e58812e2117aff7c6353b761722242a1359681932d51de",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/auth-service/security/SOP-SEC-KEY-ROTATION.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-SEC-KEY-ROTATION-v1.0.0-001",
+      "document_id": "SOP-SEC-KEY-ROTATION",
+      "document_version": "1.0.0",
+      "content_hash": "14d258e2160ab127d4440938d75f5c38cc19dd170d33c31d2e07dd13b9cd4fa6",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/auth-service/security/SOP-SEC-KEY-ROTATION.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-KNOWN-ERR-AUTH-001-v1.0.0-002",
+      "document_id": "KNOWN-ERR-AUTH-001",
+      "document_version": "1.0.0",
+      "content_hash": "053b7b9692c817bea3be831edb2799bc78d262a8e6f914034747c7dc60e668c5",
+      "hash_registered_match": true,
+      "source_uri": "kb://corpus/auth-service/auth_service/KNOWN-ERR-AUTH-001.md",
+      "uri_valid": true,
+      "status": "approved",
+      "applicability_verified": true
+    }
+  ]
+}
