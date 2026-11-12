@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 11 items
+
+tests/test_c03_compose_live.py::test_live_compose_readiness_and_topology_contracts PASSED [  9%]
+tests/test_c03_compose_live.py::test_live_sync_postgres_and_async_rabbitmq_notification_chain PASSED [ 18%]
+tests/test_c03_compose_live.py::test_live_traffic_generator_normal_and_spike_profiles PASSED [ 27%]
+tests/test_c03_compose_live.py::test_live_compose_restart_and_postgres_data_persistence PASSED [ 36%]
+tests/test_c03_services.py::test_c02_contracts_compliance_for_all_five_services PASSED [ 45%]
+tests/test_c03_services.py::test_end_to_end_sync_and_async_transaction_flow PASSED [ 54%]
+tests/test_c03_services.py::test_idempotency_and_duplicate_prevention PASSED [ 63%]
+tests/test_c03_services.py::test_notification_bounded_retries_and_idempotency PASSED [ 72%]
+tests/test_c03_services.py::test_invalid_inputs_and_auth_rejections PASSED [ 81%]
+tests/test_c03_services.py::test_dependency_failure_responses_and_persistence PASSED [ 90%]
+tests/test_c03_services.py::test_deterministic_traffic_generator_and_external_target_rejection PASSED [100%]
+
+============================== 11 passed in 6.32s ==============================

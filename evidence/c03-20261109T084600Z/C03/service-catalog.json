@@ -1,0 +1,165 @@
+{
+  "services": [
+    {
+      "schema_version": "1.0",
+      "service_id": "api-gateway",
+      "service.name": "api-gateway",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "gateway",
+      "instance_id": "api-gateway-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [
+        "auth-service",
+        "transaction-service"
+      ],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T08:54:17.913450Z"
+    },
+    {
+      "schema_version": "1.0",
+      "service_id": "auth-service",
+      "service.name": "auth-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "auth",
+      "instance_id": "auth-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T08:54:17.922751Z"
+    },
+    {
+      "schema_version": "1.0",
+      "service_id": "transaction-service",
+      "service.name": "transaction-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "transaction",
+      "instance_id": "transaction-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [
+        "ledger-service",
+        "notification-service"
+      ],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T08:54:17.930599Z"
+    },
+    {
+      "schema_version": "1.0",
+      "service_id": "ledger-service",
+      "service.name": "ledger-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "ledger",
+      "instance_id": "ledger-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T08:54:17.940084Z"
+    },
+    {
+      "schema_version": "1.0",
+      "service_id": "notification-service",
+      "service.name": "notification-service",
+      "environment": "lab",
+      "application": "sre-simulation-poc",
+      "component": "notification_worker",
+      "instance_id": "notification-service-lab-01",
+      "build_version": "0.1.0-sim",
+      "owner_ref": "project-initiator-michael",
+      "dependency_refs": [],
+      "health_endpoints": {
+        "liveness_path": "/health/live",
+        "readiness_path": "/health/ready",
+        "metrics_path": "/metrics"
+      },
+      "updated_at": "2026-11-09T08:54:17.950592Z"
+    }
+  ],
+  "dependency_edges": [
+    {
+      "schema_version": "1.0",
+      "edge_id": "edge-gw-auth",
+      "from_service_id": "api-gateway",
+      "to_service_id": "auth-service",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "sync_http",
+      "source_kind": "catalog_declared",
+      "source_ref": "http://api-gateway:8000/api/v1/topology",
+      "observed_at": "2026-11-09T08:54:17.951569Z",
+      "freshness_status": "fresh",
+      "confidence": 1.0,
+      "error_propagation_observed": false
+    },
+    {
+      "schema_version": "1.0",
+      "edge_id": "edge-gw-tx",
+      "from_service_id": "api-gateway",
+      "to_service_id": "transaction-service",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "sync_http",
+      "source_kind": "catalog_declared",
+      "source_ref": "http://api-gateway:8000/api/v1/topology",
+      "observed_at": "2026-11-09T08:54:17.951569Z",
+      "freshness_status": "fresh",
+      "confidence": 1.0,
+      "error_propagation_observed": false
+    },
+    {
+      "schema_version": "1.0",
+      "edge_id": "edge-tx-ledger",
+      "from_service_id": "transaction-service",
+      "to_service_id": "ledger-service",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "sync_http",
+      "source_kind": "catalog_declared",
+      "source_ref": "http://api-gateway:8000/api/v1/topology",
+      "observed_at": "2026-11-09T08:54:17.951569Z",
+      "freshness_status": "fresh",
+      "confidence": 1.0,
+      "error_propagation_observed": false
+    },
+    {
+      "schema_version": "1.0",
+      "edge_id": "edge-tx-notif",
+      "from_service_id": "transaction-service",
+      "to_service_id": "notification-service",
+      "environment": "lab",
+      "deployment_version": "0.1.0-sim",
+      "relation_type": "async_queue",
+      "source_kind": "catalog_declared",
+      "source_ref": "http://api-gateway:8000/api/v1/topology",
+      "observed_at": "2026-11-09T08:54:17.951569Z",
+      "freshness_status": "fresh",
+      "confidence": 1.0,
+      "error_propagation_observed": false
+    }
+  ],
+  "correlation_id": "corr-be2a4c4d03032659",
+  "trace_id": "d7a02c529d7513ba2069539d5d112aa4",
+  "observed_at": "2026-11-09T08:54:17.951569Z"
+}

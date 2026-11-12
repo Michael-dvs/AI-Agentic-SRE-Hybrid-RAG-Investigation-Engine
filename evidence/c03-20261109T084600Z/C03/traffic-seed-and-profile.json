@@ -1,0 +1,82 @@
+{
+  "normal_profile": {
+    "scenario_id": "SC-01",
+    "profile": "normal",
+    "seed": 20261109,
+    "target_url": "http://127.0.0.1:18080",
+    "rate_rps": 4.0,
+    "duration_sec": 3.0,
+    "concurrency_cap": 2,
+    "planned_requests": 12,
+    "completed_requests": 12,
+    "success_count": 12,
+    "error_count": 0,
+    "status_counts": {
+      "200": 8,
+      "201": 4
+    },
+    "p50_latency_ms": 52.64,
+    "p95_latency_ms": 122.37,
+    "wall_elapsed_sec": 2.826,
+    "schedule_sha256": "a0ca463ce4ca2963e6e7d1a571891a29c6c4149d0f20c9fd35d152df9376ff08",
+    "first_request": {
+      "seq_index": 0,
+      "idempotency_key": "idem-normal-20261109-0000-ef4f548d",
+      "correlation_id": "corr-normal-20261109-0000-ad9b51d8",
+      "traceparent": "00-ef4f548dad9b51d86cf6497de6166205-571bf3ffd75e9f7f-01",
+      "account_id": "SYNTH-ACC-001",
+      "counterparty_id": "SYNTH-ACC-002",
+      "amount": 3099.31,
+      "currency": "USD",
+      "channel": "web-sim",
+      "token": "SYNTH-TOKEN-ACTIVE-001"
+    },
+    "sample_transaction_ids": [
+      "tx-bccfc869e4a58e84",
+      "tx-877eb06eedf0f003",
+      "tx-4d71e074c1c98d51",
+      "tx-5fd4a9a9213756fc",
+      "tx-abeb9e2c7c1dce76"
+    ]
+  },
+  "spike_profile": {
+    "scenario_id": "SC-01",
+    "profile": "spike",
+    "seed": 20261109,
+    "target_url": "http://127.0.0.1:18080",
+    "rate_rps": 12.0,
+    "duration_sec": 3.0,
+    "concurrency_cap": 6,
+    "planned_requests": 36,
+    "completed_requests": 36,
+    "success_count": 36,
+    "error_count": 0,
+    "status_counts": {
+      "200": 12,
+      "201": 24
+    },
+    "p50_latency_ms": 39.24,
+    "p95_latency_ms": 76.71,
+    "wall_elapsed_sec": 2.96,
+    "schedule_sha256": "238c4acf9ac2afcceb65bdc7bbc3f46e53c6f1b11e5710f1e18c78e762edd81e",
+    "first_request": {
+      "seq_index": 0,
+      "idempotency_key": "idem-spike-20261109-0000-3cae4de3",
+      "correlation_id": "corr-spike-20261109-0000-ae24cf89",
+      "traceparent": "00-3cae4de3ae24cf894ff8853784dbfdca-cd6195a7a2eaf4a6-01",
+      "account_id": "SYNTH-ACC-001",
+      "counterparty_id": "SYNTH-ACC-002",
+      "amount": 3099.31,
+      "currency": "USD",
+      "channel": "web-sim",
+      "token": "SYNTH-TOKEN-ACTIVE-001"
+    },
+    "sample_transaction_ids": [
+      "tx-335e8b1acb76be55",
+      "tx-62fa5428a6a6642e",
+      "tx-abc1cf8a2383583b",
+      "tx-839f5258fb733b2d",
+      "tx-667bdb92766ba404"
+    ]
+  }
+}

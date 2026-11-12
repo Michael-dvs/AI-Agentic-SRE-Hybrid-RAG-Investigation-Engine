@@ -1,0 +1,420 @@
+name: sre-agentic-sim
+services:
+  api-gateway:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile
+    cpus: 0.35
+    command:
+      - uvicorn
+      - services.api_gateway.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --no-access-log
+    container_name: sre-sim-api-gateway
+    depends_on:
+      auth-service:
+        condition: service_healthy
+        required: true
+      transaction-service:
+        condition: service_healthy
+        required: true
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      BUILD_VERSION: 0.1.0-sim
+      DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+      DEPENDENCY_REFS: auth-service,transaction-service
+      INSTANCE_ID: api-gateway-lab-01
+      LEDGER_SERVICE_URL: http://ledger-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      OWNER_REF: project-initiator-michael
+      RABBITMQ_DLQ: notifications.transaction.dlq
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_QUEUE: notifications.transaction.completed
+      RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+      SERVICE_COMPONENT: gateway
+      SERVICE_ID: api-gateway
+      SERVICE_NAME: api-gateway
+      SIM_APPLICATION: sre-simulation-poc
+      SIM_ENVIRONMENT: lab
+      TRANSACTION_SERVICE_URL: http://transaction-service:8000
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      timeout: 3s
+      interval: 5s
+      retries: 8
+      start_period: 5s
+    image: sre-agentic-sim-service:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "134217728"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 8000
+        published: "18080"
+        protocol: tcp
+    restart: unless-stopped
+  auth-service:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile
+    cpus: 0.35
+    command:
+      - uvicorn
+      - services.auth_service.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --no-access-log
+    container_name: sre-sim-auth-service
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      BUILD_VERSION: 0.1.0-sim
+      DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+      DEPENDENCY_REFS: ""
+      INSTANCE_ID: auth-service-lab-01
+      LEDGER_SERVICE_URL: http://ledger-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      OWNER_REF: project-initiator-michael
+      RABBITMQ_DLQ: notifications.transaction.dlq
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_QUEUE: notifications.transaction.completed
+      RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+      SERVICE_COMPONENT: auth
+      SERVICE_ID: auth-service
+      SERVICE_NAME: auth-service
+      SIM_APPLICATION: sre-simulation-poc
+      SIM_ENVIRONMENT: lab
+      TRANSACTION_SERVICE_URL: http://transaction-service:8000
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      timeout: 3s
+      interval: 5s
+      retries: 8
+      start_period: 5s
+    image: sre-agentic-sim-service:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "134217728"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+  ledger-service:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile
+    cpus: 0.35
+    command:
+      - uvicorn
+      - services.ledger_service.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --no-access-log
+    container_name: sre-sim-ledger-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      BUILD_VERSION: 0.1.0-sim
+      DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+      DEPENDENCY_REFS: ""
+      INSTANCE_ID: ledger-service-lab-01
+      LEDGER_SERVICE_URL: http://ledger-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      OWNER_REF: project-initiator-michael
+      RABBITMQ_DLQ: notifications.transaction.dlq
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_QUEUE: notifications.transaction.completed
+      RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+      SERVICE_COMPONENT: ledger
+      SERVICE_ID: ledger-service
+      SERVICE_NAME: ledger-service
+      SIM_APPLICATION: sre-simulation-poc
+      SIM_ENVIRONMENT: lab
+      TRANSACTION_SERVICE_URL: http://transaction-service:8000
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      timeout: 3s
+      interval: 5s
+      retries: 8
+      start_period: 5s
+    image: sre-agentic-sim-service:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "134217728"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+  notification-service:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile
+    cpus: 0.35
+    command:
+      - uvicorn
+      - services.notification_service.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --no-access-log
+    container_name: sre-sim-notification-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        required: true
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      BUILD_VERSION: 0.1.0-sim
+      DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+      DEPENDENCY_REFS: ""
+      INSTANCE_ID: notification-service-lab-01
+      LEDGER_SERVICE_URL: http://ledger-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      OWNER_REF: project-initiator-michael
+      RABBITMQ_DLQ: notifications.transaction.dlq
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_QUEUE: notifications.transaction.completed
+      RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+      SERVICE_COMPONENT: notification_worker
+      SERVICE_ID: notification-service
+      SERVICE_NAME: notification-service
+      SIM_APPLICATION: sre-simulation-poc
+      SIM_ENVIRONMENT: lab
+      TRANSACTION_SERVICE_URL: http://transaction-service:8000
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      timeout: 3s
+      interval: 5s
+      retries: 10
+      start_period: 8s
+    image: sre-agentic-sim-service:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "134217728"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+  postgres:
+    cpus: 0.5
+    container_name: sre-sim-postgres
+    environment:
+      POSTGRES_DB: sre_sim_ledger
+      POSTGRES_PASSWORD: sre_sim_synth_pass_local
+      POSTGRES_USER: sre_sim
+    expose:
+      - "5432"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U sre_sim -d sre_sim_ledger
+      timeout: 3s
+      interval: 5s
+      retries: 10
+      start_period: 5s
+    image: postgres:16-alpine
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "201326592"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: sim_postgres_data
+        target: /var/lib/postgresql/data
+        volume: {}
+  rabbitmq:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile.rabbitmq
+    cpus: 0.75
+    container_name: sre-sim-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_PASS: sre_sim_synth_pass_local
+      RABBITMQ_DEFAULT_USER: sre_sim
+    expose:
+      - "5672"
+    healthcheck:
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
+      timeout: 5s
+      interval: 5s
+      retries: 12
+      start_period: 10s
+    image: sre-agentic-sim-rabbitmq:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "268435456"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+  transaction-service:
+    build:
+      context: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My
+        Drive/Project Michael/SRE-Agentic
+      dockerfile: Dockerfile
+    cpus: 0.35
+    command:
+      - uvicorn
+      - services.transaction_service.app:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --no-access-log
+    container_name: sre-sim-transaction-service
+    depends_on:
+      ledger-service:
+        condition: service_healthy
+        required: true
+      notification-service:
+        condition: service_healthy
+        required: true
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      BUILD_VERSION: 0.1.0-sim
+      DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+      DEPENDENCY_REFS: ledger-service,notification-service
+      INSTANCE_ID: transaction-service-lab-01
+      LEDGER_SERVICE_URL: http://ledger-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      OWNER_REF: project-initiator-michael
+      RABBITMQ_DLQ: notifications.transaction.dlq
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_QUEUE: notifications.transaction.completed
+      RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+      SERVICE_COMPONENT: transaction
+      SERVICE_ID: transaction-service
+      SERVICE_NAME: transaction-service
+      SIM_APPLICATION: sre-simulation-poc
+      SIM_ENVIRONMENT: lab
+      TRANSACTION_SERVICE_URL: http://transaction-service:8000
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      timeout: 3s
+      interval: 5s
+      retries: 8
+      start_period: 5s
+    image: sre-agentic-sim-service:0.1.0-sim
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    mem_limit: "134217728"
+    networks:
+      sim_internal_net: null
+    platform: linux/arm64
+    restart: unless-stopped
+networks:
+  sim_internal_net:
+    name: sre_sim_internal_net
+    driver: bridge
+volumes:
+  sim_postgres_data:
+    name: sre_sim_postgres_data
+x-common-env:
+  AUTH_SERVICE_URL: http://auth-service:8000
+  BUILD_VERSION: 0.1.0-sim
+  DATABASE_URL: postgresql://sre_sim:sre_sim_synth_pass_local@postgres:5432/sre_sim_ledger
+  LEDGER_SERVICE_URL: http://ledger-service:8000
+  NOTIFICATION_SERVICE_URL: http://notification-service:8000
+  OWNER_REF: project-initiator-michael
+  RABBITMQ_DLQ: notifications.transaction.dlq
+  RABBITMQ_ENABLED: "true"
+  RABBITMQ_QUEUE: notifications.transaction.completed
+  RABBITMQ_URL: amqp://sre_sim:sre_sim_synth_pass_local@rabbitmq:5672/%2F
+  SIM_APPLICATION: sre-simulation-poc
+  SIM_ENVIRONMENT: lab
+  TRANSACTION_SERVICE_URL: http://transaction-service:8000
+x-logging:
+  driver: json-file
+  options:
+    max-file: "3"
+    max-size: 10m

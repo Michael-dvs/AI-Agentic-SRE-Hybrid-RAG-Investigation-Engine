@@ -1,0 +1,508 @@
+{
+  "schema_version": "1.0",
+  "evidence_id": "E04-RESET-PROOF",
+  "generated_at": "2026-11-10T10:27:19.411033Z",
+  "gateway_url": "http://127.0.0.1:18080",
+  "total_scenarios_executed": 8,
+  "all_recovered_cleanly": true,
+  "zero_gt_leakage_across_all_runs": true,
+  "emergency_stop_script_verified": true,
+  "scenario_executions": [
+    {
+      "scenario_id": "SC-01",
+      "run_id": "run-20261111-5d7432f576",
+      "incident_id": "inc-20261111-5d7432f576",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-84e4deab9e98bcc9",
+        "status_code": 201,
+        "latency_ms": 81.29,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:11.322092Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:11.323574Z",
+      "fault_end_at": "2026-11-10T10:27:11.825043Z",
+      "label_frozen_at": "2026-11-10T10:27:11.322998Z",
+      "frozen_record_sha256": "f90d6e947272aaf58fc6186940cc2576e0986455bf413184c42ea49695bea6d7",
+      "active_faults_injected": 0,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 201,
+          "latency_ms": 47.4,
+          "error_code": null,
+          "transaction_id": "tx-905058414a3a89bf"
+        },
+        {
+          "probe_index": 1,
+          "status_code": 201,
+          "latency_ms": 64.5,
+          "error_code": null,
+          "transaction_id": "tx-b9967fe000bdf47d"
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": false,
+        "backlog_depth": 0
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-5c6c40cc40a41bf2",
+        "status_code": 201,
+        "latency_ms": 85.53,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:11.825023Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-02",
+      "run_id": "run-20261112-e37c8600b1",
+      "incident_id": "inc-20261112-e37c8600b1",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-659e5925d919b52d",
+        "status_code": 201,
+        "latency_ms": 34.57,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:12.101785Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:12.102275Z",
+      "fault_end_at": "2026-11-10T10:27:12.587116Z",
+      "label_frozen_at": "2026-11-10T10:27:12.101905Z",
+      "frozen_record_sha256": "56107fa2bbf22dd802e7309228b58523b163408560261eab85d029ce1e345e62",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 500,
+          "latency_ms": 16.54,
+          "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+          "transaction_id": null
+        },
+        {
+          "probe_index": 1,
+          "status_code": 500,
+          "latency_ms": 70.98,
+          "error_code": "ERR_TX_INTERNAL_EXCEPTION",
+          "transaction_id": null
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": false,
+        "backlog_depth": 0
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-a6d56cc3967918c3",
+        "status_code": 201,
+        "latency_ms": 56.67,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:12.587089Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-03",
+      "run_id": "run-20261113-065191a80c",
+      "incident_id": "inc-20261113-065191a80c",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-b605cebd14f0d22a",
+        "status_code": 201,
+        "latency_ms": 31.93,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:12.850513Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:12.851272Z",
+      "fault_end_at": "2026-11-10T10:27:14.035845Z",
+      "label_frozen_at": "2026-11-10T10:27:12.850740Z",
+      "frozen_record_sha256": "2c2beb2f836beda4dab7973cf4718108bba7d5d40d4f417d7f72abe8264176b8",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 201,
+          "latency_ms": 430.48,
+          "error_code": null,
+          "transaction_id": "tx-90bf60dc02218f83"
+        },
+        {
+          "probe_index": 1,
+          "status_code": 201,
+          "latency_ms": 417.43,
+          "error_code": null,
+          "transaction_id": "tx-9fb7f9bfb32eef25"
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": false,
+        "backlog_depth": 0
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-a50f1e61b8225a11",
+        "status_code": 201,
+        "latency_ms": 41.4,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:14.035820Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-04",
+      "run_id": "run-20261114-3fe9b724c7",
+      "incident_id": "inc-20261114-3fe9b724c7",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-77e6bd582fcc05e6",
+        "status_code": 201,
+        "latency_ms": 62.25,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:14.169928Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:14.170441Z",
+      "fault_end_at": "2026-11-10T10:27:14.730021Z",
+      "label_frozen_at": "2026-11-10T10:27:14.170098Z",
+      "frozen_record_sha256": "e7cb3d13b749f92faab47877f7dd5fca7c7a1f447030c5d7a699d9a745611eec",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 503,
+          "latency_ms": 92.51,
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "transaction_id": null
+        },
+        {
+          "probe_index": 1,
+          "status_code": 503,
+          "latency_ms": 32.66,
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "transaction_id": null
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": false,
+        "backlog_depth": 0
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-3ce72e138cec3798",
+        "status_code": 201,
+        "latency_ms": 35.51,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:14.729981Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-05",
+      "run_id": "run-20261115-427be9558a",
+      "incident_id": "inc-20261115-427be9558a",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-4e9ceef5284855fc",
+        "status_code": 201,
+        "latency_ms": 53.61,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:15.003737Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:15.004860Z",
+      "fault_end_at": "2026-11-10T10:27:15.794488Z",
+      "label_frozen_at": "2026-11-10T10:27:15.004134Z",
+      "frozen_record_sha256": "5e1f800f5ac74968ec047567920ce54380250ab8cafdca3fcb1f369c899542dc",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 503,
+          "latency_ms": 154.79,
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "transaction_id": null
+        },
+        {
+          "probe_index": 1,
+          "status_code": 503,
+          "latency_ms": 168.6,
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "transaction_id": null
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": false,
+        "backlog_depth": 0
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-86f478ead5759bdf",
+        "status_code": 201,
+        "latency_ms": 58.56,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:15.794457Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-06",
+      "run_id": "run-20261116-3c6502c498",
+      "incident_id": "inc-20261116-3c6502c498",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-8a51d1081bd5e4fe",
+        "status_code": 201,
+        "latency_ms": 36.7,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:15.928731Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:15.929220Z",
+      "fault_end_at": "2026-11-10T10:27:16.244474Z",
+      "label_frozen_at": "2026-11-10T10:27:15.928921Z",
+      "frozen_record_sha256": "74966acbd7333f15df63ed3b580b6d2224fd22c0b539ec3de53f74b4003a1942",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 403,
+          "latency_ms": 66.93,
+          "error_code": "ERR_AUTH_POLICY_MISMATCH",
+          "transaction_id": null
+        },
+        {
+          "probe_index": 1,
+          "status_code": 403,
+          "latency_ms": 9.07,
+          "error_code": "ERR_AUTH_POLICY_MISMATCH",
+          "transaction_id": null
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": null,
+        "backlog_depth": null
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-0f712abff61f3aec",
+        "status_code": 201,
+        "latency_ms": 63.25,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:16.244452Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-07",
+      "run_id": "run-20261117-1a61adc567",
+      "incident_id": "inc-20261117-1a61adc567",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-cf2ae0c74e5e5f0d",
+        "status_code": 201,
+        "latency_ms": 49.3,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:16.565058Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:16.565961Z",
+      "fault_end_at": "2026-11-10T10:27:16.988503Z",
+      "label_frozen_at": "2026-11-10T10:27:16.565393Z",
+      "frozen_record_sha256": "965f9722c67edf6480f65eb5f177c464e5792230e0de666f08fdfabc68617cfa",
+      "active_faults_injected": 1,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 201,
+          "latency_ms": 31.8,
+          "error_code": null,
+          "transaction_id": "tx-306d50eb101bfbe6"
+        },
+        {
+          "probe_index": 1,
+          "status_code": 201,
+          "latency_ms": 31.87,
+          "error_code": null,
+          "transaction_id": "tx-e2703dcb8aa6214f"
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": true,
+        "backlog_depth": 2
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-6b7b20d9e4fe25dd",
+        "status_code": 201,
+        "latency_ms": 32.08,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:16.988443Z"
+      },
+      "recovered_cleanly": true
+    },
+    {
+      "scenario_id": "SC-08",
+      "run_id": "run-20261118-514a0d9758",
+      "incident_id": "inc-20261118-514a0d9758",
+      "workflow_steps_completed": [
+        "validate",
+        "baseline_check",
+        "inject",
+        "observe",
+        "stop",
+        "recover",
+        "verify",
+        "record"
+      ],
+      "pre_injection_baseline": {
+        "passed": true,
+        "transaction_id": "tx-55d039cbbe25c777",
+        "status_code": 201,
+        "latency_ms": 39.38,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:17.285795Z"
+      },
+      "fault_onset_at": "2026-11-10T10:27:17.286368Z",
+      "fault_end_at": "2026-11-10T10:27:17.757669Z",
+      "label_frozen_at": "2026-11-10T10:27:17.285966Z",
+      "frozen_record_sha256": "e0ef5d3dd62a19309aba813972a44f0a0573db682bc7351c4a085546088a07c9",
+      "active_faults_injected": 2,
+      "observed_probes": [
+        {
+          "probe_index": 0,
+          "status_code": 403,
+          "latency_ms": 9.51,
+          "error_code": "ERR_AUTH_POLICY_MISMATCH",
+          "transaction_id": null
+        },
+        {
+          "probe_index": 1,
+          "status_code": 403,
+          "latency_ms": 9.17,
+          "error_code": "ERR_AUTH_POLICY_MISMATCH",
+          "transaction_id": null
+        }
+      ],
+      "observed_notification_queue": {
+        "consumer_lag_active": null,
+        "backlog_depth": null
+      },
+      "leakage_scan": {
+        "scanned_count": 5,
+        "leakage_detected": false,
+        "leaks": []
+      },
+      "post_recovery_verification": {
+        "passed": true,
+        "transaction_id": "tx-6fbe4a349a4810cf",
+        "status_code": 201,
+        "latency_ms": 36.39,
+        "async_notification_delivered": true,
+        "checked_at": "2026-11-10T10:27:17.757639Z"
+      },
+      "recovered_cleanly": true
+    }
+  ]
+}

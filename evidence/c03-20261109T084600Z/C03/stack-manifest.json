@@ -1,0 +1,220 @@
+{
+  "run_id": "c03-20261109T084600Z",
+  "chapter_id": "C03",
+  "compose_project": "sre-agentic-sim",
+  "architecture": "linux/arm64",
+  "microservices_count": 5,
+  "supporting_components_count": 2,
+  "containers": [
+    {
+      "Command": "\"uvicorn services.ap\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:29 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "a3a20105bb30",
+      "Image": "sre-agentic-sim-service:0.1.0-sim",
+      "Labels": "com.docker.compose.project=sre-agentic-sim,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,com.docker.compose.version=5.5.1,com.docker.compose.image=sha256:6a88457c21e1f3fa39d1fa34242b8582d0d0fb9cc3070d92c1c6623fd455d8a5,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.service=api-gateway,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/8000/tcp=127.0.0.1:18080,com.docker.compose.config-hash=db176f7df9c4708bc03f82ecd8f94d586fc45c2f30933dff58ddc0a9b9c34b99,com.docker.compose.container-number=1,com.docker.compose.depends_on=auth-service:service_healthy:false,transaction-service:service_healthy:false,com.docker.compose.oneoff=False",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-api-gateway",
+      "Names": "sre-sim-api-gateway",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "127.0.0.1:18080->8000/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "127.0.0.1",
+          "TargetPort": 8000,
+          "PublishedPort": 18080,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "api-gateway",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up About a minute (healthy)"
+    },
+    {
+      "Command": "\"uvicorn services.au\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:29 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "652ba7a3c990",
+      "Image": "sre-agentic-sim-service:0.1.0-sim",
+      "Labels": "com.docker.compose.config-hash=4f61840a90d65f8a94f54c1a39a86d6206ae30f281e0520347658a67d1b05849,com.docker.compose.depends_on=,com.docker.compose.image=sha256:6a88457c21e1f3fa39d1fa34242b8582d0d0fb9cc3070d92c1c6623fd455d8a5,com.docker.compose.oneoff=False,com.docker.compose.project=sre-agentic-sim,com.docker.compose.service=auth-service,com.docker.compose.version=5.5.1,com.docker.compose.container-number=1,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,desktop.docker.io/ports.scheme=v2",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-auth-service",
+      "Names": "sre-sim-auth-service",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "8000/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8000,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "auth-service",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up About a minute (healthy)"
+    },
+    {
+      "Command": "\"uvicorn services.le\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:29 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "5ce5f2aa3555",
+      "Image": "sre-agentic-sim-service:0.1.0-sim",
+      "Labels": "com.docker.compose.version=5.5.1,com.docker.compose.container-number=1,com.docker.compose.depends_on=postgres:service_healthy:false,com.docker.compose.image=sha256:6a88457c21e1f3fa39d1fa34242b8582d0d0fb9cc3070d92c1c6623fd455d8a5,com.docker.compose.oneoff=False,com.docker.compose.project=sre-agentic-sim,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,desktop.docker.io/ports.scheme=v2,com.docker.compose.config-hash=a033e20bc202ed2638b75b987953ca7ca07dd845e53ab25e34b381c3b7b4998a,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.service=ledger-service",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-ledger-service",
+      "Names": "sre-sim-ledger-service",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "8000/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8000,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "ledger-service",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 27 seconds (healthy)"
+    },
+    {
+      "Command": "\"uvicorn services.no\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:29 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "114988755f67",
+      "Image": "sre-agentic-sim-service:0.1.0-sim",
+      "Labels": "com.docker.compose.project=sre-agentic-sim,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.container-number=1,com.docker.compose.depends_on=rabbitmq:service_healthy:false,com.docker.compose.oneoff=False,com.docker.compose.service=notification-service,com.docker.compose.version=5.5.1,desktop.docker.io/ports.scheme=v2,com.docker.compose.config-hash=f4299d30f0f8c3f611280bd458f94c61f848c235279baffa37b28f6d2e1fe858,com.docker.compose.image=sha256:6a88457c21e1f3fa39d1fa34242b8582d0d0fb9cc3070d92c1c6623fd455d8a5",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-notification-service",
+      "Names": "sre-sim-notification-service",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "8000/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8000,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "notification-service",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up About a minute (healthy)"
+    },
+    {
+      "Command": "\"docker-entrypoint.s\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:26 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "05c7c3a44fea",
+      "Image": "postgres:16-alpine",
+      "Labels": "com.docker.compose.config-hash=bb85ab5953c4f0fffc2d49c73cc93a424d2af8e8f3ec74f2d9832fd2cdc895b4,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:2c942175a1255a9abe0366e48c1b401d9f50f835b04dfea13f111609b5530df7,com.docker.compose.project=sre-agentic-sim,com.docker.compose.service=postgres,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.version=5.5.1,desktop.docker.io/ports.scheme=v2",
+      "LocalVolumes": "1",
+      "Mounts": "sre_sim_postgr\u2026",
+      "Name": "sre-sim-postgres",
+      "Names": "sre-sim-postgres",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "5432/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 5432,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "postgres",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 28 seconds (healthy)"
+    },
+    {
+      "Command": "\"rabbitmq-server\"",
+      "CreatedAt": "2026-11-09 15:52:26 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "77249ff5645d",
+      "Image": "sre-agentic-sim-rabbitmq:0.1.0-sim",
+      "Labels": "com.docker.compose.oneoff=False,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.service=rabbitmq,com.docker.compose.version=5.5.1,com.docker.compose.config-hash=55e2df1ee15bd345a7a1cc63ec46c82df1156f036b251dd437babf24fe996a3a,com.docker.compose.container-number=1,com.docker.compose.image=sha256:2d4a189a079557594c4c03000ce020132827964e032bd553779a9cd1e057335e,com.docker.compose.project=sre-agentic-sim,desktop.docker.io/ports.scheme=v2,com.docker.compose.depends_on=",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-rabbitmq",
+      "Names": "sre-sim-rabbitmq",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "5672/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 5672,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "rabbitmq",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up About a minute (healthy)"
+    },
+    {
+      "Command": "\"uvicorn services.tr\u2026\"",
+      "CreatedAt": "2026-11-09 15:52:29 +0700 WIB",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "ca136fabed86",
+      "Image": "sre-agentic-sim-service:0.1.0-sim",
+      "Labels": "com.docker.compose.config-hash=9c6bb903585344e201a16951a12558038e75c4cfd4439fc45477aa815e7cf438,com.docker.compose.container-number=1,com.docker.compose.depends_on=notification-service:service_healthy:false,ledger-service:service_healthy:false,com.docker.compose.image=sha256:6a88457c21e1f3fa39d1fa34242b8582d0d0fb9cc3070d92c1c6623fd455d8a5,com.docker.compose.oneoff=False,com.docker.compose.project.working_dir=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic,com.docker.compose.service=transaction-service,com.docker.compose.version=5.5.1,com.docker.compose.project=sre-agentic-sim,com.docker.compose.project.config_files=/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/docker-compose.yml,desktop.docker.io/ports.scheme=v2",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "sre-sim-transaction-service",
+      "Names": "sre-sim-transaction-service",
+      "Networks": "sre_sim_internal_net",
+      "Ports": "8000/tcp",
+      "Project": "sre-agentic-sim",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8000,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "About a minute ago",
+      "Service": "transaction-service",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up About a minute (healthy)"
+    }
+  ]
+}

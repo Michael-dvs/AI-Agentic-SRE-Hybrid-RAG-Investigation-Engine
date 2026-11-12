@@ -1,0 +1,8 @@
+CONTAINER ID   NAME                           CPU %     MEM USAGE / LIMIT   MEM %     NET I/O         BLOCK I/O       PIDS
+a3a20105bb30   sre-sim-api-gateway            8.16%     54.06MiB / 128MiB   42.24%    356kB / 385kB   0B / 0B         2
+652ba7a3c990   sre-sim-auth-service           0.29%     38.78MiB / 128MiB   30.30%    120kB / 114kB   4.1kB / 0B      1
+ca136fabed86   sre-sim-transaction-service    0.99%     55.16MiB / 128MiB   43.09%    360kB / 394kB   0B / 0B         2
+5ce5f2aa3555   sre-sim-ledger-service         9.82%     44.56MiB / 128MiB   34.81%    209kB / 219kB   0B / 0B         1
+114988755f67   sre-sim-notification-service   0.62%     41MiB / 128MiB      32.03%    108kB / 152kB   0B / 0B         2
+05c7c3a44fea   sre-sim-postgres               0.67%     20.27MiB / 192MiB   10.56%    143kB / 140kB   0B / 225kB      6
+77249ff5645d   sre-sim-rabbitmq               0.38%     95.79MiB / 256MiB   37.42%    259kB / 177kB   213kB / 594kB   38

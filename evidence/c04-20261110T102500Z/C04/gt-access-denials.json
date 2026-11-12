@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "evidence_id": "E04-GT-ACCESS-DENIALS",
+  "generated_at": "2026-11-10T10:27:19.715779Z",
+  "http_fault_control_denials": [
+    {
+      "surface": "POST /_sim/fault/inject",
+      "caller_principal": "principal:alert-intake",
+      "status_code": 403,
+      "error_code": "ERR_FAULT_CONTROL_FORBIDDEN"
+    },
+    {
+      "surface": "POST /_sim/fault/inject",
+      "caller_principal": "principal:human-reviewer",
+      "status_code": 403,
+      "error_code": "ERR_FAULT_CONTROL_FORBIDDEN"
+    },
+    {
+      "surface": "POST /_sim/fault/inject",
+      "caller_principal": "principal:investigator-coord",
+      "status_code": 403,
+      "error_code": "ERR_FAULT_CONTROL_FORBIDDEN"
+    },
+    {
+      "surface": "POST /_sim/fault/inject",
+      "caller_principal": "principal:kb-ingestion",
+      "status_code": 403,
+      "error_code": "ERR_FAULT_CONTROL_FORBIDDEN"
+    },
+    {
+      "surface": "POST /_sim/fault/inject",
+      "caller_principal": "principal:mcp-policy-gateway",
+      "status_code": 403,
+      "error_code": "ERR_FAULT_CONTROL_FORBIDDEN"
+    },
+    {
+      "surface": "POST /_sim/fault/inject (forbidden scenario_id field)",
+      "caller_principal": "principal:operator-harness",
+      "status_code": 422,
+      "error_code": "ERR_FORBIDDEN_GROUND_TRUTH_FIELD"
+    }
+  ],
+  "registry_api_denials": [
+    {
+      "timestamp": "2026-11-10T10:27:19.431648Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:alert-intake",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_FORBIDDEN_PRINCIPAL"
+    },
+    {
+      "timestamp": "2026-11-10T10:27:19.431841Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:human-reviewer",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_FORBIDDEN_PRINCIPAL"
+    },
+    {
+      "timestamp": "2026-11-10T10:27:19.431914Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:investigator-coord",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_FORBIDDEN_PRINCIPAL"
+    },
+    {
+      "timestamp": "2026-11-10T10:27:19.431968Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:kb-ingestion",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_FORBIDDEN_PRINCIPAL"
+    },
+    {
+      "timestamp": "2026-11-10T10:27:19.432051Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:mcp-policy-gateway",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_FORBIDDEN_PRINCIPAL"
+    },
+    {
+      "timestamp": "2026-11-10T10:27:19.432103Z",
+      "action": "read_for_offline_evaluation",
+      "caller_principal": "principal:offline-evaluator",
+      "run_id": "run-20261111-5d7432f576",
+      "decision": "DENY",
+      "reason_code": "ERR_INVESTIGATION_NOT_CLOSED"
+    }
+  ],
+  "container_filesystem_isolation": [
+    {
+      "container": "sre-sim-api-gateway",
+      "fault_harness_absent": true,
+      "restricted_gt_absent": true
+    },
+    {
+      "container": "sre-sim-auth-service",
+      "fault_harness_absent": true,
+      "restricted_gt_absent": true
+    },
+    {
+      "container": "sre-sim-transaction-service",
+      "fault_harness_absent": true,
+      "restricted_gt_absent": true
+    },
+    {
+      "container": "sre-sim-ledger-service",
+      "fault_harness_absent": true,
+      "restricted_gt_absent": true
+    },
+    {
+      "container": "sre-sim-notification-service",
+      "fault_harness_absent": true,
+      "restricted_gt_absent": true
+    }
+  ],
+  "all_isolation_checks_passed": true
+}
