@@ -1,0 +1,129 @@
+{
+  "resilience_audit_events": [
+    {
+      "event_type": "BUDGET_EXHAUSTED",
+      "incident_id": "inc-c11-budget-proof",
+      "current_count": 3,
+      "limit": 3,
+      "timestamp": "2026-11-12T07:18:24.927759Z"
+    },
+    {
+      "event_type": "DLQ_ENQUEUED",
+      "incident_id": "inc-c11-budget-proof",
+      "reason_code": "BUDGET_EXHAUSTED",
+      "error_message": "Tool call budget exhausted for inc-c11-budget-proof (3/3)",
+      "timestamp": "2026-11-12T07:18:24.929540Z"
+    }
+  ],
+  "dlq_records": [
+    {
+      "incident_id": "inc-c11-budget-proof",
+      "reason_code": "BUDGET_EXHAUSTED",
+      "error_message": "Tool call budget exhausted for inc-c11-budget-proof (3/3)",
+      "enqueued_at": "2026-11-12T07:18:24.929528Z",
+      "context": {
+        "incident_id": "inc-c11-budget-proof",
+        "service_id": "api-gateway",
+        "environment": "lab",
+        "event_time": "2026-11-12T10:15:00Z",
+        "error_code": "ERR_UNKNOWN",
+        "trace_id": null,
+        "message": "",
+        "investigation_scope": [
+          "api-gateway",
+          "auth-service",
+          "ledger-service",
+          "notification-service",
+          "transaction-service"
+        ],
+        "impact_graph": {
+          "primary_service": "api-gateway",
+          "reference_time": "2026-11-12T10:15:00Z",
+          "max_depth": 2,
+          "upstream_callers": [],
+          "downstream_dependencies": [
+            "auth-service",
+            "ledger-service",
+            "notification-service",
+            "transaction-service"
+          ],
+          "edges": [
+            {
+              "edge_id": "edge-gw-auth",
+              "from_service_id": "api-gateway",
+              "to_service_id": "auth-service",
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "observed_at": null,
+              "edge_freshness": "stale"
+            },
+            {
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "to_service_id": "transaction-service",
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "observed_at": null,
+              "edge_freshness": "stale"
+            },
+            {
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "to_service_id": "ledger-service",
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "observed_at": null,
+              "edge_freshness": "stale"
+            },
+            {
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "to_service_id": "notification-service",
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "observed_at": null,
+              "edge_freshness": "stale"
+            }
+          ],
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed."
+        },
+        "priority": "HIGH",
+        "query_window": {
+          "start": "2026-11-12T10:10:00Z",
+          "end": "2026-11-12T10:16:00Z",
+          "duration_seconds": 360.0
+        },
+        "evidence_items": [],
+        "runbook_citations": [],
+        "no_applicable_runbook": false,
+        "hypotheses": [],
+        "contradictions": [],
+        "unknowns": [],
+        "dossier": {},
+        "timeline": [
+          {
+            "state": "RECEIVED",
+            "timestamp": "2026-11-12T07:18:24.836637Z"
+          },
+          {
+            "state": "CORRELATED",
+            "timestamp": "2026-11-12T07:18:24.838069Z"
+          },
+          {
+            "state": "TRIAGED",
+            "timestamp": "2026-11-12T07:18:24.839561Z"
+          }
+        ],
+        "status": "FAILED_SAFE",
+        "abort_reason": "Tool call budget exhausted for inc-c11-budget-proof (3/3)"
+      }
+    }
+  ],
+  "circuit_breaker_sample": {
+    "target": "broken-backend-sim",
+    "is_open": true,
+    "state": "OPEN",
+    "failure_threshold": 3,
+    "cooldown_seconds": 10.0
+  }
+}

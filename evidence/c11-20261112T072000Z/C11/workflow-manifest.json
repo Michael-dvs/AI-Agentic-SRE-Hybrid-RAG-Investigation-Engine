@@ -1,0 +1,13 @@
+{
+  "manifest": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "kb_version": "kb-idx-20261111-v1",
+    "tool_schema_version": "1.0",
+    "coordinator_ref": "CMP-INV-01"
+  },
+  "generated_at": "2026-11-12T07:18:24.723257Z",
+  "contract_ref": "urn:sre-sim:contract:workflow-event:1",
+  "dossier_contract_ref": "urn:sre-sim:contract:dossier:1",
+  "verification_status": "FROZEN_ACTIVE"
+}
