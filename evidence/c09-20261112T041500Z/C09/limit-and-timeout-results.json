@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "chapter": "C09",
+    "run_id": "c09-20261112T041500Z",
+    "requirements": "MCP-02, ADR-S05",
+    "max_window_seconds": 3600,
+    "max_points_cap": 1000,
+    "max_hits_cap": 500,
+    "max_depth_cap": 3
+  },
+  "results": [
+    {
+      "case": "window_exceeded_7200s",
+      "status": "rejected",
+      "error_code": "WINDOW_EXCEEDED",
+      "silent_clamping": false
+    },
+    {
+      "case": "invalid_time_range_start_after_end",
+      "status": "rejected",
+      "error_code": "INVALID_TIME_RANGE"
+    },
+    {
+      "case": "max_depth_exceeded_4",
+      "status": "rejected",
+      "error_code": "LIMIT_EXCEEDED",
+      "max_depth_policy_cap": 3
+    },
+    {
+      "case": "max_hits_truncation_550_to_500",
+      "status": "ok",
+      "returned_count": 500,
+      "truncated": true
+    }
+  ]
+}

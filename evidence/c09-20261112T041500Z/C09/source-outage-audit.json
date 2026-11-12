@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "chapter": "C09",
+    "run_id": "c09-20261112T041500Z",
+    "requirements": "EV-02, AT-009, AT-012, SC-09",
+    "zero_fabrication_rule": "RULE-006 (No synthetic zero metrics or phantom spans)"
+  },
+  "scenarios": [
+    {
+      "target": "tempo",
+      "scenario_id": "SC-09",
+      "status": "unavailable",
+      "error_code": "SOURCE_UNAVAILABLE",
+      "data_quality": "unavailable",
+      "payload_data": null,
+      "zero_trace_fabrication_verified": true
+    },
+    {
+      "target": "prometheus",
+      "status": "unavailable",
+      "error_code": "SOURCE_UNAVAILABLE",
+      "data_quality": "unavailable",
+      "payload_data": null,
+      "zero_metric_fabrication_verified": true
+    },
+    {
+      "target": "loki",
+      "status": "unavailable",
+      "error_code": "SOURCE_UNAVAILABLE",
+      "data_quality": "unavailable",
+      "payload_data": null,
+      "zero_log_fabrication_verified": true
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "chapter": "C09",
+    "run_id": "c09-20261112T041500Z",
+    "generated_at": "2026-11-12T04:15:44.193506+00:00",
+    "sanitizer_rule": "SEC-03 (FAIL-CLOSED Deterministic Redactor)"
+  },
+  "samples": {
+    "get_service_metrics": {
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T04:15:44.181053Z",
+      "query_window": {
+        "start": "2026-11-12T00:00:00Z",
+        "end": "2026-11-12T00:05:00Z",
+        "duration_seconds": 300.0
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "error_code": null,
+      "status": "ok",
+      "data": [
+        {
+          "timestamp": "2026-11-12T00:00:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:00:15Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:00:30Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:00:45Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:01:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:01:15Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:01:30Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:01:45Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:02:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:02:15Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:02:30Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:02:45Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:03:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:03:15Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:03:30Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:03:45Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:04:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:04:15Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:04:30Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:04:45Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        },
+        {
+          "timestamp": "2026-11-12T00:05:00Z",
+          "service_id": "api-gateway",
+          "metric_name": "sim_red_request_rate_rps",
+          "value": 142.5,
+          "unit": "ratio"
+        }
+      ]
+    },
+    "search_error_logs": {
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T04:15:44.191459Z",
+      "query_window": {
+        "start": "2026-11-12T00:00:00Z",
+        "end": "2026-11-12T00:05:00Z",
+        "duration_seconds": 300.0
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "error_code": null,
+      "status": "ok",
+      "data": [
+        {
+          "timestamp": "2026-11-12T00:01:00Z",
+          "service_id": "auth-service",
+          "service.name": "auth-service",
+          "severity": "ERROR",
+          "error_code": "AUTH_FAILED",
+          "message": "Auth failure Bearer [REDACTED:SEC-03:JWT] [REDACTED:SEC-03:CREDENTIAL] card [REDACTED:SEC-03:CARD_PAN]"
+        }
+      ]
+    },
+    "get_trace_summary": {
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-12T04:15:44.192507Z",
+      "query_window": {
+        "start": "2026-11-12T04:15:44.192507Z",
+        "end": "2026-11-12T04:15:44.192507Z",
+        "duration_seconds": 0.0
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "error_code": null,
+      "status": "ok",
+      "data": [
+        {
+          "span_id": "00f067aa0ba902b7",
+          "parent_span_id": null,
+          "service_name": "api-gateway",
+          "operation": "HTTP POST /transactions",
+          "duration_ms": 324.5,
+          "status_code": "ERROR",
+          "error": true,
+          "attributes": {
+            "http.route": "/transactions",
+            "auth.token": "Bearer [REDACTED:SEC-03:JWT]"
+          }
+        }
+      ]
+    },
+    "get_service_dependencies": {
+      "tool_name": "get_service_dependencies",
+      "source_ref": "catalog:in-memory",
+      "observed_at": "2026-11-12T04:15:44.193381Z",
+      "query_window": {
+        "start": "2026-11-12T04:15:44.193381Z",
+        "end": "2026-11-12T04:15:44.193381Z",
+        "duration_seconds": 0.0
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "error_code": null,
+      "status": "ok",
+      "data": [
+        {
+          "edge_id": "edge-gw-auth",
+          "source": "api-gateway",
+          "target": "auth-service",
+          "kind": "catalog_declared",
+          "relation_type": "sync_http",
+          "status": "fresh",
+          "depth": 1
+        },
+        {
+          "edge_id": "edge-gw-tx",
+          "source": "api-gateway",
+          "target": "transaction-service",
+          "kind": "catalog_declared",
+          "relation_type": "sync_http",
+          "status": "fresh",
+          "depth": 1
+        },
+        {
+          "edge_id": "edge-tx-ledger",
+          "source": "transaction-service",
+          "target": "ledger-service",
+          "kind": "catalog_declared",
+          "relation_type": "sync_http",
+          "status": "fresh",
+          "depth": 2
+        },
+        {
+          "edge_id": "edge-tx-notif",
+          "source": "transaction-service",
+          "target": "notification-service",
+          "kind": "catalog_declared",
+          "relation_type": "async_queue",
+          "status": "fresh",
+          "depth": 2
+        }
+      ]
+    },
+    "get_apm_health": {
+      "tool_name": "get_apm_health",
+      "source_ref": "apm:unsupported",
+      "observed_at": "2026-11-12T04:15:44.193483Z",
+      "query_window": {
+        "start": "2026-11-12T04:15:44.193483Z",
+        "end": "2026-11-12T04:15:44.193483Z",
+        "duration_seconds": 0.0
+      },
+      "data_quality": "unavailable",
+      "truncated": false,
+      "sanitized": true,
+      "error_code": "UNSUPPORTED_SOURCE",
+      "status": "unavailable",
+      "data": null
+    }
+  }
+}
