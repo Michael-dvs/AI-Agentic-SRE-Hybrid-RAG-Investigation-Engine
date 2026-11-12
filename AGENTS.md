@@ -27,6 +27,7 @@ Proyek ini adalah **AI Agentic SRE & RAG Investigation Engine — Scaled-Down Si
 4. Jangan mengklaim root cause **pasti terbukti** tanpa aturan verifikasi yang disetujui; jangan mengarang log, metric, trace, API result, SOP, sumber, atau sitasi.
 5. Jangan menganggap target KPI, pilihan teknologi, durasi 16 minggu, angka kapasitas, atau otorisasi sponsor yang berstatus **PROPOSED/TBD** sebagai keputusan final.
 6. Jangan menyatakan sebuah gate `PASSED`, sebuah tes `PASS`, atau sebuah chapter `IMPLEMENTED/VERIFIED` tanpa bukti pengujian yang benar-benar dijalankan.
+7. Jangan menjalankan `git push` ke remote repository (GitHub/GitLab/dll); seluruh push ke remote dikendalikan secara manual oleh pemilik proyek.
 
 ## 2. Sumber acuan dan resolusi konflik
 
@@ -221,6 +222,14 @@ Dalam mode **Implementation**:
 - Fault injection hanya dijalankan jika pengguna meminta implementasi/pengujian yang relevan, hanya pada layanan simulasi yang diidentifikasi. Jangan menguji endpoint produksi atau layanan publik.
 - Jalankan pemeriksaan paling spesifik yang tersedia: lint/schema/unit → integration → contract/negative → end-to-end → benchmark. Jika test tidak bisa dijalankan, beri label **NOT_RUN** dan jelaskan mengapa.
 - Berikan fallback aman dan alasan eksplisit ketika LLM, Qdrant, observability, atau tool backend gagal. Tidak boleh memalsukan data yang tidak tersedia.
+
+### 9.1 Tata kelola version control (Git commit wajib, push manual)
+
+- **Wajib Git Commit per Chapter:** Setiap kali pengerjaan suatu chapter `C(n)` selesai dan seluruh pengujian terkait dinyatakan lulus (`PASS`), agent **wajib** melakukan staging dan commit ke Git lokal dengan pesan commit terstruktur:
+  - Format: `feat(<scope>): <ringkasan pekerjaan> (C<nn>)` atau `docs(...)`, `test(...)` bila non-fitur.
+  - Contoh: `feat(dossier): baseline investigation dossier serializer, human review api, and Gate G2 replay (C12)`.
+  - Pastikan `.gitignore` dihormati: **jangan pernah** commit `.env`, cache, *.db/*.sqlite3, atau direktori `restricted/`.
+- **Dilarang Git Push Otomatis:** Agent **DILARANG KERAS** mengeksekusi `git push` ke remote repository (GitHub/GitLab/dll). Tindakan push sepenuhnya dikendalikan dan dieksekusi secara manual oleh pengguna (pemilik proyek) demi auditabilitas dan kendali versioning.
 
 ## 10. Definition of Done dan gate governance
 
