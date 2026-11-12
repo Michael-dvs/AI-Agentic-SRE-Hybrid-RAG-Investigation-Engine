@@ -1,6 +1,12 @@
-"""Orchestrator package providing Durable Deterministic Investigation Workflow (C11, FR-AGT-001, ADR-TBD05)."""
+"""Orchestrator package providing Durable Deterministic Investigation Workflow, Dossier Serialization, and Human Review (C11, C12)."""
 
 from orchestrator.checkpoint import CheckpointManager
+from orchestrator.dossier import (
+    DossierMarkdownRenderer,
+    DossierSerializer,
+    compute_canonical_dossier_hash,
+)
+from orchestrator.fallback import ManualFallbackGenerator
 from orchestrator.investigator import (
     DEFAULT_COORDINATOR_TOKEN,
     DeterministicInvestigator,
@@ -15,6 +21,16 @@ from orchestrator.resilience import (
     ResilienceController,
     ResilienceError,
 )
+from orchestrator.review import (
+    ALLOWED_DECISIONS,
+    ALLOWED_REVIEWER_ROLES,
+    DossierHashMismatchError,
+    HumanReviewManager,
+    InvalidReviewDecisionError,
+    ReviewError,
+    StaleDossierVersionError,
+    UnauthorizedReviewerError,
+)
 from orchestrator.state_machine import (
     MANDATORY_STATES,
     InvalidStateTransitionError,
@@ -25,12 +41,14 @@ from orchestrator.state_machine import (
 )
 
 __all__ = [
+    # State Machine & Persistence
     "MANDATORY_STATES",
     "InvalidStateTransitionError",
     "InvestigationStateMachine",
     "WorkflowStateStore",
     "compute_sha256_hash",
     "utc_now_z",
+    # Resilience & Control
     "CircuitBreaker",
     "DeadLetterQueue",
     "ResilienceController",
@@ -39,8 +57,23 @@ __all__ = [
     "BudgetExhaustedError",
     "IncidentCancelledError",
     "CircuitOpenError",
+    # Investigator & Checkpoint
     "CheckpointManager",
     "DeterministicInvestigator",
     "DEFAULT_COORDINATOR_TOKEN",
+    # Dossier & Markdown
+    "DossierSerializer",
+    "DossierMarkdownRenderer",
+    "compute_canonical_dossier_hash",
+    # Human Review
+    "HumanReviewManager",
+    "ReviewError",
+    "UnauthorizedReviewerError",
+    "StaleDossierVersionError",
+    "InvalidReviewDecisionError",
+    "DossierHashMismatchError",
+    "ALLOWED_REVIEWER_ROLES",
+    "ALLOWED_DECISIONS",
+    # Fallback
+    "ManualFallbackGenerator",
 ]
-

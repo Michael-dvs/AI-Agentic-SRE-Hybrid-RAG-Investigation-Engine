@@ -1,0 +1,52 @@
+{
+  "execution_id": "e2e-g2-20261112T082556Z",
+  "timestamp_utc": "2026-11-12T08:25:56.077114Z",
+  "runner": "scripts/replay_e2e_g2.py",
+  "investigation_mode": "deterministic_baseline",
+  "scenarios": {
+    "SC-01": {
+      "name": "Normal Baseline Traffic",
+      "incident_id": "inc-sc01-nominal-001",
+      "status": "HUMAN_REVIEW",
+      "dossier_hash": "226978129bd96b2648b3bd1f7dbb8013a8ff365e18397672709617a2fcd7f977",
+      "support_status": "SUPPORTED",
+      "zero_false_positive": true
+    },
+    "SC-02": {
+      "name": "HTTP 5xx Error Burst",
+      "incident_id": "inc-sc02-5xx-burst-001",
+      "status": "CLOSED",
+      "dossier_hash": "e89a29cadf99a2c0b0f18cc3caa5aa439344b29c4e6169dbcea80cf7602ec59b",
+      "support_status": "PARTIAL",
+      "reviewed_by": "sre_lead_hendra",
+      "decision": "approve"
+    },
+    "SC-03": {
+      "name": "Database Connection Pool Exhaustion",
+      "incident_id": "inc-sc03-db-exhaustion-001",
+      "status": "CLOSED",
+      "dossier_hash": "3169a96eee90501064cac3d9e58f31b47115473b8b4902a27bc3913d60b988d8",
+      "support_status": "INCONCLUSIVE",
+      "reviewed_by": "sre_lead_hendra",
+      "decision": "approve"
+    },
+    "SC-09": {
+      "name": "Tempo Trace Outage (EV-02)",
+      "incident_id": "inc-sc09-trace-outage-001",
+      "status": "HUMAN_REVIEW",
+      "dossier_hash": "7b5748c78ca9f0c47814bf681a627c93e85051cb85d7663fa9c830228208f24c",
+      "support_status": "INCONCLUSIVE",
+      "honest_uncertainty_verified": true,
+      "missing_sources_count": 2
+    },
+    "SC-12": {
+      "name": "100 Duplicate Alert Storm (OPS-01)",
+      "incident_id": "inc-20261112-a8e0a0da",
+      "status": "HUMAN_REVIEW",
+      "dossier_hash": "4b65cfb84ad8cd6bf3eb0646242332de4426c72865d2030ed4ea7c9c3af7ff80",
+      "burst_count": 100,
+      "incidents_emitted": 1,
+      "dossiers_generated": 1
+    }
+  }
+}

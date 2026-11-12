@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-fallback-at012-demo",
+  "dossier_version": 1,
+  "severity": "medium",
+  "service_id": "api-gateway",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T08:25:00Z",
+  "window_start": "2026-11-12T08:20:00Z",
+  "window_end": "2026-11-12T08:26:00Z",
+  "dossier_ready_at": "2026-11-12T08:25:57.163890Z",
+  "investigation_mode": "manual_fallback",
+  "impact_summary": {
+    "affected_services": [
+      "api-gateway"
+    ],
+    "observed_symptoms": "Telemetry signals indicated anomalies in api-gateway (ERR_UNKNOWN)",
+    "error_budget_impact": "minor"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-12T08:25:57.163890Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:resilience",
+      "summary": "Automated workflow aborted with DEADLINE_EXCEEDED: Global incident investigation deadline exceeded (120.0s cap reached)."
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-fallback-at012-demo-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus",
+      "observed_at": "2026-11-12T08:25:10Z",
+      "query_window": {
+        "start": "2026-11-12T08:20:00Z",
+        "end": "2026-11-12T08:26:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 1 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-fallback-at012-demo-fallback",
+      "rank": 1,
+      "statement": "Automated investigation aborted (DEADLINE_EXCEEDED); manual triage required",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Workflow abort triggered: 'Global incident investigation deadline exceeded (120.0s cap reached).'. Telemetry signals remain inconclusive.",
+      "unknowns": [
+        "Root cause cannot be automatically determined due to DEADLINE_EXCEEDED.",
+        "System telemetry state must be validated manually by on-call engineer."
+      ]
+    }
+  ],
+  "sop_citations": [],
+  "unknowns": [
+    "Automated pipeline halted due to DEADLINE_EXCEEDED: Global incident investigation deadline exceeded (120.0s cap reached).",
+    "Full dependency graph and span waterfall could not be verified automatically."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-fb-01",
+      "description": "Inspect live service metrics and 5xx error rates directly on Prometheus for api-gateway.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-02",
+      "description": "Perform raw error log query on Loki for api-gateway over the incident window.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-03",
+      "description": "Check database connection pool utilization and pending locks on backend databases.",
+      "risk_level": "high",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-04",
+      "description": "Consult incident runbook repository and coordinate with primary service owner.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "MANUAL_TRIAGE",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-fallback-at012-demo"
+    ]
+  },
+  "dossier_hash": "a54b4e0df340c3c6b81f066eb2f31bf7e652d12698334d48b064aec08d9972e0"
+}

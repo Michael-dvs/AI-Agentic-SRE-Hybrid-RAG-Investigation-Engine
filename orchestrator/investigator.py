@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional, Set
 
 from gateway.policy import PolicyGateway
 from orchestrator.checkpoint import CheckpointManager
+from orchestrator.dossier import DossierMarkdownRenderer, DossierSerializer
+from orchestrator.fallback import ManualFallbackGenerator
 from orchestrator.resilience import (
     BudgetExhaustedError,
     CircuitOpenError,
@@ -80,6 +82,7 @@ class DeterministicInvestigator:
             "hypotheses": [],
             "contradictions": [],
             "unknowns": [],
+            "version_manifest": self.sm.get_version_manifest(),
             "dossier": {},
             "timeline": [],
         }
@@ -249,6 +252,25 @@ class DeterministicInvestigator:
         context: Dict[str, Any],
     ) -> None:
         """Handle abnormal workflow termination safely into persistence and DLQ."""
+        # Generate and save fallback dossier if aborted
+        try:
+            fb = ManualFallbackGenerator.generate_fallback_dossier(
+                context=context,
+                reason_code=reason_code,
+                error_message=reason,
+            )
+            context["dossier"] = fb["dossier_json"]
+            context["dossier_markdown"] = fb["dossier_markdown"]
+            self.sm.store.save_dossier(
+                incident_id=incident_id,
+                dossier_version=1,
+                dossier_hash=fb["dossier_json"]["dossier_hash"],
+                dossier_json=fb["dossier_json"],
+                dossier_markdown=fb["dossier_markdown"],
+            )
+        except Exception as fb_err:
+            _LOG.warning("Fallback dossier generation failed for %s: %s", incident_id, fb_err)
+
         try:
             self.sm.transition(
                 incident_id=incident_id,
@@ -779,42 +801,33 @@ class DeterministicInvestigator:
         self.resilience.check_cancellation(incident_id)
         self.resilience.check_deadline(incident_id)
 
-        dossier: Dict[str, Any] = {
-            "dossier_id": f"dos-{incident_id}",
-            "incident_id": incident_id,
-            "service_id": context["service_id"],
-            "environment": context["environment"],
-            "created_at": utc_now_z(),
-            "priority": context.get("priority", "MEDIUM"),
-            "investigation_scope": context.get("investigation_scope", []),
-            "timeline": context.get("timeline", []),
-            "evidence_summary": {
-                "total_count": len(context.get("evidence_items", [])),
-                "evidence_ids": [ev["evidence_id"] for ev in context.get("evidence_items", [])],
-            },
-            "ranked_hypotheses": context.get("hypotheses", []),
-            "contradictions": context.get("contradictions", []),
-            "unknowns": context.get("unknowns", []),
-            "runbook_citations": context.get("runbook_citations", []),
-            "no_applicable_runbook": context.get("no_applicable_runbook", False),
-            "version_manifest": self.sm.get_version_manifest(),
-            "recommended_human_actions": [
-                f"Verify service status and network connectivity for {context['service_id']}",
-                "Review active alerts and dependency downstream health",
-                "Execute remediation in accordance with SOP runbook (strictly manual)",
-            ],
-        }
+        # Compile standard contract-compliant dossier via DossierSerializer & MarkdownRenderer
+        dossier_json = DossierSerializer.serialize(
+            context, revision=1, investigation_mode="deterministic_baseline"
+        )
+        dossier_markdown = DossierMarkdownRenderer.render(dossier_json)
 
-        context["dossier"] = dossier
+        # Persist dossier to SQLite store
+        self.sm.store.save_dossier(
+            incident_id=incident_id,
+            dossier_version=1,
+            dossier_hash=dossier_json["dossier_hash"],
+            dossier_json=dossier_json,
+            dossier_markdown=dossier_markdown,
+        )
+
+        context["dossier"] = dossier_json
+        context["dossier_markdown"] = dossier_markdown
+        context["dossier_hash"] = dossier_json["dossier_hash"]
 
         self.sm.transition(
             incident_id=incident_id,
             to_state="DRAFTED",
             idempotency_key=f"idem-{incident_id}-drafted",
             reason_code="OK",
-            reason=f"Drafted baseline investigation dossier {dossier['dossier_id']}",
+            reason=f"Drafted baseline investigation dossier v1 (hash: {dossier_json['dossier_hash'][:16]}...)",
             input_data={"incident_id": incident_id},
-            output_data={"dossier_id": dossier["dossier_id"]},
+            output_data={"dossier_hash": dossier_json["dossier_hash"]},
         )
         context["timeline"].append({"state": "DRAFTED", "timestamp": utc_now_z()})
         self.checkpoint.save_checkpoint(incident_id, "DRAFTED", context)

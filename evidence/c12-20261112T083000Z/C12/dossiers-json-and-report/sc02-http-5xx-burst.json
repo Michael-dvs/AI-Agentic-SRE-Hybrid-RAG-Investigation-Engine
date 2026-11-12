@@ -1,0 +1,278 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-sc02-5xx-burst-001",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "transaction-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T08:05:00Z",
+  "window_start": "2026-11-12T08:00:00Z",
+  "window_end": "2026-11-12T08:06:00Z",
+  "dossier_ready_at": "2026-11-12T08:05:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "transaction-service",
+      "api-gateway",
+      "db-dummy",
+      "ledger-service",
+      "notification-service"
+    ],
+    "observed_symptoms": "Spike in HTTP 500 responses detected during customer payment processing",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-12T08:25:56.309184Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.310291Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.311401Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.537283Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.539058Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.540279Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-12T08:25:56.541700Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T08:25:56.311748Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T08:25:56.347544Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T08:25:56.350348Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T08:25:56.385121Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T08:25:56.386346Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T08:25:56.419418Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T08:25:56.420709Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T08:25:56.456063Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-12T08:25:56.457415Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-12T08:25:56.533883Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc02-5xx-burst-001-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-12T08:25:56.535203Z",
+      "query_window": {
+        "start": "2026-11-12T08:00:00Z",
+        "end": "2026-11-12T08:06:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on transaction-service: 0 records returned."
+    }
+  ],
+  "missing_sources": [
+    {
+      "tool_name": "retrieve_runbooks",
+      "error_code": "NO_APPLICABLE_RUNBOOK",
+      "recorded_at": "2026-11-12T08:05:00Z",
+      "impact_note": "No active approved SOP runbook found matching the observed error pattern in corpus."
+    }
+  ],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-sc02-5xx-burst-001-001",
+      "rank": 1,
+      "statement": "Service operational error in transaction-service (ERR_TRANSACTION_FAILED)",
+      "support_status": "PARTIAL",
+      "supporting_evidence_ids": [
+        "ev-inc-sc02-5xx-burst-001-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Transaction processing failed for transaction-service'.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [],
+  "unknowns": [
+    "One or more telemetry backends were unavailable during investigation window."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of transaction-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-075f3e2da8f44fb1",
+    "reviewed_by": "sre_lead_hendra (L2_SRE_REVIEWER)",
+    "reviewed_at": "2026-11-12T08:25:56.547068Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "4bf92f3577b34da6a3ce929d0e0e4736"
+    ]
+  },
+  "dossier_hash": "e89a29cadf99a2c0b0f18cc3caa5aa439344b29c4e6169dbcea80cf7602ec59b"
+}

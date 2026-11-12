@@ -147,6 +147,38 @@ class WorkflowStateStore:
                 );
                 """
             )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS dossiers (
+                    incident_id TEXT NOT NULL,
+                    dossier_version INTEGER NOT NULL,
+                    dossier_hash TEXT NOT NULL,
+                    dossier_json TEXT NOT NULL,
+                    dossier_markdown TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (incident_id, dossier_version)
+                );
+                """
+            )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS review_records (
+                    review_event_id TEXT PRIMARY KEY,
+                    incident_id TEXT NOT NULL,
+                    target_dossier_version INTEGER NOT NULL,
+                    target_dossier_hash TEXT NOT NULL,
+                    reviewer_ref TEXT NOT NULL,
+                    reviewer_role TEXT NOT NULL,
+                    reviewed_at TEXT NOT NULL,
+                    decision TEXT NOT NULL,
+                    rationale TEXT NOT NULL,
+                    edited_dossier_version INTEGER,
+                    escalation_target TEXT,
+                    auto_action_triggered INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL
+                );
+                """
+            )
 
     def create_incident(
         self,
@@ -259,6 +291,98 @@ class WorkflowStateStore:
             "SELECT * FROM incidents WHERE status = 'ACTIVE' ORDER BY created_at ASC"
         )
         return [dict(row) for row in cursor.fetchall()]
+
+    def save_dossier(
+        self,
+        incident_id: str,
+        dossier_version: int,
+        dossier_hash: str,
+        dossier_json: dict[str, Any],
+        dossier_markdown: str,
+    ) -> None:
+        now = utc_now_z()
+        json_blob = json.dumps(dossier_json, sort_keys=True)
+        self._conn.execute(
+            """
+            INSERT OR REPLACE INTO dossiers (incident_id, dossier_version, dossier_hash, dossier_json, dossier_markdown, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (incident_id, dossier_version, dossier_hash, json_blob, dossier_markdown, now),
+        )
+
+    def get_dossier(
+        self, incident_id: str, version: int | None = None
+    ) -> dict[str, Any] | None:
+        if version is not None:
+            cursor = self._conn.execute(
+                "SELECT * FROM dossiers WHERE incident_id = ? AND dossier_version = ?",
+                (incident_id, version),
+            )
+        else:
+            cursor = self._conn.execute(
+                "SELECT * FROM dossiers WHERE incident_id = ? ORDER BY dossier_version DESC LIMIT 1",
+                (incident_id,),
+            )
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return {
+            "incident_id": row["incident_id"],
+            "dossier_version": row["dossier_version"],
+            "dossier_hash": row["dossier_hash"],
+            "dossier_json": json.loads(row["dossier_json"]),
+            "dossier_markdown": row["dossier_markdown"],
+            "created_at": row["created_at"],
+        }
+
+    def get_latest_dossier_version(self, incident_id: str) -> int:
+        cursor = self._conn.execute(
+            "SELECT MAX(dossier_version) AS max_v FROM dossiers WHERE incident_id = ?",
+            (incident_id,),
+        )
+        row = cursor.fetchone()
+        if row and row["max_v"] is not None:
+            return int(row["max_v"])
+        return 0
+
+    def record_review(self, event: dict[str, Any]) -> None:
+        now = utc_now_z()
+        self._conn.execute(
+            """
+            INSERT INTO review_records (
+                review_event_id, incident_id, target_dossier_version, target_dossier_hash,
+                reviewer_ref, reviewer_role, reviewed_at, decision, rationale,
+                edited_dossier_version, escalation_target, auto_action_triggered, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                event["review_event_id"],
+                event["incident_id"],
+                event["target_dossier_version"],
+                event["target_dossier_hash"],
+                event["reviewer_ref"],
+                event["reviewer_role"],
+                event["reviewed_at"],
+                event["decision"],
+                event["rationale"],
+                event.get("edited_dossier_version"),
+                event.get("escalation_target"),
+                1 if event.get("auto_action_triggered") else 0,
+                now,
+            ),
+        )
+
+    def get_reviews(self, incident_id: str) -> list[dict[str, Any]]:
+        cursor = self._conn.execute(
+            "SELECT * FROM review_records WHERE incident_id = ? ORDER BY reviewed_at ASC",
+            (incident_id,),
+        )
+        records = []
+        for row in cursor.fetchall():
+            d = dict(row)
+            d["auto_action_triggered"] = bool(d["auto_action_triggered"])
+            records.append(d)
+        return records
 
     def close(self) -> None:
         self._conn.close()

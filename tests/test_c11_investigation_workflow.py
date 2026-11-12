@@ -158,7 +158,9 @@ def test_version_manifest_recorded(investigator: DeterministicInvestigator) -> N
     }
     result = investigator.investigate_incident(alert)
     dossier = result["dossier"]
-    assert dossier["version_manifest"] == manifest
+    assert result["version_manifest"] == manifest
+    assert dossier["reproducibility"]["workflow_version"] == manifest["workflow_version"]
+    assert dossier["reproducibility"]["policy_version"] == manifest["policy_version"]
 
 
 # --- 4. SQLite Persistence & History (ADR-TBD05) ---

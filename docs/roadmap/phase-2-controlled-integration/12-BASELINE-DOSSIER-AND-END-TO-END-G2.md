@@ -2,9 +2,11 @@
 
 ## 1. Chapter Information
 - **Phase:** F2 — Controlled Integration (Gate `G2`)
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** PASSED
+- **Documentation status:** APPROVED
+- **Implementation status:** IMPLEMENTED
+- **Evidence bundle:** `evidence/c12-20261112T083000Z/C12/` (Run ID: `c12-20261112T083000Z`)
+- **Gate Record:** [G2 — Controlled Integration Gate Approval](../../gates/G2-CONTROLLED-INTEGRATION-GATE.md)
 - **Dependencies:** [C04 — Fault Harness and Ground Truth Isolation](../phase-1-foundation/04-FAULT-HARNESS-AND-GROUND-TRUTH-ISOLATION.md), [C07 — Hybrid Retrieval and Baselines](../phase-1-foundation/07-HYBRID-RETRIEVAL-AND-BASELINES.md), [C09 — Read-Only Telemetry Adapters](09-READ-ONLY-TELEMETRY-ADAPTERS.md), [C10 — Alert Intake and Dependency Correlation](10-ALERT-INTAKE-AND-DEPENDENCY-CORRELATION.md), [C11 — Durable Investigation Workflow](11-DURABLE-INVESTIGATION-WORKFLOW.md), `G1 PASS` ([C08](../phase-1-foundation/08-SECURE-GATEWAY-AND-FOUNDATION-G1.md))
 - **Next chapter:** [C13 — Controlled LLM Investigator](../phase-3-reasoning-observability/13-CONTROLLED-LLM-INVESTIGATOR.md)
 - **Related requirements:** `BR-005`, `BR-012`, `FR-OBS-002`, `FR-RAG-005`, `FR-RAG-009`, `FR-AGT-001`, `FR-AGT-009`, `FR-OUT-001`, `FR-OUT-002`, `FR-OUT-003`, `FR-OUT-004`, `RULE-002`, `RULE-008`, `NFR-011`, `NFR-020`, `OBJ-01`, `SC-01`, `SC-02`, `SC-12`
