@@ -1,0 +1,95 @@
+{
+  "containers": [
+    {
+      "cpu_percent": 0.22,
+      "name": "sre-sim-api-gateway",
+      "reported_bytes": 72697774.08
+    },
+    {
+      "cpu_percent": 6.36,
+      "name": "sre-sim-auth-service",
+      "reported_bytes": 46808432.64
+    },
+    {
+      "cpu_percent": 0.03,
+      "name": "sre-sim-grafana",
+      "reported_bytes": 106325606.4
+    },
+    {
+      "cpu_percent": 7.69,
+      "name": "sre-sim-ledger-service",
+      "reported_bytes": 49733959.68
+    },
+    {
+      "cpu_percent": 0.15,
+      "name": "sre-sim-loki",
+      "reported_bytes": 52544143.36
+    },
+    {
+      "cpu_percent": 7.42,
+      "name": "sre-sim-notification-service",
+      "reported_bytes": 49167728.64
+    },
+    {
+      "cpu_percent": 0.2,
+      "name": "sre-sim-otel-collector",
+      "reported_bytes": 78108426.24
+    },
+    {
+      "cpu_percent": 0.56,
+      "name": "sre-sim-postgres",
+      "reported_bytes": 21558722.56
+    },
+    {
+      "cpu_percent": 6.04,
+      "name": "sre-sim-prometheus",
+      "reported_bytes": 121215385.6
+    },
+    {
+      "cpu_percent": 0.72,
+      "name": "sre-sim-rabbitmq",
+      "reported_bytes": 108108185.6
+    },
+    {
+      "cpu_percent": 5.77,
+      "name": "sre-sim-tempo",
+      "reported_bytes": 55406755.84
+    },
+    {
+      "cpu_percent": 5.57,
+      "name": "sre-sim-transaction-service",
+      "reported_bytes": 71953285.12
+    }
+  ],
+  "cpu_percent_sum": 40.730000000000004,
+  "lab_budget_8_gib_comparison": true,
+  "limitation": "snapshot only; no approved C10-specific CPU ceiling, no proof of peak or sustained usage; snapshot time not explicit",
+  "meta": {
+    "commit": "unavailable: no git repository",
+    "environment": "synthetic local lab",
+    "kb_version": null,
+    "model_version": null,
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "prompt_version": null,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "reviewer": "TBD",
+    "run_id": "c10-final-20261112T063556Z",
+    "sha256": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "9625a768965250105d491cdad375ab66f6ca2825a89ea8f861581b2e42ec49e9",
+      "services/alert_intake/intake.py": "d2f5752f3c1dd23942ab7959b238321e10a2df255cd2e2e539e3790cd769f659",
+      "services/notification_service/app.py": "908fbe6a4cbac85e25b86c62a6bbb418d848991a13c31f596aa74790ec3f2fbe",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "abae6f0ceb6df1cd5ba48d8eb18a7750822529003f35c0a77f79e8e59687d7c3",
+      "tests/test_c10_notification_lag.py": "132d767fbab38d24ff54988800ba3056d8b578a92a9d8dc8050ecd29102a5097"
+    },
+    "started_at": "2026-11-12T06:35:56.144820Z",
+    "workflow_version": null
+  },
+  "method": "sum docker stats reported usage for 12 compose containers; one snapshot, excluding host process; Docker reports usage adjusted by its CLI",
+  "source": "burst-compose-snapshot.json",
+  "total_bytes": 833628405.76,
+  "total_mib": 795.01
+}

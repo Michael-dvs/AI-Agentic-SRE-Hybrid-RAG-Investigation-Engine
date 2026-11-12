@@ -1,0 +1,76 @@
+{
+  "run_id": "c10-live-20261112T050738Z",
+  "fault_id": "c10-check-8922d551bc28",
+  "correlation_id": "c10-fef217eaa792",
+  "trace_id": "4efd2f312ef1402a918307b8d93cb32e",
+  "procedure": "Inject one bounded synthetic ledger latency fault; send synthetic transaction; read telemetry and evaluate alert rules; reset only injected fault ID",
+  "injection": {
+    "status": 200,
+    "body": {
+      "status": "FAULT_ACTIVE",
+      "service_id": "ledger-service",
+      "fault_id": "c10-check-8922d551bc28",
+      "fault_mode": "db_latency",
+      "duration_sec": 15.0,
+      "activated_at": "2026-11-12T05:07:38.402474Z",
+      "active_fault_count": 1
+    }
+  },
+  "requests": [
+    {
+      "status": 201,
+      "elapsed_ms": 450.452
+    },
+    {
+      "status": 201,
+      "elapsed_ms": 405.188
+    },
+    {
+      "status": 201,
+      "elapsed_ms": 422.118
+    }
+  ],
+  "cleanup": {
+    "status": 200,
+    "body": {
+      "status": "RESET_COMPLETE",
+      "service_id": "ledger-service",
+      "removed_faults": 1,
+      "active_fault_count": 0,
+      "reset_at": "2026-11-12T05:07:40.865955Z"
+    }
+  },
+  "error": null,
+  "observations": {
+    "log_count": 30,
+    "span_count": 18,
+    "metric_count": 15,
+    "correlated_alert_count": 3,
+    "accepted": [
+      {
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-a2221c23",
+        "service_id": "api-gateway"
+      },
+      {
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-8461a20a",
+        "service_id": "ledger-service"
+      },
+      {
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-6e015cff",
+        "service_id": "transaction-service"
+      }
+    ],
+    "log_trace_ids": [
+      "4efd2f312ef1402a918307b8d93cb32e"
+    ],
+    "span_trace_ids": [
+      "4efd2f312ef1402a918307b8d93cb32e"
+    ]
+  }
+}

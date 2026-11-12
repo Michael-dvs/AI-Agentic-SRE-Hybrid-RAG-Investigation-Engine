@@ -1,0 +1,377 @@
+{
+  "alerts": [
+    {
+      "alert_id": "alt-auth-service-auth_failure_spike-df2cf8e10509",
+      "alert_type": "auth_failure_spike",
+      "build_version": "0.1.0-sim",
+      "environment": "lab",
+      "error_code": "ERR_AUTH_POLICY_MISMATCH",
+      "event_time": "2026-11-12T06:37:26.627477Z",
+      "schema_version": "1.0",
+      "service_id": "auth-service",
+      "severity": "high",
+      "source_id": "src-loki-logs",
+      "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=auth-service&error_code=ERR_AUTH_POLICY_MISMATCH",
+      "summary": "Authentication verifier policy mismatch spike on auth-service (ERR_AUTH_POLICY_MISMATCH)",
+      "trace_id": "2ad449214eec48c49029b93f39c01cf5",
+      "window_end": "2026-11-12T06:37:26.627477Z",
+      "window_start": "2026-11-12T06:36:26.627477Z"
+    },
+    {
+      "alert_id": "alt-notification-service-queue_consumer_lag-7441f7fc4e08",
+      "alert_type": "queue_consumer_lag",
+      "build_version": "0.1.0-sim",
+      "environment": "lab",
+      "error_code": "WARN_QUEUE_CONSUMER_LAG",
+      "event_time": "2026-11-12T06:37:26.627477Z",
+      "schema_version": "1.0",
+      "service_id": "notification-service",
+      "severity": "high",
+      "source_id": "src-sim-services",
+      "source_ref": "http://notification-service:8000/internal/notifications",
+      "summary": "Asynchronous queue consumer lag backlog active on notification-service (WARN_QUEUE_CONSUMER_LAG)",
+      "trace_id": null,
+      "window_end": "2026-11-12T06:37:26.627477Z",
+      "window_start": "2026-11-12T06:36:26.627477Z"
+    }
+  ],
+  "audit": [
+    {
+      "action": "create",
+      "at": "2026-11-12T06:37:26.636468Z",
+      "fingerprint": "c70987662d5c205d42be2c46c83597288972eba0c6cf7001144a07c21efea301",
+      "incident_id": "inc-20261112-0d0c5f52",
+      "reason": "new_fingerprint"
+    },
+    {
+      "event": "correlation_split",
+      "incident_id": "inc-20261112-fabced46",
+      "timestamp": "2026-11-12T06:37:26.638303Z"
+    },
+    {
+      "action": "create",
+      "at": "2026-11-12T06:37:26.638258Z",
+      "fingerprint": "2f6b796b1d48e002c8d289d61da6f8f0f143c13387b3c84218291a1bad9b7032",
+      "incident_id": "inc-20261112-fabced46",
+      "reason": "new_fingerprint"
+    }
+  ],
+  "auth_probe": {
+    "error_code": "ERR_AUTH_POLICY_MISMATCH",
+    "http_status": 403,
+    "trace_id": "2ad449214eec48c49029b93f39c01cf5"
+  },
+  "checks": {
+    "auth_failure_403": true,
+    "both_alerts_accepted": true,
+    "both_faults_activated": true,
+    "distinct_incidents": true,
+    "lag_log_no_fabricated_trace": true,
+    "lag_log_present": true,
+    "no_correlation_merge": true
+  },
+  "cleanup": {
+    "auth_container_stop": {
+      "exit_code": 0,
+      "stderr": ""
+    },
+    "fault_auth-service": {
+      "body": {
+        "active_fault_count": 0,
+        "removed_faults": 1,
+        "reset_at": "2026-11-12T06:37:27.687402Z",
+        "service_id": "auth-service",
+        "status": "RESET_COMPLETE"
+      },
+      "status_code": 200
+    },
+    "fault_notification-service": {
+      "body": {
+        "active_fault_count": 0,
+        "removed_faults": 1,
+        "reset_at": "2026-11-12T06:37:27.691402Z",
+        "service_id": "notification-service",
+        "status": "RESET_COMPLETE"
+      },
+      "status_code": 200
+    },
+    "notification_container_stop": {
+      "exit_code": 0,
+      "stderr": ""
+    },
+    "notification_drain": {
+      "backlog_depth": 0,
+      "processed_count": 1
+    },
+    "own_queues_delete": {
+      "exit_code": 0,
+      "stderr": ""
+    }
+  },
+  "container_stats": [
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "0.96%",
+      "Container": "c10-check-notif-9bf94552bc",
+      "ID": "c230476dd7cd",
+      "MemPerc": "33.01%",
+      "MemUsage": "42.25MiB / 128MiB",
+      "Name": "c10-check-notif-9bf94552bc",
+      "NetIO": "10.5kB / 12.1kB",
+      "PIDs": "3"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "0.23%",
+      "Container": "c10-check-auth-9bf94552bc",
+      "ID": "1f751d144ac5",
+      "MemPerc": "31.10%",
+      "MemUsage": "39.81MiB / 128MiB",
+      "Name": "c10-check-auth-9bf94552bc",
+      "NetIO": "5.93kB / 6.51kB",
+      "PIDs": "2"
+    }
+  ],
+  "containers": {
+    "auth": "c10-check-auth-9bf94552bc",
+    "notification": "c10-check-notif-9bf94552bc"
+  },
+  "errors": [],
+  "injection": {
+    "auth-service": {
+      "body": {
+        "activated_at": "2026-11-12T06:37:26.161608Z",
+        "active_fault_count": 1,
+        "duration_sec": 30.0,
+        "fault_id": "c10-a-9bf94552bc",
+        "fault_mode": "auth_config_mismatch",
+        "service_id": "auth-service",
+        "status": "FAULT_ACTIVE"
+      },
+      "status_code": 200
+    },
+    "notification-service": {
+      "body": {
+        "activated_at": "2026-11-12T06:37:26.158783Z",
+        "active_fault_count": 1,
+        "duration_sec": 30.0,
+        "fault_id": "c10-n-9bf94552bc",
+        "fault_mode": "queue_consumer_lag",
+        "service_id": "notification-service",
+        "status": "FAULT_ACTIVE"
+      },
+      "status_code": 200
+    }
+  },
+  "intake_results": [
+    {
+      "alert_type": "auth_failure_spike",
+      "correlation": {
+        "downstream_symptoms": [],
+        "impact_graph": {
+          "downstream_dependencies": [],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-auth",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "auth-service"
+            }
+          ],
+          "max_depth": 3,
+          "primary_service": "auth-service",
+          "reference_time": "2026-11-12T06:37:26.627477Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway"
+          ]
+        },
+        "incident_ids": [
+          "inc-20261112-0d0c5f52"
+        ],
+        "services": [
+          "auth-service"
+        ],
+        "status": "INCONCLUSIVE",
+        "suspected_origins": [
+          "auth-service"
+        ]
+      },
+      "http_status": 200,
+      "incident": {
+        "alert_type": "auth_failure_spike",
+        "environment": "lab",
+        "error_code": "ERR_AUTH_POLICY_MISMATCH",
+        "event_time": "2026-11-12T06:37:26.627477Z",
+        "fingerprint": "c70987662d5c205d42be2c46c83597288972eba0c6cf7001144a07c21efea301",
+        "first_seen_at": "2026-11-12T06:37:26.636468Z",
+        "hit_count": 1,
+        "incident_id": "inc-20261112-0d0c5f52",
+        "last_seen_at": "2026-11-12T06:37:26.636468Z",
+        "service_id": "auth-service",
+        "status": "ACTIVE",
+        "trace_id": "2ad449214eec48c49029b93f39c01cf5",
+        "window_end": "2026-11-12T06:37:26.627477Z",
+        "window_start": "2026-11-12T06:36:26.627477Z"
+      },
+      "service_id": "auth-service",
+      "status": "accepted",
+      "trace_id": "2ad449214eec48c49029b93f39c01cf5"
+    },
+    {
+      "alert_type": "queue_consumer_lag",
+      "correlation": {
+        "downstream_symptoms": [],
+        "impact_graph": {
+          "downstream_dependencies": [],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "to_service_id": "notification-service"
+            }
+          ],
+          "max_depth": 3,
+          "primary_service": "notification-service",
+          "reference_time": "2026-11-12T06:37:26.627477Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway",
+            "transaction-service"
+          ]
+        },
+        "incident_ids": [
+          "inc-20261112-fabced46"
+        ],
+        "services": [
+          "notification-service"
+        ],
+        "status": "INCONCLUSIVE",
+        "suspected_origins": [
+          "notification-service"
+        ]
+      },
+      "http_status": 200,
+      "incident": {
+        "alert_type": "queue_consumer_lag",
+        "environment": "lab",
+        "error_code": "WARN_QUEUE_CONSUMER_LAG",
+        "event_time": "2026-11-12T06:37:26.627477Z",
+        "fingerprint": "2f6b796b1d48e002c8d289d61da6f8f0f143c13387b3c84218291a1bad9b7032",
+        "first_seen_at": "2026-11-12T06:37:26.638258Z",
+        "hit_count": 1,
+        "incident_id": "inc-20261112-fabced46",
+        "last_seen_at": "2026-11-12T06:37:26.638258Z",
+        "service_id": "notification-service",
+        "status": "ACTIVE",
+        "trace_id": null,
+        "window_end": "2026-11-12T06:37:26.627477Z",
+        "window_start": "2026-11-12T06:36:26.627477Z"
+      },
+      "service_id": "notification-service",
+      "status": "accepted",
+      "trace_id": null
+    }
+  ],
+  "message_published": true,
+  "meta": {
+    "commit": "unavailable: no git repository",
+    "environment": "synthetic local lab",
+    "kb_version": null,
+    "model_version": null,
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "prompt_version": null,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "reviewer": "TBD",
+    "run_id": "c10-final-20261112T063556Z",
+    "sha256": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "9625a768965250105d491cdad375ab66f6ca2825a89ea8f861581b2e42ec49e9",
+      "services/alert_intake/intake.py": "d2f5752f3c1dd23942ab7959b238321e10a2df255cd2e2e539e3790cd769f659",
+      "services/notification_service/app.py": "908fbe6a4cbac85e25b86c62a6bbb418d848991a13c31f596aa74790ec3f2fbe",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "abae6f0ceb6df1cd5ba48d8eb18a7750822529003f35c0a77f79e8e59687d7c3",
+      "tests/test_c10_notification_lag.py": "132d767fbab38d24ff54988800ba3056d8b578a92a9d8dc8050ecd29102a5097"
+    },
+    "started_at": "2026-11-12T06:35:56.144820Z",
+    "workflow_version": null
+  },
+  "observed_logs": [
+    {
+      "build_version": "0.1.0-sim",
+      "correlation_id": "corr-unset",
+      "environment": "lab",
+      "error_code": "WARN_QUEUE_CONSUMER_LAG",
+      "event_type": "notification.consumer.lag_backlog",
+      "instance_id": "c10-notif-9bf94552bc",
+      "message": "Notification consumer backlog detected (depth=1)",
+      "sanitized": true,
+      "schema_version": "1.0",
+      "service.name": "notification-service",
+      "service_id": "notification-service",
+      "severity": "WARN",
+      "span_id": null,
+      "timestamp": "2026-11-12T06:37:26.368620Z",
+      "trace_absent_reason": "BACKGROUND_WORKER_NO_ACTIVE_SPAN",
+      "trace_id": null
+    },
+    {
+      "build_version": "0.1.0-sim",
+      "correlation_id": "corr-auth-9bf94552bc",
+      "environment": "lab",
+      "error_code": "ERR_AUTH_POLICY_MISMATCH",
+      "event_type": "service.error",
+      "instance_id": "c10-auth-9bf94552bc",
+      "message": "ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration",
+      "sanitized": true,
+      "schema_version": "1.0",
+      "service.name": "auth-service",
+      "service_id": "auth-service",
+      "severity": "WARN",
+      "span_id": "a1310c86f588ed6d",
+      "timestamp": "2026-11-12T06:37:26.380296Z",
+      "trace_absent_reason": null,
+      "trace_id": "2ad449214eec48c49029b93f39c01cf5"
+    },
+    {
+      "build_version": "0.1.0-sim",
+      "correlation_id": "corr-auth-9bf94552bc",
+      "environment": "lab",
+      "error_code": "ERR_AUTH_POLICY_MISMATCH",
+      "event_type": "http.request.completed",
+      "instance_id": "c10-auth-9bf94552bc",
+      "message": "POST /internal/auth/verify -> 403 (0.24ms)",
+      "sanitized": true,
+      "schema_version": "1.0",
+      "service.name": "auth-service",
+      "service_id": "auth-service",
+      "severity": "WARN",
+      "span_id": "a1310c86f588ed6d",
+      "timestamp": "2026-11-12T06:37:26.380503Z",
+      "trace_absent_reason": null,
+      "trace_id": "2ad449214eec48c49029b93f39c01cf5"
+    }
+  ],
+  "procedure": "two isolated lab containers; dedicated RabbitMQ queue; bounded injected faults; observe real Loki records and alert intake; reset only owned IDs",
+  "queue": "c10-verify-9bf94552bc",
+  "scenario_id": "SC-08",
+  "seed": 20261112
+}

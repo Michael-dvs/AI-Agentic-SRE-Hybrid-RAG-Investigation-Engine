@@ -1,0 +1,217 @@
+{
+  "accepted": 100,
+  "burst_end": "2026-11-12T06:41:01.183043Z",
+  "burst_start": "2026-11-12T06:40:57.557656Z",
+  "checks": {
+    "100_accepted": true,
+    "docker_stats_succeeded": true,
+    "hit_count_100": true,
+    "one_incident": true,
+    "one_queue_entry": true,
+    "within_5_seconds": true
+  },
+  "docker_stats": [
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "0.22%",
+      "Container": "27378deb538c461030468619ffb5812fdf21a2a95f062ae8eaa76891e402380f",
+      "ID": "27378deb538c",
+      "MemPerc": "54.17%",
+      "MemUsage": "69.33MiB / 128MiB",
+      "Name": "sre-sim-api-gateway",
+      "NetIO": "21.3MB / 26.5MB",
+      "PIDs": "4"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "6.36%",
+      "Container": "0e1bad92554740d75fccfe60cb73d4f30b81635bffc70db2ba6899bee15b8f7d",
+      "ID": "0e1bad925547",
+      "MemPerc": "34.87%",
+      "MemUsage": "44.64MiB / 128MiB",
+      "Name": "sre-sim-auth-service",
+      "NetIO": "11MB / 15MB",
+      "PIDs": "2"
+    },
+    {
+      "BlockIO": "0B / 27.2MB",
+      "CPUPerc": "0.03%",
+      "Container": "29bb1c9f5d7a37138ab3171c398073bc80d3335de5461aaf4e3227e162dc7b7d",
+      "ID": "29bb1c9f5d7a",
+      "MemPerc": "39.63%",
+      "MemUsage": "101.4MiB / 256MiB",
+      "Name": "sre-sim-grafana",
+      "NetIO": "940MB / 590MB",
+      "PIDs": "18"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "7.69%",
+      "Container": "bfecd94580fb56e6402aa883260d852a35ef1af39b8e0affff7b50b1298cacea",
+      "ID": "bfecd94580fb",
+      "MemPerc": "37.06%",
+      "MemUsage": "47.43MiB / 128MiB",
+      "Name": "sre-sim-ledger-service",
+      "NetIO": "9.31MB / 8.27MB",
+      "PIDs": "2"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "0.15%",
+      "Container": "6a44a8530ff8a40093ae35e243d5676bc9333e9b5abb3944e08efe7296eedd65",
+      "ID": "6a44a8530ff8",
+      "MemPerc": "9.79%",
+      "MemUsage": "50.11MiB / 512MiB",
+      "Name": "sre-sim-loki",
+      "NetIO": "6.92MB / 847MB",
+      "PIDs": "2"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "7.42%",
+      "Container": "c390fc255b91e2eb3d48610b9203c81d023702f151c014f24e20441e50ef3431",
+      "ID": "c390fc255b91",
+      "MemPerc": "36.63%",
+      "MemUsage": "46.89MiB / 128MiB",
+      "Name": "sre-sim-notification-service",
+      "NetIO": "28.4MB / 66.6MB",
+      "PIDs": "3"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "0.20%",
+      "Container": "edab4fb5c4352f5eec5466b70ba7fe1d4fc183194cb5b447d5be1a7f35bb09c8",
+      "ID": "edab4fb5c435",
+      "MemPerc": "38.80%",
+      "MemUsage": "74.49MiB / 192MiB",
+      "Name": "sre-sim-otel-collector",
+      "NetIO": "11.4MB / 11.7MB",
+      "PIDs": "6"
+    },
+    {
+      "BlockIO": "0B / 606kB",
+      "CPUPerc": "0.56%",
+      "Container": "05c7c3a44feaf5b8889903f7fd919810f80e086ed4b458f480687247a4d6e404",
+      "ID": "05c7c3a44fea",
+      "MemPerc": "10.71%",
+      "MemUsage": "20.56MiB / 192MiB",
+      "Name": "sre-sim-postgres",
+      "NetIO": "5.46MB / 6.56MB",
+      "PIDs": "6"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "6.04%",
+      "Container": "50cfcbd9e1d280005395a84bcf06c12e7ac90a3d1ab20f98e4810c591adf852e",
+      "ID": "50cfcbd9e1d2",
+      "MemPerc": "22.58%",
+      "MemUsage": "115.6MiB / 512MiB",
+      "Name": "sre-sim-prometheus",
+      "NetIO": "26.2MB / 19.5MB",
+      "PIDs": "5"
+    },
+    {
+      "BlockIO": "213kB / 1.93MB",
+      "CPUPerc": "0.72%",
+      "Container": "77249ff5645d19309740d4b423d76874243776bc51b474c5bea80171dc0e1028",
+      "ID": "77249ff5645d",
+      "MemPerc": "40.29%",
+      "MemUsage": "103.1MiB / 256MiB",
+      "Name": "sre-sim-rabbitmq",
+      "NetIO": "202MB / 88MB",
+      "PIDs": "38"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "5.77%",
+      "Container": "21d7dd6da7eb2935dc3c4026815d022c34e0ae73b05806ddb025cec5d7f6b710",
+      "ID": "21d7dd6da7eb",
+      "MemPerc": "13.76%",
+      "MemUsage": "52.84MiB / 384MiB",
+      "Name": "sre-sim-tempo",
+      "NetIO": "4.66MB / 2.72MB",
+      "PIDs": "2"
+    },
+    {
+      "BlockIO": "0B / 0B",
+      "CPUPerc": "5.57%",
+      "Container": "9b356012238d52a10491644ea3e553fa51ac94b9ada249aa98a4e89d784a7840",
+      "ID": "9b356012238d",
+      "MemPerc": "53.61%",
+      "MemUsage": "68.62MiB / 128MiB",
+      "Name": "sre-sim-transaction-service",
+      "NetIO": "27.5MB / 32.1MB",
+      "PIDs": "4"
+    }
+  ],
+  "docker_stats_command_completed": "2026-11-12T06:41:01.183303Z",
+  "docker_stats_command_started": "2026-11-12T06:40:57.557656Z",
+  "docker_stats_exit_code": 0,
+  "docker_stats_stderr": "",
+  "elapsed_seconds": 3.625377958989702,
+  "host_resource_samples": [
+    {
+      "count": 20,
+      "elapsed_seconds": 0.7078756669943687,
+      "host_process_maxrss_bytes_macos": 81543168,
+      "process_cpu_seconds": 0.06363500000000011
+    },
+    {
+      "count": 40,
+      "elapsed_seconds": 1.4271051669784356,
+      "host_process_maxrss_bytes_macos": 81543168,
+      "process_cpu_seconds": 0.1285940000000001
+    },
+    {
+      "count": 60,
+      "elapsed_seconds": 2.165862374997232,
+      "host_process_maxrss_bytes_macos": 81543168,
+      "process_cpu_seconds": 0.19803100000000007
+    },
+    {
+      "count": 80,
+      "elapsed_seconds": 2.885408041998744,
+      "host_process_maxrss_bytes_macos": 81543168,
+      "process_cpu_seconds": 0.24483500000000014
+    },
+    {
+      "count": 100,
+      "elapsed_seconds": 3.6253386669850443,
+      "host_process_maxrss_bytes_macos": 81543168,
+      "process_cpu_seconds": 0.3178350000000001
+    }
+  ],
+  "http_codes": {
+    "200": 100
+  },
+  "incident_count": 1,
+  "limitation": "docker stats snapshot time within the command interval is not exposed; a single snapshot does not prove peak Docker memory or a CPU ceiling",
+  "meta": {
+    "commit": "unavailable: no git repository",
+    "environment": "synthetic local lab",
+    "kb_version": null,
+    "model_version": null,
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "prompt_version": null,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "reviewer": "TBD",
+    "run_id": "c10-final-20261112T063556Z",
+    "sha256": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "9625a768965250105d491cdad375ab66f6ca2825a89ea8f861581b2e42ec49e9",
+      "services/alert_intake/intake.py": "d2f5752f3c1dd23942ab7959b238321e10a2df255cd2e2e539e3790cd769f659",
+      "services/notification_service/app.py": "908fbe6a4cbac85e25b86c62a6bbb418d848991a13c31f596aa74790ec3f2fbe",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "abae6f0ceb6df1cd5ba48d8eb18a7750822529003f35c0a77f79e8e59687d7c3",
+      "tests/test_c10_notification_lag.py": "132d767fbab38d24ff54988800ba3056d8b578a92a9d8dc8050ecd29102a5097"
+    },
+    "started_at": "2026-11-12T06:35:56.144820Z",
+    "workflow_version": null
+  },
+  "procedure": "100 signed POSTs paced 0.03s apart while collecting one docker stats snapshot for current compose services",
+  "queue_empty": true,
+  "queued_hit_count": 100,
+  "scenario_id": "SC-12"
+}

@@ -1,0 +1,1626 @@
+{
+  "case_id": "SC-04",
+  "checks": {
+    "accepted_incident": true,
+    "fault_activated": true,
+    "gateway_and_transaction_alerts": true,
+    "logs_with_trace": true,
+    "metric_trace_join_available": false,
+    "metrics_exist": true,
+    "spans_with_trace": true
+  },
+  "cleanup": {
+    "body": {
+      "active_fault_count": 0,
+      "removed_faults": 1,
+      "reset_at": "2026-11-12T05:38:15.854911Z",
+      "service_id": "ledger-service",
+      "status": "RESET_COMPLETE"
+    },
+    "http_status": 200
+  },
+  "correlation_id": "c10-ver-cf113822e944",
+  "failure": null,
+  "fault_id": "c10-verify-ea7111e0ca40",
+  "injection": {
+    "body": {
+      "activated_at": "2026-11-12T05:38:14.510427Z",
+      "active_fault_count": 1,
+      "duration_sec": 20.0,
+      "fault_id": "c10-verify-ea7111e0ca40",
+      "fault_mode": "dependency_unavailable",
+      "service_id": "ledger-service",
+      "status": "FAULT_ACTIVE"
+    },
+    "http_status": 200
+  },
+  "meta": {
+    "captured_at": "2026-11-12T05:36:39.363222Z",
+    "commit": "unavailable: no git repository",
+    "environment": "local synthetic lab; macOS in-process test client",
+    "kb_version": null,
+    "model_version": null,
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "prompt_version": null,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "reviewer": "TBD",
+    "run_id": "c10-verify-20261112T053639Z",
+    "scenario_id": null,
+    "seed": null,
+    "source_sha256": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "7b94627fbbfdd340d8ad61c8cfc1da67eb5e9eecb3737a5d201b39dbe2b43b4b",
+      "services/alert_intake/intake.py": "df8b822d7b5f1c73011cf413642da8cb00625d7063b0f4afcd891f307ddf11e5",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "e25b8dc8af99a6fc3f9596f1a9a38984a6ddd1cb6e47bc3376911f6a23836802"
+    },
+    "workflow_version": null
+  },
+  "observations": {
+    "accepted_alerts": [
+      {
+        "alert": {
+          "alert_id": "alt-api-gateway-high_error_rate-ad4cc0ab34cd",
+          "alert_type": "high_error_rate",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "api-gateway",
+          "severity": "critical",
+          "source_id": "src-prom-metrics",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"api-gateway\"}",
+          "summary": "Service api-gateway error_rate=1.00 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "auth-service",
+              "db-dummy",
+              "ledger-service",
+              "notification-service",
+              "transaction-service"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-auth",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "auth-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-notif",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "async_queue",
+                "source_kind": "catalog_declared",
+                "to_service_id": "notification-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "api-gateway",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": []
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59"
+          ],
+          "services": [
+            "api-gateway"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "api-gateway"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "auth-service",
+            "ledger-service",
+            "notification-service",
+            "transaction-service"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-auth",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "auth-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "to_service_id": "notification-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "api-gateway",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": []
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "high_error_rate",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "b11de958361c8b64036c3aa0b799d34509513d09a6315547104c2b6f1082addd",
+          "first_seen_at": "2026-11-12T05:38:15.841237Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-a8b9fc59",
+          "last_seen_at": "2026-11-12T05:38:15.841237Z",
+          "service_id": "api-gateway",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      },
+      {
+        "alert": {
+          "alert_id": "alt-ledger-service-high_error_rate-85f25e21eb92",
+          "alert_type": "high_error_rate",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "ledger-service",
+          "severity": "critical",
+          "source_id": "src-prom-metrics",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"ledger-service\"}",
+          "summary": "Service ledger-service error_rate=1.00 exceeded critical threshold 0.20 (error_code=ERR_DEPENDENCY_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [
+            "api-gateway"
+          ],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "db-dummy"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "ledger-service",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": [
+              "api-gateway",
+              "transaction-service"
+            ]
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59",
+            "inc-20261112-0cf66e36"
+          ],
+          "services": [
+            "api-gateway",
+            "ledger-service"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "ledger-service"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "db-dummy"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-ledger-db",
+              "from_service_id": "ledger-service",
+              "observed_at": null,
+              "relation_type": "storage_call",
+              "source_kind": "catalog_declared",
+              "to_service_id": "db-dummy"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "ledger-service",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway",
+            "transaction-service"
+          ]
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "high_error_rate",
+          "environment": "lab",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "99ea7d9c49ef9dec3fa48afcf8e9e4239bbf17ca472fcd1c74df81275ade7e17",
+          "first_seen_at": "2026-11-12T05:38:15.842820Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-0cf66e36",
+          "last_seen_at": "2026-11-12T05:38:15.842820Z",
+          "service_id": "ledger-service",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      },
+      {
+        "alert": {
+          "alert_id": "alt-transaction-service-high_error_rate-7a1c63252717",
+          "alert_type": "high_error_rate",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "transaction-service",
+          "severity": "critical",
+          "source_id": "src-prom-metrics",
+          "source_ref": "http://prometheus:9090/api/v1/query?query=sim_red_error_rate_ratio{service_id=\"transaction-service\"}",
+          "summary": "Service transaction-service error_rate=1.00 exceeded critical threshold 0.20 (error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [
+            "api-gateway",
+            "transaction-service"
+          ],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "db-dummy"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "ledger-service",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": [
+              "api-gateway",
+              "transaction-service"
+            ]
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59",
+            "inc-20261112-0cf66e36",
+            "inc-20261112-83b2596e"
+          ],
+          "services": [
+            "api-gateway",
+            "ledger-service",
+            "transaction-service"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "ledger-service"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "db-dummy",
+            "ledger-service",
+            "notification-service"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-ledger-db",
+              "from_service_id": "ledger-service",
+              "observed_at": null,
+              "relation_type": "storage_call",
+              "source_kind": "catalog_declared",
+              "to_service_id": "db-dummy"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "to_service_id": "notification-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "transaction-service",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway"
+          ]
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "high_error_rate",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "7bbd7d0759e05267d121d813cbbd257aa2a3345e88cb86db14f88d96dd85725c",
+          "first_seen_at": "2026-11-12T05:38:15.844165Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-83b2596e",
+          "last_seen_at": "2026-11-12T05:38:15.844165Z",
+          "service_id": "transaction-service",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      },
+      {
+        "alert": {
+          "alert_id": "alt-api-gateway-dependency_unavailable-455c394ba470",
+          "alert_type": "dependency_unavailable",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "api-gateway",
+          "severity": "critical",
+          "source_id": "src-loki-logs",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=api-gateway&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "summary": "Downstream dependency unavailable reported by api-gateway (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [
+            "api-gateway",
+            "transaction-service"
+          ],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "db-dummy"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "ledger-service",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": [
+              "api-gateway",
+              "transaction-service"
+            ]
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59",
+            "inc-20261112-cdafadee",
+            "inc-20261112-0cf66e36",
+            "inc-20261112-83b2596e"
+          ],
+          "services": [
+            "api-gateway",
+            "ledger-service",
+            "transaction-service"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "ledger-service"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "auth-service",
+            "ledger-service",
+            "notification-service",
+            "transaction-service"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-auth",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "auth-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "to_service_id": "notification-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "api-gateway",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": []
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "dependency_unavailable",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "1b74d49b695fa574779d832f0679144793e352c01c62598d3f0cd181610121c8",
+          "first_seen_at": "2026-11-12T05:38:15.845186Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-cdafadee",
+          "last_seen_at": "2026-11-12T05:38:15.845186Z",
+          "service_id": "api-gateway",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      },
+      {
+        "alert": {
+          "alert_id": "alt-ledger-service-dependency_unavailable-4490f30c3f9d",
+          "alert_type": "dependency_unavailable",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "ledger-service",
+          "severity": "critical",
+          "source_id": "src-loki-logs",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=ledger-service&error_code=ERR_DEPENDENCY_UNAVAILABLE",
+          "summary": "Downstream dependency unavailable reported by ledger-service (ERR_DEPENDENCY_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [
+            "api-gateway",
+            "transaction-service"
+          ],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "db-dummy"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "ledger-service",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": [
+              "api-gateway",
+              "transaction-service"
+            ]
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59",
+            "inc-20261112-cdafadee",
+            "inc-20261112-0cf66e36",
+            "inc-20261112-93484e49",
+            "inc-20261112-83b2596e"
+          ],
+          "services": [
+            "api-gateway",
+            "ledger-service",
+            "transaction-service"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "ledger-service"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "db-dummy"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-ledger-db",
+              "from_service_id": "ledger-service",
+              "observed_at": null,
+              "relation_type": "storage_call",
+              "source_kind": "catalog_declared",
+              "to_service_id": "db-dummy"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "ledger-service",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway",
+            "transaction-service"
+          ]
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "dependency_unavailable",
+          "environment": "lab",
+          "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "7690e932c688a957b87a7d142896274148a455fd1398149df04dd0c1479139c6",
+          "first_seen_at": "2026-11-12T05:38:15.846197Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-93484e49",
+          "last_seen_at": "2026-11-12T05:38:15.846197Z",
+          "service_id": "ledger-service",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      },
+      {
+        "alert": {
+          "alert_id": "alt-transaction-service-dependency_unavailable-62705c3d9d47",
+          "alert_type": "dependency_unavailable",
+          "build_version": "0.1.0-sim",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "schema_version": "1.0",
+          "service_id": "transaction-service",
+          "severity": "critical",
+          "source_id": "src-loki-logs",
+          "source_ref": "http://loki:3100/loki/api/v1/query_range?service_id=transaction-service&error_code=ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "summary": "Downstream dependency unavailable reported by transaction-service (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "correlation": {
+          "downstream_symptoms": [
+            "api-gateway",
+            "transaction-service"
+          ],
+          "impact_graph": {
+            "downstream_dependencies": [
+              "db-dummy"
+            ],
+            "edges": [
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "transaction-service"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "observed_at": null,
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "to_service_id": "db-dummy"
+              },
+              {
+                "edge_freshness": "stale",
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "observed_at": null,
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "to_service_id": "ledger-service"
+              }
+            ],
+            "max_depth": 3,
+            "primary_service": "ledger-service",
+            "reference_time": "2026-11-12T05:38:15.833517Z",
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+            "upstream_callers": [
+              "api-gateway",
+              "transaction-service"
+            ]
+          },
+          "incident_ids": [
+            "inc-20261112-a8b9fc59",
+            "inc-20261112-cdafadee",
+            "inc-20261112-0cf66e36",
+            "inc-20261112-93484e49",
+            "inc-20261112-83b2596e",
+            "inc-20261112-866e1824"
+          ],
+          "services": [
+            "api-gateway",
+            "ledger-service",
+            "transaction-service"
+          ],
+          "status": "INCONCLUSIVE",
+          "suspected_origins": [
+            "ledger-service"
+          ]
+        },
+        "dependency_impact": {
+          "downstream_dependencies": [
+            "db-dummy",
+            "ledger-service",
+            "notification-service"
+          ],
+          "edges": [
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-gw-tx",
+              "from_service_id": "api-gateway",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "transaction-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-ledger-db",
+              "from_service_id": "ledger-service",
+              "observed_at": null,
+              "relation_type": "storage_call",
+              "source_kind": "catalog_declared",
+              "to_service_id": "db-dummy"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-ledger",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "sync_http",
+              "source_kind": "catalog_declared",
+              "to_service_id": "ledger-service"
+            },
+            {
+              "edge_freshness": "stale",
+              "edge_id": "edge-tx-notif",
+              "from_service_id": "transaction-service",
+              "observed_at": null,
+              "relation_type": "async_queue",
+              "source_kind": "catalog_declared",
+              "to_service_id": "notification-service"
+            }
+          ],
+          "max_depth": 2,
+          "primary_service": "transaction-service",
+          "reference_time": "2026-11-12T05:38:15.833517Z",
+          "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+          "upstream_callers": [
+            "api-gateway"
+          ]
+        },
+        "http_status": 200,
+        "incident": {
+          "alert_type": "dependency_unavailable",
+          "environment": "lab",
+          "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+          "event_time": "2026-11-12T05:38:15.833517Z",
+          "fingerprint": "c07033080e9bb3665f12d9e09c0c40af69c64db13e26a95207a3af2f94688846",
+          "first_seen_at": "2026-11-12T05:38:15.847385Z",
+          "hit_count": 1,
+          "incident_id": "inc-20261112-866e1824",
+          "last_seen_at": "2026-11-12T05:38:15.847385Z",
+          "service_id": "transaction-service",
+          "status": "ACTIVE",
+          "trace_id": "6f289f9750af40bf8f0fee01c268c3da",
+          "window_end": "2026-11-12T05:38:15.833517Z",
+          "window_start": "2026-11-12T05:37:15.833517Z"
+        },
+        "status": "accepted"
+      }
+    ],
+    "log_source": "http://127.0.0.1:13100/loki/api/v1/query_range",
+    "logs": [
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "auth.token.verified",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "695ff12c5ff71ed2",
+        "timestamp": "2026-11-12T05:38:14.529506Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "http.request.completed",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "695ff12c5ff71ed2",
+        "timestamp": "2026-11-12T05:38:14.530329Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "7846782272494927",
+        "timestamp": "2026-11-12T05:38:14.564608Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "7846782272494927",
+        "timestamp": "2026-11-12T05:38:14.564900Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "14d4f8cdaf777ee1",
+        "timestamp": "2026-11-12T05:38:14.568232Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "14d4f8cdaf777ee1",
+        "timestamp": "2026-11-12T05:38:14.568496Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "auth.token.verified",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "5fb06fa4648cce8e",
+        "timestamp": "2026-11-12T05:38:14.579146Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "http.request.completed",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "5fb06fa4648cce8e",
+        "timestamp": "2026-11-12T05:38:14.579405Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "f709453ea8a34720",
+        "timestamp": "2026-11-12T05:38:14.565905Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "f709453ea8a34720",
+        "timestamp": "2026-11-12T05:38:14.566895Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "ae48958c6287e305",
+        "timestamp": "2026-11-12T05:38:14.594435Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "ae48958c6287e305",
+        "timestamp": "2026-11-12T05:38:14.594537Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "b93b5f14c3e72cfc",
+        "timestamp": "2026-11-12T05:38:14.669764Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "severity": "ERROR",
+        "span_id": "b93b5f14c3e72cfc",
+        "timestamp": "2026-11-12T05:38:14.669946Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "75ec5e558b6fc45e",
+        "timestamp": "2026-11-12T05:38:14.593725Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "75ec5e558b6fc45e",
+        "timestamp": "2026-11-12T05:38:14.593826Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "bd5a148ce07e7fbd",
+        "timestamp": "2026-11-12T05:38:14.669013Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "severity": "ERROR",
+        "span_id": "bd5a148ce07e7fbd",
+        "timestamp": "2026-11-12T05:38:14.669177Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "a6fbdf1d895fd461",
+        "timestamp": "2026-11-12T05:38:14.595129Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "a6fbdf1d895fd461",
+        "timestamp": "2026-11-12T05:38:14.595247Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "service.error",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "3a440b8009c5eb6a",
+        "timestamp": "2026-11-12T05:38:14.670609Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "event_type": "http.request.completed",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "severity": "ERROR",
+        "span_id": "3a440b8009c5eb6a",
+        "timestamp": "2026-11-12T05:38:14.670798Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "auth.token.verified",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "3cb83af2f4ef606c",
+        "timestamp": "2026-11-12T05:38:14.604689Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "environment": "lab",
+        "error_code": null,
+        "event_type": "http.request.completed",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "severity": "INFO",
+        "span_id": "3cb83af2f4ef606c",
+        "timestamp": "2026-11-12T05:38:14.604837Z",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      }
+    ],
+    "metric_source": "http://127.0.0.1:19090/api/v1/red_window",
+    "metrics": [
+      {
+        "aggregation": "rate",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "request_rate",
+        "sample_at": "2026-11-12T05:38:15.713752Z",
+        "schema_version": "1.0",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "source_ref": "http://api-gateway:8000/metrics",
+        "unit": "requests/s",
+        "value": 0.05,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "ratio",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "error_rate",
+        "sample_at": "2026-11-12T05:38:15.713752Z",
+        "schema_version": "1.0",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "source_ref": "http://api-gateway:8000/metrics",
+        "unit": "ratio",
+        "value": 1.0,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "p95",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "latency_p95",
+        "sample_at": "2026-11-12T05:38:15.713752Z",
+        "schema_version": "1.0",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "source_ref": "http://api-gateway:8000/metrics",
+        "unit": "ms",
+        "value": 73.439,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "rate",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "request_rate",
+        "sample_at": "2026-11-12T05:38:15.730836Z",
+        "schema_version": "1.0",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "source_ref": "http://ledger-service:8000/metrics",
+        "unit": "requests/s",
+        "value": 0.05,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "ratio",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "error_rate",
+        "sample_at": "2026-11-12T05:38:15.730836Z",
+        "schema_version": "1.0",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "source_ref": "http://ledger-service:8000/metrics",
+        "unit": "ratio",
+        "value": 1.0,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "p95",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "latency_p95",
+        "sample_at": "2026-11-12T05:38:15.730836Z",
+        "schema_version": "1.0",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "source_ref": "http://ledger-service:8000/metrics",
+        "unit": "ms",
+        "value": 0.354,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "rate",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "request_rate",
+        "sample_at": "2026-11-12T05:38:15.830209Z",
+        "schema_version": "1.0",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "source_ref": "http://transaction-service:8000/metrics",
+        "unit": "requests/s",
+        "value": 0.05,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "ratio",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "error_rate",
+        "sample_at": "2026-11-12T05:38:15.830209Z",
+        "schema_version": "1.0",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "source_ref": "http://transaction-service:8000/metrics",
+        "unit": "ratio",
+        "value": 1.0,
+        "window_seconds": 60
+      },
+      {
+        "aggregation": "p95",
+        "build_version": "0.1.0-sim",
+        "data_quality": "complete",
+        "environment": "lab",
+        "metric_enum": "latency_p95",
+        "sample_at": "2026-11-12T05:38:15.830209Z",
+        "schema_version": "1.0",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "source_ref": "http://transaction-service:8000/metrics",
+        "unit": "ms",
+        "value": 13.221,
+        "window_seconds": 60
+      }
+    ],
+    "span_source": "http://127.0.0.1:13200/api/search",
+    "spans": [
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 2.209,
+        "end_time": "2026-11-12T05:38:14.530277Z",
+        "error_code": null,
+        "from_service_id": "api-gateway",
+        "parent_span_id": "14d4f8cdaf777ee1",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "span_id": "695ff12c5ff71ed2",
+        "start_time": "2026-11-12T05:38:14.528049Z",
+        "to_service_id": "auth-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.285,
+        "end_time": "2026-11-12T05:38:14.564817Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "ledger-service",
+        "parent_span_id": "7846782272494927",
+        "service.name": "db-dummy",
+        "service_id": "db-dummy",
+        "span_id": "899ee47f9a9bcc0f",
+        "start_time": "2026-11-12T05:38:14.564508Z",
+        "to_service_id": "db-dummy",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.354,
+        "end_time": "2026-11-12T05:38:14.564883Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "transaction-service",
+        "parent_span_id": "f709453ea8a34720",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "span_id": "7846782272494927",
+        "start_time": "2026-11-12T05:38:14.564508Z",
+        "to_service_id": "ledger-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 53.689,
+        "end_time": "2026-11-12T05:38:14.568461Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": null,
+        "parent_span_id": "a2a40e45b5684d51",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "span_id": "14d4f8cdaf777ee1",
+        "start_time": "2026-11-12T05:38:14.514758Z",
+        "to_service_id": "api-gateway",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.865,
+        "end_time": "2026-11-12T05:38:14.579379Z",
+        "error_code": null,
+        "from_service_id": "api-gateway",
+        "parent_span_id": "a6fbdf1d895fd461",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "span_id": "5fb06fa4648cce8e",
+        "start_time": "2026-11-12T05:38:14.578497Z",
+        "to_service_id": "auth-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 13.221,
+        "end_time": "2026-11-12T05:38:14.566797Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": "api-gateway",
+        "parent_span_id": "14d4f8cdaf777ee1",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "span_id": "f709453ea8a34720",
+        "start_time": "2026-11-12T05:38:14.553555Z",
+        "to_service_id": "transaction-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 8.05,
+        "end_time": "2026-11-12T05:38:14.594522Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": "api-gateway",
+        "parent_span_id": "a6fbdf1d895fd461",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "span_id": "ae48958c6287e305",
+        "start_time": "2026-11-12T05:38:14.586461Z",
+        "to_service_id": "transaction-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 7.625,
+        "end_time": "2026-11-12T05:38:14.669928Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": "api-gateway",
+        "parent_span_id": "3a440b8009c5eb6a",
+        "service.name": "transaction-service",
+        "service_id": "transaction-service",
+        "span_id": "b93b5f14c3e72cfc",
+        "start_time": "2026-11-12T05:38:14.662289Z",
+        "to_service_id": "transaction-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.066,
+        "end_time": "2026-11-12T05:38:14.593775Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "ledger-service",
+        "parent_span_id": "75ec5e558b6fc45e",
+        "service.name": "db-dummy",
+        "service_id": "db-dummy",
+        "span_id": "ca64fcdab2e74f85",
+        "start_time": "2026-11-12T05:38:14.593693Z",
+        "to_service_id": "db-dummy",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.109,
+        "end_time": "2026-11-12T05:38:14.593813Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "transaction-service",
+        "parent_span_id": "ae48958c6287e305",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "span_id": "75ec5e558b6fc45e",
+        "start_time": "2026-11-12T05:38:14.593693Z",
+        "to_service_id": "ledger-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.126,
+        "end_time": "2026-11-12T05:38:14.669111Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "ledger-service",
+        "parent_span_id": "bd5a148ce07e7fbd",
+        "service.name": "db-dummy",
+        "service_id": "db-dummy",
+        "span_id": "ccabafae16e7fef2",
+        "start_time": "2026-11-12T05:38:14.668968Z",
+        "to_service_id": "db-dummy",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.179,
+        "end_time": "2026-11-12T05:38:14.669159Z",
+        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+        "from_service_id": "transaction-service",
+        "parent_span_id": "b93b5f14c3e72cfc",
+        "service.name": "ledger-service",
+        "service_id": "ledger-service",
+        "span_id": "bd5a148ce07e7fbd",
+        "start_time": "2026-11-12T05:38:14.668968Z",
+        "to_service_id": "ledger-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 24.181,
+        "end_time": "2026-11-12T05:38:14.595232Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": null,
+        "parent_span_id": "218105e5444c4da6",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "span_id": "a6fbdf1d895fd461",
+        "start_time": "2026-11-12T05:38:14.571037Z",
+        "to_service_id": "api-gateway",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 73.439,
+        "end_time": "2026-11-12T05:38:14.670768Z",
+        "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+        "from_service_id": null,
+        "parent_span_id": "97f7ded18a4b416a",
+        "service.name": "api-gateway",
+        "service_id": "api-gateway",
+        "span_id": "3a440b8009c5eb6a",
+        "start_time": "2026-11-12T05:38:14.597318Z",
+        "to_service_id": "api-gateway",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      },
+      {
+        "correlation_id": "c10-ver-cf113822e944",
+        "duration_ms": 0.499,
+        "end_time": "2026-11-12T05:38:14.604823Z",
+        "error_code": null,
+        "from_service_id": "api-gateway",
+        "parent_span_id": "3a440b8009c5eb6a",
+        "service.name": "auth-service",
+        "service_id": "auth-service",
+        "span_id": "3cb83af2f4ef606c",
+        "start_time": "2026-11-12T05:38:14.604313Z",
+        "to_service_id": "auth-service",
+        "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+      }
+    ]
+  },
+  "probes": [
+    {
+      "elapsed_ms": 55.876000000000005,
+      "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+      "http_status": 503
+    },
+    {
+      "elapsed_ms": 25.872,
+      "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+      "http_status": 503
+    },
+    {
+      "elapsed_ms": 75.348,
+      "error_code": "ERR_LEDGER_UPSTREAM_UNAVAILABLE",
+      "http_status": 503
+    }
+  ],
+  "procedure": "bounded dependency_unavailable on synthetic ledger; synthetic requests; collect actual log, RED metric, span and signed alert; reset only owned ID",
+  "seed": 20261112,
+  "trace_id": "6f289f9750af40bf8f0fee01c268c3da"
+}

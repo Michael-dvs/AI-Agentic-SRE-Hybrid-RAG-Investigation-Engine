@@ -1,0 +1,290 @@
+{
+  "run_id": "c10-concurrent-20261112T051109Z",
+  "procedure": "Two bounded independent synthetic faults, notification observation allowed six seconds; clean only owned fault IDs",
+  "injections": [
+    {
+      "service": "notification-service",
+      "status": 200,
+      "fault_id": "c10-notif-2ba736c0f5"
+    },
+    {
+      "service": "auth-service",
+      "status": 200,
+      "fault_id": "c10-auth-2ba736c0f5"
+    }
+  ],
+  "requests": [
+    {
+      "correlation_id": "c10-notification-2ba736c0f5",
+      "trace_id": "c36f70ca35ce492587cec78e47939a90",
+      "status": 201
+    },
+    {
+      "correlation_id": "c10-auth-2ba736c0f5",
+      "trace_id": "6ce8a55a76744f58be52f868668646e8",
+      "status": 403
+    }
+  ],
+  "cleanup": [
+    {
+      "service": "auth-service",
+      "fault_id": "c10-auth-2ba736c0f5",
+      "status": 200,
+      "body": {
+        "status": "RESET_COMPLETE",
+        "service_id": "auth-service",
+        "removed_faults": 1,
+        "active_fault_count": 0,
+        "reset_at": "2026-11-12T05:11:15.980696Z"
+      }
+    },
+    {
+      "service": "notification-service",
+      "fault_id": "c10-notif-2ba736c0f5",
+      "status": 200,
+      "body": {
+        "status": "RESET_COMPLETE",
+        "service_id": "notification-service",
+        "removed_faults": 1,
+        "active_fault_count": 0,
+        "reset_at": "2026-11-12T05:11:15.989477Z"
+      }
+    }
+  ],
+  "error": null,
+  "observations": {
+    "notification_logs": 8,
+    "auth_logs": 4,
+    "notification_services": [
+      "api-gateway",
+      "auth-service",
+      "ledger-service",
+      "transaction-service"
+    ],
+    "auth_services": [
+      "api-gateway",
+      "auth-service"
+    ],
+    "selected_alerts": [
+      {
+        "service_id": "api-gateway",
+        "trace_id": "6ce8a55a76744f58be52f868668646e8",
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-5f28643b",
+        "correlation": {
+          "incident_ids": [
+            "inc-20261112-5f28643b"
+          ],
+          "services": [
+            "api-gateway"
+          ],
+          "suspected_origins": [
+            "api-gateway"
+          ],
+          "downstream_symptoms": [],
+          "impact_graph": {
+            "primary_service": "api-gateway",
+            "reference_time": "2026-11-12T05:11:15.960478Z",
+            "max_depth": 3,
+            "upstream_callers": [],
+            "downstream_dependencies": [
+              "auth-service",
+              "db-dummy",
+              "ledger-service",
+              "notification-service",
+              "transaction-service"
+            ],
+            "edges": [
+              {
+                "edge_id": "edge-gw-auth",
+                "from_service_id": "api-gateway",
+                "to_service_id": "auth-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              },
+              {
+                "edge_id": "edge-gw-tx",
+                "from_service_id": "api-gateway",
+                "to_service_id": "transaction-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              },
+              {
+                "edge_id": "edge-ledger-db",
+                "from_service_id": "ledger-service",
+                "to_service_id": "db-dummy",
+                "relation_type": "storage_call",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              },
+              {
+                "edge_id": "edge-tx-ledger",
+                "from_service_id": "transaction-service",
+                "to_service_id": "ledger-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              },
+              {
+                "edge_id": "edge-tx-notif",
+                "from_service_id": "transaction-service",
+                "to_service_id": "notification-service",
+                "relation_type": "async_queue",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              }
+            ],
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed."
+          },
+          "status": "INCONCLUSIVE"
+        }
+      },
+      {
+        "service_id": "auth-service",
+        "trace_id": "6ce8a55a76744f58be52f868668646e8",
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-853c5df4",
+        "correlation": {
+          "incident_ids": [
+            "inc-20261112-5f28643b",
+            "inc-20261112-853c5df4"
+          ],
+          "services": [
+            "api-gateway",
+            "auth-service"
+          ],
+          "suspected_origins": [
+            "auth-service"
+          ],
+          "downstream_symptoms": [
+            "api-gateway"
+          ],
+          "impact_graph": {
+            "primary_service": "auth-service",
+            "reference_time": "2026-11-12T05:11:15.960478Z",
+            "max_depth": 3,
+            "upstream_callers": [
+              "api-gateway"
+            ],
+            "downstream_dependencies": [],
+            "edges": [
+              {
+                "edge_id": "edge-gw-auth",
+                "from_service_id": "api-gateway",
+                "to_service_id": "auth-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              }
+            ],
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed."
+          },
+          "status": "INCONCLUSIVE"
+        }
+      },
+      {
+        "service_id": "api-gateway",
+        "trace_id": "6ce8a55a76744f58be52f868668646e8",
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-a3f9ddc6",
+        "correlation": {
+          "incident_ids": [
+            "inc-20261112-5f28643b",
+            "inc-20261112-a3f9ddc6",
+            "inc-20261112-853c5df4"
+          ],
+          "services": [
+            "api-gateway",
+            "auth-service"
+          ],
+          "suspected_origins": [
+            "auth-service"
+          ],
+          "downstream_symptoms": [
+            "api-gateway"
+          ],
+          "impact_graph": {
+            "primary_service": "auth-service",
+            "reference_time": "2026-11-12T05:11:15.960478Z",
+            "max_depth": 3,
+            "upstream_callers": [
+              "api-gateway"
+            ],
+            "downstream_dependencies": [],
+            "edges": [
+              {
+                "edge_id": "edge-gw-auth",
+                "from_service_id": "api-gateway",
+                "to_service_id": "auth-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              }
+            ],
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed."
+          },
+          "status": "INCONCLUSIVE"
+        }
+      },
+      {
+        "service_id": "auth-service",
+        "trace_id": "6ce8a55a76744f58be52f868668646e8",
+        "http_status": 200,
+        "status": "accepted",
+        "incident_id": "inc-20261112-cf94d49f",
+        "correlation": {
+          "incident_ids": [
+            "inc-20261112-5f28643b",
+            "inc-20261112-a3f9ddc6",
+            "inc-20261112-853c5df4",
+            "inc-20261112-cf94d49f"
+          ],
+          "services": [
+            "api-gateway",
+            "auth-service"
+          ],
+          "suspected_origins": [
+            "auth-service"
+          ],
+          "downstream_symptoms": [
+            "api-gateway"
+          ],
+          "impact_graph": {
+            "primary_service": "auth-service",
+            "reference_time": "2026-11-12T05:11:15.960478Z",
+            "max_depth": 3,
+            "upstream_callers": [
+              "api-gateway"
+            ],
+            "downstream_dependencies": [],
+            "edges": [
+              {
+                "edge_id": "edge-gw-auth",
+                "from_service_id": "api-gateway",
+                "to_service_id": "auth-service",
+                "relation_type": "sync_http",
+                "source_kind": "catalog_declared",
+                "observed_at": null,
+                "edge_freshness": "stale"
+              }
+            ],
+            "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed."
+          },
+          "status": "INCONCLUSIVE"
+        }
+      }
+    ]
+  }
+}

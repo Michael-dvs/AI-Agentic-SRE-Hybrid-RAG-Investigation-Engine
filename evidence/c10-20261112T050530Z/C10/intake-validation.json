@@ -1,0 +1,40 @@
+{
+  "invalid_signature": {
+    "body": {
+      "error_code": "UNAUTHENTICATED",
+      "status": "rejected"
+    },
+    "http_status": 401
+  },
+  "malformed": {
+    "body": {
+      "error_code": "SCHEMA_INVALID",
+      "status": "rejected"
+    },
+    "http_status": 400
+  },
+  "meta": {
+    "captured_at": "2026-11-12T05:05:30.788205Z",
+    "commit": "unavailable: no git repository",
+    "environment": "local in-process synthetic lab",
+    "kb_version": "not applicable",
+    "model_version": "not applicable",
+    "prompt_version": "not applicable",
+    "reviewer": "TBD",
+    "run_id": "c10-20261112T050530Z",
+    "seed": null,
+    "version": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "7b94627fbbfdd340d8ad61c8cfc1da67eb5e9eecb3737a5d201b39dbe2b43b4b",
+      "services/alert_intake/intake.py": "9328e98bf7f4da0f107efb217efa95144e674d05cbebebfc48b78af6e144014b",
+      "tests/test_c10_alert_intake_correlation.py": "6435e611cd7313276d76a551c835d99a9de704d5a5df34f413c46797aa299460"
+    },
+    "workflow_version": "not applicable"
+  },
+  "procedure": "POST signed synthetic alert, bad signature and malformed schema via FastAPI TestClient",
+  "valid": {
+    "http_status": 200,
+    "status": "accepted"
+  }
+}

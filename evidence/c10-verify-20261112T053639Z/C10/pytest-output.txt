@@ -1,0 +1,73 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 53 items
+
+tests/test_c08_secure_gateway.py::test_unauthenticated_request_rejected PASSED [  1%]
+tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected PASSED [  3%]
+tests/test_c08_secure_gateway.py::test_excessive_time_window_rejected_without_silent_clamping PASSED [  5%]
+tests/test_c08_secure_gateway.py::test_ground_truth_path_access_blocked PASSED [  7%]
+tests/test_c08_secure_gateway.py::test_cross_service_scope_enforcement PASSED [  9%]
+tests/test_c08_secure_gateway.py::test_sanitizer_redaction_and_fail_closed PASSED [ 11%]
+tests/test_c08_secure_gateway.py::test_append_only_audit_log_records_all_decisions PASSED [ 13%]
+tests/test_c08_secure_gateway.py::test_read_only_tool_dispatch_and_schema_compliance PASSED [ 15%]
+tests/test_c08_secure_gateway.py::test_backend_outage_simulation_returns_unavailable PASSED [ 16%]
+tests/test_c08_secure_gateway.py::test_orchestrator_spike_invariants PASSED [ 18%]
+tests/test_c09_telemetry_adapters.py::test_get_metrics_success PASSED    [ 20%]
+tests/test_c09_telemetry_adapters.py::test_dispatcher_preserves_empty_metric_results PASSED [ 22%]
+tests/test_c09_telemetry_adapters.py::test_get_metrics_window_exceeded PASSED [ 24%]
+tests/test_c09_telemetry_adapters.py::test_get_metrics_invalid_metric_rejected PASSED [ 26%]
+tests/test_c09_telemetry_adapters.py::test_get_logs_sanitizes_secrets PASSED [ 28%]
+tests/test_c09_telemetry_adapters.py::test_get_logs_truncated_at_max_hits PASSED [ 30%]
+tests/test_c09_telemetry_adapters.py::test_get_trace_summary_success PASSED [ 32%]
+tests/test_c09_telemetry_adapters.py::test_get_trace_summary_source_unavailable PASSED [ 33%]
+tests/test_c09_telemetry_adapters.py::test_get_dependencies_depth_enforced PASSED [ 35%]
+tests/test_c09_telemetry_adapters.py::test_apm_health_unsupported_disposition PASSED [ 37%]
+tests/test_c09_telemetry_adapters.py::test_mutation_attempts_blocked PASSED [ 39%]
+tests/test_c09_telemetry_adapters.py::test_zero_ground_truth_leak PASSED [ 41%]
+tests/test_c09_telemetry_adapters.py::test_audit_chain_intact PASSED     [ 43%]
+tests/test_c09_telemetry_adapters.py::test_invalid_time_range_rejected PASSED [ 45%]
+tests/test_c09_telemetry_adapters.py::test_get_metrics_source_unavailable_timeout PASSED [ 47%]
+tests/test_c09_telemetry_adapters.py::test_get_logs_source_unavailable PASSED [ 49%]
+tests/test_c09_telemetry_adapters.py::test_invalid_trace_id_format_rejected PASSED [ 50%]
+tests/test_c09_telemetry_adapters.py::test_unknown_service_id_rejected PASSED [ 52%]
+tests/test_c09_telemetry_adapters.py::test_logs_logql_injection_blocked PASSED [ 54%]
+tests/test_c09_telemetry_adapters.py::test_all_adapter_envelopes_conformance PASSED [ 56%]
+tests/test_c09_telemetry_adapters.py::test_gateway_dispatch_integration PASSED [ 58%]
+tests/test_c10_alert_intake_correlation.py::test_alert_intake_signature_valid PASSED [ 60%]
+tests/test_c10_alert_intake_correlation.py::test_alert_intake_signature_invalid_rejected PASSED [ 62%]
+tests/test_c10_alert_intake_correlation.py::test_alert_intake_malformed_schema_rejected PASSED [ 64%]
+tests/test_c10_alert_intake_correlation.py::test_alert_intake_unmapped_service_triage PASSED [ 66%]
+tests/test_c10_alert_intake_correlation.py::test_alert_intake_utc_normalization PASSED [ 67%]
+tests/test_c10_alert_intake_correlation.py::test_end_to_end_intake_to_incident_context PASSED [ 69%]
+tests/test_c10_alert_intake_correlation.py::test_webhook_correlates_active_incident_lineage PASSED [ 71%]
+tests/test_c10_alert_intake_correlation.py::test_reject_ground_truth_fields_without_incident PASSED [ 73%]
+tests/test_c10_alert_intake_correlation.py::test_alert_scope_mismatch_requires_manual_triage PASSED [ 75%]
+tests/test_c10_alert_intake_correlation.py::test_zero_ground_truth_leak PASSED [ 77%]
+tests/test_c10_alert_intake_correlation.py::test_zero_mutation_invariance PASSED [ 79%]
+tests/test_c10_alert_intake_correlation.py::test_deduplication_single_alert PASSED [ 81%]
+tests/test_c10_alert_intake_correlation.py::test_deduplication_100_burst_duplicate_alerts PASSED [ 83%]
+tests/test_c10_alert_intake_correlation.py::test_deduplication_ttl_expiration PASSED [ 84%]
+tests/test_c10_alert_intake_correlation.py::test_bounded_queue_backpressure PASSED [ 86%]
+tests/test_c10_alert_intake_correlation.py::test_deduplication_audits_create_merge_and_ttl_split PASSED [ 88%]
+tests/test_c10_alert_intake_correlation.py::test_cascade_correlation_origin_vs_downstream PASSED [ 90%]
+tests/test_c10_alert_intake_correlation.py::test_unobserved_topology_alone_does_not_merge PASSED [ 92%]
+tests/test_c10_alert_intake_correlation.py::test_concurrent_independent_faults_split PASSED [ 94%]
+tests/test_c10_alert_intake_correlation.py::test_correlation_time_and_environment_boundaries PASSED [ 96%]
+tests/test_c10_alert_intake_correlation.py::test_dependency_freshness_is_not_fabricated PASSED [ 98%]
+tests/test_c10_alert_intake_correlation.py::test_merge_split_audit_logging PASSED [100%]
+
+=============================== warnings summary ===============================
+gateway/dispatcher.py:8
+  /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/gateway/dispatcher.py:8: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+../../../../../../../../opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53
+  /opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 53 passed, 2 warnings in 4.28s ========================
+

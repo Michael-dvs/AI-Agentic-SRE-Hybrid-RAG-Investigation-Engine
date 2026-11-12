@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "run_id": "c10-verify-20261112T053639Z",
+    "captured_at": "2026-11-12T05:36:39.363222Z",
+    "environment": "local synthetic lab; macOS in-process test client",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "commit": "unavailable: no git repository",
+    "source_sha256": {
+      "services/alert_intake/intake.py": "df8b822d7b5f1c73011cf413642da8cb00625d7063b0f4afcd891f307ddf11e5",
+      "services/alert_intake/dedup.py": "7b94627fbbfdd340d8ad61c8cfc1da67eb5e9eecb3737a5d201b39dbe2b43b4b",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "e25b8dc8af99a6fc3f9596f1a9a38984a6ddd1cb6e47bc3376911f6a23836802"
+    },
+    "scenario_id": null,
+    "seed": null,
+    "workflow_version": null,
+    "model_version": null,
+    "prompt_version": null,
+    "kb_version": null,
+    "reviewer": "TBD"
+  },
+  "command": [
+    "/opt/homebrew/opt/python@3.12/bin/python3.12",
+    "-m",
+    "pytest",
+    "tests/test_c08_secure_gateway.py",
+    "tests/test_c09_telemetry_adapters.py",
+    "tests/test_c10_alert_intake_correlation.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "output_path": "pytest-output.txt"
+}

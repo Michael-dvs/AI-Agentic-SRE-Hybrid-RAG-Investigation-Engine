@@ -1,0 +1,28 @@
+{
+  "distinct_incident_ids": 1,
+  "fingerprint": "2af5dd618393abd4c08261f978905a4fb383e1cafae7b2131a5d43537dd2799d",
+  "hit_count": 100,
+  "incident_id": "inc-20261112-49afb760",
+  "meta": {
+    "captured_at": "2026-11-12T05:03:51.675226Z",
+    "commit": "unavailable: no git repository",
+    "environment": "local in-process synthetic lab",
+    "kb_version": "not applicable",
+    "model_version": "not applicable",
+    "prompt_version": "not applicable",
+    "reviewer": "TBD",
+    "run_id": "c10-20261112T050351Z",
+    "seed": null,
+    "version": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "9cd4bf2d20aeaa9f9b0f83a161d6125aa3dbddbc7d19e67459f28515eedf2361",
+      "services/alert_intake/dedup.py": "ec2c459ddc3b7f2c2cc83dd76eb553104353ced38be614dd7e02ced6c9f9d4b0",
+      "services/alert_intake/intake.py": "6212a069ee8a59b7e91a52deb498751869484f13d4557f80997e35c2e2834389",
+      "tests/test_c10_alert_intake_correlation.py": "85cd939b805a157ef34602b5e35330aad42090dd58cf0f81a4fde34ba3ac4ace"
+    },
+    "workflow_version": "not applicable"
+  },
+  "procedure": "100 sequential identical signed synthetic alerts",
+  "queue_empty_after_dequeue": true,
+  "queued_incident_id": "inc-20261112-49afb760"
+}

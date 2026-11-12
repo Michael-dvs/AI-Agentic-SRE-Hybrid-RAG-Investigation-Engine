@@ -1,0 +1,173 @@
+{
+  "cascade": [
+    {
+      "downstream_symptoms": [
+        "api-gateway"
+      ],
+      "impact_graph": {
+        "downstream_dependencies": [
+          "db-dummy",
+          "ledger-service",
+          "notification-service"
+        ],
+        "edges": [
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-gw-tx",
+            "from_service_id": "api-gateway",
+            "observed_at": null,
+            "relation_type": "sync_http",
+            "source_kind": "catalog_declared",
+            "to_service_id": "transaction-service"
+          },
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-ledger-db",
+            "from_service_id": "ledger-service",
+            "observed_at": null,
+            "relation_type": "storage_call",
+            "source_kind": "catalog_declared",
+            "to_service_id": "db-dummy"
+          },
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-tx-ledger",
+            "from_service_id": "transaction-service",
+            "observed_at": null,
+            "relation_type": "sync_http",
+            "source_kind": "catalog_declared",
+            "to_service_id": "ledger-service"
+          },
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-tx-notif",
+            "from_service_id": "transaction-service",
+            "observed_at": null,
+            "relation_type": "async_queue",
+            "source_kind": "catalog_declared",
+            "to_service_id": "notification-service"
+          }
+        ],
+        "max_depth": 3,
+        "primary_service": "transaction-service",
+        "reference_time": "2026-11-12T00:00:00Z",
+        "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+        "upstream_callers": [
+          "api-gateway"
+        ]
+      },
+      "incident_ids": [
+        "inc-cascade-gw",
+        "inc-cascade-tx"
+      ],
+      "services": [
+        "api-gateway",
+        "transaction-service"
+      ],
+      "status": "INCONCLUSIVE",
+      "suspected_origins": [
+        "transaction-service"
+      ]
+    }
+  ],
+  "independent": [
+    {
+      "downstream_symptoms": [],
+      "impact_graph": {
+        "downstream_dependencies": [],
+        "edges": [
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-gw-auth",
+            "from_service_id": "api-gateway",
+            "observed_at": null,
+            "relation_type": "sync_http",
+            "source_kind": "catalog_declared",
+            "to_service_id": "auth-service"
+          }
+        ],
+        "max_depth": 3,
+        "primary_service": "auth-service",
+        "reference_time": "2026-11-12T00:00:00Z",
+        "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+        "upstream_callers": [
+          "api-gateway"
+        ]
+      },
+      "incident_ids": [
+        "inc-split-auth"
+      ],
+      "services": [
+        "auth-service"
+      ],
+      "status": "INCONCLUSIVE",
+      "suspected_origins": [
+        "auth-service"
+      ]
+    },
+    {
+      "downstream_symptoms": [],
+      "impact_graph": {
+        "downstream_dependencies": [],
+        "edges": [
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-gw-tx",
+            "from_service_id": "api-gateway",
+            "observed_at": null,
+            "relation_type": "sync_http",
+            "source_kind": "catalog_declared",
+            "to_service_id": "transaction-service"
+          },
+          {
+            "edge_freshness": "stale",
+            "edge_id": "edge-tx-notif",
+            "from_service_id": "transaction-service",
+            "observed_at": null,
+            "relation_type": "async_queue",
+            "source_kind": "catalog_declared",
+            "to_service_id": "notification-service"
+          }
+        ],
+        "max_depth": 3,
+        "primary_service": "notification-service",
+        "reference_time": "2026-11-12T00:00:00Z",
+        "uncertainty": "Topology alone does not establish causality; stale edges are unconfirmed.",
+        "upstream_callers": [
+          "api-gateway",
+          "transaction-service"
+        ]
+      },
+      "incident_ids": [
+        "inc-split-notif"
+      ],
+      "services": [
+        "notification-service"
+      ],
+      "status": "INCONCLUSIVE",
+      "suspected_origins": [
+        "notification-service"
+      ]
+    }
+  ],
+  "meta": {
+    "captured_at": "2026-11-12T05:03:51.675226Z",
+    "commit": "unavailable: no git repository",
+    "environment": "local in-process synthetic lab",
+    "kb_version": "not applicable",
+    "model_version": "not applicable",
+    "prompt_version": "not applicable",
+    "reviewer": "TBD",
+    "run_id": "c10-20261112T050351Z",
+    "seed": null,
+    "version": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "9cd4bf2d20aeaa9f9b0f83a161d6125aa3dbddbc7d19e67459f28515eedf2361",
+      "services/alert_intake/dedup.py": "ec2c459ddc3b7f2c2cc83dd76eb553104353ced38be614dd7e02ced6c9f9d4b0",
+      "services/alert_intake/intake.py": "6212a069ee8a59b7e91a52deb498751869484f13d4557f80997e35c2e2834389",
+      "tests/test_c10_alert_intake_correlation.py": "85cd939b805a157ef34602b5e35330aad42090dd58cf0f81a4fde34ba3ac4ace"
+    },
+    "workflow_version": "not applicable"
+  },
+  "procedure": "in-process synthetic alerts with synthetic shared trace_id and declared static catalog topology; no fault injection"
+}

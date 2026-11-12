@@ -1,0 +1,127 @@
+{
+  "assertions": {
+    "all_accepted": true,
+    "hit_count_100": true,
+    "one_incident": true,
+    "one_queue_entry": true,
+    "under_5_seconds": true
+  },
+  "elapsed_seconds": 0.29059766701539047,
+  "errors": [],
+  "final_queued_incident": {
+    "alert_type": "high_error_rate",
+    "environment": "lab",
+    "error_code": "ERR_TEST",
+    "event_time": "2026-11-12T00:00:00Z",
+    "fingerprint": "2af5dd618393abd4c08261f978905a4fb383e1cafae7b2131a5d43537dd2799d",
+    "first_seen_at": "2026-11-12T05:37:18.449337Z",
+    "hit_count": 100,
+    "incident_id": "inc-20261112-3555ddc8",
+    "last_seen_at": "2026-11-12T05:37:18.700752Z",
+    "service_id": "api-gateway",
+    "status": "ACTIVE",
+    "trace_id": null,
+    "window_end": "2026-11-12T00:00:00Z",
+    "window_start": "2026-11-11T23:59:00Z"
+  },
+  "incident_ids": {
+    "inc-20261112-3555ddc8": 100
+  },
+  "measurement_notes": "macOS ru_maxrss is process high-water RSS, not isolated incremental allocation or Docker total; tracemalloc is Python allocation only; result aggregation itself consumes memory",
+  "merge_audit_counts": {
+    "create": 1,
+    "merge": 99
+  },
+  "meta": {
+    "captured_at": "2026-11-12T05:36:39.363222Z",
+    "commit": "unavailable: no git repository",
+    "environment": "local synthetic lab; macOS in-process test client",
+    "kb_version": null,
+    "model_version": null,
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "prompt_version": null,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "reviewer": "TBD",
+    "run_id": "c10-verify-20261112T053639Z",
+    "scenario_id": null,
+    "seed": null,
+    "source_sha256": {
+      "gateway/dispatcher.py": "5b5625c97e8354796ed4f4955ffc0c87bc78b5bda377bc5d9b78da6f4078566f",
+      "services/alert_intake/correlation.py": "4694de4a1048b3b8645e0ae54a9db4b0ed3dc49062f164c959cee45dca449de8",
+      "services/alert_intake/dedup.py": "7b94627fbbfdd340d8ad61c8cfc1da67eb5e9eecb3737a5d201b39dbe2b43b4b",
+      "services/alert_intake/intake.py": "df8b822d7b5f1c73011cf413642da8cb00625d7063b0f4afcd891f307ddf11e5",
+      "tests/test_c08_secure_gateway.py": "8dbb1514f3d9d472ae5f8d202daddfbbfdbb49efad60483e3e42e77e31b2cd06",
+      "tests/test_c09_telemetry_adapters.py": "cec52855d3fe21e5ead68623bc1aa26415bede97fd38fdddb48195bff73f457a",
+      "tests/test_c10_alert_intake_correlation.py": "e25b8dc8af99a6fc3f9596f1a9a38984a6ddd1cb6e47bc3376911f6a23836802"
+    },
+    "workflow_version": null
+  },
+  "process_cpu_seconds": 0.3040949999999999,
+  "process_maxrss_after_bytes": 82395136,
+  "process_maxrss_before_bytes": 78872576,
+  "queue_empty_after_dequeue": true,
+  "requests": 100,
+  "samples": [
+    {
+      "completed": 1,
+      "elapsed_seconds": 0.0524303330166731,
+      "process_cpu_seconds": 0.05173899999999987,
+      "process_maxrss_bytes_macos": 82345984,
+      "tracemalloc_current_bytes": 1405537,
+      "tracemalloc_peak_bytes": 1555426
+    },
+    {
+      "completed": 10,
+      "elapsed_seconds": 0.07027937500970438,
+      "process_cpu_seconds": 0.070666,
+      "process_maxrss_bytes_macos": 82345984,
+      "tracemalloc_current_bytes": 1404585,
+      "tracemalloc_peak_bytes": 1555426
+    },
+    {
+      "completed": 20,
+      "elapsed_seconds": 0.09449604200199246,
+      "process_cpu_seconds": 0.09637899999999988,
+      "process_maxrss_bytes_macos": 82345984,
+      "tracemalloc_current_bytes": 1474241,
+      "tracemalloc_peak_bytes": 1555426
+    },
+    {
+      "completed": 40,
+      "elapsed_seconds": 0.14734695802326314,
+      "process_cpu_seconds": 0.15258099999999997,
+      "process_maxrss_bytes_macos": 82345984,
+      "tracemalloc_current_bytes": 1445770,
+      "tracemalloc_peak_bytes": 1597670
+    },
+    {
+      "completed": 60,
+      "elapsed_seconds": 0.19540637501631863,
+      "process_cpu_seconds": 0.203739,
+      "process_maxrss_bytes_macos": 82378752,
+      "tracemalloc_current_bytes": 1478958,
+      "tracemalloc_peak_bytes": 1612111
+    },
+    {
+      "completed": 80,
+      "elapsed_seconds": 0.24936791701475158,
+      "process_cpu_seconds": 0.26056099999999993,
+      "process_maxrss_bytes_macos": 82395136,
+      "tracemalloc_current_bytes": 1441586,
+      "tracemalloc_peak_bytes": 1645566
+    },
+    {
+      "completed": 100,
+      "elapsed_seconds": 0.2903042920224834,
+      "process_cpu_seconds": 0.3030289999999999,
+      "process_maxrss_bytes_macos": 82395136,
+      "tracemalloc_current_bytes": 1325802,
+      "tracemalloc_peak_bytes": 1645566
+    }
+  ],
+  "statuses": {
+    "200:accepted": 100
+  },
+  "test": "100 identical signed synthetic HTTP requests with 10 client threads",
+  "workers": 10
+}
