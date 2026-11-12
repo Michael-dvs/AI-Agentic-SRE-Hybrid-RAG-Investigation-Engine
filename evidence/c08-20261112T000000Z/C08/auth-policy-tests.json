@@ -1,0 +1,249 @@
+{
+  "chapter": "C08",
+  "run_id": "c08-20261112T000000Z",
+  "total_tests": 17,
+  "passed": 17,
+  "failed": 0,
+  "test_cases": [
+    {
+      "test_id": "AUTH-01-NONE",
+      "description": "Unauthenticated tool call with missing token (rejected 401)",
+      "tool_name": "get_service_metrics",
+      "caller_token": null,
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "UNAUTHENTICATED"
+      ],
+      "actual_error_code": "UNAUTHENTICATED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "AUTH-02-BOGUS",
+      "description": "Unauthenticated tool call with invalid forged token (rejected 401)",
+      "tool_name": "get_service_metrics",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "UNAUTHENTICATED"
+      ],
+      "actual_error_code": "UNAUTHENTICATED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-01-RESTART",
+      "description": "Prohibited mutation tool: restart_service (rejected 403 TOOL_NOT_ALLOWED)",
+      "tool_name": "restart_service",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "TOOL_NOT_ALLOWED"
+      ],
+      "actual_error_code": "TOOL_NOT_ALLOWED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-01-DEPLOY",
+      "description": "Prohibited mutation tool: deploy_service (rejected 403 TOOL_NOT_ALLOWED)",
+      "tool_name": "deploy_service",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "TOOL_NOT_ALLOWED"
+      ],
+      "actual_error_code": "TOOL_NOT_ALLOWED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-01-SHELL",
+      "description": "Prohibited mutation tool: execute_shell (rejected 403 TOOL_NOT_ALLOWED)",
+      "tool_name": "execute_shell",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "TOOL_NOT_ALLOWED"
+      ],
+      "actual_error_code": "TOOL_NOT_ALLOWED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-01-SQL",
+      "description": "Prohibited mutation tool: run_sql (rejected 403 TOOL_NOT_ALLOWED)",
+      "tool_name": "run_sql",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "TOOL_NOT_ALLOWED"
+      ],
+      "actual_error_code": "TOOL_NOT_ALLOWED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-02-WINDOW-EXCEEDED",
+      "description": "Time window exceeding policy maximum 3600s (7200s requested) - strictly rejected",
+      "tool_name": "get_service_metrics",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "WINDOW_EXCEEDED"
+      ],
+      "actual_error_code": "WINDOW_EXCEEDED",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "MCP-02-WINDOW-INVERTED",
+      "description": "Inverted time window (start > end) - strictly rejected",
+      "tool_name": "get_service_metrics",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "INVALID_TIME_RANGE"
+      ],
+      "actual_error_code": "INVALID_TIME_RANGE",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "AT-008-GT-PATH",
+      "description": "Attempt to access ground truth path in query arguments - strictly blocked",
+      "tool_name": "search_error_logs",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "FORBIDDEN_SCOPE",
+        "SCHEMA_INVALID"
+      ],
+      "actual_error_code": "SCHEMA_INVALID",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "AT-008-SCENARIO-ID",
+      "description": "Attempt to query ground truth scenario_id parameter - strictly blocked",
+      "tool_name": "search_error_logs",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "FORBIDDEN_SCOPE",
+        "SCHEMA_INVALID"
+      ],
+      "actual_error_code": "SCHEMA_INVALID",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "SEC-01-RESTRICTED-DENY",
+      "description": "Unprivileged caller attempting to retrieve synthetic-restricted document without group",
+      "tool_name": "retrieve_runbooks",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "SEC-01-RESTRICTED-ALLOW",
+      "description": "Privileged security-admin caller retrieving synthetic-restricted document",
+      "tool_name": "retrieve_runbooks",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "RAG-02-CROSS-SERVICE-DENY",
+      "description": "Cross-service unauthorized scope attempt",
+      "tool_name": "get_service_metrics",
+      "caller_token": "[REDACTED]",
+      "expected_status": "rejected",
+      "actual_status": "rejected",
+      "expected_error_codes": [
+        "FORBIDDEN_SCOPE"
+      ],
+      "actual_error_code": "FORBIDDEN_SCOPE",
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "READONLY-METRICS-OK",
+      "description": "Valid read-only metrics inspection within limits",
+      "tool_name": "get_service_metrics",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "READONLY-LOGS-OK",
+      "description": "Valid read-only error log search within limits",
+      "tool_name": "search_error_logs",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "READONLY-TRACES-OK",
+      "description": "Valid read-only trace summary query within limits",
+      "tool_name": "get_trace_summary",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    },
+    {
+      "test_id": "READONLY-CATALOG-OK",
+      "description": "Valid read-only service dependency map lookup",
+      "tool_name": "get_service_dependencies",
+      "caller_token": "[REDACTED]",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "expected_error_codes": [
+        null
+      ],
+      "actual_error_code": null,
+      "error_message": null,
+      "evaluation": "PASS"
+    }
+  ]
+}

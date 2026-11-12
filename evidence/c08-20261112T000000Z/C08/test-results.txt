@@ -1,0 +1,94 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 21 items
+
+tests/test_c08_secure_gateway.py::test_unauthenticated_request_rejected PASSED [  4%]
+tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected PASSED [  9%]
+tests/test_c08_secure_gateway.py::test_excessive_time_window_rejected_without_silent_clamping PASSED [ 14%]
+tests/test_c08_secure_gateway.py::test_ground_truth_path_access_blocked PASSED [ 19%]
+tests/test_c08_secure_gateway.py::test_cross_service_scope_enforcement PASSED [ 23%]
+tests/test_c08_secure_gateway.py::test_sanitizer_redaction_and_fail_closed PASSED [ 28%]
+tests/test_c08_secure_gateway.py::test_append_only_audit_log_records_all_decisions PASSED [ 33%]
+tests/test_c08_secure_gateway.py::test_read_only_tool_dispatch_and_schema_compliance PASSED [ 38%]
+tests/test_c08_secure_gateway.py::test_backend_outage_simulation_returns_unavailable PASSED [ 42%]
+tests/test_c08_secure_gateway.py::test_orchestrator_spike_invariants PASSED [ 47%]
+tests/test_c07_hybrid_retrieval.py::test_schema_compliance_across_modes PASSED [ 52%]
+tests/test_c07_hybrid_retrieval.py::test_malformed_request_rejected PASSED [ 57%]
+tests/test_c07_hybrid_retrieval.py::test_rag_01_sc10_obsolete_sop_prevention PASSED [ 61%]
+tests/test_c07_hybrid_retrieval.py::test_rag_02_cross_service_isolation PASSED [ 66%]
+tests/test_c07_hybrid_retrieval.py::test_sec_01_restricted_document_authorization PASSED [ 71%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_no_match PASSED [ 76%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_outage PASSED [ 80%]
+tests/test_c07_hybrid_retrieval.py::test_citation_provenance_and_hash_integrity PASSED [ 85%]
+tests/test_c07_hybrid_retrieval.py::test_context_token_bounding_and_truncation PASSED [ 90%]
+tests/test_c07_hybrid_retrieval.py::test_dev_benchmark_reproducibility PASSED [ 95%]
+tests/test_c07_hybrid_retrieval.py::test_indonesian_technical_semantic_retrieval_and_embedding_metadata PASSED [100%]
+
+============================== 21 passed in 3.19s ==============================
+
+============================= FULL REPOSITORY REGRESSION RUN =============================
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 52 items
+
+tests/test_c03_compose_live.py::test_live_compose_readiness_and_topology_contracts PASSED [  1%]
+tests/test_c03_compose_live.py::test_live_sync_postgres_and_async_rabbitmq_notification_chain PASSED [  3%]
+tests/test_c03_compose_live.py::test_live_traffic_generator_normal_and_spike_profiles PASSED [  5%]
+tests/test_c03_compose_live.py::test_live_compose_restart_and_postgres_data_persistence PASSED [  7%]
+tests/test_c03_services.py::test_c02_contracts_compliance_for_all_five_services PASSED [  9%]
+tests/test_c03_services.py::test_end_to_end_sync_and_async_transaction_flow PASSED [ 11%]
+tests/test_c03_services.py::test_idempotency_and_duplicate_prevention PASSED [ 13%]
+tests/test_c03_services.py::test_notification_bounded_retries_and_idempotency PASSED [ 15%]
+tests/test_c03_services.py::test_invalid_inputs_and_auth_rejections PASSED [ 17%]
+tests/test_c03_services.py::test_dependency_failure_responses_and_persistence PASSED [ 19%]
+tests/test_c03_services.py::test_deterministic_traffic_generator_and_external_target_rejection PASSED [ 21%]
+tests/test_c04_fault_harness.py::test_scenario_catalog_public_vs_restricted_separation PASSED [ 23%]
+tests/test_c04_fault_harness.py::test_restricted_gt_registry_immutability_and_access_control PASSED [ 25%]
+tests/test_c04_fault_harness.py::test_fault_control_endpoint_security_and_limits PASSED [ 26%]
+tests/test_c04_fault_harness.py::test_external_target_url_rejected_by_runner PASSED [ 28%]
+tests/test_c04_fault_harness.py::test_all_eight_core_scenarios_and_recipe_hooks_in_process PASSED [ 30%]
+tests/test_c04_fault_harness.py::test_live_docker_compose_c04_isolation_and_fault_recovery PASSED [ 32%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_telemetry_correlation_and_schema_compliance PASSED [ 34%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_alert_evaluation_and_zero_false_positives_on_sc01 PASSED [ 36%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_dependency_cascade_attribution_sc03_and_sc04 PASSED [ 38%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_missing_trace_source_sc09_reversible_outage PASSED [ 40%]
+tests/test_c05_telemetry_and_catalog.py::test_c05_otel_collector_strips_forbidden_gt_fields_and_zero_leakage PASSED [ 42%]
+tests/test_c05_telemetry_and_catalog.py::test_live_docker_compose_c05_observability_stack PASSED [ 44%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_corpus_structure_and_document_count PASSED [ 46%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_all_chunks_schema_compliance PASSED [ 48%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_redaction_sanitizer_sec03 PASSED [ 50%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_zero_ground_truth_leakage_at008 PASSED [ 51%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_obsolete_lifecycle_and_version_transition_sc10_rag01 PASSED [ 53%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_multi_service_and_access_isolation_rag02_sec01 PASSED [ 55%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_determinism_and_lifecycle_rollback PASSED [ 57%]
+tests/test_c06_knowledge_and_ingestion.py::test_c06_evaluation_queries_separation_fr_rag_006 PASSED [ 59%]
+tests/test_c07_hybrid_retrieval.py::test_schema_compliance_across_modes PASSED [ 61%]
+tests/test_c07_hybrid_retrieval.py::test_malformed_request_rejected PASSED [ 63%]
+tests/test_c07_hybrid_retrieval.py::test_rag_01_sc10_obsolete_sop_prevention PASSED [ 65%]
+tests/test_c07_hybrid_retrieval.py::test_rag_02_cross_service_isolation PASSED [ 67%]
+tests/test_c07_hybrid_retrieval.py::test_sec_01_restricted_document_authorization PASSED [ 69%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_no_match PASSED [ 71%]
+tests/test_c07_hybrid_retrieval.py::test_honest_gap_handling_outage PASSED [ 73%]
+tests/test_c07_hybrid_retrieval.py::test_citation_provenance_and_hash_integrity PASSED [ 75%]
+tests/test_c07_hybrid_retrieval.py::test_context_token_bounding_and_truncation PASSED [ 76%]
+tests/test_c07_hybrid_retrieval.py::test_dev_benchmark_reproducibility PASSED [ 78%]
+tests/test_c07_hybrid_retrieval.py::test_indonesian_technical_semantic_retrieval_and_embedding_metadata PASSED [ 80%]
+tests/test_c08_secure_gateway.py::test_unauthenticated_request_rejected PASSED [ 82%]
+tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected PASSED [ 84%]
+tests/test_c08_secure_gateway.py::test_excessive_time_window_rejected_without_silent_clamping PASSED [ 86%]
+tests/test_c08_secure_gateway.py::test_ground_truth_path_access_blocked PASSED [ 88%]
+tests/test_c08_secure_gateway.py::test_cross_service_scope_enforcement PASSED [ 90%]
+tests/test_c08_secure_gateway.py::test_sanitizer_redaction_and_fail_closed PASSED [ 92%]
+tests/test_c08_secure_gateway.py::test_append_only_audit_log_records_all_decisions PASSED [ 94%]
+tests/test_c08_secure_gateway.py::test_read_only_tool_dispatch_and_schema_compliance PASSED [ 96%]
+tests/test_c08_secure_gateway.py::test_backend_outage_simulation_returns_unavailable PASSED [ 98%]
+tests/test_c08_secure_gateway.py::test_orchestrator_spike_invariants PASSED [100%]
+
+============================= 52 passed in 29.64s ==============================

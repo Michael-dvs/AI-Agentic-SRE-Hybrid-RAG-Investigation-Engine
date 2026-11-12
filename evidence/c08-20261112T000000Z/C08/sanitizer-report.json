@@ -1,0 +1,45 @@
+{
+  "chapter": "C08",
+  "requirement": "SEC-03 / RULE-001 / NFR-003",
+  "sanitizer_mode": "FAIL_CLOSED",
+  "fail_closed_verified": true,
+  "fixtures_tested": 4,
+  "all_fixtures_passed": true,
+  "zero_raw_leak_verified": true,
+  "fixture_details": [
+    {
+      "fixture_type": "synthetic_jwt",
+      "raw_length": 58,
+      "redacted_length": 28,
+      "redaction_count": 1,
+      "raw_leak_detected": false,
+      "status": "PASS"
+    },
+    {
+      "fixture_type": "synthetic_api_key",
+      "raw_length": 45,
+      "redacted_length": 25,
+      "redaction_count": 1,
+      "raw_leak_detected": false,
+      "status": "PASS"
+    },
+    {
+      "fixture_type": "synthetic_credential",
+      "raw_length": 33,
+      "redacted_length": 28,
+      "redaction_count": 1,
+      "raw_leak_detected": false,
+      "status": "PASS"
+    },
+    {
+      "fixture_type": "synthetic_pan",
+      "raw_length": 43,
+      "redacted_length": 50,
+      "redaction_count": 1,
+      "raw_leak_detected": false,
+      "status": "PASS"
+    }
+  ],
+  "audit_chain_verified": true,
+  "audit_events_count": 17
+}
