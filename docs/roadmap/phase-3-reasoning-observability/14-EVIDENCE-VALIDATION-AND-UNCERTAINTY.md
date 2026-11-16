@@ -2,9 +2,11 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** IMPLEMENTED
+- **Documentation status:** APPROVED
+- **Implementation status:** IMPLEMENTED
+- **Evidence bundle:** `evidence/c14-20261116T075346Z/C14/` (Run ID: `c14-20261116T075346Z`)
+- **Reviewer Decision & Baseline PoC Note:** Disetujui oleh Project Initiator sebagai baseline simulasi PoC: (1) Ringkasan validasi disajikan sebagai sidecar terpisah untuk mempertahankan kebekuan kontrak dossier v1 JSON (ADR-DC02); (2) Status hipotesis LLM dibatasi maksimal `PARTIAL` demi prinsip kejujuran bukti; (3) Atribusi origin cascade menggunakan heuristik nama diterima untuk lab PoC, dengan arsitektur penelusuran graf trace OTel dipetakan untuk skala komersial/enterprise APS-BNI.
 - **Dependencies:** [C07 — Hybrid Retrieval and Baselines](../phase-1-foundation/07-HYBRID-RETRIEVAL-AND-BASELINES.md), [C09 — Read-Only Telemetry Adapters](../phase-2-controlled-integration/09-READ-ONLY-TELEMETRY-ADAPTERS.md), [C13 — Controlled LLM Investigator](13-CONTROLLED-LLM-INVESTIGATOR.md), `G2 PASS` ([C12](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md))
 - **Next chapter:** [C15 — AI Observability, Audit, and Cost](15-AI-OBSERVABILITY-AUDIT-AND-COST.md)
 - **Related requirements:** `BR-003`, `BR-006`, `BR-013`, `FR-SIM-006`, `FR-OBS-006`, `FR-OBS-007`, `FR-RAG-004`, `FR-RAG-009`, `FR-AGT-005`, `FR-AGT-006`, `FR-AGT-007`, `FR-AGT-010`, `FR-OUT-003`, `RULE-005`, `RULE-006`, `RULE-007`, `NFR-004`, `NFR-016`, `KPI-03`, `KPI-04`, `KPI-11`, `OBJ-02`, `OBJ-03`, `RISK-03`, `RISK-04`, `SC-03` s/d `SC-10`, `SC-14`, `UC-02`, `UC-05` s/d `UC-08`

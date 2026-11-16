@@ -1,0 +1,45 @@
+[
+  {
+    "run_id": "c14-20261116T075346Z",
+    "scenario_id": "synthetic-sop",
+    "valid": [
+      {
+        "chunk_id": "active",
+        "document_id": "SOP-AUTH",
+        "service_id": "auth-service",
+        "environment": "lab",
+        "status": "approved",
+        "effective_from": "2020-01-01T00:00:00Z",
+        "effective_to": null
+      }
+    ],
+    "rejected": [
+      {
+        "chunk_id": "obsolete",
+        "document_id": "SOP-AUTH",
+        "service_id": "auth-service",
+        "environment": "lab",
+        "status": "obsolete",
+        "effective_from": "2020-01-01T00:00:00Z",
+        "effective_to": "2021-01-01T00:00:00Z",
+        "rejection_reason": "OBSOLETE_SOP",
+        "details": "Citation status 'obsolete' is not active/approved."
+      },
+      {
+        "chunk_id": "wrong-service",
+        "document_id": "SOP-LEDGER",
+        "service_id": "ledger-service",
+        "environment": "lab",
+        "status": "approved",
+        "effective_from": "2020-01-01T00:00:00Z",
+        "effective_to": null,
+        "rejection_reason": "SCOPE_MISMATCH",
+        "details": "Citation service 'ledger-service' or environment 'lab' mismatches incident [auth-service/lab]."
+      }
+    ],
+    "reason_codes": [
+      "OBSOLETE_SOP",
+      "SCOPE_MISMATCH"
+    ]
+  }
+]

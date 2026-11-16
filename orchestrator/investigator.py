@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import datetime
+from dataclasses import asdict
 import logging
 import uuid
 from typing import Any, Dict, List, Optional, Set
 
 from gateway.policy import PolicyGateway
+from orchestrator.claim_validator_contract import ClaimValidator, HypothesisStatus
 from orchestrator.checkpoint import CheckpointManager
 from orchestrator.dossier import DossierMarkdownRenderer, DossierSerializer
 from orchestrator.fallback import ManualFallbackGenerator
@@ -43,6 +45,7 @@ class DeterministicInvestigator:
         checkpoint_manager: CheckpointManager | None = None,
         bearer_token: str = DEFAULT_COORDINATOR_TOKEN,
         llm_investigator: LLMInvestigator | None = None,
+        claim_validator: ClaimValidator | None = None,
     ) -> None:
         self.sm = state_machine
         self.gateway = gateway
@@ -51,6 +54,7 @@ class DeterministicInvestigator:
         self.checkpoint = checkpoint_manager or CheckpointManager(self.sm.store)
         self.bearer_token = bearer_token
         self.llm = llm_investigator
+        self.claim_validator = claim_validator if claim_validator is not None else ClaimValidator()
 
     def _format_incident_id(self, raw_id: str) -> str:
         return raw_id if raw_id.startswith("inc-") else f"inc-{raw_id}"
@@ -741,6 +745,8 @@ class DeterministicInvestigator:
                             f"Candidate cause (not proven): {hypothesis['estimated_root_cause']}"
                         ),
                         "candidate_cause": hypothesis["estimated_root_cause"],
+                        "diagnosis": hypothesis["diagnosis"],
+                        "confidence": hypothesis["confidence"],
                         "confidence_score": {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}[hypothesis["confidence"]],
                         "status": "PARTIAL",
                         "supporting_evidence_ids": hypothesis["supporting_evidence_ids"],
@@ -787,6 +793,33 @@ class DeterministicInvestigator:
         self.resilience.check_deadline(incident_id)
 
         evidence_items = context.get("evidence_items", [])
+        if context.get("investigation_mode") == "agentic_llm":
+            window = context["query_window"]
+            svc = context["service_id"]
+            try:
+                self.resilience.check_preflight(incident_id, "get_service_metrics")
+                result = self.gateway.execute_tool(
+                    tool_name="get_service_metrics",
+                    arguments={"service_id": svc, "environment": context["environment"],
+                               "metric_enum": "error_rate", "start": window["start"],
+                               "end": window["end"], "max_points": 100},
+                    token=f"Bearer {self.bearer_token}", incident_id=incident_id,
+                )
+                self.resilience.record_tool_result("get_service_metrics", result.get("status", "ok"))
+                evidence_items.append({
+                    "evidence_id": f"ev-{incident_id}-{len(evidence_items) + 1:03d}",
+                    "tool_name": "get_service_metrics", "service_id": svc,
+                    "source_ref": result.get("source_ref", "prometheus"),
+                    "observed_at": result.get("observed_at", utc_now_z()),
+                    "data_quality": result.get("data_quality", "complete"),
+                    "error_code": result.get("error_code"), "data": result,
+                    "records": result.get("records", []), "sanitized": result.get("sanitized") is True,
+                })
+            except CircuitOpenError:
+                context.setdefault("unknowns", []).append("Error-rate metrics source unavailable.")
+        if context.get("investigation_mode") == "agentic_llm":
+            return self._validate_agentic(incident_id, context)
+
         hypotheses = context.get("hypotheses", [])
         contradictions: List[str] = []
         unknowns: List[str] = list(context.get("unknowns", []))
@@ -861,6 +894,92 @@ class DeterministicInvestigator:
         self.checkpoint.save_checkpoint(incident_id, "VALIDATED", context)
         return context
 
+    def _validate_agentic(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        hypotheses = context.get("hypotheses", [])
+        citations = context.get("runbook_citations", [])
+        reports = []
+        try:
+            for hypothesis in hypotheses:
+                candidate = {
+                    **hypothesis,
+                    "contradicting_evidence_ids": hypothesis.get("refuting_evidence_ids", []),
+                }
+                report = self.claim_validator.validate_hypothesis(candidate, context)
+                if report.hypothesis_id != hypothesis["hypothesis_id"]:
+                    raise ValueError("Validation report hypothesis ID mismatch")
+                reports.append(asdict(report))
+
+            # A citation must survive every report; validation failures must not leak it.
+            valid_citations = [
+                citation for citation in citations
+                if reports and all(citation in report["valid_sop_citations"] for report in reports)
+            ]
+            usable_ids = {
+                ev["evidence_id"] for ev in context.get("evidence_items", [])
+                if ev.get("evidence_id") and ev.get("records")
+                and ev.get("data_quality") != "unavailable"
+                and not ev.get("error_code")
+            }
+            for hypothesis, report in zip(hypotheses, reports):
+                status = HypothesisStatus(report["status"])
+                # The current validator checks references and bounds, not semantic entailment.
+                # It cannot promote an LLM diagnosis to a supported finding.
+                checked_ids = {
+                    claim["evidence_id"] for claim in report["claims"]
+                    if claim["status"] == HypothesisStatus.SUPPORTED
+                }
+                supporting_ids = [
+                    evidence_id for evidence_id in report["supporting_evidence_ids"]
+                    if evidence_id in usable_ids and evidence_id in checked_ids
+                ]
+                if not supporting_ids and status != HypothesisStatus.UNSUPPORTED:
+                    status = HypothesisStatus.INCONCLUSIVE
+                elif status == HypothesisStatus.SUPPORTED:
+                    status = HypothesisStatus.PARTIAL
+                hypothesis["status"] = status.value
+                hypothesis["confidence_score"] = min(
+                    hypothesis.get("confidence_score", 0.5), report["confidence_score"]
+                )
+                hypothesis["supporting_evidence_ids"] = supporting_ids
+                hypothesis["refuting_evidence_ids"] = report["contradicting_evidence_ids"]
+                hypothesis["unknowns"] = list(dict.fromkeys(
+                    [*hypothesis.get("unknowns", []), *report["unknowns"]]
+                ))
+            context["validation_reports"] = reports
+            context["runbook_citations"] = valid_citations
+            context["no_applicable_runbook"] = not bool(valid_citations)
+            context["contradictions"] = list(dict.fromkeys([
+                *context.get("contradictions", []),
+                *(item for report in reports for item in report["contradictions"]),
+            ]))
+            context["unknowns"] = list(dict.fromkeys([
+                *context.get("unknowns", []),
+                *(item for report in reports for item in report["unknowns"]),
+            ]))
+        except Exception:
+            context["runbook_citations"] = []
+            context["no_applicable_runbook"] = True
+            for hypothesis in hypotheses:
+                hypothesis["status"] = "INCONCLUSIVE"
+                hypothesis["confidence_score"] = min(hypothesis.get("confidence_score", 0.5), 0.30)
+            raise
+
+        self.sm.transition(
+            incident_id=incident_id,
+            to_state="VALIDATED",
+            idempotency_key=f"idem-{incident_id}-validated",
+            reason_code="OK",
+            reason=f"Validated {len(reports)} candidate hypotheses",
+            input_data={"hypotheses_count": len(hypotheses)},
+            output_data={
+                "contradictions_count": len(context["contradictions"]),
+                "unknowns_count": len(context["unknowns"]),
+            },
+        )
+        context["timeline"].append({"state": "VALIDATED", "timestamp": utc_now_z()})
+        self.checkpoint.save_checkpoint(incident_id, "VALIDATED", context)
+        return context
+
     def _step_drafted(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Compile baseline Draft Handover Dossier structure (C11, C12 handover)."""
         self.resilience.check_cancellation(incident_id)
@@ -870,7 +989,9 @@ class DeterministicInvestigator:
         dossier_json = DossierSerializer.serialize(
             context, revision=1, investigation_mode=context.get("investigation_mode", "deterministic_baseline")
         )
-        dossier_markdown = DossierMarkdownRenderer.render(dossier_json)
+        validation_summary = DossierSerializer.serialize_validation_summary(context)
+        context["validation_summary"] = validation_summary
+        dossier_markdown = DossierMarkdownRenderer.render(dossier_json, validation_summary)
 
         # Persist dossier to SQLite store
         self.sm.store.save_dossier(

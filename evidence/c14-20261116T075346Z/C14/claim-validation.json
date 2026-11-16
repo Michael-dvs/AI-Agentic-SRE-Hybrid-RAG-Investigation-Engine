@@ -1,0 +1,28 @@
+[
+  {
+    "run_id": "c14-20261116T075346Z",
+    "scenario_id": "synthetic-value-check",
+    "claim_text": "Observed latency",
+    "evidence_id": "ev-metric",
+    "status": "SUPPORTED",
+    "reason_code": "CLAIM_CORROBORATED",
+    "value_delta": null,
+    "observed_at": "2026-11-16T10:00:00Z",
+    "details": "Claim substantiated by valid within-window telemetry evidence."
+  },
+  {
+    "run_id": "c14-20261116T075346Z",
+    "scenario_id": "synthetic-value-check",
+    "claim_text": "Observed latency",
+    "evidence_id": "ev-metric",
+    "status": "UNSUPPORTED",
+    "reason_code": "VALUE_MISMATCH",
+    "value_delta": {
+      "claimed": 500.0,
+      "observed": 120.0,
+      "difference": 380.0
+    },
+    "observed_at": "2026-11-16T10:00:00Z",
+    "details": "Claimed value 500.0 mismatches observed telemetry 120.0."
+  }
+]

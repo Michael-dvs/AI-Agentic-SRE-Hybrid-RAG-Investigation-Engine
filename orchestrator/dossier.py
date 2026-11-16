@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import re
 from typing import Any, Dict, List, Optional
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -238,14 +239,11 @@ class DossierSerializer:
                 stmt = f"Service failure detected on {service_id}"
 
             sup_ids = [eid for eid in h.get("supporting_evidence_ids", []) if eid in available_ev_ids]
-            ref_ids = [eid for eid in h.get("refuting_evidence_ids", []) if eid in available_ev_ids]
+            ref_ids = [eid for eid in h.get("contradicting_evidence_ids", h.get("refuting_evidence_ids", [])) if eid in available_ev_ids]
 
-            # Invariant: SUPPORTED must have minItems: 1
+            # Do not assign unrelated evidence to satisfy the schema.
             if status_val == "SUPPORTED" and not sup_ids:
-                if available_ev_ids:
-                    sup_ids = [available_ev_ids[0]]
-                else:
-                    status_val = "INCONCLUSIVE"
+                status_val = "INCONCLUSIVE"
 
             reason = h.get("description") or h.get("reason_summary") or f"Hypothesis derived from observed signals on {service_id}."
             if len(reason) < 5:
@@ -258,11 +256,11 @@ class DossierSerializer:
             hypotheses_list.append({
                 "hypothesis_id": h_id,
                 "rank": idx,
-                "statement": stmt[:2048],
+                "statement": re.sub(r"\bverified\b", "unconfirmed", stmt, flags=re.IGNORECASE)[:2048],
                 "support_status": status_val,
                 "supporting_evidence_ids": list(set(sup_ids)),
                 "contradicting_evidence_ids": list(set(ref_ids)),
-                "reason_summary": reason[:2048],
+                "reason_summary": re.sub(r"\bverified\b", "unconfirmed", reason, flags=re.IGNORECASE)[:2048],
                 "unknowns": [u[:512] for u in h_unknowns if len(u) >= 3],
             })
 
@@ -391,12 +389,43 @@ class DossierSerializer:
 
         return dossier_payload
 
+    @classmethod
+    def serialize_validation_summary(cls, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Serialize validation separately from the frozen dossier v1 payload."""
+        if "validation_reports" not in context:
+            return None
+        reports = context["validation_reports"]
+        claims = [claim for report in reports for claim in report.get("claims", [])]
+        contradictions = list(context.get("contradictions", []))
+        rejected_citations = []
+        seen_rejections = set()
+        for report in reports:
+            contradictions.extend(report.get("contradictions", []))
+            for citation in report.get("rejected_sop_citations", []):
+                rejection = {
+                    "doc_id": citation.get("doc_id") or citation.get("document_id") or "",
+                    "chunk_id": citation.get("chunk_id") or "",
+                    "rejection_reason": citation.get("rejection_reason") or "",
+                    "details": citation.get("details") or "",
+                }
+                key = tuple(rejection.values())
+                if key not in seen_rejections:
+                    seen_rejections.add(key)
+                    rejected_citations.append(rejection)
+        return {
+            "supported_claims_count": sum(claim.get("status") == "SUPPORTED" for claim in claims),
+            "unsupported_claims_count": sum(claim.get("status") == "UNSUPPORTED" for claim in claims),
+            "total_material_claims_count": len(claims),
+            "contradictions": list(dict.fromkeys(contradictions)),
+            "rejected_sop_citations": rejected_citations,
+        }
+
 
 class DossierMarkdownRenderer:
     """Renders human-readable Markdown handover dossiers adhering to BRD Appendix A (C12, FR-OUT-002, NFR-020)."""
 
     @classmethod
-    def render(cls, dossier: Dict[str, Any]) -> str:
+    def render(cls, dossier: Dict[str, Any], validation_summary: Optional[Dict[str, Any]] = None) -> str:
         """Render dossier dictionary into standard enterprise Markdown report."""
         inc_id = dossier["incident_id"]
         status = dossier["hypotheses"][0]["support_status"] if dossier.get("hypotheses") else "INCONCLUSIVE"
@@ -493,13 +522,40 @@ class DossierMarkdownRenderer:
             for u in dossier["unknowns"]:
                 md_lines.append(f"> [!WARNING] **Telemetry Uncertainty:** {u}")
         else:
-            md_lines.append("No material telemetry gaps or signal contradictions detected.")
+            md_lines.append("No material telemetry gaps reported.")
 
         if dossier.get("missing_sources"):
             md_lines.append("")
             md_lines.append("**Unavailable Telemetry Sources:**")
             for ms in dossier["missing_sources"]:
                 md_lines.append(f"- Tool `{ms['tool_name']}` reported `{ms['error_code']}` at `{ms['recorded_at']}`: {ms['impact_note']}")
+
+        validation = validation_summary
+        if validation is not None:
+            md_lines.extend([
+                "",
+                "### Validation results",
+                "",
+                "Claim counts reflect validator reference, time and value checks, not semantic corroboration.",
+                "",
+                f"- Supported claims: {validation['supported_claims_count']}",
+                f"- Unsupported claims: {validation['unsupported_claims_count']}",
+                f"- Total material claims: {validation['total_material_claims_count']}",
+                "",
+                "**Contradictions:**",
+            ])
+            for contradiction in validation["contradictions"]:
+                md_lines.append(f"- {contradiction}")
+            if not validation["contradictions"]:
+                md_lines.append("- None reported.")
+            md_lines.extend(["", "**Rejected SOP citations:**"])
+            for citation in validation["rejected_sop_citations"]:
+                md_lines.append(
+                    f"- `{citation['doc_id']}` / `{citation['chunk_id']}`: "
+                    f"`{citation['rejection_reason']}` {citation['details']}"
+                )
+            if not validation["rejected_sop_citations"]:
+                md_lines.append("- None reported.")
 
         md_lines.extend([
             "",

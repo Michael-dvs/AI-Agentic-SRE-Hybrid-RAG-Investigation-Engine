@@ -18,7 +18,7 @@ from orchestrator.llm_investigator import (
 )
 from orchestrator.llm_provider import ProviderError, ProviderReply, ReplayProvider
 from orchestrator.resilience import IncidentCancelledError, ResilienceController
-from orchestrator.state_machine import InvestigationStateMachine, MANDATORY_STATES, WorkflowStateStore
+from orchestrator.state_machine import InvestigationStateMachine, MANDATORY_STATES, WorkflowStateStore, utc_now_z
 
 
 WHEN = "2026-11-16T10:00:00Z"
@@ -258,7 +258,7 @@ def test_full_workflow_injection_or_outage_to_review(tmp_path, outage):
     investigator = DeterministicInvestigator(InvestigationStateMachine(store), gateway,
                                             correlator=OneServiceCorrelation(), llm_investigator=llm)
     result = investigator.investigate_incident({"incident_id": incident_id, "service_id": "auth-service",
-                                              "environment": "lab", "event_time": WHEN})
+                                              "environment": "lab", "event_time": utc_now_z()})
     assert result["status"] == "HUMAN_REVIEW"
     assert [event["to_state"] for event in store.get_transitions(incident_id)] == list(MANDATORY_STATES)
     dossier = result["dossier"]
