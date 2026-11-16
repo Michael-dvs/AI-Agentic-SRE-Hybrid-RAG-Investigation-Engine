@@ -1,0 +1,13 @@
+{
+  "experiment": "AI Observability Sink Outage Resilience (OPS-02, AT-012)",
+  "incident_id": "inc-c15-outage-002",
+  "tracer_outage_simulated": true,
+  "tracer_dropped_spans_count": 9,
+  "investigation_outcome": "HUMAN_REVIEW",
+  "dossier_generated": true,
+  "dossier_hash": "588933c38adc2610151d281de53ccbf7705bc870678af9d342bcb90a96f5d46a",
+  "independent_security_audit_intact": true,
+  "audit_chain_verified": true,
+  "audit_events_count": 6,
+  "audit_violations": []
+}

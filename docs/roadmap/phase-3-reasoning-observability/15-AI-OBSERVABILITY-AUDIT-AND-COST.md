@@ -2,9 +2,11 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** IMPLEMENTED
+- **Documentation status:** APPROVED
+- **Implementation status:** IMPLEMENTED
+- **Evidence bundle:** `evidence/c15-20261116T085541Z/C15/` (Run ID: `c15-20261116T085541Z`)
+- **Reviewer Decision & Baseline PoC Note:** Disetujui oleh Project Initiator sebagai baseline simulasi PoC: (1) Pemisahan tegar Sink 1 (Independent Security Audit Sink SHA-256 hash-chained, fail-closed) vs Sink 2 (Sanitized AI Observability Sink, lightweight OpenInference JSONL, fail-open) memenuhi ADR-S06 & BRD §12.2; (2) Pengendalian memori lab tetap di bawah 8 GiB RAM tanpa ketergantungan ClickHouse; (3) Multi-sink DLP scanner memverifikasi 0 kebocoran PII/rahasia/restricted/ground-truth dan 0 hidden CoT (<think>); (4) Akuntansi latensi (P95 <= 120s) dan shadow unit cost terukur otomatis untuk seluruh run (sukses maupun failed/timeout).
 - **Dependencies:** [C08 — Secure Gateway and Foundation G1](../phase-1-foundation/08-SECURE-GATEWAY-AND-FOUNDATION-G1.md) (`G1 PASS`), [C11 — Durable Investigation Workflow](../phase-2-controlled-integration/11-DURABLE-INVESTIGATION-WORKFLOW.md), [C13 — Controlled LLM Investigator](13-CONTROLLED-LLM-INVESTIGATOR.md), [C14 — Evidence Validation and Uncertainty](14-EVIDENCE-VALIDATION-AND-UNCERTAINTY.md), `G2 PASS` ([C12](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md)), keputusan `ADR-S06` (pilihan sink AI observability & kebijakan *outage buffering*)
 - **Next chapter:** [C16 — Human Review and Handover](16-HUMAN-REVIEW-AND-HANDOVER.md)
 - **Related requirements:** `BR-014`, `FR-AGT-008`, `FR-OUT-006`, `NFR-003`, `NFR-005`, `NFR-006`, `NFR-007`, `NFR-008`, `NFR-012`, `NFR-013`, `NFR-017`, `NFR-018`, `KPI-07`, `KPI-14`, `BEN-03`, `DEP-06`, `RISK-08`

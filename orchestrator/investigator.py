@@ -5,10 +5,13 @@ from __future__ import annotations
 import datetime
 from dataclasses import asdict
 import logging
+import time
 import uuid
 from typing import Any, Dict, List, Optional, Set
 
 from gateway.policy import PolicyGateway
+from observability.ai_tracer import SanitizedAITracer
+from observability.cost_tracker import CostAndResourceTracker
 from orchestrator.claim_validator_contract import ClaimValidator, HypothesisStatus
 from orchestrator.checkpoint import CheckpointManager
 from orchestrator.dossier import DossierMarkdownRenderer, DossierSerializer
@@ -46,6 +49,8 @@ class DeterministicInvestigator:
         bearer_token: str = DEFAULT_COORDINATOR_TOKEN,
         llm_investigator: LLMInvestigator | None = None,
         claim_validator: ClaimValidator | None = None,
+        ai_tracer: SanitizedAITracer | None = None,
+        cost_tracker: CostAndResourceTracker | None = None,
     ) -> None:
         self.sm = state_machine
         self.gateway = gateway
@@ -55,6 +60,8 @@ class DeterministicInvestigator:
         self.bearer_token = bearer_token
         self.llm = llm_investigator
         self.claim_validator = claim_validator if claim_validator is not None else ClaimValidator()
+        self.ai_tracer = ai_tracer if ai_tracer is not None else SanitizedAITracer()
+        self.cost_tracker = cost_tracker if cost_tracker is not None else CostAndResourceTracker()
 
     def _format_incident_id(self, raw_id: str) -> str:
         return raw_id if raw_id.startswith("inc-") else f"inc-{raw_id}"
@@ -72,8 +79,20 @@ class DeterministicInvestigator:
         # Initialize resilience tracking for global deadline
         self.resilience.start_incident(incident_id)
 
+        # Initialize C15 AI observability trace and cost accounting session
+        corr_id = alert_or_incident.get("correlation_id") or f"corr-{uuid.uuid4().hex[:12]}"
+        self.cost_tracker.start_incident(incident_id)
+        ai_trace_id = self.ai_tracer.start_trace(
+            incident_id=incident_id,
+            correlation_id=corr_id,
+            trace_id=trace_id,
+            version_manifest=self.sm.get_version_manifest(),
+        )
+
         context: Dict[str, Any] = {
             "incident_id": incident_id,
+            "correlation_id": corr_id,
+            "ai_trace_id": ai_trace_id,
             "service_id": service_id,
             "environment": environment,
             "event_time": event_time,
@@ -97,31 +116,134 @@ class DeterministicInvestigator:
 
         try:
             # 1. RECEIVED
+            t0 = time.perf_counter()
             context = self._step_received(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "RECEIVED", dur)
+            self.ai_tracer.record_span(incident_id, "state.received", duration_ms=dur, attributes={"state": "RECEIVED"})
 
             # 2. CORRELATED
+            t0 = time.perf_counter()
             context = self._step_correlated(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "CORRELATED", dur)
+            self.ai_tracer.record_span(incident_id, "state.correlated", duration_ms=dur, attributes={"state": "CORRELATED"})
 
             # 3. TRIAGED
+            t0 = time.perf_counter()
             context = self._step_triaged(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "TRIAGED", dur)
+            self.ai_tracer.record_span(incident_id, "state.triaged", duration_ms=dur, attributes={"state": "TRIAGED"})
 
             # 4. EVIDENCE_COLLECTED
+            t0 = time.perf_counter()
             context = self._step_evidence_collected(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "EVIDENCE_COLLECTED", dur)
+            self.cost_tracker.record_tool_call(incident_id, count=len(context.get("evidence_items", [])))
+            self.ai_tracer.record_span(
+                incident_id,
+                "state.evidence_collected",
+                duration_ms=dur,
+                attributes={"state": "EVIDENCE_COLLECTED", "evidence_count": len(context.get("evidence_items", []))},
+            )
 
             # 5. RETRIEVED
+            t0 = time.perf_counter()
             context = self._step_retrieved(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "RETRIEVED", dur)
+            self.cost_tracker.record_retrieval(incident_id, dur)
+            self.ai_tracer.record_span(
+                incident_id,
+                "state.retrieved",
+                duration_ms=dur,
+                attributes={
+                    "state": "RETRIEVED",
+                    "citations_count": len(context.get("runbook_citations", [])),
+                    "no_applicable": context.get("no_applicable_runbook", False),
+                },
+            )
 
             # 6. HYPOTHESES
+            t0 = time.perf_counter()
             context = self._step_hypotheses(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "HYPOTHESES", dur)
+            if self.llm:
+                usage = self.llm.ledger.usage(incident_id)
+                in_tok = usage.get("input_reported") or usage.get("input_reserved") or 0
+                out_tok = usage.get("output_reported") or usage.get("output_reserved") or 0
+                self.cost_tracker.record_tokens(incident_id, in_tok, out_tok)
+                self.ai_tracer.record_span(
+                    incident_id,
+                    "state.hypotheses",
+                    duration_ms=dur,
+                    attributes={
+                        "state": "HYPOTHESES",
+                        "mode": context.get("investigation_mode"),
+                        "input_tokens": in_tok,
+                        "output_tokens": out_tok,
+                        "hypotheses_count": len(context.get("hypotheses", [])),
+                    },
+                )
+            else:
+                self.ai_tracer.record_span(
+                    incident_id,
+                    "state.hypotheses",
+                    duration_ms=dur,
+                    attributes={"state": "HYPOTHESES", "mode": "deterministic", "hypotheses_count": len(context.get("hypotheses", []))},
+                )
 
             # 7. VALIDATED
+            t0 = time.perf_counter()
             context = self._step_validated(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "VALIDATED", dur)
+            self.ai_tracer.record_span(
+                incident_id,
+                "state.validated",
+                duration_ms=dur,
+                attributes={
+                    "state": "VALIDATED",
+                    "contradictions_count": len(context.get("contradictions", [])),
+                    "unknowns_count": len(context.get("unknowns", [])),
+                },
+            )
 
             # 8. DRAFTED
+            t0 = time.perf_counter()
             context = self._step_drafted(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "DRAFTED", dur)
+            self.ai_tracer.record_span(
+                incident_id,
+                "state.drafted",
+                duration_ms=dur,
+                attributes={"state": "DRAFTED", "dossier_hash": context.get("dossier_hash")},
+            )
 
             # 9. HUMAN_REVIEW
+            t0 = time.perf_counter()
             context = self._step_human_review(incident_id, context)
+            dur = max(0.0, (time.perf_counter() - t0) * 1000.0)
+            self.cost_tracker.record_state_duration(incident_id, "HUMAN_REVIEW", dur)
+            self.ai_tracer.record_span(incident_id, "state.human_review", duration_ms=dur, attributes={"state": "HUMAN_REVIEW"})
+
+            # Conclude metrics and AI trace session
+            metrics = self.cost_tracker.finish_incident(incident_id, outcome="COMPLETED")
+            context["metrics"] = metrics
+            self.ai_tracer.end_trace(
+                incident_id=incident_id,
+                outcome="COMPLETED",
+                final_summary={
+                    "priority": context.get("priority"),
+                    "dossier_hash": context.get("dossier_hash"),
+                    "total_duration_ms": metrics["latency"]["intake_to_dossier_duration_ms"],
+                    "shadow_cost_usd": metrics["shadow_cost"]["estimated_unit_cost_usd"],
+                },
+            )
 
             return context
 
@@ -295,6 +417,22 @@ class DeterministicInvestigator:
         # Enqueue to DLQ and save checkpoint
         self.resilience.record_dlq_event(incident_id, reason_code, reason, context)
         self.checkpoint.save_checkpoint(incident_id, to_state, context)
+
+        # Conclude cost and AI trace metrics for aborted run fail-open
+        try:
+            metrics = self.cost_tracker.finish_incident(incident_id, outcome=terminal_outcome)
+            context["metrics"] = metrics
+            self.ai_tracer.end_trace(
+                incident_id=incident_id,
+                outcome=terminal_outcome,
+                final_summary={
+                    "reason_code": reason_code,
+                    "abort_reason": reason,
+                    "shadow_cost_usd": metrics["shadow_cost"]["estimated_unit_cost_usd"],
+                },
+            )
+        except Exception as obs_err:
+            _LOG.warning("Failed to record abort metrics for %s: %s", incident_id, obs_err)
 
     # --- Step Implementations ---
 

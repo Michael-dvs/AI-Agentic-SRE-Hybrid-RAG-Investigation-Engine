@@ -1,0 +1,17 @@
+{
+  "clean": true,
+  "total_violations": 0,
+  "violations_by_category": {},
+  "scanned_files_count": 8,
+  "scanned_files": [
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/outage-experiment-audit.jsonl",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/sanitized-trace-export.json",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/audit-correlation.json",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/sink-outage-proof.json",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/sanitized-trace-export.jsonl",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/audit-correlation.jsonl",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/security-audit.jsonl",
+    "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c15-20261116T085541Z/C15/usage-cost-metrics.json"
+  ],
+  "findings": []
+}

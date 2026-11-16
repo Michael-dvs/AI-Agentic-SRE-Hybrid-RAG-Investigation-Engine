@@ -1,0 +1,135 @@
+{
+  "incident_id": "inc-c15-nominal-001",
+  "correlation_id": "corr-c15-emp-001",
+  "trace_id": "ai-trace-d761e0557f994cd8",
+  "cryptographic_hash_chain": {
+    "verified": true,
+    "total_audit_events": 6,
+    "chain_violations": [],
+    "last_event_hash": "8e5b0f137a8a2898460089a80806c2b6901babbebc84dbe2da154b40539a9d87"
+  },
+  "audit_events": [
+    {
+      "audit_event_id": "aud-b2856c267b4a4780",
+      "action": "TOOL_INVOCATION",
+      "actor_ref": "principal_investigator",
+      "target_ref": "get_service_metrics",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": null,
+      "event_hash": "5493e389d0b5298e43e355cd01229e788f746688863d2ebec2dab443fc1d773f",
+      "occurred_at": "2026-11-16T08:55:41.837191Z"
+    },
+    {
+      "audit_event_id": "aud-49a64270980d40eb",
+      "action": "TOOL_INVOCATION",
+      "actor_ref": "principal_investigator",
+      "target_ref": "search_error_logs",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": "5493e389d0b5298e43e355cd01229e788f746688863d2ebec2dab443fc1d773f",
+      "event_hash": "47dd7d5e403518b028ae6dbdb377c0240ff06d7c88813f2130bcdeeb48a428ab",
+      "occurred_at": "2026-11-16T08:55:41.837762Z"
+    },
+    {
+      "audit_event_id": "aud-97f685861f4c48a0",
+      "action": "TOOL_INVOCATION",
+      "actor_ref": "principal_investigator",
+      "target_ref": "get_service_metrics",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": "47dd7d5e403518b028ae6dbdb377c0240ff06d7c88813f2130bcdeeb48a428ab",
+      "event_hash": "3609f8eb578596023f919f1974d0aee1239119919cba39ba170635029976973f",
+      "occurred_at": "2026-11-16T08:55:41.838123Z"
+    },
+    {
+      "audit_event_id": "aud-9b4d813b28c54923",
+      "action": "TOOL_INVOCATION",
+      "actor_ref": "principal_investigator",
+      "target_ref": "search_error_logs",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": "3609f8eb578596023f919f1974d0aee1239119919cba39ba170635029976973f",
+      "event_hash": "e01a6633966c44bccf82f98f464b8587f270b5274be4806b321a0de589b11143",
+      "occurred_at": "2026-11-16T08:55:41.838505Z"
+    },
+    {
+      "audit_event_id": "aud-a49194df2ec44085",
+      "action": "TOOL_INVOCATION",
+      "actor_ref": "principal_investigator",
+      "target_ref": "get_trace_summary",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": "e01a6633966c44bccf82f98f464b8587f270b5274be4806b321a0de589b11143",
+      "event_hash": "196f6c9f7700ec1b3c9c65972d24ba9ae1655c2580c1f5dcd3948f893efc1281",
+      "occurred_at": "2026-11-16T08:55:41.838862Z"
+    },
+    {
+      "audit_event_id": "aud-514de0b679a240ef",
+      "action": "KB_RETRIEVAL",
+      "actor_ref": "principal_investigator",
+      "target_ref": "retrieve_runbooks",
+      "result_code": "ALLOW",
+      "reason_code": "OK",
+      "prev_event_hash": "196f6c9f7700ec1b3c9c65972d24ba9ae1655c2580c1f5dcd3948f893efc1281",
+      "event_hash": "8e5b0f137a8a2898460089a80806c2b6901babbebc84dbe2da154b40539a9d87",
+      "occurred_at": "2026-11-16T08:55:41.839613Z"
+    }
+  ],
+  "correlated_ai_trace_spans": [
+    {
+      "span_id": "span-e652e3badf99",
+      "name": "state.received",
+      "duration_ms": 0.34,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-8ce79351742f",
+      "name": "state.correlated",
+      "duration_ms": 0.26,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-91ec7bd5aaa6",
+      "name": "state.triaged",
+      "duration_ms": 0.163,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-8689c87aeff4",
+      "name": "state.evidence_collected",
+      "duration_ms": 2.357,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-e9dfea57ebac",
+      "name": "state.retrieved",
+      "duration_ms": 0.459,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-a9513b20ad0a",
+      "name": "state.hypotheses",
+      "duration_ms": 0.169,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-c1628f397413",
+      "name": "state.validated",
+      "duration_ms": 0.157,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-c57b8646abfa",
+      "name": "state.drafted",
+      "duration_ms": 1.182,
+      "status": "OK"
+    },
+    {
+      "span_id": "span-e1657a99eedd",
+      "name": "state.human_review",
+      "duration_ms": 0.202,
+      "status": "OK"
+    }
+  ]
+}

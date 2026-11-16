@@ -1,0 +1,58 @@
+{
+  "total_incidents_tracked": 1,
+  "total_tokens_consumed": 3342,
+  "total_shadow_cost_usd": 0.000856,
+  "actual_billed_lab_cost_usd": 0.0,
+  "p95_intake_to_dossier_ms": 6.525,
+  "kpi_07_p95_met": true,
+  "incident_runs": [
+    {
+      "incident_id": "inc-c15-nominal-001",
+      "started_at": "2026-11-16T08:55:41.835456Z",
+      "completed_at": "2026-11-16T08:55:41.842027Z",
+      "outcome": "COMPLETED",
+      "latency": {
+        "intake_to_dossier_duration_ms": 6.525,
+        "retrieval_latency_ms": 0.459,
+        "state_durations_ms": {
+          "RECEIVED": 0.34,
+          "CORRELATED": 0.26,
+          "TRIAGED": 0.163,
+          "EVIDENCE_COLLECTED": 2.357,
+          "RETRIEVED": 0.459,
+          "HYPOTHESES": 0.169,
+          "VALIDATED": 0.157,
+          "DRAFTED": 1.182,
+          "HUMAN_REVIEW": 0.202
+        },
+        "kpi_07_under_120s": true
+      },
+      "tokens": {
+        "prompt_tokens": 2450,
+        "completion_tokens": 380,
+        "embedding_tokens": 512,
+        "total_tokens": 3342
+      },
+      "calls": {
+        "tool_calls_count": 5
+      },
+      "shadow_cost": {
+        "currency": "USD",
+        "estimated_unit_cost_usd": 0.000856,
+        "actual_billed_lab_cost_usd": 0.0,
+        "applied_rates": {
+          "prompt_token_per_1k": 0.00015,
+          "completion_token_per_1k": 0.0006,
+          "embedding_token_per_1k": 2e-05,
+          "tool_call_unit_cost": 5e-05
+        }
+      },
+      "resource_usage": {
+        "initial_rss_mb": 231.83,
+        "final_rss_mb": 231.86,
+        "peak_rss_mb": 231.86,
+        "memory_ceiling_8gib_ok": true
+      }
+    }
+  ]
+}

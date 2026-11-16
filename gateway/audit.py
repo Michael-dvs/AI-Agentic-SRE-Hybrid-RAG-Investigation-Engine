@@ -10,6 +10,7 @@ import uuid
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
+from observability.audit_chain import AuditWriteError, compute_chain_hash, compute_request_fingerprint, verify_chain_integrity
 
 _CONTRACT_PATH = (
     pathlib.Path(__file__).resolve().parent.parent
@@ -105,10 +106,16 @@ class SecurityAuditLogger:
         self.last_event_hash = event_hash
         self.events.append(event)
 
-        # Append to file if configured
+        # Append to file if configured (FAIL_CLOSED)
         if self.log_path:
-            with open(self.log_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(event) + "\n")
+            try:
+                with open(self.log_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(event) + "\n")
+                    f.flush()
+            except Exception as exc:
+                raise AuditWriteError(
+                    f"FAIL_CLOSED: Failed to write audit event {event_id} to {self.log_path}: {exc}"
+                ) from exc
 
         return event
 
