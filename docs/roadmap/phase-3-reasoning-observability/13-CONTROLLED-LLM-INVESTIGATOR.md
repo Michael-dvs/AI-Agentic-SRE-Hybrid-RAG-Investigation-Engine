@@ -2,9 +2,10 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** IMPLEMENTED
+- **Documentation status:** APPROVED
+- **Implementation status:** IMPLEMENTED
+- **Evidence bundle:** `evidence/c13-20261116T024951Z/C13/` (Run ID: `c13-20261116T024951Z`)
 - **Dependencies:** [C08 — Secure Gateway and Foundation G1](../phase-1-foundation/08-SECURE-GATEWAY-AND-FOUNDATION-G1.md) (`G1 PASS`), [C12 — Baseline Dossier and End-to-End G2](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md) (`G2 PASS`), penguncian versi eksak model/provider gratis (`TBD-04`) dan kuota token (`ADR-S05`)
 - **Next chapter:** [C14 — Evidence Validation and Uncertainty](14-EVIDENCE-VALIDATION-AND-UNCERTAINTY.md)
 - **Related requirements:** `BR-003`, `BR-004`, `FR-AGT-003`, `FR-AGT-005`, `FR-AGT-007`, `FR-AGT-008`, `FR-AGT-010`, `RULE-004`, `RULE-007`, `NFR-006`, `NFR-016`, `KPI-12`, `DEP-02`, `RISK-05`, `RISK-08`, `SC-06`, `SC-11`, `SC-13`, `UC-04`, `UC-09`

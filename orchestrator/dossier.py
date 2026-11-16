@@ -346,8 +346,8 @@ class DossierSerializer:
         reproducibility = {
             "workflow_version": manifest.get("workflow_version", "1.0.0"),
             "policy_version": manifest.get("policy_version", "1.0.0"),
-            "model_version": "deterministic_rule_engine_v1",
-            "prompt_version": "deterministic_baseline_rules_v1",
+            "model_version": manifest.get("model_version", "deterministic_rule_engine_v1"),
+            "prompt_version": manifest.get("prompt_version", "deterministic_baseline_rules_v1"),
             "tool_schema_version": manifest.get("tool_schema_version", "1.0"),
             "kb_index_version": manifest.get("kb_version", "kb-idx-20261111-v1"),
             "correlation_ids": [context.get("trace_id") or f"corr-{incident_id}"],

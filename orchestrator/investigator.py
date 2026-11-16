@@ -11,6 +11,8 @@ from gateway.policy import PolicyGateway
 from orchestrator.checkpoint import CheckpointManager
 from orchestrator.dossier import DossierMarkdownRenderer, DossierSerializer
 from orchestrator.fallback import ManualFallbackGenerator
+from orchestrator.context_builder import ContextRejected
+from orchestrator.llm_investigator import LLMInvestigator, sanitized_citations
 from orchestrator.resilience import (
     BudgetExhaustedError,
     CircuitOpenError,
@@ -40,6 +42,7 @@ class DeterministicInvestigator:
         resilience: ResilienceController | None = None,
         checkpoint_manager: CheckpointManager | None = None,
         bearer_token: str = DEFAULT_COORDINATOR_TOKEN,
+        llm_investigator: LLMInvestigator | None = None,
     ) -> None:
         self.sm = state_machine
         self.gateway = gateway
@@ -47,6 +50,7 @@ class DeterministicInvestigator:
         self.resilience = resilience or ResilienceController()
         self.checkpoint = checkpoint_manager or CheckpointManager(self.sm.store)
         self.bearer_token = bearer_token
+        self.llm = llm_investigator
 
     def _format_incident_id(self, raw_id: str) -> str:
         return raw_id if raw_id.startswith("inc-") else f"inc-{raw_id}"
@@ -431,7 +435,7 @@ class DeterministicInvestigator:
                     "error_code": metrics_res.get("error_code"),
                     "data": metrics_res,
                     "records": metrics_res.get("records", []),
-                    "sanitized": metrics_res.get("sanitized", True),
+                    "sanitized": metrics_res.get("sanitized") is True,
                 })
                 seq += 1
             except CircuitOpenError:
@@ -479,7 +483,7 @@ class DeterministicInvestigator:
                     "error_code": logs_res.get("error_code"),
                     "data": logs_res,
                     "records": logs_res.get("records", []),
-                    "sanitized": logs_res.get("sanitized", True),
+                    "sanitized": logs_res.get("sanitized") is True,
                 })
                 seq += 1
             except CircuitOpenError:
@@ -527,7 +531,7 @@ class DeterministicInvestigator:
                 "error_code": traces_res.get("error_code"),
                 "data": traces_res,
                 "records": traces_res.get("records", []),
-                "sanitized": traces_res.get("sanitized", True),
+                "sanitized": traces_res.get("sanitized") is True,
             })
             seq += 1
         except CircuitOpenError:
@@ -594,7 +598,15 @@ class DeterministicInvestigator:
                 _LOG.info("No applicable runbook found for %s (%s)", primary_service, error_code)
             else:
                 context["no_applicable_runbook"] = False
-                context["runbook_citations"] = citations
+                if self.llm:
+                    try:
+                        context["runbook_citations"] = sanitized_citations(retrieval_res)
+                    except ContextRejected:
+                        context["runbook_citations"] = []
+                        context["llm_context_error"] = "SCHEMA_INVALID"
+                        context["no_applicable_runbook"] = True
+                else:
+                    context["runbook_citations"] = citations
 
         except Exception as e:
             _LOG.warning("Runbook retrieval failed for %s: %s", primary_service, e)
@@ -631,7 +643,7 @@ class DeterministicInvestigator:
         for ev in evidence_items:
             tname = ev.get("tool_name")
             data = ev.get("data", {})
-            records = data.get("records", []) if isinstance(data, dict) else []
+            records = ev.get("records", data.get("records", []) if isinstance(data, dict) else [])
 
             if tname == "search_error_logs" and records:
                 observed_errors.extend(records)
@@ -653,7 +665,7 @@ class DeterministicInvestigator:
             ]
 
             if len(err_services) > 1 and primary_service in err_services:
-                downstream = [s for s in err_services if s != primary_service][0]
+                downstream = sorted(s for s in err_services if s != primary_service)[0]
                 hypotheses.append({
                     "hypothesis_id": f"hyp-{incident_id}-001",
                     "title": f"Cascading failure from {downstream} propagating error to {primary_service}",
@@ -707,15 +719,63 @@ class DeterministicInvestigator:
             })
 
         context["hypotheses"] = hypotheses
+        if self.llm:
+            result = self.llm.generate(context, self.resilience)
+            context["llm_result"] = result
+            context["version_manifest"] = {
+                **context["version_manifest"],
+                "model_version": result["manifest"]["version"],
+                "prompt_version": result["manifest"]["prompt_sha256"],
+            }
+            if result["status"] == "accepted":
+                candidates = result["candidates"]
+                primary = {**candidates["primary_hypothesis"],
+                           "supporting_evidence_ids": candidates["supporting_evidence_ids"],
+                           "contradicting_evidence_ids": candidates["contradicting_evidence_ids"]}
+                context["hypotheses"] = [
+                    {
+                        "hypothesis_id": f"hyp-{incident_id}-{index:03d}",
+                        "title": hypothesis["summary"],
+                        "description": (
+                            f"{hypothesis['diagnosis']} "
+                            f"Candidate cause (not proven): {hypothesis['estimated_root_cause']}"
+                        ),
+                        "candidate_cause": hypothesis["estimated_root_cause"],
+                        "confidence_score": {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}[hypothesis["confidence"]],
+                        "status": "PARTIAL",
+                        "supporting_evidence_ids": hypothesis["supporting_evidence_ids"],
+                        "refuting_evidence_ids": hypothesis["contradicting_evidence_ids"],
+                        "unknowns": candidates["unknowns"],
+                    }
+                    for index, hypothesis in enumerate(
+                        [primary, *candidates["alternative_hypotheses"]], start=1
+                    )
+                ]
+                context["unknowns"] = candidates["unknowns"]
+                context["investigation_mode"] = "agentic_llm"
+            else:
+                context["investigation_mode"] = "manual_fallback"
+                context["unknowns"] = [
+                    f"LLM synthesis unavailable ({result['reason_code']}); C11 evidence baseline requires human triage."
+                ]
+                context["review_summary"] = {
+                    "status": "MANUAL_TRIAGE", "latest_review_event_id": None,
+                    "reviewed_by": None, "reviewed_at": None,
+                }
+                context["recommended_checks"] = [
+                    "Manually correlate the collected logs, metrics and trace observation windows.",
+                    "Check unavailable telemetry sources and consult the applicable approved runbook.",
+                    "Have L1/L2 review the evidence and alternative causes before any human-controlled action.",
+                ]
 
         self.sm.transition(
             incident_id=incident_id,
             to_state="HYPOTHESES",
             idempotency_key=f"idem-{incident_id}-hypotheses",
             reason_code="OK",
-            reason=f"Formulated {len(hypotheses)} candidate hypotheses via deterministic rule engine",
+            reason=f"Formulated {len(context['hypotheses'])} candidates ({context.get('investigation_mode', 'deterministic_baseline')})",
             input_data={"evidence_count": len(evidence_items)},
-            output_data={"hypotheses_count": len(hypotheses)},
+            output_data={"hypotheses_count": len(context["hypotheses"])},
         )
         context["timeline"].append({"state": "HYPOTHESES", "timestamp": utc_now_z()})
         self.checkpoint.save_checkpoint(incident_id, "HYPOTHESES", context)
@@ -729,7 +789,7 @@ class DeterministicInvestigator:
         evidence_items = context.get("evidence_items", [])
         hypotheses = context.get("hypotheses", [])
         contradictions: List[str] = []
-        unknowns: List[str] = []
+        unknowns: List[str] = list(context.get("unknowns", []))
 
         # 1. Honest Uncertainty Check: Trace Outage / Missing Trace (EV-02, SC-09)
         trace_ev = [ev for ev in evidence_items if ev.get("tool_name") == "get_trace_summary"]
@@ -761,7 +821,10 @@ class DeterministicInvestigator:
 
         # 3. Assign validated status to hypotheses
         for hyp in hypotheses:
-            if trace_outage:
+            if context.get("investigation_mode") == "manual_fallback":
+                hyp["status"] = "INCONCLUSIVE"
+                hyp["confidence_score"] = min(hyp.get("confidence_score", 0.5), 0.30)
+            elif trace_outage:
                 # Must abstain / downgrade when trace is missing
                 hyp["status"] = "INCONCLUSIVE"
                 hyp["confidence_score"] = min(hyp.get("confidence_score", 0.5), 0.40)
@@ -772,8 +835,10 @@ class DeterministicInvestigator:
             elif not hyp.get("supporting_evidence_ids"):
                 hyp["status"] = "INCONCLUSIVE"
                 hyp["confidence_score"] = 0.20
+            elif context.get("investigation_mode") == "agentic_llm":
+                # C13 proves schema/references, not the semantic claim validation owned by C14.
+                hyp["status"] = "PARTIAL"
             else:
-                # Fully corroborated by available evidence
                 hyp["status"] = "SUPPORTED"
 
         context["contradictions"] = contradictions
@@ -803,7 +868,7 @@ class DeterministicInvestigator:
 
         # Compile standard contract-compliant dossier via DossierSerializer & MarkdownRenderer
         dossier_json = DossierSerializer.serialize(
-            context, revision=1, investigation_mode="deterministic_baseline"
+            context, revision=1, investigation_mode=context.get("investigation_mode", "deterministic_baseline")
         )
         dossier_markdown = DossierMarkdownRenderer.render(dossier_json)
 

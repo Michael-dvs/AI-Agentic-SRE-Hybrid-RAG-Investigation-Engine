@@ -1,0 +1,82 @@
+{
+  "incident_id": "inc-c13-sc13",
+  "scenario_id": "SC-13",
+  "acceptance_test": "OPS-02 / AT-012",
+  "fallback_trigger": "HTTP_503_THREE_RETRIES_EXHAUSTED",
+  "investigation_mode": "manual_fallback",
+  "status": "INCONCLUSIVE",
+  "audit_records": [
+    {
+      "incident_id": "inc-c13-sc13",
+      "observed_at": "2026-11-16T03:20:45.902529Z",
+      "attempt": 1,
+      "reason_code": "HTTP_503",
+      "status": "ATTEMPT_FAILED",
+      "sanitized": true
+    },
+    {
+      "incident_id": "inc-c13-sc13",
+      "observed_at": "2026-11-16T03:20:46.036519Z",
+      "attempt": 2,
+      "reason_code": "HTTP_503",
+      "status": "ATTEMPT_FAILED",
+      "sanitized": true
+    },
+    {
+      "incident_id": "inc-c13-sc13",
+      "observed_at": "2026-11-16T03:20:46.258310Z",
+      "attempt": 3,
+      "reason_code": "HTTP_503",
+      "status": "ATTEMPT_FAILED",
+      "sanitized": true
+    },
+    {
+      "incident_id": "inc-c13-sc13",
+      "observed_at": "2026-11-16T03:20:46.258986Z",
+      "reason_code": "HTTP_503",
+      "status": "INCONCLUSIVE",
+      "investigation_mode": "manual_fallback",
+      "sanitized": true,
+      "usage": {
+        "attempts": 3,
+        "input_reserved": 11388,
+        "output_reserved": 3072,
+        "input_reported": 0,
+        "output_reported": 0,
+        "usage_missing": 3
+      }
+    }
+  ],
+  "dossier_summary": {
+    "status": "MANUAL_TRIAGE",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually correlate the collected logs, metrics and trace observation windows.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-02",
+      "description": "Check unavailable telemetry sources and consult the applicable approved runbook.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-03",
+      "description": "Have L1/L2 review the evidence and alternative causes before any human-controlled action.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ]
+}

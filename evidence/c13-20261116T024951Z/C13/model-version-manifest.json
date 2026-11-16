@@ -1,0 +1,23 @@
+{
+  "provider": "openrouter",
+  "model_name": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "version": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "weights_digest": null,
+  "version_limitation": "Provider model tag; immutable weight digest not exposed",
+  "decoding": {
+    "temperature": 0,
+    "max_output_tokens": 1024
+  },
+  "prompt_sha256": "71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5",
+  "limits": {
+    "max_input_tokens": 4096,
+    "max_output_tokens": 1024,
+    "timeout_seconds": 15.0,
+    "max_retries": 2,
+    "incident_input_tokens": 12288,
+    "incident_output_tokens": 3072
+  },
+  "input_accounting": "utf8_byte_upper_bound_plus_framing_reserve",
+  "cash_budget_usd": 0,
+  "ollama_enabled": false
+}

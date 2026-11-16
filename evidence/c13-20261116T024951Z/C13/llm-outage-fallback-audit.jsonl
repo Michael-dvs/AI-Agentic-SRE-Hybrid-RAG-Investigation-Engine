@@ -1,0 +1,4 @@
+{"incident_id": "inc-c13-sc13", "observed_at": "2026-11-16T03:20:45.902529Z", "attempt": 1, "reason_code": "HTTP_503", "status": "ATTEMPT_FAILED", "sanitized": true}
+{"incident_id": "inc-c13-sc13", "observed_at": "2026-11-16T03:20:46.036519Z", "attempt": 2, "reason_code": "HTTP_503", "status": "ATTEMPT_FAILED", "sanitized": true}
+{"incident_id": "inc-c13-sc13", "observed_at": "2026-11-16T03:20:46.258310Z", "attempt": 3, "reason_code": "HTTP_503", "status": "ATTEMPT_FAILED", "sanitized": true}
+{"incident_id": "inc-c13-sc13", "observed_at": "2026-11-16T03:20:46.258986Z", "reason_code": "HTTP_503", "status": "INCONCLUSIVE", "investigation_mode": "manual_fallback", "sanitized": true, "usage": {"attempts": 3, "input_reserved": 11388, "output_reserved": 3072, "input_reported": 0, "output_reported": 0, "usage_missing": 3}}

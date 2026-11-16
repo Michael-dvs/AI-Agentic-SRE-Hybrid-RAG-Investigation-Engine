@@ -1,0 +1,35 @@
+{
+  "incident_id": "inc-c13-sc11",
+  "observed_at": "2026-11-16T03:20:46.273117Z",
+  "sanitized": true,
+  "candidates": {
+    "primary_hypothesis": {
+      "summary": "Authentication token format rejection",
+      "diagnosis": "HTTP 401 indicates client provided an invalid or expired Bearer token, not an internal auth-service outage.",
+      "confidence": "MEDIUM",
+      "estimated_root_cause": "Malformed client authorization header or expired JWT token."
+    },
+    "alternative_hypotheses": [
+      {
+        "summary": "Upstream proxy header stripping",
+        "diagnosis": "API gateway may have dropped the Authorization header before forwarding to auth-service.",
+        "confidence": "LOW",
+        "estimated_root_cause": "Proxy configuration error or gateway header rewrite.",
+        "supporting_evidence_ids": [
+          "ev-inc-c13-sc11-002"
+        ],
+        "contradicting_evidence_ids": []
+      }
+    ],
+    "supporting_evidence_ids": [
+      "ev-inc-c13-sc11-002"
+    ],
+    "contradicting_evidence_ids": [],
+    "unknowns": [
+      "Client identity and token issuance history are not accessible in lab scope.",
+      "Trace duration is nominal (10ms) showing no database lock contention."
+    ]
+  },
+  "validation_status": "SCHEMA_VALID_UNVERIFIED",
+  "note": "Per RULE-007, model candidates are unverified hypotheses. Semantic claim validation is owned by C14."
+}
