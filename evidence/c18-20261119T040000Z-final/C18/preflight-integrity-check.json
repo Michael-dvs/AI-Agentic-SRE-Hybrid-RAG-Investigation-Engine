@@ -1,0 +1,40 @@
+{
+  "run_id": "c18-20261119T040000Z-final",
+  "checked_at_utc": "2026-11-19T04:59:36.417801+00:00",
+  "hash_method": "SHA-256 binary digest across frozen baseline assets",
+  "files": [
+    {
+      "path": "restricted/evaluator_queries/holdout_queries.json",
+      "baseline_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "actual_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "matches": true
+    },
+    {
+      "path": "restricted/gt_registry/ground_truth_records.jsonl",
+      "baseline_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "actual_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "matches": true
+    }
+  ],
+  "h_g3_partition": {
+    "path": "restricted/gt_registry/h_g3_partition",
+    "records": [
+      "run-20261115-427be9558a.json",
+      "run-20261117-1a61adc567.json"
+    ],
+    "isolated": true
+  },
+  "h_g3_queries": {
+    "path": "restricted/evaluator_queries/h_g3_queries.json",
+    "query_count": 6,
+    "queries": [
+      "QRY-HLD-001",
+      "QRY-HLD-002",
+      "QRY-HLD-003",
+      "QRY-HLD-004",
+      "QRY-HLD-005",
+      "QRY-HLD-006"
+    ]
+  },
+  "h_g4_seal_status": "SEALED_AND_UNTOUCHED"
+}

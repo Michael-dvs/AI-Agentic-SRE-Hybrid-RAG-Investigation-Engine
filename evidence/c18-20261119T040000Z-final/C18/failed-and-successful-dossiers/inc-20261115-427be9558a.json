@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261115-427be9558a",
+  "dossier_version": 1,
+  "severity": "medium",
+  "service_id": "ledger-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T00:00:00Z",
+  "window_start": "2026-11-12T00:00:00Z",
+  "window_end": "2026-11-12T00:00:00Z",
+  "dossier_ready_at": "2026-11-19T01:00:15Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "ledger-service"
+    ],
+    "observed_symptoms": "Telemetry signals indicated anomalies in ledger-service (ERR_UNKNOWN)",
+    "error_budget_impact": "minor"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-12T00:00:00Z",
+      "event_kind": "alert",
+      "source_ref": "alert_intake:queue",
+      "summary": "Incident alert triggered for ledger-service"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261115-427be9558a-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "telemetry:adapter",
+      "observed_at": "2026-11-12T00:00:00Z",
+      "query_window": {
+        "start": "2026-11-12T00:00:00Z",
+        "end": "2026-11-12T00:00:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 0 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-1",
+      "rank": 1,
+      "statement": "Fault detected in ledger-service",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Hypothesis derived from observed signals on ledger-service.",
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "sop_citations": [],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of ledger-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-20261115-427be9558a"
+    ]
+  },
+  "dossier_hash": "020e9bd3cd8f3d4697cf4ca0d8bf276f93fccb021a3bebfbc2e90d485540a03c"
+}

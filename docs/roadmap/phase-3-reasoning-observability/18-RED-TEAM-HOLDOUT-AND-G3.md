@@ -2,9 +2,9 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability (Gate `G3`)
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** APPROVED
+- **Documentation status:** APPROVED
+- **Implementation status:** VERIFIED (19/19 Red-Team Tests PASS, H-G3 Blind Holdout Evaluated via offline join & 14-KPI scorer, H-G4 Sealed, Gate G3 PASSED; diverifikasi di [`../../evidence/c18-20261119T040000Z-final/C18/`](../../evidence/c18-20261119T040000Z-final/C18/))
 - **Dependencies:** [C17 — Offline Evaluation and UAT Harness](17-OFFLINE-EVALUATION-AND-UAT-HARNESS.md), `G2 PASS` ([C12](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md)), kandidat rilis Fase 3 dan split `H-G3` dalam keadaan *frozen*
 - **Next chapter:** [C19 — Lab Shadow Pilot and Manual Baseline](../phase-4-pilot-hardening/19-LAB-SHADOW-PILOT-AND-MANUAL-BASELINE.md)
 - **Related requirements:** `BR-006`, `BR-007`, `BR-011`, `FR-SIM-006`, `FR-OBS-007`, `FR-RAG-004`, `FR-RAG-006`, `FR-RAG-009`, `FR-AGT-001`–`007`, `FR-AGT-010`, `FR-OUT-002`–`003`, `RULE-001`–`008`, `RULE-012`, `NFR-003`–`007`, `NFR-011`–`012`, `NFR-016`–`017`, `NFR-019`, `KPI-02`–`05`, `KPI-07`, `KPI-09`–`12`, `OBJ-02`–`05`, `BEN-02`, `RISK-01`–`05`, `SC-08`–`11`, `SC-13`–`14`

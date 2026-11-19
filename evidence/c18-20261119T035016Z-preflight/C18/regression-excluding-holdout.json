@@ -1,0 +1,11 @@
+{
+  "command": "python3 -m pytest tests/ -q -k 'not test_c06_evaluation_queries_separation_fr_rag_006'",
+  "status": "PASS_WITH_EXCLUSIONS",
+  "passed": 449,
+  "skipped": 6,
+  "deselected": 1,
+  "warnings": 2,
+  "duration_seconds": 22.16,
+  "excluded_reason": "Deselected test parses the mixed H-G3/H-G4 holdout query file; excluded to protect H-G4.",
+  "scope": "Regression with exclusions; not full C18 integrated security acceptance or H-G3 benchmark."
+}

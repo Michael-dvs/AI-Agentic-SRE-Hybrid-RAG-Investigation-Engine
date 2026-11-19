@@ -1,9 +1,9 @@
-"""Offline DEV-only delayed join. All paths and the audit head are trusted configuration.
+"""Offline delayed join for DEV and separately provisioned H-G3 records.
 
 C15 hashes are not signatures: a separately protected trusted chain head is required.
-C16 currently emits no final-dossier-bound closure event, so its ordinary approval
-alone cannot pass this gate. The producer must record the closure payload below
-in the C15 chain after persisting the final dossier.
+C16 emits a final-dossier-bound closure event when its audit sink succeeds.
+Source directories are trusted configuration and must contain only the selected split;
+this runner cannot prove provenance or safely separate a mixed-split registry.
 """
 from __future__ import annotations
 
@@ -41,17 +41,21 @@ def _closure_payload(incident_id: str, version: int, dossier_hash: str) -> dict[
             "dossier_hash": dossier_hash, "terminal_state": "CLOSED"}
 
 
-def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_head: str,
-             incident_id: str, run_id: str, dev_source_dir: Path,
-             output_dir: Path, runtime_dir: Path) -> Path:
-    """Write a joined JSON artifact in a private evaluator directory, returning its path.
+def join_evaluator(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_head: str,
+                   incident_id: str, run_id: str, split_id: str, source_dir: Path,
+                   output_dir: Path, runtime_dir: Path) -> Path:
+    """Join one post-CLOSED record from a dedicated DEV or H-G3 directory.
 
-    The dedicated DEV source consists of one JSON object per run named <run_id>.json,
-    with split_id='dev', incident_id and run_id. Never pass mixed-split registries.
-    Source and output directories must already exist and be mode 0700 (or stricter),
-    outside and disjoint from the runtime directory. The caller supplies the complete
-    chain and an independently trusted head; neither can be established by hashing alone.
+    Each source is an owner-only JSON object named <run_id>.json. The caller must
+    independently provision and verify a single-split directory; never supply a
+    mixed registry. H-G4 and all other split identifiers are rejected before source
+    access. Paths and the complete audit chain's independently trusted head are
+    trusted configuration; hashing alone cannot establish their trustworthiness.
     """
+    if split_id == "H-G4":
+        raise EvaluationBlocked("H-G4 split remains strictly sealed until C21")
+    if split_id not in ("dev", "H-G3"):
+        raise EvaluationBlocked("Unsupported evaluation split")
     if not re.fullmatch(r"inc-[a-z0-9-]+", incident_id) or not re.fullmatch(r"run-[a-z0-9-]+", run_id):
         raise EvaluationBlocked("Invalid opaque identifier")
     incident = store.get_incident(incident_id)
@@ -85,7 +89,7 @@ def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_he
                and event.get("request_fingerprint") == fingerprint for event in audit_events):
         raise EvaluationBlocked("No final-dossier-bound closure audit event")
 
-    source = _private_directory(Path(dev_source_dir))
+    source = _private_directory(Path(source_dir))
     output = _private_directory(Path(output_dir))
     runtime = Path(runtime_dir).resolve(strict=True)
     if _overlap(source, output) or _overlap(source, runtime) or _overlap(output, runtime):
@@ -98,7 +102,7 @@ def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_he
             info = os.fstat(fd)
             if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
                     or info.st_mode & 0o077 or info.st_nlink != 1):
-                raise EvaluationBlocked("DEV source must be an owner-only regular file")
+                raise EvaluationBlocked("Evaluation source must be an owner-only regular file")
             with os.fdopen(fd, encoding="utf-8") as stream:
                 fd = -1
                 ground_truth = json.load(stream)
@@ -107,9 +111,9 @@ def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_he
                 os.close(fd)
     finally:
         os.close(source_fd)
-    if (not isinstance(ground_truth, dict) or ground_truth.get("split_id") != "dev"
+    if (not isinstance(ground_truth, dict) or ground_truth.get("split_id") != split_id
             or ground_truth.get("run_id") != run_id or ground_truth.get("incident_id") != incident_id):
-        raise EvaluationBlocked("Source is not a matching DEV record")
+        raise EvaluationBlocked(f"Source is not a matching {'DEV' if split_id == 'dev' else 'H-G3'} record")
     payload = {"run_id": run_id, "incident_id": incident_id,
                "dossier": dossier, "ground_truth": ground_truth}
     output_fd = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
@@ -129,3 +133,12 @@ def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_he
     finally:
         os.close(output_fd)
     return output / f"{run_id}.json"
+
+
+def join_dev(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_head: str,
+             incident_id: str, run_id: str, dev_source_dir: Path,
+             output_dir: Path, runtime_dir: Path) -> Path:
+    """Preserve the DEV-only API with the same isolation and closure checks."""
+    return join_evaluator(store=store, audit_events=audit_events, trusted_audit_head=trusted_audit_head,
+                          incident_id=incident_id, run_id=run_id, split_id="dev",
+                          source_dir=dev_source_dir, output_dir=output_dir, runtime_dir=runtime_dir)

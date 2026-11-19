@@ -1,11 +1,11 @@
-"""DEV-only delayed join tests using synthetic, per-run records."""
+"""Delayed join tests using synthetic, per-run records."""
 import copy
 import json
 import os
 
 import pytest
 
-from evaluator.runner import EvaluationBlocked, _closure_payload, join_dev
+from evaluator.runner import EvaluationBlocked, _closure_payload, join_dev, join_evaluator
 from observability.audit_chain import AuditHashChain
 from orchestrator.dossier import compute_canonical_dossier_hash
 from orchestrator.state_machine import WorkflowStateStore
@@ -136,3 +136,68 @@ def test_isolation_rejects_runtime_paths_and_unsafe_sources(setup, tmp_path):
     source.symlink_to(tmp_path / "elsewhere")
     with pytest.raises(OSError):
         join_dev(**setup)
+
+
+def _join_args(setup, split_id):
+    args = dict(setup)
+    args["source_dir"] = args.pop("dev_source_dir")
+    args["split_id"] = split_id
+    return args
+
+
+def test_hg3_join_uses_matching_dedicated_record(setup):
+    path = setup["dev_source_dir"] / "run-test.json"
+    record = json.loads(path.read_text())
+    record["split_id"] = "H-G3"
+    path.write_text(json.dumps(record))
+    result = join_evaluator(**_join_args(setup, "H-G3"))
+    assert json.loads(result.read_text())["ground_truth"] == record
+    assert result.stat().st_mode & 0o077 == 0
+    assert list(setup["runtime_dir"].iterdir()) == []
+
+
+@pytest.mark.parametrize("split_id", ["H-G4", "h-g3", "", "other", None])
+def test_unsupported_split_blocked_before_source_access(setup, split_id, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("source access attempted")
+
+    monkeypatch.setattr("evaluator.runner._private_directory", forbidden)
+    message = "H-G4 split remains strictly sealed until C21" if split_id == "H-G4" else "Unsupported evaluation split"
+    with pytest.raises(EvaluationBlocked, match=message):
+        join_evaluator(**_join_args(setup, split_id))
+
+
+@pytest.mark.parametrize("source_split", ["dev", "H-G4"])
+def test_hg3_rejects_mismatched_record(setup, source_split):
+    path = setup["dev_source_dir"] / "run-test.json"
+    record = json.loads(path.read_text())
+    record["split_id"] = source_split
+    path.write_text(json.dumps(record))
+    with pytest.raises(EvaluationBlocked, match="matching H-G3"):
+        join_evaluator(**_join_args(setup, "H-G3"))
+    assert list(setup["output_dir"].iterdir()) == []
+
+
+def test_hg3_preserves_closure_and_isolation_guards(setup):
+    args = _join_args(setup, "H-G3")
+    setup["store"].update_incident_state("inc-test", "HUMAN_REVIEW", "ACTIVE")
+    args["source_dir"] = args["source_dir"] / "missing"
+    with pytest.raises(EvaluationBlocked, match="PREMATURE"):
+        join_evaluator(**args)
+    setup["store"].update_incident_state("inc-test", "CLOSED", "CLOSED")
+    args["source_dir"] = setup["dev_source_dir"]
+    args["output_dir"] = setup["runtime_dir"]
+    with pytest.raises(EvaluationBlocked, match="disjoint"):
+        join_evaluator(**args)
+
+
+def test_hg3_unanchored_audit_blocks_before_source_access(setup, monkeypatch):
+    args = _join_args(setup, "H-G3")
+    args["trusted_audit_head"] = "a" * 64
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("source access attempted")
+
+    monkeypatch.setattr("evaluator.runner._private_directory", forbidden)
+    with pytest.raises(EvaluationBlocked, match="unanchored"):
+        join_evaluator(**args)

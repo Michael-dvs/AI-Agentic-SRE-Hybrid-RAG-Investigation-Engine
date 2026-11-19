@@ -1,0 +1,160 @@
+{
+  "metrics": {
+    "KPI-01": {
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1.0,
+      "status": "MEASURED",
+      "missing": 0
+    },
+    "KPI-02": {
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1.0,
+      "status": "MEASURED",
+      "missing": 0,
+      "all_causes": {
+        "numerator": 2,
+        "denominator": 2,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      },
+      "primary_cause": {
+        "numerator": 2,
+        "denominator": 2,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      }
+    },
+    "KPI-03": {
+      "numerator": 2,
+      "denominator": 2,
+      "value": 1.0,
+      "status": "MEASURED",
+      "missing": 0
+    },
+    "KPI-04": {
+      "numerator": 0,
+      "denominator": 2,
+      "value": 0.0,
+      "status": "MEASURED",
+      "missing": 0,
+      "critical_security_unsupported": 0
+    },
+    "KPI-05": {
+      "hit_rate_at_5": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 2
+      },
+      "classical_recall_at_5": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 2
+      }
+    },
+    "KPI-06": {
+      "numerator": 0,
+      "denominator": 2,
+      "value": null,
+      "status": "PARTIAL",
+      "missing": 2,
+      "label_sources": [
+        "SELF_EVALUATED_DEVELOPER_LABELS"
+      ]
+    },
+    "KPI-07": {
+      "value": 75.0,
+      "unit": "seconds",
+      "method": "nearest_rank",
+      "count": 2,
+      "missing": 0,
+      "status": "MEASURED"
+    },
+    "KPI-08": {
+      "value": null,
+      "matched_count": 0,
+      "missing": 2,
+      "status": "UNAVAILABLE"
+    },
+    "KPI-09": {
+      "value": 0,
+      "observed_count": 0,
+      "missing": 0,
+      "status": "MEASURED"
+    },
+    "KPI-10": {
+      "value": 0,
+      "observed_count": 0,
+      "missing": 0,
+      "status": "MEASURED"
+    },
+    "KPI-11": {
+      "value": 0,
+      "observed_count": 0,
+      "missing": 0,
+      "status": "MEASURED"
+    },
+    "KPI-12": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null,
+      "status": "PARTIAL",
+      "missing": 2
+    },
+    "KPI-13": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null,
+      "status": "PARTIAL",
+      "missing": 2
+    },
+    "KPI-14": {
+      "numerator": 0.0,
+      "denominator": 2,
+      "value": null,
+      "status": "PARTIAL",
+      "missing": 2,
+      "total_observed_cost": 0.0,
+      "unit": "caller-specified common currency per completed case",
+      "tokens": {
+        "value": 6400,
+        "observed_total": 6400,
+        "missing": 0,
+        "status": "MEASURED"
+      }
+    }
+  },
+  "separate": {
+    "healthy_false_positive_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null,
+      "status": "UNAVAILABLE",
+      "missing": 0
+    },
+    "safety_abstention_accuracy": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null,
+      "status": "UNAVAILABLE",
+      "missing": 0
+    },
+    "zero_claims_fallback": 0,
+    "valid_abstain_zero_claims": 0,
+    "AT-016": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null,
+      "status": "UNAVAILABLE",
+      "missing": 0
+    },
+    "resource_measurements": []
+  }
+}

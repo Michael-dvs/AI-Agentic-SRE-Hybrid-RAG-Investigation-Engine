@@ -1,0 +1,18 @@
+{
+  "run_id": "c18-20261119T035016Z-preflight",
+  "gate_recommendation": "BLOCKED",
+  "reviewer_authority": "TBD",
+  "risks": [
+    {"id": "C18-PREFLIGHT-01", "status": "OPEN", "severity": "BLOCKER", "finding": "C17 runner accepts only DEV; required final-dossier-bound closure event is not emitted by C16 according to runner documentation.", "evidence": "evaluator/runner.py:1-6,44-46,80-86,110-112", "owner": "TBD", "disposition": "Establish and qualify isolated H-G3 post-CLOSED join and trusted audit closure on DEV before freeze."},
+    {"id": "C18-PREFLIGHT-02", "status": "OPEN", "severity": "BLOCKER", "finding": "C17 DEV UAT ledger marks all 12 proposal tests and AT-001 through AT-017 BLOCKED for full acceptance.", "evidence": "evidence/c17-20261119T032931Z-6ad5ea8e/C17/dev-uat-ledger.md", "owner": "TBD", "disposition": "Reconcile readiness and complete required DEV acceptance before H-G3."},
+    {"id": "C18-PREFLIGHT-03", "status": "OPEN", "severity": "BLOCKER", "finding": "H-G3 and H-G4 share files; byte-level checksum does not establish zero access history, and filtering mixed records can expose H-G4.", "owner": "TBD", "disposition": "Agree auditable isolation and access-history proof before opening H-G3; do not parse H-G4."}
+  ],
+  "updates": [
+    {"risk_id": "C18-PREFLIGHT-01", "note": "Correction: C16 code emits the bound closure event when its audit sink succeeds; source docstring was stale. A dedicated H-G3 join was added and synthetic runner tests passed, but independently provisioned split provenance and integrated closure remain unverified."},
+    {"risk_id": "C18-PREFLIGHT-02", "note": "Owner directive assigns full integrated acceptance to C18; historical E17 ledger remains BLOCKED. Replay-backed C18 tests are not active-model acceptance."},
+    {"risk_id": "C18-PREFLIGHT-03", "note": "An empty owner-only H-G3 directory exists. No safe index for selecting H-G3 without reading H-G4 is established. Full tests include test_c06_evaluation_queries_separation_fr_rag_006, which parses the mixed holdout query file."},
+    {"risk_id": "C18-PREFLIGHT-02", "note": "Replay security suite initially 18 passed and 1 failed due to an incorrect HTTP_503 audit-code expectation. Corrected to documented SOURCE_UNAVAILABLE and separately checked persisted hash chain; corrected single test passed and full replay suite then reported 19 passed. Integrated active-model acceptance remains NOT_RUN."}
+  ],
+  "post_holdout_revisions": [],
+  "note": "No H-G3 result observed in this preflight; no determination about earlier access."
+}

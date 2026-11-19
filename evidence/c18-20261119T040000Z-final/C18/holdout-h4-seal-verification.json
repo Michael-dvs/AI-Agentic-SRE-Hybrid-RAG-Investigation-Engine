@@ -1,0 +1,25 @@
+{
+  "status": "VERIFIED_SEALED",
+  "method": "BYTE_RANGE_SLICING_AND_OFFSET_ISOLATION",
+  "h_g4_holdout_records": {
+    "source_file": "restricted/gt_registry/ground_truth_records.jsonl",
+    "h_g4_line_number": 7,
+    "h_g4_run_id": "run-20261118-e39b744a19",
+    "parsed_during_c18": false,
+    "included_in_h_g3_partition": false
+  },
+  "h_g4_queries": {
+    "source_file": "restricted/evaluator_queries/holdout_queries.json",
+    "h_g4_query_ids": [
+      "QRY-HLD-007",
+      "QRY-HLD-008",
+      "QRY-HLD-009",
+      "QRY-HLD-010",
+      "QRY-HLD-011",
+      "QRY-HLD-012"
+    ],
+    "parsed_during_c18": false,
+    "included_in_h_g3_queries": false
+  },
+  "access_log": "Zero H-G4 data access occurred during C18 execution."
+}
