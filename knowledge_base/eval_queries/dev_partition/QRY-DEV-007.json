@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-007",
+  "query_text": "Mitigasi kegagalan dependensi downstream pada transaction service",
+  "target_service_id": "transaction-service",
+  "expected_document_ids": [
+    "SOP-TX-001"
+  ],
+  "expected_section_paths": [
+    "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 2. Prosedur Investigasi dan Mitigasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Alert SimDependencyUnavailable pada transaksi transfer"
+}

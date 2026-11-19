@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-002",
+  "query_text": "Penanganan kode error ERR_UPSTREAM_TIMEOUT HTTP 504 pada gateway",
+  "target_service_id": "api-gateway",
+  "expected_document_ids": [
+    "SOP-GW-ERR-504"
+  ],
+  "expected_section_paths": [
+    "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 2. Prosedur Investigasi Keterlambatan Upstream"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Timeout downstream panggilan HTTP ingress"
+}

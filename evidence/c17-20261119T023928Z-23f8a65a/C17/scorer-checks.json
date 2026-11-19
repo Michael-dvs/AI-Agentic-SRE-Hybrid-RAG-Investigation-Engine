@@ -1,0 +1,90 @@
+{
+  "checks": [
+    {
+      "node": "tests/test_c17_scorer.py::test_requested_qualification_cases",
+      "planned_command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_requested_qualification_cases"
+      ],
+      "command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_requested_qualification_cases"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": "......                                                                   [100%]\n6 passed in 0.01s\n",
+      "stderr": ""
+    },
+    {
+      "node": "tests/test_c17_scorer.py::test_failed_cost_and_denominators",
+      "planned_command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_failed_cost_and_denominators"
+      ],
+      "command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_failed_cost_and_denominators"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+      "stderr": ""
+    },
+    {
+      "node": "tests/test_c17_scorer.py::test_controls_abstention_multifault",
+      "planned_command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_controls_abstention_multifault"
+      ],
+      "command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_controls_abstention_multifault"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+      "stderr": ""
+    },
+    {
+      "node": "tests/test_c17_scorer.py::test_missing_inputs_and_replay",
+      "planned_command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_missing_inputs_and_replay"
+      ],
+      "command": [
+        "/opt/homebrew/opt/python@3.12/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_c17_scorer.py::test_missing_inputs_and_replay"
+      ],
+      "status": "PASS",
+      "returncode": 0,
+      "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+      "stderr": ""
+    }
+  ],
+  "status": "PASS",
+  "scope": "Synthetic scorer checks only; not acceptance or benchmark certification"
+}

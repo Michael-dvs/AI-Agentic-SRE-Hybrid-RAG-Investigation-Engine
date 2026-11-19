@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "/opt/homebrew/opt/python@3.12/bin/python3.12",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_c15_cost_accounting.py::test_tracker_aggregates_multiple_runs_including_failed_runs"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": ""
+  }
+]

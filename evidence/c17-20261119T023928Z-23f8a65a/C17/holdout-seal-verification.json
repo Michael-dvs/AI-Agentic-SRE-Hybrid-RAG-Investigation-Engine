@@ -1,0 +1,4 @@
+{
+  "status": "NOT VERIFIED",
+  "reason": "No independent audit of sealed split access logs and hashes was provided; no assertion about read count or integrity is made."
+}

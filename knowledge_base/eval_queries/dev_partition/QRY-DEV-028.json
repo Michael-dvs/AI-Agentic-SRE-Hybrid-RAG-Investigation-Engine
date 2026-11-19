@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-028",
+  "query_text": "Penghentian kueri database macet menggunakan pg_cancel_backend",
+  "target_service_id": "db-dummy",
+  "expected_document_ids": [
+    "SOP-DB-001"
+  ],
+  "expected_section_paths": [
+    "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Cancel backend kueri PostgreSQL"
+}

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-020",
+  "query_text": "Pengecekan clock skew dan masa berlaku token autentikasi",
+  "target_service_id": "auth-service",
+  "expected_document_ids": [
+    "SOP-AUTH-001"
+  ],
+  "expected_section_paths": [
+    "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 2. Prosedur Investigasi dan Validasi"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Verifikasi sinkronisasi waktu dan expiry token"
+}

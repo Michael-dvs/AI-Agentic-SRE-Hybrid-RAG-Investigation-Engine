@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-006",
+  "query_text": "Penyebab token ditolak akibat mismatch key verifikasi pada auth service",
+  "target_service_id": "auth-service",
+  "expected_document_ids": [
+    "KNOWN-ERR-AUTH-001"
+  ],
+  "expected_section_paths": [
+    "KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token > 2. Solusi Permanen dan Solusi Sementara (Workaround)"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Known error ketidakcocokan konfigurasi secret JWT"
+}

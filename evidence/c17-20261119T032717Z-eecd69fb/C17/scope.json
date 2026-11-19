@@ -1,0 +1,16 @@
+{
+  "status": "BLOCKED",
+  "split": "DEV",
+  "excluded": [
+    "All holdout data and queries",
+    "tests/test_c06_knowledge_and_ingestion.py: contains a sealed-query read",
+    "Live Docker fault-recovery test: target identity not verified",
+    "Scenario tests without proven DEV split"
+  ],
+  "limitations": [
+    "No full regression suite was executed",
+    "Supporting checks cannot establish complete UAT",
+    "AT-013 final clean replays and AT-014 locked benchmark are outside C17",
+    "No independent seal audit"
+  ]
+}

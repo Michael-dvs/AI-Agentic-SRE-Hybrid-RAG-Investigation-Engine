@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-001",
+  "query_text": "Bagaimana langkah mitigasi saat terjadi lonjakan error rate HTTP 5xx pada API Gateway?",
+  "target_service_id": "api-gateway",
+  "expected_document_ids": [
+    "SOP-GW-001"
+  ],
+  "expected_section_paths": [
+    "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 2. Prosedur Mitigasi Operasional"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Triage alert SimHighErrorRate pada ingress gateway"
+}

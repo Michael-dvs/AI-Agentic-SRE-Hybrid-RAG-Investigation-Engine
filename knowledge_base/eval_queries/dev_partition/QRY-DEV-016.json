@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-016",
+  "query_text": "Investigasi saturasi connection pool dan kueri macet di PostgreSQL db-dummy",
+  "target_service_id": "db-dummy",
+  "expected_document_ids": [
+    "SOP-DB-001"
+  ],
+  "expected_section_paths": [
+    "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Pemeriksaan pg_stat_activity dan cancel backend"
+}

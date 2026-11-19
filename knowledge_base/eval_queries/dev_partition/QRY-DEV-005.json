@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-005",
+  "query_text": "Penanganan HTTP 500 unhandled exception pada internal auth service",
+  "target_service_id": "auth-service",
+  "expected_document_ids": [
+    "SOP-AUTH-ERR-500"
+  ],
+  "expected_section_paths": [
+    "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Error 500 internal pada modul decoding autentikasi"
+}

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-025",
+  "query_text": "Pemeriksaan row-level lock contention pada update saldo ledger",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "SOP-LEDGER-ERR-504"
+  ],
+  "expected_section_paths": [
+    "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Pemeriksaan baris terkunci pada saldo"
+}

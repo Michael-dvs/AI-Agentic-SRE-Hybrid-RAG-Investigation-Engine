@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-013",
+  "query_text": "Penanganan antrean pesan dan consumer lag pada notification service",
+  "target_service_id": "notification-service",
+  "expected_document_ids": [
+    "SOP-NOTIF-001"
+  ],
+  "expected_section_paths": [
+    "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Alert SimQueueConsumerLag notifikasi"
+}

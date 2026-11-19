@@ -298,6 +298,24 @@ class AuthorizedReviewManager:
                         incident_id=formatted_inc_id,
                         target_version=str(effective_target_version),
                     )
+                    # Record closure event binding the final dossier hash required by C17 offline evaluation gate
+                    final_dossier_hash = updated_hash
+                    closure_payload = {
+                        "incident_id": formatted_inc_id,
+                        "dossier_version": effective_target_version,
+                        "dossier_hash": final_dossier_hash,
+                        "terminal_state": "CLOSED",
+                    }
+                    audit_sink.record_event(
+                        actor_ref="principal_reviewer",
+                        action="WORKFLOW_TRANSITION",
+                        target_ref=f"{formatted_inc_id}:v{effective_target_version}",
+                        result_code="ALLOW",
+                        reason_code="OK",
+                        request_payload=closure_payload,
+                        incident_id=formatted_inc_id,
+                        target_version=str(effective_target_version),
+                    )
                 except Exception as e:
                     _LOG.warning("Failed to record sign-off audit event: %s", e)
 

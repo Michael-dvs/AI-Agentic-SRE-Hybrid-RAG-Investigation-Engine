@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-018",
+  "query_text": "Aliran data transaksi sinkron dari gateway ke ledger service",
+  "target_service_id": "api-gateway",
+  "expected_document_ids": [
+    "ARCH-SIM-ECOSYSTEM.md"
+  ],
+  "expected_section_paths": [
+    "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Topologi alur request sinkron"
+}

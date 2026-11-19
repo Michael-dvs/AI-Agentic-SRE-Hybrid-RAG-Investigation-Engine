@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-022",
+  "query_text": "Penyelamatan idempotency key transaksi saat terjadi downstream error",
+  "target_service_id": "transaction-service",
+  "expected_document_ids": [
+    "SOP-TX-001"
+  ],
+  "expected_section_paths": [
+    "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi > 2. Prosedur Investigasi dan Mitigasi"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Idempotency key unlock"
+}

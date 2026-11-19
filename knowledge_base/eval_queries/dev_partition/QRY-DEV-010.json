@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-010",
+  "query_text": "SOP resmi aktif mitigasi latensi database PostgreSQL ledger",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "SOP-LEDGER-001"
+  ],
+  "expected_section_paths": [
+    "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "SOP versi 2 aktif penanganan latensi database ledger"
+}

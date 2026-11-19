@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-021",
+  "query_text": "Restart graceful container auth-service saat terjadi error internal",
+  "target_service_id": "auth-service",
+  "expected_document_ids": [
+    "SOP-AUTH-ERR-500"
+  ],
+  "expected_section_paths": [
+    "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Restart mandiri auth service"
+}

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-019",
+  "query_text": "Eskalasi insiden lonjakan error HTTP 5xx pada gateway ke tim SRE L2",
+  "target_service_id": "api-gateway",
+  "expected_document_ids": [
+    "SOP-GW-001"
+  ],
+  "expected_section_paths": [
+    "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 3. Langkah Eskalasi dan Handover"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Prosedur handover insiden gateway"
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "/opt/homebrew/opt/python@3.12/bin/python3.12",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_c08_secure_gateway.py::test_backend_outage_simulation_returns_unavailable"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n=============================== warnings summary ===============================\ngateway/dispatcher.py:8\n  /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/gateway/dispatcher.py:8: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient\n\n../../../../../../../../opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53\n  /opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 passed, 2 warnings in 1.92s\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-012",
+  "query_text": "Mengatasi kebocoran sesi idle in transaction pada connection pool ledger",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "KNOWN-ERR-LEDGER-001"
+  ],
+  "expected_section_paths": [
+    "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Pembersihan koneksi idle in transaction"
+}

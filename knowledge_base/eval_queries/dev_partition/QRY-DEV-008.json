@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-008",
+  "query_text": "Penanganan error 500 internal pada pemrosesan transaksi finansial",
+  "target_service_id": "transaction-service",
+  "expected_document_ids": [
+    "SOP-TX-ERR-500"
+  ],
+  "expected_section_paths": [
+    "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Error 500 transaksi internal"
+}

@@ -1,0 +1,777 @@
+{
+  "split": "DEV",
+  "run_id": "c17-20261119T024131Z-8ae8dd13",
+  "records": [
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "SEC-01",
+      "requirement_ids": [
+        "FR-RAG-004",
+        "NFR-003",
+        "RULE-003"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_cross_service_scope_enforcement"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039981+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "SEC-02",
+      "requirement_ids": [
+        "RULE-004",
+        "FR-AGT-003"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_context.py::test_prompt_injection_stays_user_data"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039990+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "SEC-03",
+      "requirement_ids": [
+        "NFR-003",
+        "NFR-012",
+        "NFR-017"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c15_dlp_scanner.py::test_dlp_scanner_detects_synthetic_secrets_and_pii"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039993+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "MCP-01",
+      "requirement_ids": [
+        "BR-007",
+        "FR-AGT-002",
+        "FR-AGT-003",
+        "RULE-003",
+        "KPI-09"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_controlled_llm.py::test_mcp01_provider_native_tool_call_is_denied"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039994+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "MCP-02",
+      "requirement_ids": [
+        "FR-AGT-002",
+        "FR-AGT-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_excessive_time_window_rejected_without_silent_clamping"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039996+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "RAG-01",
+      "requirement_ids": [
+        "FR-RAG-004",
+        "FR-RAG-008",
+        "RULE-005",
+        "KPI-11"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_context.py::test_citation_trust_metadata_does_not_override_scope"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039998+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "RAG-02",
+      "requirement_ids": [
+        "FR-RAG-004",
+        "RULE-005",
+        "KPI-11"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_cross_service_scope_enforcement"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.039999+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "EV-01",
+      "requirement_ids": [
+        "BR-006",
+        "FR-AGT-006"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c14_contradiction_and_uncertainty.py::test_ev01_metrics_normal_vs_logs_error_conflict"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040001+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "EV-02",
+      "requirement_ids": [
+        "FR-OBS-007",
+        "RULE-006",
+        "NFR-016"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_backend_outage_simulation_returns_unavailable"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040002+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "OPS-01",
+      "requirement_ids": [
+        "FR-OBS-005",
+        "FR-AGT-004",
+        "NFR-010"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c10_alert_intake_correlation.py::test_deduplication_100_burst_duplicate_alerts"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040004+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "OPS-02",
+      "requirement_ids": [
+        "FR-AGT-007",
+        "NFR-005",
+        "NFR-006",
+        "KPI-12"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_controlled_llm.py::test_ops02_three_transient_attempts_then_fallback"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040005+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "HUM-01",
+      "requirement_ids": [
+        "BR-012",
+        "FR-OUT-004",
+        "RULE-008"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c16_human_review.py::test_hum01_zero_auto_remediation"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040007+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-001",
+      "requirement_ids": [
+        "BR-001",
+        "FR-SIM-001"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040010+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-002",
+      "requirement_ids": [
+        "BR-002",
+        "FR-SIM-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040012+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-003",
+      "requirement_ids": [
+        "FR-OBS-001",
+        "FR-OBS-002",
+        "FR-OBS-003",
+        "FR-OBS-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c10_alert_intake_correlation.py::test_end_to_end_intake_to_incident_context"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040014+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-004",
+      "requirement_ids": [
+        "FR-AGT-001"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c11_investigation_workflow.py::test_sequential_9_states_happy_path"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040016+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-005",
+      "requirement_ids": [
+        "FR-AGT-002",
+        "FR-AGT-003",
+        "FR-AGT-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040017+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-006",
+      "requirement_ids": [
+        "FR-RAG-003"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040019+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-007",
+      "requirement_ids": [
+        "FR-RAG-004",
+        "RULE-005"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040021+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-008",
+      "requirement_ids": [
+        "RULE-002"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c08_secure_gateway.py::test_ground_truth_path_access_blocked"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040023+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-009",
+      "requirement_ids": [
+        "FR-AGT-006"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c14_contradiction_and_uncertainty.py::test_ev01_metrics_normal_vs_logs_error_conflict"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040024+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-010",
+      "requirement_ids": [
+        "FR-OUT-001",
+        "FR-OUT-002",
+        "FR-OUT-003",
+        "FR-OUT-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c16_human_review.py::test_at010_unauthorized_review_rejected"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040026+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-011",
+      "requirement_ids": [
+        "RULE-004"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_context.py::test_prompt_injection_stays_user_data"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040028+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-012",
+      "requirement_ids": [
+        "NFR-006",
+        "FR-AGT-007"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c13_controlled_llm.py::test_ops02_three_transient_attempts_then_fallback"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040029+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-013",
+      "requirement_ids": [
+        "NFR-002",
+        "KPI-13"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040031+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-014",
+      "requirement_ids": [
+        "KPI-02",
+        "KPI-03",
+        "KPI-04",
+        "KPI-05",
+        "KPI-06",
+        "KPI-07",
+        "KPI-08"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040033+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-015",
+      "requirement_ids": [
+        "NFR-013"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c15_cost_accounting.py::test_tracker_aggregates_multiple_runs_including_failed_runs"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040035+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-016",
+      "requirement_ids": [
+        "FR-OBS-006"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "No complete DEV acceptance procedure executed.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040036+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    },
+    {
+      "test_run_id": "c17-20261119T024131Z-8ae8dd13",
+      "test_id": "AT-017",
+      "requirement_ids": [
+        "FR-OUT-007"
+      ],
+      "preconditions": "DEV only; full acceptance procedure and dependencies required",
+      "commands": [],
+      "planned_commands": [
+        [
+          "/opt/homebrew/opt/python@3.12/bin/python3.12",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_c16_human_review.py::test_at017_ticket_creation_guard"
+        ]
+      ],
+      "dataset_version": "DEV; version not established",
+      "expected": "Complete acceptance criteria satisfied by DEV evidence",
+      "actual": "Mapped supporting check not executed; full DEV acceptance not established.",
+      "status": "BLOCKED",
+      "evidence_link": null,
+      "defect_id": null,
+      "reviewer": null,
+      "date": "2026-11-19T02:41:31.040038+00:00",
+      "disposition": "Full DEV acceptance remains unproven"
+    }
+  ]
+}

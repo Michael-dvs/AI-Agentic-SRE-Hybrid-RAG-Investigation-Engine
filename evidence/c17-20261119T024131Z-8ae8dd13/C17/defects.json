@@ -1,0 +1,23 @@
+{
+  "defects": [
+    {
+      "defect_id": "C17-INTEGRATION-01",
+      "test_id": "AT-008",
+      "status": "OPEN",
+      "description": "C16 approval audit does not bind the final post-review dossier hash required by the C17 closure gate."
+    },
+    {
+      "defect_id": "C17-ISOLATION-01",
+      "test_id": "AT-008",
+      "status": "OPEN",
+      "description": "The DEV-only source is trusted configuration; the split is checked after reading and the C04 mixed registry is not integrated."
+    },
+    {
+      "defect_id": "C17-SEAL-01",
+      "test_id": "AT-014",
+      "status": "OPEN",
+      "description": "Independent evidence of zero holdout reads and seal integrity is unavailable."
+    }
+  ],
+  "scope": "Known integration and seal blockers plus failures observed in mapped checks; unexecuted acceptance criteria remain blocked."
+}

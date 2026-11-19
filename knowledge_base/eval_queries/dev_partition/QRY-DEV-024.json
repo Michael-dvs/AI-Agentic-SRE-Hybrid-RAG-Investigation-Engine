@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-024",
+  "query_text": "Langkah drain connection pool database ledger secara bertahap",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "SOP-LEDGER-001"
+  ],
+  "expected_section_paths": [
+    "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Connection draining ledger pool"
+}

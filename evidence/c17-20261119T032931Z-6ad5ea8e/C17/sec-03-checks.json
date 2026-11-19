@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "/opt/homebrew/opt/python@3.12/bin/python3.12",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_c15_dlp_scanner.py::test_dlp_scanner_detects_synthetic_secrets_and_pii"
+    ],
+    "returncode": 0,
+    "stdout": ".                                                                        [100%]\n1 passed in 0.01s\n",
+    "stderr": ""
+  }
+]

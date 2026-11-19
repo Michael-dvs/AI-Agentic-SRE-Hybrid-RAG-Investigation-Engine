@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-014",
+  "query_text": "Langkah mitigasi backlog RabbitMQ dan tuning prefetch count notifikasi",
+  "target_service_id": "notification-service",
+  "expected_document_ids": [
+    "SOP-NOTIF-QUEUE-001"
+  ],
+  "expected_section_paths": [
+    "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Backlog antrean pesan RabbitMQ"
+}

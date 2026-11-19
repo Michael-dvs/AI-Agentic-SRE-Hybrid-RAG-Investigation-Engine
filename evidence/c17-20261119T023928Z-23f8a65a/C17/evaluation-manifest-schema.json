@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sre-sim:contract:evaluation-manifest:1",
+  "title": "Restricted Offline Evaluation Manifest Contract v1",
+  "description": "Restricted evaluator-only manifest binding an opaque runtime run_id and closed dossier hash to the isolated ground-truth scenario and dataset split.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evaluation_manifest_id",
+    "run_id",
+    "incident_id",
+    "scenario_id",
+    "split_id",
+    "split_freeze_hash",
+    "fault_seed",
+    "fault_onset_at",
+    "fault_end_at",
+    "expected_root_cause_services",
+    "expected_fault_types",
+    "expected_relevant_chunk_ids",
+    "is_healthy_control",
+    "is_multi_fault",
+    "required_terminal_state",
+    "closed_dossier_version",
+    "closed_dossier_hash",
+    "label_frozen_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "evaluation_manifest_id": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 128
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run-[a-z0-9-]+$"
+    },
+    "incident_id": {
+      "type": "string",
+      "pattern": "^inc-[a-z0-9-]+$"
+    },
+    "scenario_id": {
+      "type": "string",
+      "enum": [
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "SC-04",
+        "SC-05",
+        "SC-06",
+        "SC-07",
+        "SC-08",
+        "SC-09",
+        "SC-10",
+        "SC-11",
+        "SC-12",
+        "SC-13",
+        "SC-14"
+      ]
+    },
+    "split_id": {
+      "type": "string",
+      "enum": ["dev", "H-G3", "H-G4"]
+    },
+    "split_freeze_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "fault_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fault_onset_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "fault_end_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "expected_root_cause_services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    },
+    "expected_fault_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    },
+    "expected_relevant_chunk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 128
+      }
+    },
+    "is_healthy_control": {
+      "type": "boolean"
+    },
+    "is_multi_fault": {
+      "type": "boolean"
+    },
+    "required_terminal_state": {
+      "const": "CLOSED"
+    },
+    "closed_dossier_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "closed_dossier_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "label_frozen_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    }
+  }
+}
+

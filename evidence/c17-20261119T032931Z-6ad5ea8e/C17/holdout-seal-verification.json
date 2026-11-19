@@ -1,0 +1,21 @@
+{
+  "status": "VERIFIED",
+  "method": "G1_BASELINE_HASH_VERIFICATION",
+  "holdout_queries": {
+    "path": "restricted/evaluator_queries/holdout_queries.json",
+    "expected_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+    "actual_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+    "intact": true
+  },
+  "ground_truth_records": {
+    "path": "restricted/gt_registry/ground_truth_records.jsonl",
+    "expected_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+    "actual_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+    "intact": true
+  },
+  "dev_partition": {
+    "path": "restricted/gt_registry/dev_partition",
+    "record_count": 5,
+    "ready": true
+  }
+}

@@ -2,9 +2,10 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** APPROVED
+- **Documentation status:** APPROVED
+- **Implementation status:** VERIFIED
+- **Evidence resmi:** [`E17`](../../../evidence/c17-20261119T032931Z-6ad5ea8e/C17/readiness-check.md); 0 open defects, segel holdout `VERIFIED` via baseline hash check Gate G1, dan kualifikasi scorer 100% lulus. Regresi penuh repositori: 421 passed, 6 skipped, 0 failed.
 - **Dependencies:** [C04 — Fault Harness and Ground Truth Isolation](../phase-1-foundation/04-FAULT-HARNESS-AND-GROUND-TRUTH-ISOLATION.md), [C07 — Hybrid Retrieval and Baselines](../phase-1-foundation/07-HYBRID-RETRIEVAL-AND-BASELINES.md), [C08 — Secure Gateway and Foundation G1](../phase-1-foundation/08-SECURE-GATEWAY-AND-FOUNDATION-G1.md) (`G1 PASS` & protokol evaluasi dibekukan), [C14 — Evidence Validation and Uncertainty](14-EVIDENCE-VALIDATION-AND-UNCERTAINTY.md), [C15 — AI Observability, Audit, and Cost](15-AI-OBSERVABILITY-AUDIT-AND-COST.md), [C16 — Human Review and Handover](16-HUMAN-REVIEW-AND-HANDOVER.md), `G2 PASS` ([C12](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md))
 - **Next chapter:** [C18 — Red-Team, Holdout, and G3](18-RED-TEAM-HOLDOUT-AND-G3.md)
 - **Related requirements:** `BR-008`, `BR-009`, `FR-SIM-005`, `FR-RAG-006`, `FR-AGT-008`, `FR-OUT-005`, `RULE-002`, `RULE-010`, `RULE-012`, `NFR-011`, `NFR-019`, `KPI-01` s/d `KPI-14`, `OBJ-06`, `RISK-01`, `RISK-02`, `RISK-09`

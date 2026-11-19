@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-003",
+  "query_text": "Arsitektur reverse proxy dan circuit breaker threshold pada gateway",
+  "target_service_id": "api-gateway",
+  "expected_document_ids": [
+    "ARCH-GW-001"
+  ],
+  "expected_section_paths": [
+    "ARCH-GW-001: Arsitektur Reverse Proxy Ingress Gateway > 2. Kebijakan Circuit Breaking dan Timeout"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Konfigurasi timeout dan circuit breaker ingress"
+}

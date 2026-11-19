@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-015",
+  "query_text": "Known error blocking asyncio loop pada consumer event notifikasi",
+  "target_service_id": "notification-service",
+  "expected_document_ids": [
+    "KNOWN-ERR-NOTIF-001"
+  ],
+  "expected_section_paths": [
+    "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 2. Solusi Sementara dan Penanganan"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Heartbeat closure pada RabbitMQ consumer"
+}

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-011",
+  "query_text": "Penanganan query timeout SQL 504 pada ledger service",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "SOP-LEDGER-ERR-504"
+  ],
+  "expected_section_paths": [
+    "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Timeout SQL internal database ledger"
+}

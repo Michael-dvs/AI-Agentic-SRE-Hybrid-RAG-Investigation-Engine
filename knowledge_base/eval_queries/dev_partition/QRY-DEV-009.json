@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-009",
+  "query_text": "Analisis kronologi cascade failure dari ledger ke transaction service",
+  "target_service_id": "transaction-service",
+  "expected_document_ids": [
+    "POSTMORTEM-TX-001"
+  ],
+  "expected_section_paths": [
+    "POSTMORTEM-TX-001: Kegagalan Berantai Pemrosesan Transaksi Finansial > 2. Analisis Kronologi dan Deteksi Telemetri"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Post-mortem historis kegagalan berantai"
+}

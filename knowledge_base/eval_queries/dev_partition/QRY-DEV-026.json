@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-026",
+  "query_text": "Konfigurasi idle in transaction session timeout pada PostgreSQL",
+  "target_service_id": "ledger-service",
+  "expected_document_ids": [
+    "KNOWN-ERR-LEDGER-001"
+  ],
+  "expected_section_paths": [
+    "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi"
+  ],
+  "relevance_label": "relevant",
+  "split": "dev",
+  "notes": "Timeout sesi idle database"
+}

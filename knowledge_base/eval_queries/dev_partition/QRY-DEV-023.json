@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-023",
+  "query_text": "Pemeriksaan format data nominal transaksi finansial pada transaction service",
+  "target_service_id": "transaction-service",
+  "expected_document_ids": [
+    "SOP-TX-ERR-500"
+  ],
+  "expected_section_paths": [
+    "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik"
+  ],
+  "relevance_label": "supplementary",
+  "split": "dev",
+  "notes": "Validasi skema payload transaksi"
+}

@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-004",
+  "query_text": "Investigasi alert SimAuthFailureSpike dan penanganan token verifikasi gagal",
+  "target_service_id": "auth-service",
+  "expected_document_ids": [
+    "SOP-AUTH-001"
+  ],
+  "expected_section_paths": [
+    "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 2. Prosedur Investigasi dan Validasi"
+  ],
+  "relevance_label": "critical",
+  "split": "dev",
+  "notes": "Lonjakan HTTP 401 dan ERR_AUTH_REJECTED"
+}

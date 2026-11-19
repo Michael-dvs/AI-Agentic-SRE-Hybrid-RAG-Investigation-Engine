@@ -1,0 +1,14 @@
+{
+  "query_id": "QRY-DEV-017",
+  "query_text": "Batas alokasi memori dan sizing connection pool PostgreSQL lab",
+  "target_service_id": "db-dummy",
+  "expected_document_ids": [
+    "ARCH-DB-001"
+  ],
+  "expected_section_paths": [
+    "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 2. Batas Alokasi Memori dan Resource Ceiling"
+  ],
+  "relevance_label": "supplementary",
+  "split": "dev",
+  "notes": "Spesifikasi max_connections dan RAM ceiling"
+}
