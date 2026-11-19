@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-c16-lifecycle-001",
+  "dossier_version": 2,
+  "severity": "medium",
+  "service_id": "transaction-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T00:00:00Z",
+  "window_start": "2026-11-12T00:00:00Z",
+  "window_end": "2026-11-12T00:00:00Z",
+  "dossier_ready_at": "2026-11-16T14:00:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "transaction-service"
+    ],
+    "observed_symptoms": "Telemetry signals indicated anomalies in transaction-service (ERR_UNKNOWN)",
+    "error_budget_impact": "minor"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-19T01:37:28.202498Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.202645Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.202806Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.388122Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.388670Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.388855Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-19T01:37:28.389038Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-c16-lifecycle-001-001",
+      "rank": 1,
+      "statement": "Database connection pool exhaustion on payment-db due to slow queries",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Hypothesis derived from observed signals on transaction-service.",
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "sop_citations": [],
+  "unknowns": [
+    "One or more telemetry backends were unavailable during investigation window."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of transaction-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-d540bf2d1a0f48c6",
+    "reviewed_by": "sre_lead_marcus (LEAD_SRE)",
+    "reviewed_at": "2026-11-19T01:37:28.391941Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-c16-lifecycle-001"
+    ]
+  },
+  "dossier_hash": "6cad81cb49d0a76d2e5db74c423a124cebb8d5459f73646d60d9c8e9adc1501b",
+  "review_events": [
+    {
+      "review_event_id": "rev-e815962ee7d54a3c",
+      "incident_id": "inc-c16-lifecycle-001",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "965337504c1da10655551d9483e577492608050c6f57595efe7135e539fbbce1",
+      "reviewer_ref": "sre_specialist_maya",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-19T01:37:28.390964Z",
+      "decision": "edit",
+      "rationale": "Corrected hypothesis based on database active connection metrics.",
+      "edited_dossier_version": 2,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-19T01:37:28.391045Z"
+    },
+    {
+      "review_event_id": "rev-d540bf2d1a0f48c6",
+      "incident_id": "inc-c16-lifecycle-001",
+      "target_dossier_version": 2,
+      "target_dossier_hash": "6bb3c0a35d79632c423a3639bf9cc3b661ef19cf44cf523e9b3dfa009fdb74da",
+      "reviewer_ref": "sre_lead_marcus",
+      "reviewer_role": "PROJECT_OWNER_LAB",
+      "reviewed_at": "2026-11-19T01:37:28.391941Z",
+      "decision": "approve",
+      "rationale": "Verified revised root cause against slow query logs and thread pool telemetry.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-19T01:37:28.392022Z"
+    }
+  ]
+}

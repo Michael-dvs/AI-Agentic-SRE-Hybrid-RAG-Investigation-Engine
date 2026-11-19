@@ -547,12 +547,18 @@ def create_prometheus_app(
         # Support both URL params and POST form-data/x-www-form-urlencoded from Grafana
         if request.method == "POST":
             try:
-                form = await request.form()
-                query = query or form.get("query")
-                service_id = service_id or form.get("service_id")
-                start = start if start is not None else (float(form.get("start")) if form.get("start") else None)
-                end = end if end is not None else (float(form.get("end")) if form.get("end") else None)
-                step = step if step is not None else (float(form.get("step")) if form.get("step") else None)
+                raw_bytes = await request.body()
+                if raw_bytes:
+                    import urllib.parse
+                    parsed_form = dict(urllib.parse.parse_qsl(raw_bytes.decode("utf-8", errors="replace")))
+                    query = query or parsed_form.get("query")
+                    service_id = service_id or parsed_form.get("service_id")
+                    if start is None and parsed_form.get("start"):
+                        start = float(parsed_form["start"])
+                    if end is None and parsed_form.get("end"):
+                        end = float(parsed_form["end"])
+                    if step is None and parsed_form.get("step"):
+                        step = float(parsed_form["step"])
             except Exception:
                 pass
 

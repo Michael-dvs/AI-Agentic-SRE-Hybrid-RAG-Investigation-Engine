@@ -156,6 +156,10 @@ class HashChainedAuditStore:
         return event
 
 
+# Semantic alias matching C15 / C16 audit chain nomenclature (ADR-S06)
+AuditHashChain = HashChainedAuditStore
+
+
 def verify_chain_integrity(events: list[dict[str, Any]]) -> tuple[bool, list[str]]:
     """Verify cryptographic integrity of an ordered sequence of audit events.
 

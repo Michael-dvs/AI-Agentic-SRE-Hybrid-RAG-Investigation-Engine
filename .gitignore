@@ -29,3 +29,7 @@ venv/
 # Restricted Ground Truth & Evaluator Storage (RULE-002 / AT-008)
 restricted/
 
+# Tool and agent cache
+.playwright-mcp/
+artifacts/
+

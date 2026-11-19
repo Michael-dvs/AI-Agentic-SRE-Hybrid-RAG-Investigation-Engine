@@ -1,0 +1,44 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.7.0 -- /opt/homebrew/opt/python@3.12/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic
+plugins: anyio-4.15.1
+collecting ... collected 25 items
+
+tests/test_c16_human_review.py::test_hum01_zero_auto_remediation PASSED  [  4%]
+tests/test_c16_human_review.py::test_at010_unauthorized_review_rejected PASSED [  8%]
+tests/test_c16_human_review.py::test_at010_rejection_flow PASSED         [ 12%]
+tests/test_c16_human_review.py::test_at010_correction_creates_new_revision PASSED [ 16%]
+tests/test_c16_human_review.py::test_version_conflict_guard PASSED       [ 20%]
+tests/test_c16_human_review.py::test_approval_seals_and_audits PASSED    [ 24%]
+tests/test_c16_human_review.py::test_at017_ticket_creation_guard PASSED  [ 28%]
+tests/test_c16_human_review.py::test_handover_export_isolation PASSED    [ 32%]
+tests/test_c16_human_review.py::test_review_console_cli_execution PASSED [ 36%]
+tests/test_c12_baseline_dossier_g2.py::test_dossier_json_schema_validation_happy_path PASSED [ 40%]
+tests/test_c12_baseline_dossier_g2.py::test_dossier_markdown_rendering_completeness PASSED [ 44%]
+tests/test_c12_baseline_dossier_g2.py::test_dossier_sha256_canonical_hash_integrity PASSED [ 48%]
+tests/test_c12_baseline_dossier_g2.py::test_human_review_approval_flow_and_closure PASSED [ 52%]
+tests/test_c12_baseline_dossier_g2.py::test_human_review_unauthorized_role_rejected PASSED [ 56%]
+tests/test_c12_baseline_dossier_g2.py::test_human_review_version_conflict_rejected PASSED [ 60%]
+tests/test_c12_baseline_dossier_g2.py::test_human_review_edit_creates_new_revision PASSED [ 64%]
+tests/test_c12_baseline_dossier_g2.py::test_human_review_strictly_zero_mutation_hum01 PASSED [ 68%]
+tests/test_c12_baseline_dossier_g2.py::test_sc09_trace_outage_honest_inconclusive_ev02 PASSED [ 72%]
+tests/test_c12_baseline_dossier_g2.py::test_ev01_conflicting_evidence_partial_status PASSED [ 76%]
+tests/test_c12_baseline_dossier_g2.py::test_no_applicable_runbook_flagging PASSED [ 80%]
+tests/test_c12_baseline_dossier_g2.py::test_sc12_100_duplicate_alerts_single_dossier PASSED [ 84%]
+tests/test_c12_baseline_dossier_g2.py::test_manual_fallback_on_deadline_exceeded_at012 PASSED [ 88%]
+tests/test_c12_baseline_dossier_g2.py::test_zero_ground_truth_leakage_end_to_end_at008 PASSED [ 92%]
+tests/test_c12_baseline_dossier_g2.py::test_zero_mutation_calls_end_to_end_at005 PASSED [ 96%]
+tests/test_c12_baseline_dossier_g2.py::test_reproducibility_and_version_provenance PASSED [100%]
+
+=============================== warnings summary ===============================
+gateway/dispatcher.py:8
+  /Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/gateway/dispatcher.py:8: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+../../../../../../../../opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53
+  /opt/homebrew/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 25 passed, 2 warnings in 8.61s ========================

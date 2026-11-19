@@ -1,0 +1,59 @@
+{
+  "test_title": "Human Review Decision Matrix & Version Binding (AT-010, HUM-01, NFR-011)",
+  "unauthorized_blocked": true,
+  "version_conflict_blocked": true,
+  "lifecycle_events": [
+    {
+      "step": "A_UNAUTHORIZED_REJECTION",
+      "actor": "unauthorized_guest",
+      "role": "UNTRUSTED_EXTERNAL",
+      "decision_attempted": "APPROVE",
+      "result": "DENIED",
+      "error_code": "FORBIDDEN_SCOPE",
+      "message": "UNAUTHORIZED: Unauthorized reviewer role: 'UNTRUSTED_EXTERNAL'"
+    },
+    {
+      "step": "B_CORRECTION_APPEND_ONLY",
+      "actor": "sre_specialist_maya",
+      "role": "L2_SRE",
+      "decision": "edit",
+      "source_revision": 1,
+      "new_revision": 2,
+      "source_hash": "965337504c1da10655551d9483e577492608050c6f57595efe7135e539fbbce1",
+      "new_hash": "6bb3c0a35d79632c423a3639bf9cc3b661ef19cf44cf523e9b3dfa009fdb74da",
+      "telemetry_preserved_unmutated": true,
+      "auto_action_triggered": false
+    },
+    {
+      "step": "C_VERSION_CONFLICT_GUARD",
+      "actor": "sre_lead_marcus",
+      "role": "LEAD_SRE",
+      "decision_attempted": "APPROVE",
+      "target_version": 1,
+      "latest_version": 2,
+      "result": "DENIED",
+      "error_code": "VERSION_CONFLICT"
+    },
+    {
+      "step": "D_VERSION_BOUND_APPROVAL",
+      "actor": "sre_lead_marcus",
+      "role": "LEAD_SRE",
+      "decision": "approve",
+      "approved_revision": 2,
+      "approved_hash": "6cad81cb49d0a76d2e5db74c423a124cebb8d5459f73646d60d9c8e9adc1501b",
+      "final_incident_state": "CLOSED",
+      "auto_action_triggered": false
+    },
+    {
+      "step": "E_REJECTION_FLOW",
+      "incident_id": "inc-c16-reject-test-001",
+      "actor": "sre_oncall_david",
+      "role": "L1_SRE",
+      "decision": "reject",
+      "final_incident_state": "REJECTED",
+      "auto_action_triggered": false
+    }
+  ],
+  "audit_chain_length": 1,
+  "audit_chain_valid": true
+}

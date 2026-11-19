@@ -7,6 +7,11 @@ from orchestrator.dossier import (
     compute_canonical_dossier_hash,
 )
 from orchestrator.fallback import ManualFallbackGenerator
+from orchestrator.handover import (
+    HandoverExporter,
+    sanitize_data_recursively,
+    verify_ground_truth_isolation,
+)
 from orchestrator.investigator import (
     DEFAULT_COORDINATOR_TOKEN,
     DeterministicInvestigator,
@@ -24,12 +29,18 @@ from orchestrator.resilience import (
 from orchestrator.review import (
     ALLOWED_DECISIONS,
     ALLOWED_REVIEWER_ROLES,
+    AuthorizedReviewManager,
     DossierHashMismatchError,
     HumanReviewManager,
     InvalidReviewDecisionError,
     ReviewError,
     StaleDossierVersionError,
     UnauthorizedReviewerError,
+)
+from orchestrator.ticketing import (
+    DummyTicketManager,
+    InvalidDossierStateError,
+    TicketError,
 )
 from orchestrator.state_machine import (
     MANDATORY_STATES,
@@ -66,6 +77,7 @@ __all__ = [
     "DossierMarkdownRenderer",
     "compute_canonical_dossier_hash",
     # Human Review
+    "AuthorizedReviewManager",
     "HumanReviewManager",
     "ReviewError",
     "UnauthorizedReviewerError",
@@ -74,6 +86,14 @@ __all__ = [
     "DossierHashMismatchError",
     "ALLOWED_REVIEWER_ROLES",
     "ALLOWED_DECISIONS",
+    # Ticketing (C16)
+    "DummyTicketManager",
+    "InvalidDossierStateError",
+    "TicketError",
+    # Handover Export (C16)
+    "HandoverExporter",
+    "sanitize_data_recursively",
+    "verify_ground_truth_isolation",
     # Fallback
     "ManualFallbackGenerator",
 ]

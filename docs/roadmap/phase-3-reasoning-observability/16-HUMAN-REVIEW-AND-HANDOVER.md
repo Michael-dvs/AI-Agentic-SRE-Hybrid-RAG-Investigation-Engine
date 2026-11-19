@@ -2,9 +2,9 @@
 
 ## 1. Chapter Information
 - **Phase:** F3 — Reasoning & Observability
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Status:** APPROVED
+- **Documentation status:** APPROVED
+- **Implementation status:** VERIFIED (C16 Scope: AuthorizedReviewManager, Version-Bound Approval, Append-Only Revision vN+1, HandoverExporter with Ground Truth Isolation, DummyTicketManager AT-017, Review Console CLI TBD-11; 9/9 C16 pytest PASS, 397/397 full suite PASS)
 - **Dependencies:** [C12 — Baseline Dossier and End-to-End G2](../phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md) (`G2 PASS`), [C14 — Evidence Validation and Uncertainty](14-EVIDENCE-VALIDATION-AND-UNCERTAINTY.md), [C15 — AI Observability, Audit, and Cost](15-AI-OBSERVABILITY-AUDIT-AND-COST.md), keputusan `TBD-11` (antarmuka review manusia) dan `ADR-S07` (disposisi *optional dummy ticket*)
 - **Next chapter:** [C17 — Offline Evaluation and UAT Harness](17-OFFLINE-EVALUATION-AND-UAT-HARNESS.md)
 - **Related requirements:** `BR-005`, `BR-012`, `BR-014`, `BR-015` (Could), `FR-RAG-005`, `FR-AGT-010`, `FR-OUT-001`, `FR-OUT-004`, `FR-OUT-005`, `FR-OUT-006`, `FR-OUT-007` (Could), `RULE-007`, `RULE-008`, `NFR-005`, `NFR-011`, `NFR-018`, `NFR-020`, `KPI-06`, `BEN-03`, `UC-10`

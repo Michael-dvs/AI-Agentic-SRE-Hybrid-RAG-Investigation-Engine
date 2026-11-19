@@ -1,0 +1,52 @@
+{
+  "scenario": "Sponsor / Operator Live Review Walkthrough (UC-10, UC-11)",
+  "incident_id": "inc-c16-walkthrough-001",
+  "investigation_latency_seconds": 0.103884,
+  "review_latency_seconds": 0.000678,
+  "initial_state_before_review": "HUMAN_REVIEW",
+  "final_state_after_review": "CLOSED",
+  "auto_action_triggered": false,
+  "reviewer": {
+    "ref": "sre_alex_chen",
+    "role": "L2_SRE",
+    "decision": "approve"
+  },
+  "dossier_metadata": {
+    "version": 1,
+    "hash": "0e6329a32f75a3e82cb9e904512a7fe27662d125cd6a3f8630adac5b3e11fd30",
+    "severity": "high",
+    "scope": [
+      "auth-service"
+    ]
+  },
+  "sop_citations": [],
+  "hypotheses_reviewed": [
+    {
+      "hypothesis_id": "hyp-inc-c16-walkthrough-001-001",
+      "rank": 1,
+      "statement": "Service operational error in auth-service (ERR_UNKNOWN)",
+      "support_status": "PARTIAL",
+      "supporting_evidence_ids": [
+        "ev-inc-c16-walkthrough-001-004"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Simulated operational error for api-gateway'.",
+      "unknowns": []
+    }
+  ],
+  "audit_event": {
+    "schema_version": "1.0",
+    "review_event_id": "rev-e8503f34f50f4f0f",
+    "incident_id": "inc-c16-walkthrough-001",
+    "target_dossier_version": 1,
+    "target_dossier_hash": "0e6329a32f75a3e82cb9e904512a7fe27662d125cd6a3f8630adac5b3e11fd30",
+    "reviewer_ref": "sre_alex_chen",
+    "reviewer_role": "L2_SRE_REVIEWER",
+    "reviewed_at": "2026-11-19T01:37:28.201217Z",
+    "decision": "approve",
+    "rationale": "Verified against telemetry metrics and SOP-AUTH-001 runbook citations. Safe to close.",
+    "edited_dossier_version": null,
+    "escalation_target": null,
+    "auto_action_triggered": false
+  }
+}
