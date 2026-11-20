@@ -225,7 +225,7 @@ def main() -> int:
         print(f"Error: Dossier file not found: {path}")
         return 1
 
-    if args.non-interactive or args.action:
+    if args.non_interactive or args.action:
         action = args.action or "APPROVE"
         data = json.loads(path.read_text(encoding="utf-8"))
         res = run_review_action(data, action, args.reviewer_ref, args.reviewer_role, args.rationale)

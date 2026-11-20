@@ -1,0 +1,325 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-pilot-dev-sc04-004",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "api-gateway",
+  "environment": "lab",
+  "alert_received_at": "2026-11-20T08:15:00Z",
+  "window_start": "2026-11-20T08:10:00Z",
+  "window_end": "2026-11-20T08:16:00Z",
+  "dossier_ready_at": "2026-11-20T08:15:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "api-gateway",
+      "auth-service",
+      "ledger-service",
+      "notification-service",
+      "transaction-service"
+    ],
+    "observed_symptoms": "HTTP 504 cascade across api-gateway, transaction-service, and ledger-service",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-20T08:37:52.335586Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.336877Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.338171Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.354814Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.358402Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.360235Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.361950Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.338659Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.340905Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.342003Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on auth-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.343761Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on auth-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.344675Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.346404Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.347397Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on notification-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.349150Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.350173Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.351887Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc04-004-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-20T08:37:52.352810Z",
+      "query_window": {
+        "start": "2026-11-20T08:10:00Z",
+        "end": "2026-11-20T08:16:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on api-gateway: 1 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc04-004-001",
+      "rank": 1,
+      "statement": "Cascading failure from ledger-service propagating error to api-gateway",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc04-004-010",
+        "ev-inc-pilot-dev-sc04-004-002",
+        "ev-inc-pilot-dev-sc04-004-006"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Downstream dependency ledger-service logged errors ('Gateway returned HTTP 504 due to downstream transaction-service timeout'), leading to upstream failure in api-gateway.",
+      "unknowns": []
+    },
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc04-004-002",
+      "rank": 2,
+      "statement": "High latency / error span observed on api-gateway",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc04-004-011"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Distributed trace captured span 'HTTP POST /api/v1/transfer' with error status.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-002",
+      "doc_id": "SOP-GW-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 1. Gejala dan Karakteristik Error",
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+      "doc_id": "SOP-GW-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-002",
+      "doc_id": "ARCH-SIM-ECOSYSTEM",
+      "version": "1.0.0",
+      "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)",
+      "source_uri": "kb://corpus/api-gateway/security/ARCH-SIM-ECOSYSTEM.md",
+      "applicability_verified": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of api-gateway.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-GW-ERR-504"
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-37905643d1884273",
+    "reviewed_by": "project_owner_michael (L2_SRE)",
+    "reviewed_at": "2026-11-20T08:37:52.373615Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "6cf92f3577b34da6a3ce929d0e0e4738"
+    ]
+  },
+  "dossier_hash": "f55d549ec7850e08d081a02246869f2492ec87cf6b208eea97ee3763ce2f4e40",
+  "review_events": [
+    {
+      "review_event_id": "rev-37905643d1884273",
+      "incident_id": "inc-pilot-dev-sc04-004",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "8543b426059c0e2509f7cd6711c86619592c4bef7f1f7648ad578fafdb368678",
+      "reviewer_ref": "project_owner_michael",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-20T08:37:52.373615Z",
+      "decision": "approve",
+      "rationale": "Reviewed inc-pilot-dev-sc04-004 in Unified TUI Console; approved without auto-remediation.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-20T08:37:52.373693Z"
+    }
+  ]
+}

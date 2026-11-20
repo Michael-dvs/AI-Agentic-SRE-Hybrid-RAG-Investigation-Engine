@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-pilot-dev-sc03-003",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "ledger-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-20T08:10:00Z",
+  "window_start": "2026-11-20T08:05:00Z",
+  "window_end": "2026-11-20T08:11:00Z",
+  "dossier_ready_at": "2026-11-20T08:10:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "ledger-service",
+      "api-gateway",
+      "transaction-service",
+      "db-dummy"
+    ],
+    "observed_symptoms": "PostgreSQL connection pool exhaustion causing checkout timeout in ledger-service",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-20T08:37:52.298450Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.299836Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.301021Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.313857Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.317087Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.318692Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.320260Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.301485Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.303609Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.304671Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.306362Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.307259Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.308934Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.309886Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.311176Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc03-003-009",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-20T08:37:52.312077Z",
+      "query_window": {
+        "start": "2026-11-20T08:05:00Z",
+        "end": "2026-11-20T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on ledger-service: 1 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc03-003-001",
+      "rank": 1,
+      "statement": "Service operational error in ledger-service (ERR_DATABASE_LATENCY)",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc03-003-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'PostgreSQL connection pool checkout timeout exceeded in ledger-service'.",
+      "unknowns": []
+    },
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc03-003-002",
+      "rank": 2,
+      "statement": "High latency / error span observed on ledger-service",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc03-003-009"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Distributed trace captured span 'POSTGRES_POOL_CHECKOUT' with error status.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-002",
+      "doc_id": "SOP-LEDGER-001",
+      "version": "2.0.0",
+      "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-001-v2.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-001",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of ledger-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-LEDGER-001"
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-476b30f14ccb40e7",
+    "reviewed_by": "project_owner_michael (L2_SRE)",
+    "reviewed_at": "2026-11-20T08:37:52.330987Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "5af92f3577b34da6a3ce929d0e0e4737"
+    ]
+  },
+  "dossier_hash": "0c905eac6ebead1bbea01c20d22683b84dfa78588ad00a391c45c570ca9889fd",
+  "review_events": [
+    {
+      "review_event_id": "rev-476b30f14ccb40e7",
+      "incident_id": "inc-pilot-dev-sc03-003",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "e6f73c266895614ccb9bfcaa39ecde85f15563cdd0c51cb9ed561627b441bf29",
+      "reviewer_ref": "project_owner_michael",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-20T08:37:52.330987Z",
+      "decision": "approve",
+      "rationale": "Reviewed inc-pilot-dev-sc03-003 in Unified TUI Console; approved without auto-remediation.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-20T08:37:52.331071Z"
+    }
+  ]
+}

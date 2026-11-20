@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-pilot-dev-sc06-005",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "auth-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-20T08:20:00Z",
+  "window_start": "2026-11-20T08:15:00Z",
+  "window_end": "2026-11-20T08:21:00Z",
+  "dossier_ready_at": "2026-11-20T08:20:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "auth-service",
+      "api-gateway"
+    ],
+    "observed_symptoms": "Authentication token verification mismatch on auth-service /verify",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-20T08:37:52.378315Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.379340Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.380487Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.388684Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.392123Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.393812Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-20T08:37:52.395231Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc06-005-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.381130Z",
+      "query_window": {
+        "start": "2026-11-20T08:15:00Z",
+        "end": "2026-11-20T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on auth-service: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc06-005-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.383387Z",
+      "query_window": {
+        "start": "2026-11-20T08:15:00Z",
+        "end": "2026-11-20T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on auth-service: 1 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc06-005-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-20T08:37:52.384427Z",
+      "query_window": {
+        "start": "2026-11-20T08:15:00Z",
+        "end": "2026-11-20T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 25 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc06-005-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-20T08:37:52.386141Z",
+      "query_window": {
+        "start": "2026-11-20T08:15:00Z",
+        "end": "2026-11-20T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-pilot-dev-sc06-005-005",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-20T08:37:52.387107Z",
+      "query_window": {
+        "start": "2026-11-20T08:15:00Z",
+        "end": "2026-11-20T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on auth-service: 1 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc06-005-001",
+      "rank": 1,
+      "statement": "Service operational error in auth-service (ERR_AUTH_REJECTED)",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc06-005-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Token verification failed with synthetic signing key mismatch on /verify'.",
+      "unknowns": []
+    },
+    {
+      "hypothesis_id": "hyp-inc-pilot-dev-sc06-005-002",
+      "rank": 2,
+      "statement": "High latency / error span observed on auth-service",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-pilot-dev-sc06-005-005"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Distributed trace captured span 'POST /verify' with error status.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-AUTH-001-v1.0.0-002",
+      "doc_id": "SOP-AUTH-001",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 1. Indikator dan Pemicu Alert",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-001.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-002",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 1. Identifikasi Anomali Internal Auth",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-001-v1.0.0-001",
+      "doc_id": "SOP-AUTH-001",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-001.md",
+      "applicability_verified": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of auth-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-AUTH-001"
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-d1300619b76c40c2",
+    "reviewed_by": "project_owner_michael (L2_SRE)",
+    "reviewed_at": "2026-11-20T08:37:52.404898Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "7df92f3577b34da6a3ce929d0e0e4739"
+    ]
+  },
+  "dossier_hash": "fcb70c3e36f7b4d56df3a2b9f18e89b00f9e8fe479ac7fa0685d03532781a828",
+  "review_events": [
+    {
+      "review_event_id": "rev-d1300619b76c40c2",
+      "incident_id": "inc-pilot-dev-sc06-005",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "b483fcc2912b15132e0268bf8c1e2532d9d959c8c40886e7906189106e045d32",
+      "reviewer_ref": "project_owner_michael",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-20T08:37:52.404898Z",
+      "decision": "approve",
+      "rationale": "Reviewed inc-pilot-dev-sc06-005 in Unified TUI Console; approved without auto-remediation.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-20T08:37:52.404975Z"
+    }
+  ]
+}

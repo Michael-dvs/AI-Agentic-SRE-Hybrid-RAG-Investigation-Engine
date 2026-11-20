@@ -1,0 +1,74 @@
+{
+  "run_id": "c19-20261120T083752Z",
+  "generated_at_utc": "2026-11-20T08:37:52.498001Z",
+  "split_id": "dev",
+  "total_defects": 6,
+  "defects": [
+    {
+      "defect_id": "C19-DEF-001",
+      "category": "USABILITY",
+      "severity": "P2-HIGH",
+      "component": "orchestrator/usability_console.py (SREDashboard.run)",
+      "title": "Reflow layout terminal TUI tertunda saat resize mendadak",
+      "description": "Loop input Prompt.ask dengan console.clear() per perintah tidak memicu reflow otomatis ketika ukuran terminal berubah antara <100 kolom dan >=100 kolom sebelum pengguna menekan Enter.",
+      "observed_during": "Uji navigasi TUI dua panel pada layar lebar (120 cols) dan sempit (72 cols).",
+      "remediation_plan_c20": "Tambahkan dukungan refresh viewport eksplisit dan manajemen ukuran panel responsif serta pengujian regresi layout pada berbagai lebar terminal di C20.",
+      "status": "OPEN_FOR_C20"
+    },
+    {
+      "defect_id": "C19-DEF-002",
+      "category": "USABILITY",
+      "severity": "P2-HIGH",
+      "component": "orchestrator/usability_console.py (SREDashboard._dossier_detail)",
+      "title": "Pratinjau isi bukti telemetri dan kutipan teks SOP belum tersedia langsung di TUI",
+      "description": "Panel detail insiden hanya menampilkan baris ringkas doc_id | section_path dan evidence_id | tool_name tanpa cuplikan isi log/metrik atau excerpt SOP, sehingga penelaah masih perlu membuka berkas handover untuk verifikasi detail saat koreksi.",
+      "observed_during": "Penelaahan skenario DEV-03 (SOP-LEDGER-001 v2) dan DEV-06 (aksi CORRECT v1->v2).",
+      "remediation_plan_c20": "Tambahkan tampilan ringkasan terikat-panjang (bounded excerpt) yang aman dan ter-sanitasi untuk evidence summary dan metadata versi SOP di panel detail TUI pada C20.",
+      "status": "OPEN_FOR_C20"
+    },
+    {
+      "defect_id": "C19-DEF-003",
+      "category": "PERFORMANCE",
+      "severity": "P3-MEDIUM",
+      "component": "orchestrator/usability_console.py & observability/audit_chain.py",
+      "title": "Pembacaan ulang penuh audit JSONL saat inisialisasi ReviewActionController",
+      "description": "Setiap instansiasi AuditHashChain/ReviewActionController membaca seluruh log audit append-only secara sinkron; berpotensi menambah latensi I/O ketika jumlah insiden meningkat pada uji burst 100 alert dan konkurensi C20.",
+      "observed_during": "Simulasi multi-skenario berurutan dengan pencatatan audit rantai SHA-256.",
+      "remediation_plan_c20": "Profilkan I/O audit append dan evaluasi tail/incremental verification pada skenario OPS-01 burst 100 alert serta gelombang konkurensi 5/20/50 di C20.",
+      "status": "OPEN_FOR_C20"
+    },
+    {
+      "defect_id": "C19-DEF-004",
+      "category": "RAG_NAVIGATION",
+      "severity": "P2-HIGH",
+      "component": "orchestrator/review.py & orchestrator/dossier.py (DossierSerializer.serialize)",
+      "title": "Revisi append-only CORRECT v(N)->v(N+1) tidak mewariskan field evidence/sop_citations dossier terserialisasi",
+      "description": "Ketika AuthorizedReviewManager.submit_review(decision='edit') memanggil DossierSerializer.serialize(edit_ctx, revision=new_rev), edit_ctx memakai kunci dossier terserialisasi ('evidence', 'sop_citations', 'alert_received_at') sementara DossierSerializer membaca kunci konteks investigasi ('evidence_items', 'runbook_citations', 'event_time'). Akibatnya revisi v2 kehilangan daftar bukti dan sitasi SOP dari v1 dan menurunkan status hipotesis koreksi.",
+      "observed_during": "Eksekusi skenario DEV-06 (inc-pilot-dev-sc07-006) saat menjalankan aksi TUI CORRECT -> APPROVE.",
+      "remediation_plan_c20": "Normalisasi pemetaan field dossier terserialisasi di AuthorizedReviewManager/DossierSerializer pada C20 agar revisi v(N+1) mempertahankan evidence, sop_citations, dan alert_received_at v(N).",
+      "status": "OPEN_FOR_C20"
+    },
+    {
+      "defect_id": "C19-DEF-005",
+      "category": "BASELINE_BIAS",
+      "severity": "P3-MEDIUM",
+      "component": "evaluator/manual_baseline.py & evaluator/pilot_rubric.py",
+      "title": "Keterbatasan validasi solo-developer dan potensi carryover familiarity",
+      "description": "Pengukuran manual baseline dan penilaian rubrik 5 dimensi dilakukan oleh pemilik proyek tunggal (SELF_EVALUATED_DEVELOPER_LABELS / TBD-02 / TBD-08) tanpa reviewer SME bank eksternal independen.",
+      "observed_during": "Penyusunan manual-timing-protocol-and-records dan review-rubric C19.",
+      "remediation_plan_c20": "Pertahankan label caveat eksplisit pada laporan KPI-06/KPI-08 di C21 dan dokumentasikan kebutuhan validasi panel SME independen pada analisis kesenjangan enterprise C23.",
+      "status": "DOCUMENTED_LIMITATION"
+    },
+    {
+      "defect_id": "C19-DEF-006",
+      "category": "RAG_NAVIGATION",
+      "severity": "P2-HIGH",
+      "component": "orchestrator/investigator.py & knowledge_base/retrieval/prefilter.py",
+      "title": "Ketidakselarasan kontrak index_version_policy ('active_only' vs 'kb_active_alias') dan formulasi query_text",
+      "description": "DeterministicInvestigator._step_retrieved mengirim index_version_policy='active_only', sedangkan StrictPreFilter.is_chunk_applicable hanya menerima 'latest', 'kb_active_alias', atau ID versi indeks aktual (mis. 'kb-idx-20261111-v1'), sehingga retrieval mengembalikan status no_match (NO_APPLICABLE_RUNBOOK) kecuali dinormalisasi.",
+      "observed_during": "Eksekusi awal lab shadow pilot DEV dengan ToolDispatcher default.",
+      "remediation_plan_c20": "Selaraskan index_version_policy menjadi 'kb_active_alias' pada DeterministicInvestigator (atau dukung alias 'active_only' di StrictPreFilter) serta perkaya formulasi query_text dari ringkasan error log aktual pada C20 sebelum pembekuan rilis final.",
+      "status": "OPEN_FOR_C20"
+    }
+  ]
+}

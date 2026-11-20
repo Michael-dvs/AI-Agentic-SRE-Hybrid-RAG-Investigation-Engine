@@ -1,0 +1,42 @@
+{
+  "status": "VERIFIED_SEALED",
+  "checked_at_utc": "2026-11-20T08:37:52.123540Z",
+  "method": "G1_BASELINE_SHA256_AND_RUNNER_GUARD_CHECK",
+  "files": [
+    {
+      "path": "restricted/evaluator_queries/holdout_queries.json",
+      "baseline_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "actual_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "matches": true
+    },
+    {
+      "path": "restricted/gt_registry/ground_truth_records.jsonl",
+      "baseline_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "actual_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "matches": true
+    }
+  ],
+  "h_g4_holdout_records": {
+    "source_file": "restricted/gt_registry/ground_truth_records.jsonl",
+    "h_g4_line_number": 7,
+    "h_g4_run_id": "run-20261118-e39b744a19",
+    "parsed_during_c19": false,
+    "included_in_c19_pilot": false
+  },
+  "h_g4_queries": {
+    "source_file": "restricted/evaluator_queries/holdout_queries.json",
+    "h_g4_query_ids": [
+      "QRY-HLD-007",
+      "QRY-HLD-008",
+      "QRY-HLD-009",
+      "QRY-HLD-010",
+      "QRY-HLD-011",
+      "QRY-HLD-012"
+    ],
+    "parsed_during_c19": false,
+    "included_in_c19_pilot": false
+  },
+  "runner_h_g4_guard_blocked": true,
+  "runner_guard_message": "H-G4 split remains strictly sealed until C21",
+  "access_log": "Zero H-G4 data access occurred during C19 Tahap 1B shadow pilot and manual baseline execution."
+}

@@ -1,0 +1,221 @@
+{
+  "run_id": "c19-20261120T083752Z",
+  "generated_at_utc": "2026-11-20T08:37:52.497843Z",
+  "split_id": "dev",
+  "summary": {
+    "reviewed_count": 7,
+    "dimension_means": {
+      "correctness": 4.429,
+      "evidence_sufficiency": 4.429,
+      "actionability": 4.143,
+      "clarity": 4.571,
+      "uncertainty_handling": 4.286
+    },
+    "overall_mean_score": 4.372,
+    "accepted_without_substantial_rework_count": 6,
+    "kpi_06_acceptance_rate": 0.8571,
+    "decision_counts": {
+      "APPROVED": 6,
+      "APPROVED_WITH_MINOR_EDIT": 1,
+      "REJECTED": 0
+    },
+    "median_system_tti_seconds": 0.032,
+    "median_human_review_effort_seconds": 40.0,
+    "auto_action_triggered_count": 0,
+    "assessment_kind": "self_review_lab_owner",
+    "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+    "honesty_disclosure": "Skor rubrik 5 dimensi dan KPI-06 dinilai oleh pengembang tunggal lab (SELF_EVALUATED_DEVELOPER_LABELS / self_review_lab_owner) per ADR-S08."
+  },
+  "entries": [
+    {
+      "incident_id": "inc-pilot-dev-sc01-001",
+      "service_id": "api-gateway",
+      "case_label": "DEV-01 Healthy Control Baseline",
+      "scores": {
+        "correctness": 5,
+        "evidence_sufficiency": 4,
+        "actionability": 4,
+        "clarity": 5,
+        "uncertainty_handling": 5
+      },
+      "mean_dimension_score": 4.6,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.042,
+      "human_review_effort_seconds": 22.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "566952dfb80510f4944a10ba43d375a0c811669c724967766afb4b2c51cfc8d3",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Kontrol sehat tidak memicu hipotesis fault palsu; status INCONCLUSIVE aman dengan 0 error log."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc02-002",
+      "service_id": "transaction-service",
+      "case_label": "DEV-02 Single Fault HTTP 5xx Burst",
+      "scores": {
+        "correctness": 5,
+        "evidence_sufficiency": 5,
+        "actionability": 4,
+        "clarity": 5,
+        "uncertainty_handling": 4
+      },
+      "mean_dimension_score": 4.6,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.032,
+      "human_review_effort_seconds": 38.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "af2d5decb5f7fc6aa3c8c2448cef70ca2a2794f8a9058c13cb3078046930024c",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Korelasi log ERR_TRANSACTION_FAILED, metrik RED, dan sitasi SOP-TX aktif tersaji jelas di TUI."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc03-003",
+      "service_id": "ledger-service",
+      "case_label": "DEV-03 Single Fault DB Connection Pool Exhaustion",
+      "scores": {
+        "correctness": 5,
+        "evidence_sufficiency": 5,
+        "actionability": 5,
+        "clarity": 4,
+        "uncertainty_handling": 4
+      },
+      "mean_dimension_score": 4.6,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.029,
+      "human_review_effort_seconds": 45.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "0c905eac6ebead1bbea01c20d22683b84dfa78588ad00a391c45c570ca9889fd",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Retrieval hanya mengutip SOP-LEDGER-001 v2.0.0 yang approved dan mengecualikan v1.0.0 obsolete."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc04-004",
+      "service_id": "api-gateway",
+      "case_label": "DEV-04 Cascade Failure Gateway -> Transaction -> Ledger",
+      "scores": {
+        "correctness": 5,
+        "evidence_sufficiency": 4,
+        "actionability": 4,
+        "clarity": 4,
+        "uncertainty_handling": 4
+      },
+      "mean_dimension_score": 4.2,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.034,
+      "human_review_effort_seconds": 62.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "f55d549ec7850e08d081a02246869f2492ec87cf6b208eea97ee3763ce2f4e40",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Korelasi graf dependensi mengidentifikasi asal kaskade dari ledger-service ke api-gateway."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc06-005",
+      "service_id": "auth-service",
+      "case_label": "DEV-05 Auth Token Mismatch & Obsolete SOP Exclusion",
+      "scores": {
+        "correctness": 4,
+        "evidence_sufficiency": 5,
+        "actionability": 4,
+        "clarity": 5,
+        "uncertainty_handling": 4
+      },
+      "mean_dimension_score": 4.4,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.023,
+      "human_review_effort_seconds": 35.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "fcb70c3e36f7b4d56df3a2b9f18e89b00f9e8fe479ac7fa0685d03532781a828",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Dokumen SOP-AUTH-001 aktif terambil dengan pembatasan layanan dan lingkungan yang tepat."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc07-006",
+      "service_id": "notification-service",
+      "case_label": "DEV-06 Queue Consumer Lag (Human Correction v1->v2)",
+      "scores": {
+        "correctness": 3,
+        "evidence_sufficiency": 4,
+        "actionability": 4,
+        "clarity": 4,
+        "uncertainty_handling": 4
+      },
+      "mean_dimension_score": 3.8,
+      "decision": "APPROVED_WITH_MINOR_EDIT",
+      "accepted_without_substantial_rework": false,
+      "system_time_to_dossier_seconds": 0.029,
+      "human_review_effort_seconds": 78.0,
+      "tui_actions_applied": [
+        "CORRECT",
+        "APPROVE"
+      ],
+      "final_dossier_version": 2,
+      "final_dossier_hash": "0b2580216e86ed40327e16932a5b9b7aa2ecd566b5c139f6541ec7e816de8a73",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Hipotesis awal terlalu umum sehingga dikoreksi melalui aksi TUI CORRECT (v1->v2) sebelum APPROVE; ditemukan cacat C19-DEF-004 pada preservasi bukti di v2."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc09-007",
+      "service_id": "api-gateway",
+      "case_label": "DEV-07 Degraded Mode / Trace Backend Outage",
+      "scores": {
+        "correctness": 4,
+        "evidence_sufficiency": 4,
+        "actionability": 4,
+        "clarity": 5,
+        "uncertainty_handling": 5
+      },
+      "mean_dimension_score": 4.4,
+      "decision": "APPROVED",
+      "accepted_without_substantial_rework": true,
+      "system_time_to_dossier_seconds": 0.032,
+      "human_review_effort_seconds": 40.0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "final_dossier_version": 1,
+      "final_dossier_hash": "2cb4ef0a3b291598aa1d2c283891d194f47e57a65767207dcd8f9d65fcf7fb4f",
+      "final_state": "CLOSED",
+      "auto_action_triggered": false,
+      "assessment_kind": "self_review_lab_owner",
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+      "reviewer_notes": "Outage get_trace_summary dicatat jujur pada missing_sources dan menurunkan hipotesis ke INCONCLUSIVE (EV-02) tanpa fabrikasi span."
+    }
+  ]
+}

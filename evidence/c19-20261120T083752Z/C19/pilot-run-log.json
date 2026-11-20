@@ -1,0 +1,275 @@
+{
+  "run_id": "c19-20261120T083752Z",
+  "executed_at_utc": "2026-11-20T08:37:52.498053Z",
+  "split_id": "dev",
+  "summary": {
+    "total_incidents": 7,
+    "closed_incidents": 7,
+    "telegram_dry_run_count": 7,
+    "auto_action_triggered_count": 0,
+    "handover_gt_leak_count": 0
+  },
+  "audit_chain": {
+    "valid": true,
+    "event_count": 15,
+    "head_hash": "27980e1cfce337e2c181c4191bf8d477d1bc47d0f990cae32bfcde6d8da6c013",
+    "violations": []
+  },
+  "telegram_events": [
+    {
+      "incident_id": "inc-pilot-dev-sc01-001",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc01-001\nAffected: api-gateway, auth-service, ledger-service, notification-service, transaction-service\nSymptom: Routine synthetic traffic health verification on api-gateway\nAI diagnosis: Transient or unobserved anomaly on api-gateway\nRunbook SOP: SOP-GW-ERR-504 | SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc02-002",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc02-002\nAffected: transaction-service, api-gateway, db-dummy, ledger-service, notification-service\nSymptom: Spike in HTTP 500 error rate on transaction-service payment endpoint\nAI diagnosis: Service operational error in transaction-service (ERR_TRANSACTION_FAILED)\nRunbook SOP: SOP-TX-001 | SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc03-003",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc03-003\nAffected: ledger-service, api-gateway, transaction-service, db-dummy\nSymptom: PostgreSQL connection pool exhaustion causing checkout timeout in ledger-service\nAI diagnosis: Service operational error in ledger-service (ERR_DATABASE_LATENCY)\nRunbook SOP: SOP-LEDGER-001 | SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc04-004",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc04-004\nAffected: api-gateway, auth-service, ledger-service, notification-service, transaction-service\nSymptom: HTTP 504 cascade across api-gateway, transaction-service, and ledger-service\nAI diagnosis: Cascading failure from ledger-service propagating error to api-gateway\nRunbook SOP: SOP-GW-ERR-504 | SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 1. Gejala dan Karakteristik Error\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc06-005",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc06-005\nAffected: auth-service, api-gateway\nSymptom: Authentication token verification mismatch on auth-service /verify\nAI diagnosis: Service operational error in auth-service (ERR_AUTH_REJECTED)\nRunbook SOP: SOP-AUTH-001 | SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 1. Indikator dan Pemicu Alert\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc07-006",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc07-006\nAffected: notification-service, api-gateway, transaction-service\nSymptom: RabbitMQ notification queue consumer lag and backlog spike\nAI diagnosis: Service operational error in notification-service (ERR_QUEUE_CONSUMER_LAG)\nRunbook SOP: SOP-NOTIF-001 | SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc09-007",
+      "status": "DRY_RUN",
+      "dry_run": true,
+      "delivered": false,
+      "reason": "TELEGRAM_CREDENTIALS_NOT_CONFIGURED",
+      "message": "SRE INCIDENT ALERT [HIGH]\nIncident ID: inc-pilot-dev-sc09-007\nAffected: api-gateway, auth-service, ledger-service, notification-service, transaction-service\nSymptom: Gateway timeout observed while distributed tracing backend is down\nAI diagnosis: Service operational error in api-gateway (ERR_GATEWAY_TIMEOUT)\nRunbook SOP: SOP-GW-ERR-504 | SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API\nReview di Unified SRE Command Center:\npython3 scripts/sre_dashboard.py\nNotification only. Tidak ada perintah Telegram yang diterima server."
+    }
+  ],
+  "runs": [
+    {
+      "incident_id": "inc-pilot-dev-sc01-001",
+      "service_id": "api-gateway",
+      "case_label": "DEV-01 Healthy Control Baseline",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "566952dfb80510f4944a10ba43d375a0c811669c724967766afb4b2c51cfc8d3",
+      "top_hypothesis_status": "INCONCLUSIVE",
+      "sop_citations_count": 3,
+      "evidence_count": 11,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.042,
+      "human_review_seconds": 22.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc01-001/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc01-001/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc01-001/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc02-002",
+      "service_id": "transaction-service",
+      "case_label": "DEV-02 Single Fault HTTP 5xx Burst",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "af2d5decb5f7fc6aa3c8c2448cef70ca2a2794f8a9058c13cb3078046930024c",
+      "top_hypothesis_status": "SUPPORTED",
+      "sop_citations_count": 3,
+      "evidence_count": 11,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.032,
+      "human_review_seconds": 38.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc02-002/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc02-002/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc02-002/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc03-003",
+      "service_id": "ledger-service",
+      "case_label": "DEV-03 Single Fault DB Connection Pool Exhaustion",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "0c905eac6ebead1bbea01c20d22683b84dfa78588ad00a391c45c570ca9889fd",
+      "top_hypothesis_status": "SUPPORTED",
+      "sop_citations_count": 3,
+      "evidence_count": 9,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.029,
+      "human_review_seconds": 45.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc03-003/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc03-003/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc03-003/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc04-004",
+      "service_id": "api-gateway",
+      "case_label": "DEV-04 Cascade Failure Gateway -> Transaction -> Ledger",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "f55d549ec7850e08d081a02246869f2492ec87cf6b208eea97ee3763ce2f4e40",
+      "top_hypothesis_status": "SUPPORTED",
+      "sop_citations_count": 3,
+      "evidence_count": 11,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.034,
+      "human_review_seconds": 62.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc04-004/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc04-004/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc04-004/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc06-005",
+      "service_id": "auth-service",
+      "case_label": "DEV-05 Auth Token Mismatch & Obsolete SOP Exclusion",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "fcb70c3e36f7b4d56df3a2b9f18e89b00f9e8fe479ac7fa0685d03532781a828",
+      "top_hypothesis_status": "SUPPORTED",
+      "sop_citations_count": 3,
+      "evidence_count": 5,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.023,
+      "human_review_seconds": 35.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc06-005/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc06-005/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc06-005/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc07-006",
+      "service_id": "notification-service",
+      "case_label": "DEV-06 Queue Consumer Lag (Human Correction v1->v2)",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 2,
+      "final_dossier_hash": "0b2580216e86ed40327e16932a5b9b7aa2ecd566b5c139f6541ec7e816de8a73",
+      "top_hypothesis_status": "INCONCLUSIVE",
+      "sop_citations_count": 0,
+      "evidence_count": 0,
+      "missing_sources_count": 0,
+      "tui_actions_applied": [
+        "CORRECT",
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.029,
+      "human_review_seconds": 78.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc07-006/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc07-006/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc07-006/dossier.html"
+      }
+    },
+    {
+      "incident_id": "inc-pilot-dev-sc09-007",
+      "service_id": "api-gateway",
+      "case_label": "DEV-07 Degraded Mode / Trace Backend Outage",
+      "split_id": "dev",
+      "investigation_mode": "deterministic_baseline",
+      "initial_review_state": "HUMAN_REVIEW",
+      "final_state": "CLOSED",
+      "final_dossier_version": 1,
+      "final_dossier_hash": "2cb4ef0a3b291598aa1d2c283891d194f47e57a65767207dcd8f9d65fcf7fb4f",
+      "top_hypothesis_status": "INCONCLUSIVE",
+      "sop_citations_count": 3,
+      "evidence_count": 10,
+      "missing_sources_count": 1,
+      "tui_actions_applied": [
+        "APPROVE"
+      ],
+      "telegram_status": "DRY_RUN",
+      "system_tti_seconds": 0.032,
+      "human_review_seconds": 40.0,
+      "auto_action_triggered": false,
+      "handover_gt_isolated": true,
+      "handover_artifacts": {
+        "json": "runtime/handover/inc-pilot-dev-sc09-007/dossier_final.json",
+        "markdown": "runtime/handover/inc-pilot-dev-sc09-007/dossier.md",
+        "html": "runtime/handover/inc-pilot-dev-sc09-007/dossier.html"
+      }
+    }
+  ]
+}

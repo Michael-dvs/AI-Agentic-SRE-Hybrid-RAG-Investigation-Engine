@@ -1,0 +1,142 @@
+{
+  "alert_received_at": "2026-11-12T00:00:00Z",
+  "dossier_hash": "0b2580216e86ed40327e16932a5b9b7aa2ecd566b5c139f6541ec7e816de8a73",
+  "dossier_ready_at": "2026-11-20T08:25:00Z",
+  "dossier_version": 2,
+  "environment": "lab",
+  "evidence": [],
+  "hypotheses": [
+    {
+      "contradicting_evidence_ids": [],
+      "hypothesis_id": "hyp-inc-pilot-dev-sc07-006-human-001",
+      "rank": 1,
+      "reason_summary": "Hypothesis derived from observed signals on notification-service.",
+      "statement": "RabbitMQ notification consumer worker stalled causing 1250-message queue backlog; verify consumer prefetch and worker health manually per SOP-NOTIF-QUEUE-001.",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "impact_summary": {
+    "affected_services": [
+      "notification-service"
+    ],
+    "error_budget_impact": "minor",
+    "observed_symptoms": "Telemetry signals indicated anomalies in notification-service (ERR_UNKNOWN)"
+  },
+  "incident_id": "inc-pilot-dev-sc07-006",
+  "investigation_mode": "deterministic_baseline",
+  "missing_sources": [],
+  "recommended_checks": [
+    {
+      "auto_execution_allowed": false,
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of notification-service.",
+      "related_sop_doc_id": "SOP-NOTIF-001",
+      "requires_human_approval": true,
+      "risk_level": "medium"
+    }
+  ],
+  "reproducibility": {
+    "correlation_ids": [
+      "corr-inc-pilot-dev-sc07-006"
+    ],
+    "kb_index_version": "kb-idx-20261111-v1",
+    "model_version": "deterministic_rule_engine_v1",
+    "policy_version": "1.0.0",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "workflow_version": "1.0.0"
+  },
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-55b1bf3999c7435f",
+    "reviewed_by": "project_owner_michael (L2_SRE)",
+    "reviewed_at": "2026-11-20T08:37:52.444637Z"
+  },
+  "schema_version": "1.0",
+  "service_id": "notification-service",
+  "severity": "medium",
+  "sop_citations": [],
+  "timeline": [
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED",
+      "timestamp": "2026-11-20T08:37:52.409678Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED",
+      "timestamp": "2026-11-20T08:37:52.411215Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED",
+      "timestamp": "2026-11-20T08:37:52.412642Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED",
+      "timestamp": "2026-11-20T08:37:52.423997Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED",
+      "timestamp": "2026-11-20T08:37:52.427411Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES",
+      "timestamp": "2026-11-20T08:37:52.429130Z"
+    },
+    {
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED",
+      "timestamp": "2026-11-20T08:37:52.430823Z"
+    }
+  ],
+  "unknowns": [],
+  "window_end": "2026-11-12T00:00:00Z",
+  "window_start": "2026-11-12T00:00:00Z",
+  "review_events": [
+    {
+      "review_event_id": "rev-0c9c3967b3d643ea",
+      "incident_id": "inc-pilot-dev-sc07-006",
+      "target_dossier_version": 1,
+      "target_dossier_hash": "331db816270b4f9e62def52b647f7b189c044aca0eff1b16734bbf845ec7473c",
+      "reviewer_ref": "project_owner_michael",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-20T08:37:52.442350Z",
+      "decision": "edit",
+      "rationale": "Supplementing root-cause statement with consumer prefetch lag details.",
+      "edited_dossier_version": 2,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-20T08:37:52.442426Z"
+    },
+    {
+      "review_event_id": "rev-55b1bf3999c7435f",
+      "incident_id": "inc-pilot-dev-sc07-006",
+      "target_dossier_version": 2,
+      "target_dossier_hash": "9283f4015209dbf372401392c20c45b5a526a7bae0df85107d34c85c44e97a19",
+      "reviewer_ref": "project_owner_michael",
+      "reviewer_role": "L2_SRE_REVIEWER",
+      "reviewed_at": "2026-11-20T08:37:52.444637Z",
+      "decision": "approve",
+      "rationale": "Verified v2 correction and backlog check instructions; approved for handover.",
+      "edited_dossier_version": null,
+      "escalation_target": null,
+      "auto_action_triggered": false,
+      "created_at": "2026-11-20T08:37:52.444702Z"
+    }
+  ]
+}
