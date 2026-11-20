@@ -10,6 +10,7 @@ import uuid
 from typing import Any, Callable, Dict, List, Optional, Set
 
 from gateway.policy import PolicyGateway
+from gateway.sanitizer import DeterministicSanitizer
 from observability.ai_tracer import SanitizedAITracer
 from observability.cost_tracker import CostAndResourceTracker
 from orchestrator.claim_validator_contract import ClaimValidator, HypothesisStatus
@@ -68,6 +69,29 @@ class DeterministicInvestigator:
     def _format_incident_id(self, raw_id: str) -> str:
         return raw_id if raw_id.startswith("inc-") else f"inc-{raw_id}"
 
+    @staticmethod
+    def _retrieval_query_text(context: Dict[str, Any]) -> str:
+        service_id = str(context.get("service_id", "unknown-service"))
+        error_code = str(context.get("error_code", "ERR_UNKNOWN"))
+        observed: list[str] = []
+        for evidence in context.get("evidence_items", []):
+            if evidence.get("tool_name") != "search_error_logs":
+                continue
+            for record in evidence.get("records", [])[:3]:
+                if not isinstance(record, dict):
+                    continue
+                detail = record.get("message") or record.get("error_code")
+                if detail:
+                    observed.append(str(detail))
+        if not observed and context.get("message"):
+            observed.append(str(context["message"]))
+        sanitized, _ = DeterministicSanitizer().sanitize_text(" | ".join(observed))
+        telemetry_summary = sanitized[:512] or "no bounded error-log summary available"
+        return (
+            f"Troubleshooting runbook SOP for {service_id} {error_code}. "
+            f"Observed telemetry error summary: {telemetry_summary}"
+        )
+
     def investigate_incident(self, alert_or_incident: Dict[str, Any]) -> Dict[str, Any]:
         """Execute full 9-state investigation lifecycle: RECEIVED -> ... -> HUMAN_REVIEW."""
         raw_id = alert_or_incident.get("incident_id") or f"inc-{uuid.uuid4().hex[:12]}"
@@ -79,7 +103,7 @@ class DeterministicInvestigator:
         trace_id = alert_or_incident.get("trace_id")
 
         # Initialize resilience tracking for global deadline
-        self.resilience.start_incident(incident_id)
+        admitted = self.resilience.start_incident(incident_id)
 
         # Initialize C15 AI observability trace and cost accounting session
         corr_id = alert_or_incident.get("correlation_id") or f"corr-{uuid.uuid4().hex[:12]}"
@@ -117,6 +141,10 @@ class DeterministicInvestigator:
         }
 
         try:
+            if not admitted:
+                raise IncidentCancelledError(
+                    f"Incident {incident_id} rejected: emergency kill switch engaged"
+                )
             # 1. RECEIVED
             t0 = time.perf_counter()
             context = self._step_received(incident_id, context)
@@ -722,12 +750,12 @@ class DeterministicInvestigator:
                 arguments={
                     "service_id": primary_service,
                     "environment": context["environment"],
-                    "query_text": f"Troubleshooting runbook SOP for {primary_service} {error_code}",
+                    "query_text": self._retrieval_query_text(context),
                     "reference_time": context["event_time"],
                     "retrieval_mode": "hybrid_rrf",
                     "top_k": 3,
                     "max_context_tokens": 1024,
-                    "index_version_policy": "active_only",
+                    "index_version_policy": "kb_active_alias",
                 },
                 token=f"Bearer {self.bearer_token}",
                 incident_id=incident_id,

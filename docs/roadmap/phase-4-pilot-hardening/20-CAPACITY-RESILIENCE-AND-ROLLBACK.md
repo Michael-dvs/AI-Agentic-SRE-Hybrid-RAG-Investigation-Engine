@@ -4,7 +4,7 @@
 - **Phase:** F4 — Pilot & Hardening
 - **Status:** DRAFT
 - **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Implementation status:** `IN_PROGRESS` — Tahap 2A `VERIFIED` pada `DEV`; Tahap 2B (*publish/canary/rollback*, rekonsiliasi `AT-015`, dan *final release freeze*) `NOT_STARTED`
 - **Dependencies:** [C15 — AI Observability, Audit, and Cost](../phase-3-reasoning-observability/15-AI-OBSERVABILITY-AUDIT-AND-COST.md), [C18 — Red-Team, Holdout, and G3](../phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md) (`G3 PASS`), [C19 — Lab Shadow Pilot and Manual Baseline](19-LAB-SHADOW-PILOT-AND-MANUAL-BASELINE.md), batas kapasitas/anggaran (`TBD-03`, `TBD-09`, `ADR-S05`)
 - **Next chapter:** [C21 — Final Holdout and Benchmark](21-FINAL-HOLDOUT-AND-BENCHMARK.md)
 - **Related requirements:** `FR-OBS-005`, `FR-RAG-008`, `FR-AGT-004`, `FR-AGT-007`, `FR-AGT-009`, `RULE-009`, `NFR-006`, `NFR-007`, `NFR-009`, `NFR-010`, `NFR-013`, `NFR-014`, `KPI-07`, `KPI-12`, `KPI-14`, `OBJ-05`, `DEP-01`, `DEP-06`, `RISK-07`, `RISK-08`, `SC-12`, `SC-13`
@@ -78,4 +78,55 @@ Setelah chapter ini selesai, profil *throughput*, latensi, antrean, dan CPU/RAM 
 - **Risiko:** Pengujian konkurensi `20` atau `50` insiden unik secara simultan pada laptop 16 GiB RAM (alokasi Docker 8 GiB) atau *Free-Tier LLM API* kemungkinan besar akan menyentuh batas memori atau *rate limit* (`DEP-01`, `DEP-06`); sesuai aturan proyek, kondisi ini **bukan** kegagalan yang harus disembunyikan, melainkan wajib dicatat sebagai *observed lab capacity ceiling* dan batas skala maket.
 - **Open Decisions:** Tidak ada keputusan arsitektur baru; seluruh parameter rilis wajib dikunci di `final-release-manifest` pada akhir chapter ini.
 - **Handover ke [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md):** Rilis final yang telah dibekukan (`final-release-manifest`), data biaya/kapasitas (`E20`), serta kesiapan untuk membuka segel *final holdout* `H-G4`.
+
+## 9. Catatan Implementasi Tahap 2A: Hardening, Capacity, dan Resilience
+
+### 9.1 Batas eksekusi
+
+- **Run ID:** `c20-stage2a-20261120T090912Z`
+- **Split:** `DEV` saja; partisi *Final Blind Holdout* tidak dibuka, dibaca, atau diparsing.
+- **Biaya tunai:** `$0.00`; drill menggunakan backend sintetis lokal dan *in-process harness*.
+- **Batas tahap:** Paket ini bukan `E20` final. Uji *publish/canary/rollback*, rekonsiliasi unit cost final `AT-015`, dan pembekuan `final-release-manifest` tetap `NOT_STARTED`.
+
+### 9.2 Penutupan defect C19
+
+| Defect | Disposisi Tahap 2A | Bukti regresi |
+|---|---|---|
+| `C19-DEF-001` | `RESOLVED`: viewport Rich menghitung ulang layout terhadap lebar terminal pada setiap refresh `Live` | `test_def001_viewport_reflows_against_current_console_width` |
+| `C19-DEF-002` | `RESOLVED`: ringkasan evidence dan excerpt SOP disanitasi, dibatasi panjangnya, serta menampilkan versi SOP | `test_def002_bounded_sanitized_evidence_and_sop_version_render` |
+| `C19-DEF-003` | `RESOLVED`: inisialisasi ulang memakai checkpoint + verifikasi tail; pembacaan penuh ditunda sampai history diminta; append diserialisasi | `test_def003_audit_tail_initialization_and_concurrent_chain_integrity` |
+| `C19-DEF-004` | `RESOLVED`: revisi `v(N+1)` mewarisi `evidence`, `sop_citations`, dan `alert_received_at` | `test_def004_correct_revision_inherits_evidence_citations_and_alert_time` |
+| `C19-DEF-005` | `CLOSED_WITH_DOCUMENTED_LIMITATION`: label solo-developer, bias familiaritas, dan status non-SME tetap wajib | `test_def005_manual_baseline_retains_solo_developer_bias_disclosure` |
+| `C19-DEF-006` | `RESOLVED`: `kb_active_alias` menjadi kebijakan caller, `active_only` tetap alias legacy aman, dan query memuat ringkasan error tersanitasi | `test_def006_index_aliases_and_telemetry_enriched_query` |
+
+### 9.3 Hasil kapasitas `OPS-01`
+
+Sumber: [`capacity-series.json`](../../../evidence/c20-stage2a-20261120T090912Z/C20/capacity-series.json).
+
+| Beban | Status | Hasil | Throughput | P50 / P95 | Peak RSS proses |
+|---|---|---|---:|---:|---:|
+| 100 duplicate alerts | `PASS` | 100 alert → 1 incident → 1 dossier; `hit_count=100` | 13,806.434 alert/s | 0.710 / 0.710 ms | 210.359 MiB |
+| 5 unique concurrent | `PASS` | 5 accepted, 0 rejected, 5 dossier | 2,110.446 incident/s | 0.369 / 0.408 ms | 210.359 MiB |
+| 20 unique concurrent | `PASS` | 20 accepted, 0 rejected, 20 dossier | 2,231.676 incident/s | 0.353 / 0.426 ms | 210.359 MiB |
+| 50 unique concurrent | `PASS` | 50 accepted, 0 rejected, 50 dossier | 2,233.235 incident/s | 0.349 / 0.420 ms | 210.359 MiB |
+
+Docker daemon tidak tersedia saat run, sehingga metrik kontainer diberi status `UNAVAILABLE`; angka CPU/RSS di atas secara eksplisit merupakan metrik proses harness dan tidak dilabeli ulang sebagai metrik kontainer. Seluruh level tetap berada di bawah plafon RAM lab 8 GiB.
+
+### 9.4 Hasil resilience `OPS-02`, `AT-012`
+
+Sumber: [`outage-and-kill-switch.json`](../../../evidence/c20-stage2a-20261120T090912Z/C20/outage-and-kill-switch.json).
+
+- Enam dari enam drill `PASS`: LLM timeout, adapter telemetri, knowledge base, tracer sink, queue saturation, dan emergency kill switch.
+- LLM timeout menghasilkan dossier `manual_fallback` dengan hipotesis `INCONCLUSIVE`.
+- Outage telemetri menghasilkan `missing_sources` tanpa evidence imajiner; outage KB menghasilkan `NO_APPLICABLE_RUNBOOK`.
+- Tracer sink fail-open tidak menghentikan investigasi; rantai audit lokal tetap valid.
+- Queue saturation menghasilkan `REJECTED_BACKPRESSURE`; kill switch membatalkan incident aktif dan menolak intake baru dengan status `CANCELLED`.
+- `safe_terminal_rate=100%`, `incidents_without_audit=0`, `auto_remediation_triggered=false`, dan `non_target_services_mutated=false`.
+
+### 9.5 Verifikasi
+
+- `python3 -m pytest -q tests/test_c20_capacity_resilience.py` → `8 passed`.
+- Regresi terfokus C07/C11/C12/C13/C15/C16/C19/C20 → `102 passed`.
+- `python3 scripts/run_c20_stage2a.py` → `PASS`; concurrency `5/20/50` seluruhnya `PASS`; resilience `6/6`.
+- `python3 -m pytest -q tests/` → `469 passed, 6 skipped`; seluruh tes yang dieksekusi lulus.
 

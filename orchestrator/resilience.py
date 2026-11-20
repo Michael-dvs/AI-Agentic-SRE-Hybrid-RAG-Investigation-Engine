@@ -191,20 +191,32 @@ class ResilienceController:
         self._incident_start_times: Dict[str, float] = {}
         # incident_id -> tool_call_count
         self._tool_call_counts: Dict[str, int] = {}
-        # set of cancelled incident_ids
-        self._cancelled_incidents: Set[str] = {} if False else set()
+        self._cancelled_incidents: Set[str] = set()
         self._cancellation_reasons: Dict[str, str] = {}
+        self._kill_switch_engaged = False
+        self._kill_switch_reason = "Emergency kill switch engaged"
         self._lock = threading.Lock()
 
         # Audit events for E11 packaging
         self._resilience_events: List[Dict[str, Any]] = []
 
-    def start_incident(self, incident_id: str) -> None:
-        """Register start time of an incident for deadline tracking."""
+    def start_incident(self, incident_id: str) -> bool:
+        """Register an incident, or reject it when the global kill switch is engaged."""
         with self._lock:
+            if self._kill_switch_engaged:
+                self._cancelled_incidents.add(incident_id)
+                self._cancellation_reasons[incident_id] = self._kill_switch_reason
+                self._resilience_events.append({
+                    "event_type": "INTAKE_REJECTED_KILL_SWITCH",
+                    "incident_id": incident_id,
+                    "reason": self._kill_switch_reason,
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+                })
+                return False
             if incident_id not in self._incident_start_times:
                 self._incident_start_times[incident_id] = self._clock()
             self._tool_call_counts.setdefault(incident_id, 0)
+            return True
 
     def check_deadline(self, incident_id: str, deadline_seconds: float | None = None) -> float:
         """Check if global deadline exceeded. Returns elapsed seconds or raises DeadlineExceededError."""
@@ -266,6 +278,28 @@ class ResilienceController:
             }
             self._resilience_events.append(event)
             _LOG.warning("Kill switch engaged: incident %s cancelled (%s)", incident_id, reason)
+
+    def engage_kill_switch(self, reason: str = "Emergency operator kill switch") -> list[str]:
+        """Reject new intake and cooperatively cancel every registered investigation."""
+        with self._lock:
+            self._kill_switch_engaged = True
+            self._kill_switch_reason = reason
+            active = sorted(self._incident_start_times)
+            self._cancelled_incidents.update(active)
+            for incident_id in active:
+                self._cancellation_reasons[incident_id] = reason
+            self._resilience_events.append({
+                "event_type": "GLOBAL_KILL_SWITCH_ENGAGED",
+                "incident_ids": active,
+                "reason": reason,
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+            })
+            return active
+
+    @property
+    def kill_switch_engaged(self) -> bool:
+        with self._lock:
+            return self._kill_switch_engaged
 
     def is_cancelled(self, incident_id: str) -> bool:
         with self._lock:

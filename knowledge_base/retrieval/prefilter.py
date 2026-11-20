@@ -7,6 +7,8 @@ from typing import Any
 
 from knowledge_base.retrieval.models import RetrievalRequest
 
+_ACTIVE_INDEX_POLICIES = frozenset({"latest", "kb_active_alias", "active_only"})
+
 
 def parse_iso8601_utc(dt_str: str) -> datetime.datetime:
     """Parse ISO-8601 UTC timestamp ending in Z."""
@@ -67,11 +69,14 @@ class StrictPreFilter:
             if not chunk_allowed_groups.intersection(caller_groups):
                 return False, f"RESTRICTED_ACCESS_DENIED: caller groups {caller_groups} lack allowed {chunk_allowed_groups}"
 
-        # 6. Index version policy check
+        # 6. Index version policy check. ``active_only`` remains a safe legacy
+        # alias while new callers use the canonical ``kb_active_alias`` value.
         policy = request.index_version_policy
-        if policy and policy not in ("latest", "kb_active_alias"):
+        if not policy:
+            return False, "INDEX_VERSION_POLICY_REQUIRED"
+        if policy not in _ACTIVE_INDEX_POLICIES:
             chunk_idx_ver = chunk.get("index_version")
-            if chunk_idx_ver and chunk_idx_ver != policy:
+            if not chunk_idx_ver or chunk_idx_ver != policy:
                 return False, f"INDEX_VERSION_MISMATCH: chunk {chunk_idx_ver} != policy {policy}"
 
         return True, "APPLICABLE"

@@ -165,3 +165,8 @@ class AlertDeduplicator:
         """Remove and return the oldest pending incident snapshot, or None."""
         with self._lock:
             return self._queue.popleft().copy() if self._queue else None
+
+    def queue_size(self) -> int:
+        """Return the current bounded work queue depth."""
+        with self._lock:
+            return len(self._queue)

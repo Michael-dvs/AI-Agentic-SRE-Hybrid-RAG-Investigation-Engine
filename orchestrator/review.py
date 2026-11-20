@@ -354,8 +354,11 @@ class AuthorizedReviewManager:
                     "telemetry_summary",
                     "signals_timeline",
                     "evidence_items",
+                    "evidence",
                     "telemetry_citations",
+                    "sop_citations",
                     "source_telemetry",
+                    "alert_received_at",
                 }
                 for k, v in edited_dossier_data.items():
                     if k not in protected_fields:

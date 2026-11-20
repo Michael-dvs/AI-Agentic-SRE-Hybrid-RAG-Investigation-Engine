@@ -10,6 +10,17 @@ from typing import Any, Dict, List, Optional
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from gateway.sanitizer import DeterministicSanitizer
+
+
+_DOSSIER_SANITIZER = DeterministicSanitizer()
+
+
+def _bounded_sanitized_text(value: Any, *, limit: int) -> str:
+    normalized = " ".join(str(value or "").split())
+    sanitized, _ = _DOSSIER_SANITIZER.sanitize_text(normalized)
+    return sanitized[:limit]
+
 # Path to canonical dossier contract schema
 _CONTRACT_DIR = (
     pathlib.Path(__file__).resolve().parent.parent
@@ -75,13 +86,13 @@ class DossierSerializer:
         }
         severity = severity_map.get(raw_priority, "medium")
 
-        alert_time = context.get("event_time", "2026-11-12T00:00:00Z")
+        alert_time = context.get("event_time") or context.get("alert_received_at") or "2026-11-12T00:00:00Z"
         if not alert_time.endswith("Z"):
             alert_time = f"{alert_time.replace('+00:00', '')}Z"
 
-        window = context.get("query_window", {})
-        window_start = window.get("start", alert_time)
-        window_end = window.get("end", alert_time)
+        window = context.get("query_window") or {}
+        window_start = window.get("start") or context.get("window_start") or alert_time
+        window_end = window.get("end") or context.get("window_end") or alert_time
         if not window_start.endswith("Z"):
             window_start = f"{window_start.replace('+00:00', '')}Z"
         if not window_end.endswith("Z"):
@@ -90,10 +101,11 @@ class DossierSerializer:
         dossier_ready_at = context.get("dossier_ready_at") or alert_time
 
         # 1. Impact Summary
-        scope = context.get("investigation_scope", [service_id])
+        prior_impact = context.get("impact_summary") if isinstance(context.get("impact_summary"), dict) else {}
+        scope = context.get("investigation_scope") or prior_impact.get("affected_services") or [service_id]
         if not scope:
             scope = [service_id]
-        observed_symptoms = context.get("message") or f"Telemetry signals indicated anomalies in {service_id} ({context.get('error_code', 'ERR_UNKNOWN')})"
+        observed_symptoms = context.get("message") or prior_impact.get("observed_symptoms") or f"Telemetry signals indicated anomalies in {service_id} ({context.get('error_code', 'ERR_UNKNOWN')})"
         if len(observed_symptoms) < 3:
             observed_symptoms = f"Anomaly observed in {service_id}"
         error_budget = "severe" if severity == "critical" else ("moderate" if severity == "high" else "minor")
@@ -132,9 +144,13 @@ class DossierSerializer:
                 })
 
         # 3. Evidence vs Missing Sources Separation
-        raw_evidence = context.get("evidence_items", [])
+        evidence_context = context.get("evidence_items")
+        raw_evidence = evidence_context if isinstance(evidence_context, list) else context.get("evidence", [])
         evidence_list: List[Dict[str, Any]] = []
-        missing_sources: List[Dict[str, Any]] = []
+        raw_missing = context.get("missing_sources", [])
+        missing_sources: List[Dict[str, Any]] = [
+            dict(item) for item in raw_missing if isinstance(item, dict)
+        ]
 
         valid_tools = {
             "get_service_metrics",
@@ -155,9 +171,7 @@ class DossierSerializer:
                 obs_at = f"{obs_at.replace('+00:00', '')}Z"
 
             err_code = ev.get("error_code")
-
             if dq == "unavailable" or err_code in ("SOURCE_UNAVAILABLE", "TIMEOUT", "BACKEND_TIMEOUT"):
-                # Missing source routing
                 m_err = "SOURCE_UNAVAILABLE"
                 if err_code in ("TIMEOUT", "BACKEND_TIMEOUT"):
                     m_err = "BACKEND_TIMEOUT"
@@ -174,30 +188,45 @@ class DossierSerializer:
                     "recorded_at": obs_at,
                     "impact_note": f"Telemetry backend for {tname} was unavailable or timed out during observation window."[:512],
                 })
-            else:
-                # Valid evidence item
-                quality_val = "partial" if dq == "partial" else "complete"
-                ev_id = ev.get("evidence_id", f"ev-{incident_id}-001")
-                if not ev_id.startswith("ev-"):
-                    ev_id = f"ev-{ev_id}"
+                continue
 
-                records_count = len(ev.get("records", []))
-                summary_txt = f"{tname} queried on {ev.get('service_id', service_id)}: {records_count} records returned."
-
-                evidence_list.append({
-                    "evidence_id": ev_id,
-                    "tool_name": tname,
-                    "source_ref": ev.get("source_ref", "telemetry:adapter")[:128],
-                    "observed_at": obs_at,
-                    "query_window": {
-                        "start": window_start,
-                        "end": window_end,
-                    },
-                    "data_quality": quality_val,
-                    "truncated": bool(ev.get("truncated", False)),
-                    "sanitized": True,
-                    "summary": summary_txt[:2048],
-                })
+            quality_val = "partial" if dq == "partial" else "complete"
+            ev_id = ev.get("evidence_id", f"ev-{incident_id}-001")
+            if not ev_id.startswith("ev-"):
+                ev_id = f"ev-{ev_id}"
+            records = ev.get("records", [])
+            summary_source = ev.get("summary")
+            if not summary_source and records:
+                preview_values = []
+                for record in records[:3]:
+                    if isinstance(record, dict):
+                        preview_values.append(
+                            record.get("message")
+                            or record.get("metric")
+                            or record.get("value")
+                            or json.dumps(record, sort_keys=True, default=str)
+                        )
+                summary_source = "; ".join(str(value) for value in preview_values if value is not None)
+            if not summary_source:
+                summary_source = (
+                    f"{tname} queried on {ev.get('service_id', service_id)}: "
+                    f"{len(records)} records returned."
+                )
+            ev_window = ev.get("query_window") if isinstance(ev.get("query_window"), dict) else {}
+            evidence_list.append({
+                "evidence_id": ev_id,
+                "tool_name": tname,
+                "source_ref": ev.get("source_ref", "telemetry:adapter")[:128],
+                "observed_at": obs_at,
+                "query_window": {
+                    "start": ev_window.get("start", window_start),
+                    "end": ev_window.get("end", window_end),
+                },
+                "data_quality": quality_val,
+                "truncated": bool(ev.get("truncated", False)),
+                "sanitized": True,
+                "summary": _bounded_sanitized_text(summary_source, limit=2048),
+            })
 
         # Ensure missing sources from context errors are captured
         if context.get("no_applicable_runbook"):
@@ -265,7 +294,8 @@ class DossierSerializer:
             })
 
         # 5. SOP Citations
-        raw_citations = context.get("runbook_citations", [])
+        citation_context = context.get("runbook_citations")
+        raw_citations = citation_context if isinstance(citation_context, list) else context.get("sop_citations", [])
         sop_citations: List[Dict[str, Any]] = []
         for cit in raw_citations:
             doc_id = cit.get("doc_id") or cit.get("document_id") or "SOP-GENERIC"
@@ -276,6 +306,12 @@ class DossierSerializer:
                 src_uri = f"kb://sop/{doc_id.lower()}.md"
 
             cid = cit.get("chunk_id") or f"chk-{doc_id.lower()}-001"
+            excerpt_source = (
+                cit.get("excerpt")
+                or cit.get("text_excerpt")
+                or cit.get("summary")
+                or "Excerpt tidak tersedia pada payload retrieval tersanitasi."
+            )
             sop_citations.append({
                 "chunk_id": cid[:128],
                 "doc_id": doc_id[:128],
@@ -283,6 +319,8 @@ class DossierSerializer:
                 "section_path": sec[:256],
                 "source_uri": src_uri,
                 "applicability_verified": True,
+                "excerpt": _bounded_sanitized_text(excerpt_source, limit=512),
+                "sanitized": True,
             })
 
         # 6. Unknowns
@@ -340,14 +378,14 @@ class DossierSerializer:
         }
 
         # 9. Reproducibility
-        manifest = context.get("version_manifest") or {}
+        manifest = context.get("version_manifest") or context.get("reproducibility") or {}
         reproducibility = {
             "workflow_version": manifest.get("workflow_version", "1.0.0"),
             "policy_version": manifest.get("policy_version", "1.0.0"),
             "model_version": manifest.get("model_version", "deterministic_rule_engine_v1"),
             "prompt_version": manifest.get("prompt_version", "deterministic_baseline_rules_v1"),
             "tool_schema_version": manifest.get("tool_schema_version", "1.0"),
-            "kb_index_version": manifest.get("kb_version", "kb-idx-20261111-v1"),
+            "kb_index_version": manifest.get("kb_version") or manifest.get("kb_index_version", "kb-idx-20261111-v1"),
             "correlation_ids": [context.get("trace_id") or f"corr-{incident_id}"],
         }
 

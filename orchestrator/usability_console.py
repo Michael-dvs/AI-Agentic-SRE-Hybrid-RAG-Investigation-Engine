@@ -8,12 +8,14 @@ import pathlib
 import subprocess
 from typing import Any, Mapping, Sequence
 
-from rich.console import Console, Group, RenderableType
+from rich.console import Console, ConsoleOptions, Group, RenderableType, RenderResult
+from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
+from gateway.sanitizer import DeterministicSanitizer
 from observability.audit_chain import AuditHashChain
 from orchestrator.handover import HandoverExporter
 from orchestrator.review import AuthorizedReviewManager
@@ -22,6 +24,33 @@ from orchestrator.telegram_dispatcher import TelegramDispatcher
 
 
 ARCHIVE_STATES = {"CLOSED", "REJECTED", "MANUAL_TRIAGE_REQUIRED"}
+
+_DISPLAY_SANITIZER = DeterministicSanitizer()
+
+
+def _bounded_sanitized_excerpt(value: Any, *, limit: int = 240) -> str:
+    raw = " ".join(str(value or "").split())
+    sanitized, _ = _DISPLAY_SANITIZER.sanitize_text(raw)
+    safe = "".join(char for char in sanitized if char >= " " and char != "\x7f")
+    if not safe:
+        return "Excerpt tidak tersedia."
+    if len(safe) <= limit:
+        return safe
+    return f"{safe[: limit - 1].rstrip()}…"
+
+
+class DashboardViewport:
+    """Resolve the dashboard layout against the current terminal width on every refresh."""
+
+    def __init__(self, dashboard: "SREDashboard") -> None:
+        self.dashboard = dashboard
+
+    def __rich_console__(
+        self,
+        console: Console,
+        options: ConsoleOptions,
+    ) -> RenderResult:
+        yield self.dashboard.render(width=options.max_width)
 
 
 class DashboardRepository:
@@ -365,17 +394,32 @@ class SREDashboard:
         citation_text = Text()
         for item in citations:
             if isinstance(item, Mapping):
-                citation_text.append(
-                    f"{item.get('doc_id') or item.get('document_id', 'Runbook')} | "
-                    f"{item.get('section_path') or item.get('section', 'bagian tidak tersedia')}\n"
+                metadata = (
+                    f"{item.get('doc_id') or item.get('document_id', 'Runbook')} "
+                    f"v{item.get('version') or item.get('document_version', 'unknown')} | "
+                    f"{item.get('section_path') or item.get('section', 'bagian tidak tersedia')} | "
+                    f"applicable={bool(item.get('applicability_verified', False))}"
                 )
+                excerpt = (
+                    item.get("excerpt")
+                    or item.get("text_excerpt")
+                    or item.get("summary")
+                )
+                citation_text.append(f"{metadata}\n  {_bounded_sanitized_excerpt(excerpt)}\n")
         if not citation_text.plain:
             citation_text.append("Tidak ada sitasi SOP aktif.", style="dim")
 
         evidence_text = Text()
         for item in evidence:
             if isinstance(item, Mapping):
-                evidence_text.append(f"{item.get('evidence_id', 'unknown')} | {item.get('tool_name', 'source unknown')}\n")
+                metadata = (
+                    f"{item.get('evidence_id', 'unknown')} | "
+                    f"{item.get('tool_name', 'source unknown')} | "
+                    f"quality={item.get('data_quality', 'unknown')}"
+                )
+                evidence_text.append(
+                    f"{metadata}\n  {_bounded_sanitized_excerpt(item.get('summary'))}\n"
+                )
         if not evidence_text.plain:
             evidence_text.append("Tidak ada bukti telemetri terverifikasi.", style="dim")
 
@@ -477,26 +521,35 @@ class SREDashboard:
         self.selected_incident_id = None
 
     def run(self) -> None:
-        """Run a line-oriented keyboard loop that works without mouse support."""
+        """Run a keyboard loop with continuous viewport refresh during blocking input."""
+        viewport = DashboardViewport(self)
+        self.console.clear()
         try:
-            while True:
-                self.console.clear()
-                self.console.print(self.render())
-                command = Prompt.ask("Command", console=self.console).strip().upper()
-                if command == "Q":
-                    self.notice = "Console ditutup tanpa tindakan otomatis."
-                    break
-                if command in {"1", "2", "3", "4", "5"}:
-                    self.view = {"1": "active", "2": "archive", "3": "health", "4": "model", "5": "telegram"}[command]
-                    self.selected_incident_id = None
-                elif command == "O" and self.view in {"active", "archive"}:
-                    self._select_by_index()
-                elif command == "B":
-                    self.selected_incident_id = None
-                    self.view = "active"
-                elif command in {"A", "R", "C", "E"}:
-                    self._review_selected({"A": "APPROVE", "R": "REJECT", "C": "CORRECT", "E": "ESCALATE"}[command])
-                else:
-                    self.notice = "Command tidak dikenal. Gunakan 1-5, O, A/R/C/E/B, atau Q."
+            with Live(
+                viewport,
+                console=self.console,
+                auto_refresh=True,
+                refresh_per_second=8,
+                screen=True,
+            ) as live:
+                while True:
+                    command = Prompt.ask("Command", console=self.console).strip().upper()
+                    if command == "Q":
+                        self.notice = "Console ditutup tanpa tindakan otomatis."
+                        live.update(viewport, refresh=True)
+                        break
+                    if command in {"1", "2", "3", "4", "5"}:
+                        self.view = {"1": "active", "2": "archive", "3": "health", "4": "model", "5": "telegram"}[command]
+                        self.selected_incident_id = None
+                    elif command == "O" and self.view in {"active", "archive"}:
+                        self._select_by_index()
+                    elif command == "B":
+                        self.selected_incident_id = None
+                        self.view = "active"
+                    elif command in {"A", "R", "C", "E"}:
+                        self._review_selected({"A": "APPROVE", "R": "REJECT", "C": "CORRECT", "E": "ESCALATE"}[command])
+                    else:
+                        self.notice = "Command tidak dikenal. Gunakan 1-5, O, A/R/C/E/B, atau Q."
+                    live.update(viewport, refresh=True)
         finally:
             self.store.close()

@@ -369,6 +369,14 @@
           },
           "applicability_verified": {
             "const": true
+          },
+          "excerpt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "sanitized": {
+            "const": true
           }
         }
       }
