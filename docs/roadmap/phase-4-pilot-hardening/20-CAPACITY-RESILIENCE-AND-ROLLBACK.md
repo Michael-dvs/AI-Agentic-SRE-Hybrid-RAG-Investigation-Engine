@@ -2,9 +2,9 @@
 
 ## 1. Chapter Information
 - **Phase:** F4 — Pilot & Hardening
-- **Status:** DRAFT
-- **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** `IN_PROGRESS` — Tahap 2A `VERIFIED` pada `DEV`; Tahap 2B (*publish/canary/rollback*, rekonsiliasi `AT-015`, dan *final release freeze*) `NOT_STARTED`
+- **Status:** APPROVED
+- **Documentation status:** COMPLETE / APPROVED
+- **Implementation status:** COMPLETE / IMPLEMENTED / VERIFIED (Tahap 2A capacity/resilience & penutupan defect C19 `VERIFIED`; Tahap 2B rollback deterministik, rekonsiliasi `AT-015`, dan *final release freeze* `VERIFIED` pada paket bukti terpadu [`evidence/c20-20261120T093645Z/C20/`](../../../evidence/c20-20261120T093645Z/C20/readiness-check.md))
 - **Dependencies:** [C15 — AI Observability, Audit, and Cost](../phase-3-reasoning-observability/15-AI-OBSERVABILITY-AUDIT-AND-COST.md), [C18 — Red-Team, Holdout, and G3](../phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md) (`G3 PASS`), [C19 — Lab Shadow Pilot and Manual Baseline](19-LAB-SHADOW-PILOT-AND-MANUAL-BASELINE.md), batas kapasitas/anggaran (`TBD-03`, `TBD-09`, `ADR-S05`)
 - **Next chapter:** [C21 — Final Holdout and Benchmark](21-FINAL-HOLDOUT-AND-BENCHMARK.md)
 - **Related requirements:** `FR-OBS-005`, `FR-RAG-008`, `FR-AGT-004`, `FR-AGT-007`, `FR-AGT-009`, `RULE-009`, `NFR-006`, `NFR-007`, `NFR-009`, `NFR-010`, `NFR-013`, `NFR-014`, `KPI-07`, `KPI-12`, `KPI-14`, `OBJ-05`, `DEP-01`, `DEP-06`, `RISK-07`, `RISK-08`, `SC-12`, `SC-13`
@@ -129,4 +129,34 @@ Sumber: [`outage-and-kill-switch.json`](../../../evidence/c20-stage2a-20261120T0
 - Regresi terfokus C07/C11/C12/C13/C15/C16/C19/C20 → `102 passed`.
 - `python3 scripts/run_c20_stage2a.py` → `PASS`; concurrency `5/20/50` seluruhnya `PASS`; resilience `6/6`.
 - `python3 -m pytest -q tests/` → `469 passed, 6 skipped`; seluruh tes yang dieksekusi lulus.
+
+## 10. Rekaman Implementasi Tahap 2B — Rollback, Unit Cost, dan Final Release Freeze
+
+- **Run ID & Paket Bukti Terpadu `E20`:** `c20-20261120T093645Z` pada [`evidence/c20-20261120T093645Z/C20/`](../../../evidence/c20-20261120T093645Z/C20/readiness-check.md) (menggabungkan seluruh artefak Tahap 2A dan Tahap 2B).
+- **Skrip & Suite Pengujian:**
+  - [`scripts/run_rollback_restore.py`](../../../scripts/run_rollback_restore.py) (4 drill rollback/restore, rekonsiliasi biaya unit `AT-015`/`KPI-14`, verifikasi segel `H-G4`, dan pembekuan `final-release-manifest`).
+  - [`tests/test_c20_rollback_restore.py`](../../../tests/test_c20_rollback_restore.py) (`7/7 PASS`).
+- **Hasil Uji Rollback & Restore Deterministik (`NFR-014`, `FR-RAG-008` — [`rollback-restore-record.md`](../../../evidence/c20-20261120T093645Z/C20/rollback-restore-record.md)):**
+  - `workflow_and_tool_schema`: `PASS` — canary `policy_version=1.1.0-canary` (`max_window_seconds=1800`) menolak jendela 2400s (`WINDOW_EXCEEDED`); rollback 1-langkah mengembalikan hash identik (`1a07bb91cec4cf01...`) dan tetap menegakkan `MCP-02` pada 3601s.
+  - `model_and_prompt_template`: `PASS` — regresi canary memicu `manual_fallback` aman tanpa merusak state SQLite insiden aktif; rollback mengembalikan `replay-stable-v1` (`agentic_llm`) dan `prompt_sha256` identik (`71975c945f0347f3...`).
+  - `kb_index_alias_and_cache`: `PASS` — rotasi staging `kb-idx-20261120-staging` -> rollback 1-langkah alias `kb_active_alias` ke `kb-idx-20261111-v1` dengan hash identik (`c9ee96dac3bb07b4...`), `SOP-LEDGER-001` v1.0.0 obsolete tetap dikecualikan, dan cache dibersihkan.
+  - `local_state_and_audit_chain`: `PASS` — simulasi korupsi SQLite & audit JSONL terdeteksi; restore dari backup mengembalikan `PRAGMA integrity_check=ok`, integritas hash dossier kanonik, serta rantai audit SHA-256 valid sebelum dan sesudah append pasca-restore (`4` event).
+  - Seluruh drill mencatat `auto_remediation_triggered=False` (`RULE-008`, `HUM-01`).
+- **Rekonsiliasi Basis Biaya Unit (`AT-015`, `KPI-14` — [`unit-cost-basis.md`](../../../evidence/c20-20261120T093645Z/C20/unit-cost-basis.md)):**
+  - Biaya tunai aktual lab: `$0.00 USD` (mematuhi plafon `TBD-09`).
+  - *Successful runs* (`89` run): `5,788` token, `72` tool calls, shadow cost `$0.004693`.
+  - *Failed / timed-out runs* (`3` run): `15,175` token, `3` tool calls, shadow cost `$0.003775`.
+  - Gabungan `KPI-14` (seluruh percobaan / `89` completed): `$0.000095 USD / completed incident` (total `$0.008468`, `20,963` token); slice `agentic_llm` (`2` completed + `1` timeout): `$0.002634 USD / completed LLM incident`.
+  - Puncak RSS proses teramati: `266.920 MiB <= 8192.0 MiB` (`memory_ceiling_compliant=True`).
+- **Manifes Rilis Final Terbeku (`NFR-019` — [`final-release-manifest.md`](../../../evidence/c20-20261120T093645Z/C20/final-release-manifest.md)):**
+  - `manifest_self_sha256`: `bc17ccad777b2eae440028557749b201a6c37725a8ca8083ba9af04d42bb7f20`
+  - `source_tree_sha256` (`161` berkas pada 9 direktori kode): `10c3235882ab75e1286f18cc1204792009d053b5ee1677c4a202fd3bcc74f665`
+  - `prompt_template_sha256`: `71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5`
+  - `contracts_sha256` (`20` skema C02): `ef40fc00d64bad87d7f8f45ffe0af366095d9faec338815287726778c609d663`
+  - `kb_manifest_hash` (`kb-idx-20261111-v1`, `kb_active_alias`): `c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129`
+- **Verifikasi Segel `H-G4` ([`holdout-h4-seal-verification.json`](../../../evidence/c20-20261120T093645Z/C20/holdout-h4-seal-verification.json)):**
+  - Status `VERIFIED_SEALED`, `runner_h_g4_guard_blocked=True`, `0` baris `H-G4` disentuh selama C20.
+- **Verifikasi Regresi Penuh ([`pytest-verified-output.txt`](../../../evidence/c20-20261120T093645Z/C20/pytest-verified-output.txt)):**
+  - `python3 -m pytest -q tests/` menghasilkan `476 passed, 6 skipped` (`exit_code=0`).
+
 

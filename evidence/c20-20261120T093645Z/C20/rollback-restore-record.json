@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c20-20261120T093645Z",
+  "generated_at_utc": "2026-11-20T09:36:45.787388Z",
+  "scope": "C20_STAGE_2B_DEV_ONLY",
+  "summary": {
+    "total_drills": 4,
+    "passed": 4,
+    "failed": 0,
+    "all_passed": true,
+    "auto_remediation_triggered": false
+  },
+  "drills": [
+    {
+      "component": "workflow_and_tool_schema",
+      "requirement": "NFR-014",
+      "status": "PASS",
+      "baseline_hash": "1a07bb91cec4cf01fb6eb5367e8b273cf8600abc88328cf144163bc613f837a8",
+      "canary_hash": "26f81163d2743b5735cf90cdb049e0f2bd7fe5cfa0389d335015a572a962dc57",
+      "restored_hash": "1a07bb91cec4cf01fb6eb5367e8b273cf8600abc88328cf144163bc613f837a8",
+      "hash_identical_after_rollback": true,
+      "canary_2400s_window_error": "WINDOW_EXCEEDED",
+      "restored_2400s_window_status": "ok",
+      "post_rollback_mcp02_3601s_error": "WINDOW_EXCEEDED",
+      "auto_remediation_triggered": false
+    },
+    {
+      "component": "model_and_prompt_template",
+      "requirement": "NFR-014",
+      "status": "PASS",
+      "baseline_model_version": "replay-stable-v1",
+      "canary_model_version": "canary-regressed-v2",
+      "restored_model_version": "replay-stable-v1",
+      "baseline_prompt_sha256": "71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5",
+      "restored_prompt_sha256": "71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5",
+      "canary_fallback_mode": "manual_fallback",
+      "restored_investigation_mode": "agentic_llm",
+      "pre_existing_incident_state_intact": true,
+      "auto_remediation_triggered": false
+    },
+    {
+      "component": "kb_index_alias_and_cache",
+      "requirement": "FR-RAG-008",
+      "status": "PASS",
+      "active_alias": "kb_active_alias",
+      "baseline_index_version": "kb-idx-20261111-v1",
+      "baseline_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+      "staging_index_version": "kb-idx-20261120-staging",
+      "staging_manifest_hash": "adaebdf80755da26c03eb386d1876868da72fa03055bdffd9b7798f74b398f17",
+      "chunks_withdrawn_in_staging": 7,
+      "restored_index_version": "kb-idx-20261111-v1",
+      "restored_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+      "hash_identical_after_rollback": true,
+      "obsolete_v1_excluded": true,
+      "cache_cleared_on_rotation_and_rollback": true,
+      "auto_remediation_triggered": false
+    },
+    {
+      "component": "local_state_and_audit_chain",
+      "requirement": "NFR-014",
+      "status": "PASS",
+      "sqlite_corruption_detected": true,
+      "audit_corruption_detected": true,
+      "sqlite_integrity_check_after_restore": "ok",
+      "dossier_canonical_hash_intact": true,
+      "backup_audit_sha256": "8dec9d9b954b556f583065579e7d9d87b3c162da72d7238c859981f8a89bc6ed",
+      "pre_backup_audit_head": "3363c0f68584be92c91639ceb361d68adb2b77b50b1cf8453218b5ab8298f1b3",
+      "restored_audit_head": "3363c0f68584be92c91639ceb361d68adb2b77b50b1cf8453218b5ab8298f1b3",
+      "audit_chain_valid_after_restore": true,
+      "audit_chain_valid_after_post_restore_append": true,
+      "post_restore_event_count": 4,
+      "auto_remediation_triggered": false
+    }
+  ]
+}

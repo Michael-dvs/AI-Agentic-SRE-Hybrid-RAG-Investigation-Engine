@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c20-stage2a-20261120T090912Z",
+  "scope": "C20_STAGE_2A_DEV_ONLY",
+  "final_e20_package": false,
+  "source_registry": "evidence/c19-20261120T083752Z/C19/pilot-defects.json",
+  "defects": [
+    {
+      "defect_id": "C19-DEF-001",
+      "disposition": "RESOLVED",
+      "verification": "test_def001_viewport_reflows_against_current_console_width"
+    },
+    {
+      "defect_id": "C19-DEF-002",
+      "disposition": "RESOLVED",
+      "verification": "test_def002_bounded_sanitized_evidence_and_sop_version_render"
+    },
+    {
+      "defect_id": "C19-DEF-003",
+      "disposition": "RESOLVED",
+      "verification": "test_def003_audit_tail_initialization_and_concurrent_chain_integrity"
+    },
+    {
+      "defect_id": "C19-DEF-004",
+      "disposition": "RESOLVED",
+      "verification": "test_def004_correct_revision_inherits_evidence_citations_and_alert_time"
+    },
+    {
+      "defect_id": "C19-DEF-005",
+      "disposition": "CLOSED_WITH_DOCUMENTED_LIMITATION",
+      "verification": "test_def005_manual_baseline_retains_solo_developer_bias_disclosure"
+    },
+    {
+      "defect_id": "C19-DEF-006",
+      "disposition": "RESOLVED",
+      "verification": "test_def006_index_aliases_and_telemetry_enriched_query"
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "resolved": 5,
+    "closed_with_documented_limitation": 1,
+    "open": 0
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c20-20261120T093645Z",
+  "generated_at_utc": "2026-11-20T09:36:46.187861Z",
+  "requirement_mapping": [
+    "AT-015",
+    "KPI-14",
+    "NFR-013",
+    "TBD-09"
+  ],
+  "applied_shadow_rates_usd": {
+    "prompt_token_per_1k": 0.00015,
+    "completion_token_per_1k": 0.0006,
+    "embedding_token_per_1k": 2e-05,
+    "tool_call_unit_cost": 5e-05
+  },
+  "actual_cash_spend_usd": 0.0,
+  "budget_cap_tbd09_usd": 0.0,
+  "budget_cap_compliant": true,
+  "sources_reconciled": {
+    "c15_reference_run": "evidence/c15-20261116T085541Z/C15/usage-cost-metrics.json",
+    "c19_shadow_pilot": "evidence/c19-20261120T083752Z/C19/pilot-run-log.json",
+    "c20_stage2a_capacity": "evidence/c20-stage2a-20261120T090912Z/C20/capacity-series.json",
+    "c20_stage2a_resilience": "evidence/c20-stage2a-20261120T090912Z/C20/outage-and-kill-switch.json",
+    "c20_stage2b_live_probes": "in-process CostAndResourceTracker (1 completed agentic_llm + 1 timeout fallback)"
+  },
+  "successful_runs": {
+    "completed_count": 89,
+    "breakdown": {
+      "c15_agentic_llm": 1,
+      "c19_deterministic_pilot": 7,
+      "c20_stage2a_capacity_burst_and_waves": 76,
+      "c20_stage2a_degraded_completed": 4,
+      "c20_stage2b_agentic_llm_probe": 1
+    },
+    "tokens": {
+      "prompt_tokens": 4300,
+      "completion_tokens": 720,
+      "embedding_tokens": 768,
+      "total_tokens": 5788
+    },
+    "tool_calls_observed": 72,
+    "shadow_cost_usd": 0.004693
+  },
+  "failed_or_timed_out_runs": {
+    "failed_count": 3,
+    "breakdown": {
+      "c20_stage2a_backpressure_or_kill_switch": 2,
+      "c20_stage2b_llm_timeout_probe": 1
+    },
+    "tokens": {
+      "prompt_tokens": 11847,
+      "completion_tokens": 3072,
+      "embedding_tokens": 256,
+      "total_tokens": 15175
+    },
+    "tool_calls_observed": 3,
+    "shadow_cost_usd": 0.003775
+  },
+  "combined_kpi_14": {
+    "formula": "(successful_shadow_cost_usd + failed_shadow_cost_usd) / completed_count",
+    "total_attempts_all": 92,
+    "completed_denominator_all": 89,
+    "total_tokens_all_attempts": 20963,
+    "total_shadow_cost_all_attempts_usd": 0.008468,
+    "kpi_14_all_runs_per_completed_usd": 9.5e-05,
+    "agentic_llm_slice": {
+      "completed_llm_runs": 2,
+      "failed_llm_attempts": 1,
+      "combined_llm_shadow_cost_usd": 0.005268,
+      "kpi_14_agentic_llm_per_completed_usd": 0.002634,
+      "mean_tokens_per_completed_llm_run": 10481.5
+    }
+  },
+  "compute_and_resource_envelope": {
+    "c20_capacity_total_cpu_seconds": 0.047046,
+    "c20_probe_ok_cpu_seconds": 0.022855,
+    "c20_probe_timeout_cpu_seconds": 0.028979,
+    "observed_peak_process_rss_mib": 266.92,
+    "lab_ram_ceiling_mib": 8192.0,
+    "memory_ceiling_compliant": true,
+    "docker_container_metrics_status": "UNAVAILABLE"
+  },
+  "live_probe_details": {
+    "successful_probe": {
+      "incident_id": "inc-c20-cost-ok",
+      "started_at": "2026-11-20T09:36:45.792961Z",
+      "completed_at": "2026-11-20T09:36:45.817672Z",
+      "outcome": "COMPLETED",
+      "latency": {
+        "intake_to_dossier_duration_ms": 24.708,
+        "retrieval_latency_ms": 1.091,
+        "state_durations_ms": {
+          "RECEIVED": 1.225,
+          "CORRELATED": 1.043,
+          "TRIAGED": 0.919,
+          "EVIDENCE_COLLECTED": 1.796,
+          "RETRIEVED": 1.091,
+          "HYPOTHESES": 13.796,
+          "VALIDATED": 1.373,
+          "DRAFTED": 2.102,
+          "HUMAN_REVIEW": 1.051
+        },
+        "kpi_07_under_120s": true
+      },
+      "tokens": {
+        "prompt_tokens": 1850,
+        "completion_tokens": 340,
+        "embedding_tokens": 256,
+        "total_tokens": 2446
+      },
+      "calls": {
+        "tool_calls_count": 3
+      },
+      "shadow_cost": {
+        "currency": "USD",
+        "estimated_unit_cost_usd": 0.000637,
+        "actual_billed_lab_cost_usd": 0.0,
+        "applied_rates": {
+          "prompt_token_per_1k": 0.00015,
+          "completion_token_per_1k": 0.0006,
+          "embedding_token_per_1k": 2e-05,
+          "tool_call_unit_cost": 5e-05
+        }
+      },
+      "resource_usage": {
+        "initial_rss_mb": 266.86,
+        "final_rss_mb": 266.86,
+        "peak_rss_mb": 266.86,
+        "memory_ceiling_8gib_ok": true
+      },
+      "cpu_time_seconds": 0.022855
+    },
+    "failed_timeout_probe": {
+      "incident_id": "inc-c20-cost-timeout",
+      "started_at": "2026-11-20T09:36:45.820531Z",
+      "completed_at": "2026-11-20T09:36:46.187564Z",
+      "outcome": "FAILED_LLM_TIMEOUT_FALLBACK",
+      "latency": {
+        "intake_to_dossier_duration_ms": 367.031,
+        "retrieval_latency_ms": 1.168,
+        "state_durations_ms": {
+          "RECEIVED": 1.065,
+          "CORRELATED": 0.959,
+          "TRIAGED": 0.923,
+          "EVIDENCE_COLLECTED": 1.777,
+          "RETRIEVED": 1.168,
+          "HYPOTHESES": 355.633,
+          "VALIDATED": 1.308,
+          "DRAFTED": 2.733,
+          "HUMAN_REVIEW": 1.236
+        },
+        "kpi_07_under_120s": true
+      },
+      "tokens": {
+        "prompt_tokens": 11847,
+        "completion_tokens": 3072,
+        "embedding_tokens": 256,
+        "total_tokens": 15175
+      },
+      "calls": {
+        "tool_calls_count": 3
+      },
+      "shadow_cost": {
+        "currency": "USD",
+        "estimated_unit_cost_usd": 0.003775,
+        "actual_billed_lab_cost_usd": 0.0,
+        "applied_rates": {
+          "prompt_token_per_1k": 0.00015,
+          "completion_token_per_1k": 0.0006,
+          "embedding_token_per_1k": 2e-05,
+          "tool_call_unit_cost": 5e-05
+        }
+      },
+      "resource_usage": {
+        "initial_rss_mb": 266.86,
+        "final_rss_mb": 266.92,
+        "peak_rss_mb": 266.92,
+        "memory_ceiling_8gib_ok": true
+      },
+      "cpu_time_seconds": 0.028979
+    },
+    "successful_mode": "agentic_llm",
+    "failed_mode": "manual_fallback"
+  },
+  "honest_labeling": "Biaya tunai aktual lab adalah $0.00 (TBD-09). Shadow unit cost USD dihitung dari tarif referensi observability/cost_tracker.py dan memisahkan run berhasil vs gagal/timeout serta membedakan run deterministic_baseline (0 token LLM) dari run agentic_llm."
+}
