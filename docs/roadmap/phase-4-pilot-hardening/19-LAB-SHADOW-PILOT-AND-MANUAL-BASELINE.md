@@ -4,7 +4,7 @@
 - **Phase:** F4 — Pilot & Hardening
 - **Status:** DRAFT
 - **Documentation status:** COMPLETE / REVIEW_REQUIRED
-- **Implementation status:** NOT_STARTED
+- **Implementation status:** `IN_PROGRESS` — Tahap 1A prototype usability `VERIFIED`; Tahap 1B shadow pilot dan manual baseline `NOT_STARTED`
 - **Dependencies:** [C16 — Human Review and Handover](../phase-3-reasoning-observability/16-HUMAN-REVIEW-AND-HANDOVER.md), [C18 — Red-Team, Holdout, and G3](../phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md) (`G3 PASS`), protokol *pairing/timing/anti-carryover* (`ADR-S08`, `TBD-08`)
 - **Next chapter:** [C20 — Capacity, Resilience, and Rollback](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md)
 - **Related requirements:** `BR-005`, `FR-OUT-004`, `FR-OUT-006`, `RULE-008`, `RULE-011`, `NFR-018`, `NFR-020`, `KPI-06`, `KPI-08`, `BEN-01`, `BEN-02`, `BEN-04`, `DEP-05`, `RISK-03`, `RISK-09`, `UC-10`, `UC-11`
@@ -75,3 +75,12 @@ Setelah chapter ini selesai, alur *shadow pilot* di lab telah diuji pada variasi
 - **Risiko:** Bias *self-review* dan *carryover* karena pengembang tunggal (`project-initiator-michael`) memahami desain skenario (`TBD-02`); mitigasi dengan memisahkan waktu pengukuran manual sebelum melihat output AI, mematuhi rubrik objektif berbasis bukti, dan mencantumkan *caveat* `SELF_EVALUATED` di seluruh laporan.
 - **Open Decisions:** Apakah `KPI-08` dilaporkan sebagai perbandingan berpasangan terukur atau diberi penanda *caveat/not-evaluable* untuk klaim efisiensi organisasi ditentukan berdasarkan validitas rekaman `manual-timing-protocol-and-records` sesuai aturan [Master Implementation Roadmap](../00-IMPLEMENTATION-MASTER-ROADMAP.md) §8.5.
 - **Handover ke [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md) dan [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md):** Daftar perbaikan kebergunaan/operasional (`pilot-defects`) untuk dituntaskan di [C20](20-CAPACITY-RESILIENCE-AND-ROLLBACK.md), serta rekaman baseline manual dan rubrik reviewer (`E19`) untuk dikonsolidasikan di [C21](21-FINAL-HOLDOUT-AND-BENCHMARK.md).
+
+## 10. Rekaman Implementasi Tahap 1A — Prototype Usability
+- **Batas implementasi:** hanya `RFC-F4-USABILITY-01` Tahap 1A. Tidak ada *Lab Shadow Pilot*, *Blinded Manual Baseline*, rubrik 5 dimensi, registri `pilot-defects`, paket `E19`, atau akses partisi `H-G4`.
+- **Unified SRE Command Center:** `scripts/sre_dashboard.py` dan `orchestrator/usability_console.py` menyediakan navigasi *Active Incidents*, *Archive Dossiers*, *Service Health*, *AI Model Config*, dan *Telegram Alerts*. Aksi `APPROVE`, `REJECT`, `CORRECT`, dan `ESCALATE` memakai `AuthorizedReviewManager`; persetujuan mengekspor paket melalui `HandoverExporter`.
+- **Emergency Telegram Dispatcher:** `orchestrator/telegram_dispatcher.py` hanya mengirim notifikasi keluar untuk dossier `PENDING_REVIEW`. Kredensial kosong menghasilkan `DRY_RUN`; kegagalan jaringan menghasilkan `FALLBACK` tanpa menggagalkan alur investigasi. Tidak ada listener masuk atau jalur eksekusi perintah.
+- **Kontrol keselamatan:** semua review event mempertahankan `auto_action_triggered=false`; output UI dan Telegram dibentuk dari field yang diizinkan tanpa membaca registri *ground truth*; aksi reviewer ditulis ke audit JSONL append-only dengan timestamp UTC dan rantai SHA-256 yang dilanjutkan saat proses dibuka ulang.
+- **Verifikasi aktual:** `python3 -m pytest -q tests/test_c19_usability_console.py` menghasilkan `7 passed`; `python3 -m pytest -q` menghasilkan `457 passed, 6 skipped`; smoke entrypoint menerima `Q`, merender *Active Incidents*, dan keluar dengan status `0`.
+- **Status tata kelola RFC:** implementasi prototype dan hasil unit test tidak mengubah status RFC dari `PROPOSED / UNDER_REVIEW` serta tidak membuktikan exit criteria C19 Tahap 1B.
+

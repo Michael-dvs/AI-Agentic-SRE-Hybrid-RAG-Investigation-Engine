@@ -292,6 +292,26 @@ class WorkflowStateStore:
         )
         return [dict(row) for row in cursor.fetchall()]
 
+    def list_incidents(
+        self,
+        current_states: set[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """List incidents, optionally restricted to an allowlisted set of workflow states."""
+        if not current_states:
+            cursor = self._conn.execute(
+                "SELECT * FROM incidents ORDER BY updated_at DESC, incident_id ASC"
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+        ordered_states = sorted(current_states)
+        placeholders = ", ".join("?" for _ in ordered_states)
+        cursor = self._conn.execute(
+            f"SELECT * FROM incidents WHERE current_state IN ({placeholders}) "
+            "ORDER BY updated_at DESC, incident_id ASC",
+            ordered_states,
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
     def save_dossier(
         self,
         incident_id: str,

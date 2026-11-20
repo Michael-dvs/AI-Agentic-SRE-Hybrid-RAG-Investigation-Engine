@@ -63,10 +63,31 @@ class HashChainedAuditStore:
 
     def __init__(self, log_path: pathlib.Path | str | None = None) -> None:
         self.log_path = pathlib.Path(log_path) if log_path else None
-        if self.log_path:
-            self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self.last_event_hash: str | None = None
         self.events: list[dict[str, Any]] = []
+        if not self.log_path:
+            return
+
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.log_path.exists() or self.log_path.stat().st_size == 0:
+            return
+        try:
+            existing_events = [
+                json.loads(line)
+                for line in self.log_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        except (OSError, json.JSONDecodeError) as exc:
+            raise AuditWriteError(
+                f"FAIL_CLOSED: Existing audit log cannot be loaded from {self.log_path}: {exc}"
+            ) from exc
+        is_valid, violations = verify_chain_integrity(existing_events)
+        if not is_valid:
+            raise AuditWriteError(
+                f"FAIL_CLOSED: Existing audit chain is invalid at {self.log_path}: {violations}"
+            )
+        self.events = existing_events
+        self.last_event_hash = existing_events[-1]["event_hash"] if existing_events else None
 
     def record_event(
         self,

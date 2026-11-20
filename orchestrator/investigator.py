@@ -7,7 +7,7 @@ from dataclasses import asdict
 import logging
 import time
 import uuid
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from gateway.policy import PolicyGateway
 from observability.ai_tracer import SanitizedAITracer
@@ -51,6 +51,7 @@ class DeterministicInvestigator:
         claim_validator: ClaimValidator | None = None,
         ai_tracer: SanitizedAITracer | None = None,
         cost_tracker: CostAndResourceTracker | None = None,
+        pending_review_notifier: Callable[[Dict[str, Any]], Any] | None = None,
     ) -> None:
         self.sm = state_machine
         self.gateway = gateway
@@ -62,6 +63,7 @@ class DeterministicInvestigator:
         self.claim_validator = claim_validator if claim_validator is not None else ClaimValidator()
         self.ai_tracer = ai_tracer if ai_tracer is not None else SanitizedAITracer()
         self.cost_tracker = cost_tracker if cost_tracker is not None else CostAndResourceTracker()
+        self.pending_review_notifier = pending_review_notifier
 
     def _format_incident_id(self, raw_id: str) -> str:
         return raw_id if raw_id.startswith("inc-") else f"inc-{raw_id}"
@@ -1174,5 +1176,14 @@ class DeterministicInvestigator:
         context["timeline"].append({"state": "HUMAN_REVIEW", "timestamp": utc_now_z()})
         context["status"] = "HUMAN_REVIEW"
         self.checkpoint.save_checkpoint(incident_id, "HUMAN_REVIEW", context)
+        if self.pending_review_notifier is not None:
+            try:
+                self.pending_review_notifier(context["dossier"])
+            except Exception as exc:
+                _LOG.warning(
+                    "Passive pending-review notification failed for %s: %s",
+                    incident_id,
+                    exc,
+                )
         _LOG.info("Investigation for %s successfully reached HUMAN_REVIEW", incident_id)
         return context
