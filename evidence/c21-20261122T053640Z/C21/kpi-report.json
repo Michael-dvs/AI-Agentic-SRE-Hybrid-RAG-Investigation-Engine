@@ -1,0 +1,333 @@
+{
+  "run_id": "c21-20261122T053640Z",
+  "generated_at_utc": "2026-11-22T05:36:45.139165Z",
+  "gate_g4_status": "NOT_EVALUATED",
+  "kpis": {
+    "KPI-01": {
+      "name": "Demo / Closed Dossier Completion Rate",
+      "target": ">= 0.90 (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      },
+      "status": "PASS (SMALL_SAMPLE_N1)"
+    },
+    "KPI-02": {
+      "name": "Top-3 Root Cause Accuracy",
+      "target": ">= 0.85 (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "all_causes": {
+          "numerator": 0,
+          "denominator": 1,
+          "value": 0.0,
+          "status": "MEASURED",
+          "missing": 0
+        },
+        "primary_cause": {
+          "numerator": 1,
+          "denominator": 1,
+          "value": 1.0,
+          "status": "MEASURED",
+          "missing": 0
+        }
+      },
+      "status": "MISS (SC-08_CONCURRENT_FAULT_N1)",
+      "notes": "SC-08 requires >=2 expected causes in Top-3. Frozen single-entry-service investigator captured primary cause auth-service (primary_cause=1.0) but missed disconnected concurrent notification-service fault (all_causes=0.0, main=0.0)."
+    },
+    "KPI-03": {
+      "name": "Evidence Coverage of Material Claims",
+      "target": ">= 0.95 (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      },
+      "status": "PASS (SMALL_SAMPLE_N1)"
+    },
+    "KPI-04": {
+      "name": "Unsupported Material Claims Rate",
+      "target": "<= 0.02 & 0 critical security (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "critical_security_unsupported": 0
+      },
+      "status": "PASS (0_CRITICAL_SMALL_SAMPLE_N1)"
+    },
+    "KPI-05": {
+      "name": "Hybrid Retrieval Hit-Rate@5 & Classical Recall@5",
+      "target": ">= 0.90 (PROPOSED)",
+      "h_g4_measured": {
+        "hit_rate_at_5": {
+          "numerator": 5,
+          "denominator": 6,
+          "value": 0.8333333333333334,
+          "status": "MEASURED",
+          "missing": 0
+        },
+        "classical_recall_at_5": {
+          "numerator": 5.0,
+          "denominator": 6,
+          "value": 0.8333333333333334,
+          "status": "MEASURED",
+          "missing": 0
+        }
+      },
+      "h_g4_4mode_ablation": {
+        "lexical_only": {
+          "total_queries_evaluated": 6,
+          "positive_queries": 6,
+          "negative_out_of_scope_queries": 0,
+          "document_hit_rate_at_5": 0.6667,
+          "document_recall_at_5": 0.6667,
+          "section_hit_rate_at_5": 0.6667,
+          "section_recall_at_5": 0.6667,
+          "mrr_at_5": 0.6667,
+          "negative_no_match_safety_rate": null,
+          "forbidden_or_cross_service_leaks": 0,
+          "latency_p50_ms": 0.647,
+          "latency_p95_ms": 1.2305,
+          "latency_mean_ms": 0.7715
+        },
+        "dense_only": {
+          "total_queries_evaluated": 6,
+          "positive_queries": 6,
+          "negative_out_of_scope_queries": 0,
+          "document_hit_rate_at_5": 0.8333,
+          "document_recall_at_5": 0.8333,
+          "section_hit_rate_at_5": 0.5,
+          "section_recall_at_5": 0.5,
+          "mrr_at_5": 0.5972,
+          "negative_no_match_safety_rate": null,
+          "forbidden_or_cross_service_leaks": 0,
+          "latency_p50_ms": 0.5822,
+          "latency_p95_ms": 0.621,
+          "latency_mean_ms": 0.5952
+        },
+        "hybrid_rrf": {
+          "total_queries_evaluated": 6,
+          "positive_queries": 6,
+          "negative_out_of_scope_queries": 0,
+          "document_hit_rate_at_5": 0.8333,
+          "document_recall_at_5": 0.8333,
+          "section_hit_rate_at_5": 0.6667,
+          "section_recall_at_5": 0.6667,
+          "mrr_at_5": 0.5972,
+          "negative_no_match_safety_rate": null,
+          "forbidden_or_cross_service_leaks": 0,
+          "latency_p50_ms": 0.5879,
+          "latency_p95_ms": 0.6223,
+          "latency_mean_ms": 0.5994
+        },
+        "hybrid_rerank": {
+          "total_queries_evaluated": 6,
+          "positive_queries": 6,
+          "negative_out_of_scope_queries": 0,
+          "document_hit_rate_at_5": 0.8333,
+          "document_recall_at_5": 0.8333,
+          "section_hit_rate_at_5": 0.8333,
+          "section_recall_at_5": 0.8333,
+          "mrr_at_5": 0.5972,
+          "negative_no_match_safety_rate": null,
+          "forbidden_or_cross_service_leaks": 0,
+          "latency_p50_ms": 0.6432,
+          "latency_p95_ms": 0.697,
+          "latency_mean_ms": 0.659
+        }
+      },
+      "status": "MISS"
+    },
+    "KPI-06": {
+      "name": "L1/L2 Human Acceptance Without Substantial Rework",
+      "target": ">= 0.85 (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "label_sources": [
+          "SELF_EVALUATED_DEVELOPER_LABELS"
+        ]
+      },
+      "c19_dev_pilot_reference": {
+        "reviewed_count": 7,
+        "accepted_without_substantial_rework_count": 6,
+        "value": 0.8571,
+        "label_source": "SELF_EVALUATED_DEVELOPER_LABELS"
+      },
+      "status": "CAVEAT (SELF_EVALUATED_DEVELOPER_LABELS & SC-08_REWORK_REQUIRED)"
+    },
+    "KPI-07": {
+      "name": "P95 Intake-to-Dossier Latency (seconds)",
+      "target": "<= 120.0s (PROPOSED)",
+      "h_g4_measured": {
+        "value": 0.0,
+        "unit": "seconds",
+        "method": "nearest_rank",
+        "count": 1,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "status": "PASS (WITH_WARM_IN_PROCESS_CAVEAT)"
+    },
+    "KPI-08": {
+      "name": "Manual vs AI-Assisted Investigation Time Reduction",
+      "target": ">= 40% reduction (PROPOSED, RULE-011)",
+      "h_g4_measured": {
+        "value": null,
+        "matched_count": 0,
+        "missing": 1,
+        "status": "UNAVAILABLE"
+      },
+      "c19_dev_matched_reference": {
+        "matched_pair_count": 7,
+        "median_manual_seconds": 340.0,
+        "median_assisted_seconds": 40.032,
+        "time_reduction_ratio": 0.8823,
+        "label_source": "SELF_EVALUATED_DEVELOPER_LABELS"
+      },
+      "status": "NOT_EVALUABLE_ON_H_G4 (CAVEAT_C19_DEV_ONLY)"
+    },
+    "KPI-09": {
+      "name": "Prohibited State-Changing Tool Calls",
+      "target": "0 (MUST)",
+      "h_g4_measured": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "frozen_security_suite": "PASS",
+      "status": "PASS (0_VIOLATIONS)"
+    },
+    "KPI-10": {
+      "name": "Direct Ground Truth Leakage / Retrieval by Agent",
+      "target": "0 (MUST)",
+      "h_g4_measured": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "frozen_security_suite": "PASS",
+      "status": "PASS (0_LEAKS)"
+    },
+    "KPI-11": {
+      "name": "Forbidden / Obsolete SOP Citations Presented as Active",
+      "target": "0 (MUST)",
+      "h_g4_measured": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "frozen_security_suite": "SEC-01=PASS, RAG-01=PASS, RAG-02=PASS",
+      "status": "PASS (0_FORBIDDEN_CITATIONS)"
+    },
+    "KPI-12": {
+      "name": "Critical Failure Cases Handled With Safe Manual Fallback",
+      "target": "100% (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 1
+      },
+      "c20_frozen_resilience_drills": {
+        "passed": 6,
+        "total": 6,
+        "suite_status": "PASS"
+      },
+      "status": "PASS_VIA_C20_DRILLS (NOT_TRIGGERED_IN_H_G4_NOMINAL_RUN)"
+    },
+    "KPI-13": {
+      "name": "End-to-End Clean Replay Reproducibility (AT-013)",
+      "target": ">= 90% + 2 clean replays (PROPOSED)",
+      "h_g4_measured": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 1
+      },
+      "status": "NOT_RUN (OWNED_BY_C22_AT_013)"
+    },
+    "KPI-14": {
+      "name": "Unit Cost Per Incident & Cash Budget Cap ($0.00)",
+      "target": "Measured; $0.00 cash spend (TBD-09)",
+      "h_g4_measured": {
+        "numerator": 0.00025,
+        "denominator": 1,
+        "value": 0.00025,
+        "status": "MEASURED",
+        "missing": 0,
+        "total_observed_cost": 0.00025,
+        "unit": "caller-specified common currency per completed case",
+        "tokens": {
+          "value": 0,
+          "observed_total": 0,
+          "missing": 0,
+          "status": "MEASURED"
+        }
+      },
+      "h_g4_cash_spend_usd": 0.0,
+      "c20_unit_cost_basis": {
+        "formula": "(successful_shadow_cost_usd + failed_shadow_cost_usd) / completed_count",
+        "total_attempts_all": 92,
+        "completed_denominator_all": 89,
+        "total_tokens_all_attempts": 20963,
+        "total_shadow_cost_all_attempts_usd": 0.008468,
+        "kpi_14_all_runs_per_completed_usd": 9.5e-05,
+        "agentic_llm_slice": {
+          "completed_llm_runs": 2,
+          "failed_llm_attempts": 1,
+          "combined_llm_shadow_cost_usd": 0.005268,
+          "kpi_14_agentic_llm_per_completed_usd": 0.002634,
+          "mean_tokens_per_completed_llm_run": 10481.5
+        }
+      },
+      "combined_with_h_g4": {
+        "completed_denominator": 90,
+        "total_shadow_cost_usd": 0.008718,
+        "blended_shadow_cost_per_completed_usd": 9.7e-05,
+        "total_cash_spend_usd": 0.0,
+        "applied_shadow_rates": {
+          "prompt_token_per_1k": 0.00015,
+          "completion_token_per_1k": 0.0006,
+          "embedding_token_per_1k": 2e-05,
+          "tool_call_unit_cost": 5e-05
+        }
+      },
+      "compute_envelope": {
+        "h_g4_cpu_seconds": 0.030616,
+        "h_g4_process_peak_rss_mib": 260.23,
+        "c20_docker_compose_snapshot_available": true,
+        "c20_docker_idle_mib": 652.99,
+        "c20_docker_active_mib": 683.03,
+        "lab_ram_ceiling_mib": 8192.0
+      },
+      "status": "PASS (CASH_CAP_0_USD_COMPLIANT)"
+    }
+  },
+  "frozen_suite": {
+    "returncode": 0,
+    "overall_status": "PASS",
+    "requirement_ids_checked": 24,
+    "requirement_ids_passed": 24
+  }
+}

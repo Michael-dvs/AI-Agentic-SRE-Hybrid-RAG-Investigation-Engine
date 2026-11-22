@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c20-docker-20261121T004500Z",
+  "observed_at_utc": "2026-11-20T17:46:47Z",
+  "scope": "SUPPLEMENTAL_DOCKER_CONTAINER_TELEMETRY_ON_FROZEN_RELEASE",
+  "frozen_manifest_ref": "evidence/c20-20261120T093645Z/C20/final-release-manifest.json",
+  "frozen_source_tree_sha256": "10c3235882ab75e1286f18cc1204792009d053b5ee1677c4a202fd3bcc74f665",
+  "frozen_manifest_integrity_intact": true,
+  "h_g4_seal_status": "VERIFIED_SEALED",
+  "lab_ram_limit_mib": 8192.0,
+  "compose_configured_memory_limit_mib": 2944.0,
+  "project_container_count": 12,
+  "non_project_containers_excluded_from_sum": [
+    "botseri-dashboard",
+    "botseri-n8n",
+    "botseri-waha",
+    "botseri-db"
+  ],
+  "live_spike_traffic_burst": {
+    "scenario_id": "SC-01",
+    "profile": "spike",
+    "seed": 20261121,
+    "target_url": "http://127.0.0.1:18080",
+    "planned_requests": 100,
+    "completed_requests": 100,
+    "success_count": 100,
+    "error_count": 0,
+    "status_counts": {
+      "201": 100
+    },
+    "p50_latency_ms": 409.07,
+    "p95_latency_ms": 556.8,
+    "wall_elapsed_sec": 4.09
+  },
+  "docker_stats_during_c20_run": {
+    "status": "MEASURED",
+    "source": "evidence/c20-docker-20261121T004500Z/C20/capacity-series.json",
+    "project_total_memory_mib": 652.99,
+    "project_total_limit_mib": 2944.0,
+    "project_total_cpu_pct": 5.89,
+    "project_total_pids": 87
+  },
+  "docker_stats_post_live_spike": {
+    "status": "MEASURED",
+    "project_total_memory_mib": 683.03,
+    "project_total_limit_mib": 2944.0,
+    "project_utilization_of_compose_limit_pct": 23.2,
+    "project_utilization_of_8gib_lab_ceiling_pct": 8.34,
+    "project_total_cpu_pct": 6.41,
+    "containers": [
+      {"name": "sre-sim-api-gateway", "cpu_pct": 0.28, "mem_mib": 78.88, "limit_mib": 128.0, "mem_pct": 61.63, "net_io": "759kB / 1.1MB", "pids": 9},
+      {"name": "sre-sim-transaction-service", "cpu_pct": 0.43, "mem_mib": 65.22, "limit_mib": 128.0, "mem_pct": 50.96, "net_io": "870kB / 1.23MB", "pids": 9},
+      {"name": "sre-sim-auth-service", "cpu_pct": 0.23, "mem_mib": 42.14, "limit_mib": 128.0, "mem_pct": 32.92, "net_io": "327kB / 590kB", "pids": 2},
+      {"name": "sre-sim-ledger-service", "cpu_pct": 0.24, "mem_mib": 47.14, "limit_mib": 128.0, "mem_pct": 36.83, "net_io": "725kB / 1.02MB", "pids": 2},
+      {"name": "sre-sim-notification-service", "cpu_pct": 1.19, "mem_mib": 47.57, "limit_mib": 128.0, "mem_pct": 37.17, "net_io": "462kB / 983kB", "pids": 3},
+      {"name": "sre-sim-postgres", "cpu_pct": 0.06, "mem_mib": 20.59, "limit_mib": 192.0, "mem_pct": 10.72, "net_io": "434kB / 456kB", "pids": 6},
+      {"name": "sre-sim-rabbitmq", "cpu_pct": 0.64, "mem_mib": 105.8, "limit_mib": 256.0, "mem_pct": 41.31, "net_io": "967kB / 562kB", "pids": 38},
+      {"name": "sre-sim-otel-collector", "cpu_pct": 0.28, "mem_mib": 58.8, "limit_mib": 192.0, "mem_pct": 30.63, "net_io": "1.95MB / 1.99MB", "pids": 6},
+      {"name": "sre-sim-prometheus", "cpu_pct": 0.24, "mem_mib": 53.6, "limit_mib": 512.0, "mem_pct": 10.47, "net_io": "22.1kB / 15.3kB", "pids": 3},
+      {"name": "sre-sim-loki", "cpu_pct": 0.26, "mem_mib": 43.7, "limit_mib": 512.0, "mem_pct": 8.54, "net_io": "889kB / 134kB", "pids": 2},
+      {"name": "sre-sim-tempo", "cpu_pct": 0.24, "mem_mib": 45.82, "limit_mib": 384.0, "mem_pct": 11.93, "net_io": "830kB / 146kB", "pids": 2},
+      {"name": "sre-sim-grafana", "cpu_pct": 2.32, "mem_mib": 73.77, "limit_mib": 256.0, "mem_pct": 28.81, "net_io": "21.5kB / 7.63kB", "pids": 18}
+    ]
+  },
+  "pytest_full_suite_with_docker_up": {
+    "command": "python3 -m pytest -q",
+    "passed": 482,
+    "skipped": 0,
+    "failed": 0,
+    "duration_seconds": 34.88
+  }
+}

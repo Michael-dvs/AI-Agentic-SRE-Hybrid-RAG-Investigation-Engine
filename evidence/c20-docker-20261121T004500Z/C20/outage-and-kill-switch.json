@@ -1,0 +1,139 @@
+{
+  "drills": [
+    {
+      "drill": "llm_outage_timeout",
+      "fallback_mode": "manual_fallback",
+      "hypothesis_statuses": [
+        "INCONCLUSIVE"
+      ],
+      "incident_id": "inc-c20-llm-outage",
+      "status": "PASS",
+      "terminal_state": "HUMAN_REVIEW"
+    },
+    {
+      "drill": "telemetry_adapter_outage",
+      "fabricated_evidence_count": 0,
+      "incident_id": "inc-c20-telemetry-outage",
+      "missing_sources": [
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_service_metrics was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.256389Z",
+          "tool_name": "get_service_metrics"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for search_error_logs was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.257589Z",
+          "tool_name": "search_error_logs"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_service_metrics was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.258193Z",
+          "tool_name": "get_service_metrics"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for search_error_logs was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.258829Z",
+          "tool_name": "search_error_logs"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_service_metrics was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.259631Z",
+          "tool_name": "get_service_metrics"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for search_error_logs was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.260391Z",
+          "tool_name": "search_error_logs"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_service_metrics was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.261176Z",
+          "tool_name": "get_service_metrics"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for search_error_logs was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.261192Z",
+          "tool_name": "search_error_logs"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_service_metrics was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.261198Z",
+          "tool_name": "get_service_metrics"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for search_error_logs was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.261203Z",
+          "tool_name": "search_error_logs"
+        },
+        {
+          "error_code": "SOURCE_UNAVAILABLE",
+          "impact_note": "Telemetry backend for get_trace_summary was unavailable or timed out during observation window.",
+          "recorded_at": "2026-11-20T17:42:46.261216Z",
+          "tool_name": "get_trace_summary"
+        }
+      ],
+      "status": "PASS",
+      "terminal_state": "HUMAN_REVIEW"
+    },
+    {
+      "citation_count": 0,
+      "drill": "knowledge_base_outage",
+      "incident_id": "inc-c20-kb-outage",
+      "retrieval_status": "NO_APPLICABLE_RUNBOOK",
+      "status": "PASS",
+      "terminal_state": "HUMAN_REVIEW"
+    },
+    {
+      "drill": "ai_tracer_sink_outage",
+      "dropped_spans": 9,
+      "incident_id": "inc-c20-tracer-outage",
+      "status": "PASS",
+      "terminal_state": "HUMAN_REVIEW"
+    },
+    {
+      "backpressure_audit_count": 1,
+      "drill": "queue_saturation_backpressure",
+      "incident_id": "inc-c20-queue-saturation",
+      "queue_depth": 1,
+      "status": "PASS",
+      "terminal_state": "REJECTED_BACKPRESSURE"
+    },
+    {
+      "active_incidents_cancelled": [
+        "inc-c20-running-before-kill"
+      ],
+      "drill": "emergency_kill_switch",
+      "fallback_dossier_generated": true,
+      "incident_id": "inc-c20-rejected-after-kill",
+      "new_intake_rejected": true,
+      "status": "PASS",
+      "terminal_state": "CANCELLED"
+    }
+  ],
+  "final_e20_package": false,
+  "generated_at_utc": "2026-11-20T17:42:46.489115Z",
+  "run_id": "c20-docker-20261121T004500Z",
+  "schema_version": "1.0",
+  "scope": "C20_STAGE_2A_DEV_ONLY",
+  "summary": {
+    "audit_chain_valid": true,
+    "audit_chain_violations": [],
+    "audit_event_count": 50,
+    "auto_remediation_triggered": false,
+    "drill_count": 6,
+    "incidents_without_audit": 0,
+    "non_target_services_mutated": false,
+    "pass_count": 6,
+    "safe_terminal_rate": 1.0
+  }
+}

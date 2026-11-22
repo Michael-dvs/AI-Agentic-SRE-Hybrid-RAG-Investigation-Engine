@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c21-20261122T053640Z",
+  "executed_at_utc": "2026-11-22T05:36:45.139147Z",
+  "benchmark": "EXECUTED_BLIND_H_G4",
+  "preflight": {
+    "verified_at_utc": "2026-11-22T05:36:40.088614Z",
+    "manifest_path": "evidence/c21-preflight-20261122T051612608117Z/C21/final-release-manifest.json",
+    "manifest_file_sha256": "b7fcc5484b83b9f5d67766d1a1b4adb21c215f8c25430ee00ecbeb66ae3d1c4f",
+    "manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+    "candidate_source_tree_sha256": "36a484e84e4c15712086ec78593ee35ee98bffcca5524cc5e3c3756cee4abed5",
+    "protected_dirs_verified": [
+      "orchestrator",
+      "gateway",
+      "services",
+      "knowledge_base",
+      "observability",
+      "fault_harness",
+      "traffic"
+    ],
+    "protected_dirs_hashes": {
+      "orchestrator": "a23680582037ed80b7bda987d509f8b61064a078a64a9b3e8ca26b02ee334a4d",
+      "gateway": "ffd74ba790e02a018b1b6993a38d2a7f99920fad3a940513da896de38417e268",
+      "services": "7c2b9166c51cf14be65a7aa86d4e217b30a04b7b4f076a1111051b86ace673f8",
+      "knowledge_base": "0cbe530ba607d5258b1a00fa170747f436a078276dd34a5d08136953ca8a7d67",
+      "observability": "3cf93f87faf1b35b27d31f234669d979e1ff30f879c495c00b93e2e25008adba",
+      "fault_harness": "05ccfa8df702911fc01f6df9f69e4861736cc48ba22947764c7855b7f554e02b",
+      "traffic": "91d031af06bb87a79ebfb3418eab1eb0a609ca2c1e79921f5a507370218eaedd"
+    },
+    "evaluator_hashes": {
+      "evaluator/runner.py": "c07610ab6b91763da769ddeeb7b05c30e1f3c869c8d2ab5ed71f0f6d86a6b2c1",
+      "evaluator/scorer.py": "bd907582d3b5a7e6d6285ff47fa85ae76cf41071348fea6a4b01e4c94ebb8828"
+    },
+    "contracts_sha256": "ef40fc00d64bad87d7f8f45ffe0af366095d9faec338815287726778c609d663",
+    "versions": {
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0",
+      "tool_schema_version": "1.0",
+      "prompt_template_sha256": "71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5",
+      "kb_active_alias": "kb_active_alias",
+      "kb_index_version": "kb-idx-20261111-v1",
+      "kb_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+      "kb_document_count": 20,
+      "kb_chunk_count": 71
+    },
+    "seals": {
+      "restricted/evaluator_queries/holdout_queries.json": {
+        "expected_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+        "actual_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+        "matches": true
+      },
+      "restricted/gt_registry/ground_truth_records.jsonl": {
+        "expected_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+        "actual_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+        "matches": true
+      }
+    },
+    "permissions": {
+      "evaluator_queries_dir": {
+        "path": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/restricted/evaluator_queries",
+        "owner_uid": 501,
+        "process_uid": 501,
+        "mode_octal": "0o700",
+        "expected_mode_octal": "0o700",
+        "owner_only": true
+      },
+      "holdout_queries_file": {
+        "path": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/restricted/evaluator_queries/holdout_queries.json",
+        "owner_uid": 501,
+        "process_uid": 501,
+        "mode_octal": "0o600",
+        "expected_mode_octal": "0o600",
+        "owner_only": true
+      },
+      "gt_registry_dir": {
+        "path": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/restricted/gt_registry",
+        "owner_uid": 501,
+        "process_uid": 501,
+        "mode_octal": "0o700",
+        "expected_mode_octal": "0o700",
+        "owner_only": true
+      },
+      "ground_truth_records_file": {
+        "path": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/restricted/gt_registry/ground_truth_records.jsonl",
+        "owner_uid": 501,
+        "process_uid": 501,
+        "mode_octal": "0o600",
+        "expected_mode_octal": "0o600",
+        "owner_only": true
+      }
+    }
+  },
+  "preflight_doc_note_run_id": "run-20261118-e39b744a19",
+  "h_g4_spec": {
+    "line_number": 8,
+    "split_id": "H-G4",
+    "run_id": "run-20261118-514a0d9758",
+    "incident_id": "inc-20261118-514a0d9758",
+    "target_services": [
+      "auth-service",
+      "notification-service"
+    ],
+    "offset": 7649,
+    "length": 1395
+  },
+  "h_g4_query_ids": [
+    "QRY-HLD-007",
+    "QRY-HLD-008",
+    "QRY-HLD-009",
+    "QRY-HLD-010",
+    "QRY-HLD-011",
+    "QRY-HLD-012"
+  ],
+  "h_g4_replay": {
+    "incident_id": "inc-20261118-514a0d9758",
+    "run_id": "run-20261118-514a0d9758",
+    "partition_file": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/restricted/h_g4_partition/run-20261118-514a0d9758.json",
+    "joined_file": "/Users/michaelarhdyn/Library/CloudStorage/GoogleDrive-23.michaelaristio@gmail.com/My Drive/Project Michael/SRE-Agentic/evidence/c21-20261122T053640Z/C21/joined_records/run-20261118-514a0d9758.json",
+    "audit_chain_head": "bb4e6d56e7575771c9cbd6519fd5bcb15728bda387c233186e504a371c68d37b",
+    "audit_event_count": 8
+  },
+  "post_benchmark_immutability": {
+    "all_intact": true,
+    "permissions_intact": true,
+    "verified_at_utc": "2026-11-22T05:36:45.139033Z"
+  },
+  "gate_g4_status": "NOT_EVALUATED"
+}

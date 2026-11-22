@@ -1,0 +1,59 @@
+{
+  "status": "SOURCE_HASHES_MATCH_ONLY",
+  "files": {
+    "restricted/evaluator_queries/holdout_queries.json": {
+      "baseline_sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "sha256": "6c7fbc74a4fb3f630374183c97e261ecccf7e824034049ae4b4437919a7513b6",
+      "matches": true
+    },
+    "restricted/gt_registry/ground_truth_records.jsonl": {
+      "baseline_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95",
+      "matches": true
+    }
+  },
+  "protected_directories": {
+    "orchestrator": {
+      "sha256": "a23680582037ed80b7bda987d509f8b61064a078a64a9b3e8ca26b02ee334a4d",
+      "matches_c20": true
+    },
+    "gateway": {
+      "sha256": "ffd74ba790e02a018b1b6993a38d2a7f99920fad3a940513da896de38417e268",
+      "matches_c20": true
+    },
+    "services": {
+      "sha256": "7c2b9166c51cf14be65a7aa86d4e217b30a04b7b4f076a1111051b86ace673f8",
+      "matches_c20": true
+    },
+    "knowledge_base": {
+      "sha256": "0cbe530ba607d5258b1a00fa170747f436a078276dd34a5d08136953ca8a7d67",
+      "matches_c20": true
+    },
+    "observability": {
+      "sha256": "3cf93f87faf1b35b27d31f234669d979e1ff30f879c495c00b93e2e25008adba",
+      "matches_c20": true
+    },
+    "fault_harness": {
+      "sha256": "05ccfa8df702911fc01f6df9f69e4861736cc48ba22947764c7855b7f554e02b",
+      "matches_c20": true
+    },
+    "traffic": {
+      "sha256": "91d031af06bb87a79ebfb3418eab1eb0a609ca2c1e79921f5a507370218eaedd",
+      "matches_c20": true
+    }
+  },
+  "contracts_sha256": "ef40fc00d64bad87d7f8f45ffe0af366095d9faec338815287726778c609d663",
+  "kb_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+  "prompt_template_sha256": "71975c945f0347f3f97f44705e7cc049e726649083c3a4c037bb41548fb8f4a5",
+  "c20_source_tree_sha256": "10c3235882ab75e1286f18cc1204792009d053b5ee1677c4a202fd3bcc74f665",
+  "candidate_source_tree_sha256": "36a484e84e4c15712086ec78593ee35ee98bffcca5524cc5e3c3756cee4abed5",
+  "protected_assets_match_c20": true,
+  "query_source_permissions": "NOT_OWNER_ONLY",
+  "isolation": "NOT_VERIFIED",
+  "authorization": "NOT_VERIFIED",
+  "access_history": "NOT_VERIFIED",
+  "gt_actual_partition": "NOT_CREATED",
+  "gt_partition_rule": "Actual GT partition only after CLOSED for each incident.",
+  "benchmark": "NOT_RUN",
+  "candidate_manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e"
+}

@@ -1,0 +1,215 @@
+{
+  "generated_at_utc": "2026-11-22T05:36:45.084042Z",
+  "total_findings": 7,
+  "post_hoc_tuning_performed": false,
+  "findings": [
+    {
+      "finding_id": "C21-FAIL-001",
+      "category": "KPI-02_MISS_CONCURRENT_MULTI_FAULT",
+      "severity": "HIGH",
+      "target": "inc-20261118-514a0d9758",
+      "observed_result": {
+        "kpi_02_main": 0.0,
+        "kpi_02_primary_cause": 1.0,
+        "kpi_02_all_causes": 0.0,
+        "accepted_without_substantial_rework": false
+      },
+      "root_cause_analysis": "H-G4 incident run-20261118-514a0d9758 injects concurrent faults on two topologically disconnected service branches (auth-service and notification-service, scenario SC-08). The frozen DependencyCorrelator only traverses directed dependency edges from the single alert's primary service_id (api-gateway <- auth-service), and AlertDeduplicator keys per (service_id, environment, alert_type, window). Consequently, DeterministicInvestigator correctly diagnosed auth-service (primary_cause=1.0) with valid provenance, but never expanded scope to notification-service in the same incident dossier.",
+      "compliance_note": "Per RULE-012 and BRD §21.1, frozen runtime code and KPI thresholds were NOT modified after observing this miss. Logged for Chapter 23 architectural gap review."
+    },
+    {
+      "finding_id": "C21-RET-LEXICAL_ONLY-QRY-HLD-009",
+      "category": "RETRIEVAL_MISS_OR_FALSE_POSITIVE",
+      "severity": "MEDIUM",
+      "target": "lexical_only:QRY-HLD-009",
+      "observed_result": {
+        "query_id": "QRY-HLD-009",
+        "target_service_id": "notification-service",
+        "status": "ok",
+        "gap_reason": null,
+        "expected_document_ids": [
+          "SOP-NOTIF-001"
+        ],
+        "retrieved_document_ids": [
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001"
+        ],
+        "expected_section_paths": [
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+        ],
+        "retrieved_section_paths": [
+          "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+          "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+          "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event"
+        ],
+        "latency_ms": 0.7256,
+        "outcome": "MISS"
+      },
+      "root_cause_analysis": "Mode lexical_only returned outcome=MISS (retrieved=['SOP-NOTIF-QUEUE-001', 'SOP-NOTIF-QUEUE-001', 'SOP-NOTIF-QUEUE-001', 'KNOWN-ERR-NOTIF-001', 'KNOWN-ERR-NOTIF-001'], expected=['SOP-NOTIF-001']).",
+      "compliance_note": "Recorded verbatim without corpus or query tuning."
+    },
+    {
+      "finding_id": "C21-RET-LEXICAL_ONLY-QRY-HLD-012",
+      "category": "RETRIEVAL_MISS_OR_FALSE_POSITIVE",
+      "severity": "MEDIUM",
+      "target": "lexical_only:QRY-HLD-012",
+      "observed_result": {
+        "query_id": "QRY-HLD-012",
+        "target_service_id": "notification-service",
+        "status": "ok",
+        "gap_reason": null,
+        "expected_document_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_document_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001"
+        ],
+        "expected_section_paths": [
+          "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+        ],
+        "retrieved_section_paths": [
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event"
+        ],
+        "latency_ms": 0.647,
+        "outcome": "MISS"
+      },
+      "root_cause_analysis": "Mode lexical_only returned outcome=MISS (retrieved=['SOP-NOTIF-001', 'SOP-NOTIF-001', 'SOP-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'KNOWN-ERR-NOTIF-001'], expected=['ARCH-SIM-ECOSYSTEM.md']). Specific corpus/prefilter factor: ARCH-SIM-ECOSYSTEM.md has frontmatter document_id='ARCH-SIM-ECOSYSTEM' (without '.md') and service_id='api-gateway', so RAG-02 StrictPreFilter on target_service_id='notification-service' excludes it at pre-filter stage before ranking.",
+      "compliance_note": "Recorded verbatim without corpus or query tuning."
+    },
+    {
+      "finding_id": "C21-RET-DENSE_ONLY-QRY-HLD-012",
+      "category": "RETRIEVAL_MISS_OR_FALSE_POSITIVE",
+      "severity": "MEDIUM",
+      "target": "dense_only:QRY-HLD-012",
+      "observed_result": {
+        "query_id": "QRY-HLD-012",
+        "target_service_id": "notification-service",
+        "status": "ok",
+        "gap_reason": null,
+        "expected_document_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_document_ids": [
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001"
+        ],
+        "expected_section_paths": [
+          "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+        ],
+        "retrieved_section_paths": [
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+        ],
+        "latency_ms": 0.621,
+        "outcome": "MISS"
+      },
+      "root_cause_analysis": "Mode dense_only returned outcome=MISS (retrieved=['SOP-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'SOP-NOTIF-001', 'SOP-NOTIF-001'], expected=['ARCH-SIM-ECOSYSTEM.md']). Specific corpus/prefilter factor: ARCH-SIM-ECOSYSTEM.md has frontmatter document_id='ARCH-SIM-ECOSYSTEM' (without '.md') and service_id='api-gateway', so RAG-02 StrictPreFilter on target_service_id='notification-service' excludes it at pre-filter stage before ranking.",
+      "compliance_note": "Recorded verbatim without corpus or query tuning."
+    },
+    {
+      "finding_id": "C21-RET-HYBRID_RRF-QRY-HLD-012",
+      "category": "RETRIEVAL_MISS_OR_FALSE_POSITIVE",
+      "severity": "MEDIUM",
+      "target": "hybrid_rrf:QRY-HLD-012",
+      "observed_result": {
+        "query_id": "QRY-HLD-012",
+        "target_service_id": "notification-service",
+        "status": "ok",
+        "gap_reason": null,
+        "expected_document_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_document_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "SOP-NOTIF-001"
+        ],
+        "expected_section_paths": [
+          "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+        ],
+        "retrieved_section_paths": [
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+        ],
+        "latency_ms": 0.5836,
+        "outcome": "MISS"
+      },
+      "root_cause_analysis": "Mode hybrid_rrf returned outcome=MISS (retrieved=['SOP-NOTIF-001', 'SOP-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'SOP-NOTIF-001'], expected=['ARCH-SIM-ECOSYSTEM.md']). Specific corpus/prefilter factor: ARCH-SIM-ECOSYSTEM.md has frontmatter document_id='ARCH-SIM-ECOSYSTEM' (without '.md') and service_id='api-gateway', so RAG-02 StrictPreFilter on target_service_id='notification-service' excludes it at pre-filter stage before ranking.",
+      "compliance_note": "Recorded verbatim without corpus or query tuning."
+    },
+    {
+      "finding_id": "C21-RET-HYBRID_RERANK-QRY-HLD-012",
+      "category": "RETRIEVAL_MISS_OR_FALSE_POSITIVE",
+      "severity": "MEDIUM",
+      "target": "hybrid_rerank:QRY-HLD-012",
+      "observed_result": {
+        "query_id": "QRY-HLD-012",
+        "target_service_id": "notification-service",
+        "status": "ok",
+        "gap_reason": null,
+        "expected_document_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_document_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "SOP-NOTIF-001"
+        ],
+        "expected_section_paths": [
+          "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+        ],
+        "retrieved_section_paths": [
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+          "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+          "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+        ],
+        "latency_ms": 0.6384,
+        "outcome": "MISS"
+      },
+      "root_cause_analysis": "Mode hybrid_rerank returned outcome=MISS (retrieved=['SOP-NOTIF-001', 'SOP-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'KNOWN-ERR-NOTIF-001', 'SOP-NOTIF-001'], expected=['ARCH-SIM-ECOSYSTEM.md']). Specific corpus/prefilter factor: ARCH-SIM-ECOSYSTEM.md has frontmatter document_id='ARCH-SIM-ECOSYSTEM' (without '.md') and service_id='api-gateway', so RAG-02 StrictPreFilter on target_service_id='notification-service' excludes it at pre-filter stage before ranking.",
+      "compliance_note": "Recorded verbatim without corpus or query tuning."
+    },
+    {
+      "finding_id": "C21-LIMIT-001",
+      "category": "STATISTICAL_POWER_AND_BASELINE_LIMITATION",
+      "severity": "MEDIUM",
+      "target": "H-G4 / KPI-06 / KPI-08 / KPI-13",
+      "observed_result": {
+        "h_g4_queries": 6,
+        "h_g4_replays": 1,
+        "kpi_08_h_g4": "UNAVAILABLE",
+        "kpi_13": "NOT_RUN (C22)"
+      },
+      "root_cause_analysis": "H-G4 sample size (n=1 replay, n=6 queries) cannot establish narrow confidence intervals against TBD-08 (30-50 replays, 100-200 queries); human baseline KPI-08 is DEV-only solo-developer self-assessment; reproducibility clean replays AT-013 await Chapter 22.",
+      "compliance_note": "Disclosed explicitly for Gate G4 feasibility decision in Chapter 24."
+    }
+  ]
+}

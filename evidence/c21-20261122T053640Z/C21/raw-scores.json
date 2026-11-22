@@ -1,0 +1,1442 @@
+{
+  "run_id": "c21-20261122T053640Z",
+  "generated_at_utc": "2026-11-22T05:36:45.139159Z",
+  "h_g4_sample_counts": {
+    "queries": 6,
+    "replays": 1
+  },
+  "retrieval_4mode": {
+    "modes": {
+      "lexical_only": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.6667,
+        "document_recall_at_5": 0.6667,
+        "section_hit_rate_at_5": 0.6667,
+        "section_recall_at_5": 0.6667,
+        "mrr_at_5": 0.6667,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.647,
+        "latency_p95_ms": 1.2305,
+        "latency_mean_ms": 0.7715
+      },
+      "dense_only": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.5,
+        "section_recall_at_5": 0.5,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.5822,
+        "latency_p95_ms": 0.621,
+        "latency_mean_ms": 0.5952
+      },
+      "hybrid_rrf": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.6667,
+        "section_recall_at_5": 0.6667,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.5879,
+        "latency_p95_ms": 0.6223,
+        "latency_mean_ms": 0.5994
+      },
+      "hybrid_rerank": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.8333,
+        "section_recall_at_5": 0.8333,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.6432,
+        "latency_p95_ms": 0.697,
+        "latency_mean_ms": 0.659
+      }
+    },
+    "per_query": {
+      "lexical_only": [
+        {
+          "query_id": "QRY-HLD-007",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-LEDGER-ERR-504"
+          ],
+          "retrieved_document_ids": [
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout"
+          ],
+          "retrieved_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger"
+          ],
+          "latency_ms": 1.2305,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-008",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "retrieved_document_ids": [
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "SOP-LEDGER-001",
+            "SOP-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala"
+          ],
+          "retrieved_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger"
+          ],
+          "latency_ms": 0.7819,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-009",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "KNOWN-ERR-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event"
+          ],
+          "latency_ms": 0.7256,
+          "outcome": "MISS"
+        },
+        {
+          "query_id": "QRY-HLD-010",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-QUEUE-001",
+            "KNOWN-ERR-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah"
+          ],
+          "latency_ms": 0.6448,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-011",
+          "target_service_id": "db-dummy",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-DB-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "ARCH-DB-001",
+            "ARCH-DB-001"
+          ],
+          "expected_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 1. Identifikasi dan Pengawasan Sinyal Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 1. Topologi Persistence dan Skema Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database"
+          ],
+          "latency_ms": 0.5992,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-012",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "ARCH-SIM-ECOSYSTEM.md"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event"
+          ],
+          "latency_ms": 0.647,
+          "outcome": "MISS"
+        }
+      ],
+      "dense_only": [
+        {
+          "query_id": "QRY-HLD-007",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-LEDGER-ERR-504"
+          ],
+          "retrieved_document_ids": [
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-001",
+            "SOP-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout"
+          ],
+          "retrieved_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger"
+          ],
+          "latency_ms": 0.6099,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-008",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "retrieved_document_ids": [
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "SOP-LEDGER-001",
+            "SOP-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala"
+          ],
+          "retrieved_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF)",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"
+          ],
+          "latency_ms": 0.6083,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-009",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 2. Solusi Sementara dan Penanganan"
+          ],
+          "latency_ms": 0.5822,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-010",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-QUEUE-001",
+            "KNOWN-ERR-NOTIF-001",
+            "SOP-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi"
+          ],
+          "latency_ms": 0.5715,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-011",
+          "target_service_id": "db-dummy",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-DB-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "ARCH-DB-001",
+            "SOP-DB-001",
+            "ARCH-DB-001"
+          ],
+          "expected_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 1. Identifikasi dan Pengawasan Sinyal Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 1. Topologi Persistence dan Skema Database",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database"
+          ],
+          "latency_ms": 0.5783,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-012",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "ARCH-SIM-ECOSYSTEM.md"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+          ],
+          "latency_ms": 0.621,
+          "outcome": "MISS"
+        }
+      ],
+      "hybrid_rrf": [
+        {
+          "query_id": "QRY-HLD-007",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-LEDGER-ERR-504"
+          ],
+          "retrieved_document_ids": [
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-001",
+            "SOP-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout"
+          ],
+          "retrieved_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 1. Identifikasi dan Triage Latensi Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman"
+          ],
+          "latency_ms": 0.6152,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-008",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "retrieved_document_ids": [
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "SOP-LEDGER-001",
+            "SOP-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala"
+          ],
+          "retrieved_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) > 2. Prosedur Mitigasi Bertahap yang Aman",
+            "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF)"
+          ],
+          "latency_ms": 0.6129,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-009",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event"
+          ],
+          "latency_ms": 0.5879,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-010",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis"
+          ],
+          "latency_ms": 0.5744,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-011",
+          "target_service_id": "db-dummy",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-DB-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "ARCH-DB-001",
+            "ARCH-DB-001"
+          ],
+          "expected_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 1. Identifikasi dan Pengawasan Sinyal Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 1. Topologi Persistence dan Skema Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database"
+          ],
+          "latency_ms": 0.6223,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-012",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "ARCH-SIM-ECOSYSTEM.md"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "SOP-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+          ],
+          "latency_ms": 0.5836,
+          "outcome": "MISS"
+        }
+      ],
+      "hybrid_rerank": [
+        {
+          "query_id": "QRY-HLD-007",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-LEDGER-ERR-504"
+          ],
+          "retrieved_document_ids": [
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504",
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "expected_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout"
+          ],
+          "retrieved_section_paths": [
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 2. Tindakan Penanganan Khusus Ledger",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala"
+          ],
+          "latency_ms": 0.6531,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-008",
+          "target_service_id": "ledger-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "KNOWN-ERR-LEDGER-001"
+          ],
+          "retrieved_document_ids": [
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "KNOWN-ERR-LEDGER-001",
+            "SOP-LEDGER-ERR-504",
+            "SOP-LEDGER-ERR-504"
+          ],
+          "expected_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala"
+          ],
+          "retrieved_section_paths": [
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 1. Uraian Masalah dan Gejala",
+            "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+            "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout"
+          ],
+          "latency_ms": 0.697,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-009",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi"
+          ],
+          "latency_ms": 0.6827,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-010",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001",
+            "SOP-NOTIF-QUEUE-001"
+          ],
+          "expected_section_paths": [
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 2. Prosedur Investigasi dan Mitigasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 2. Tindakan Operasional di Lab",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ",
+            "SOP-NOTIF-QUEUE-001: Mitigasi Backlog Pesan dan Consumer Lag RabbitMQ > 1. Ambang Batas dan Kriteria Kritis"
+          ],
+          "latency_ms": 0.6432,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-011",
+          "target_service_id": "db-dummy",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "SOP-DB-001"
+          ],
+          "retrieved_document_ids": [
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "SOP-DB-001",
+            "ARCH-DB-001",
+            "ARCH-DB-001"
+          ],
+          "expected_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi"
+          ],
+          "retrieved_section_paths": [
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 1. Identifikasi dan Pengawasan Sinyal Database",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL",
+            "SOP-DB-001: Penanganan Saturasi Connection Pool Database PostgreSQL > 2. Tindakan Diagnostik dan Remediasi",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database > 1. Topologi Persistence dan Skema Database",
+            "ARCH-DB-001: Arsitektur Persistence dan Connection Pool Database"
+          ],
+          "latency_ms": 0.6396,
+          "outcome": "HIT"
+        },
+        {
+          "query_id": "QRY-HLD-012",
+          "target_service_id": "notification-service",
+          "status": "ok",
+          "gap_reason": null,
+          "expected_document_ids": [
+            "ARCH-SIM-ECOSYSTEM.md"
+          ],
+          "retrieved_document_ids": [
+            "SOP-NOTIF-001",
+            "SOP-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "KNOWN-ERR-NOTIF-001",
+            "SOP-NOTIF-001"
+          ],
+          "expected_section_paths": [
+            "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 2. Aliran Peristiwa Asinkron (Asynchronous Event Flow)"
+          ],
+          "retrieved_section_paths": [
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 1. Identifikasi Anomali Konsumen Notifikasi",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event",
+            "KNOWN-ERR-NOTIF-001: Blocking Socket I/O pada Consumer Event > 1. Penyebab Masalah",
+            "SOP-NOTIF-001: Pemantauan dan Penanganan Antrean Konsumen Notifikasi > 3. Verifikasi Pasca-Penanganan"
+          ],
+          "latency_ms": 0.6384,
+          "outcome": "MISS"
+        }
+      ]
+    },
+    "scorer_retrieval_queries": [
+      {
+        "query_id": "QRY-HLD-007",
+        "relevant_ids": [
+          "SOP-LEDGER-ERR-504"
+        ],
+        "retrieved_ids": [
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-001",
+          "SOP-LEDGER-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-008",
+        "relevant_ids": [
+          "KNOWN-ERR-LEDGER-001"
+        ],
+        "retrieved_ids": [
+          "KNOWN-ERR-LEDGER-001",
+          "KNOWN-ERR-LEDGER-001",
+          "KNOWN-ERR-LEDGER-001",
+          "SOP-LEDGER-001",
+          "SOP-LEDGER-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-009",
+        "relevant_ids": [
+          "SOP-NOTIF-001"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-010",
+        "relevant_ids": [
+          "SOP-NOTIF-QUEUE-001"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-011",
+        "relevant_ids": [
+          "SOP-DB-001"
+        ],
+        "retrieved_ids": [
+          "SOP-DB-001",
+          "SOP-DB-001",
+          "SOP-DB-001",
+          "ARCH-DB-001",
+          "ARCH-DB-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-012",
+        "relevant_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "SOP-NOTIF-001"
+        ]
+      }
+    ]
+  },
+  "scorer_input_case": {
+    "incident_id": "inc-20261118-514a0d9758",
+    "ground_truth": {
+      "actual_root_cause": {
+        "expected_fault_types": [
+          "auth_config_mismatch",
+          "queue_consumer_lag"
+        ],
+        "expected_relevant_chunk_ids": [
+          "chk-sop-auth-mismatch-001",
+          "chk-sop-notif-lag-001"
+        ],
+        "expected_root_cause_services": [
+          "auth-service",
+          "notification-service"
+        ],
+        "is_healthy_control": false,
+        "is_multi_fault": true
+      },
+      "expected_impact": [
+        "Simultaneous 403 ERR_AUTH_POLICY_MISMATCH on auth-service AND consumer_lag_active on notification-service",
+        "Two independent failure domains active concurrently"
+      ],
+      "fault_category": "concurrent_independent_faults",
+      "fault_seed": 20261118,
+      "gt_record_id": "gt-run-20261118-514a0d9758",
+      "incident_id": "inc-20261118-514a0d9758",
+      "injected_parameters": [
+        {
+          "delay_ms": 0,
+          "duration_sec": 6.0,
+          "error_rate": 1.0,
+          "fault_id": "flt-514a0d9758-conc-auth",
+          "fault_mode": "auth_config_mismatch",
+          "pool_limit": 1,
+          "seed": 20261118,
+          "target_service": "auth-service"
+        },
+        {
+          "delay_ms": 1200,
+          "duration_sec": 6.0,
+          "error_rate": 1.0,
+          "fault_id": "flt-514a0d9758-conc-notif",
+          "fault_mode": "queue_consumer_lag",
+          "pool_limit": 1,
+          "seed": 20261118,
+          "target_service": "notification-service"
+        }
+      ],
+      "label_frozen_at": "2026-11-10T10:27:17.285966Z",
+      "record_sha256": "e0ef5d3dd62a19309aba813972a44f0a0573db682bc7351c4a085546088a07c9",
+      "run_id": "run-20261118-514a0d9758",
+      "scenario_id": "SC-08",
+      "split_freeze_hash": "a6d84649a24730093cec59ed3602fb7e37e9a14bbccf111f28121736279a6aac",
+      "split_id": "H-G4",
+      "target_services": [
+        "auth-service",
+        "notification-service"
+      ]
+    },
+    "completed": true,
+    "diagnoses": [
+      {
+        "cause": "auth-service",
+        "status": "SUPPORTED"
+      }
+    ],
+    "claims": [
+      {
+        "claim_text": "Service operational error in auth-service (ERR_AUTH_REJECTED)",
+        "valid_source": true,
+        "unsupported": false,
+        "critical_security": false
+      }
+    ],
+    "valid_abstain": false,
+    "retrieval_queries": [
+      {
+        "query_id": "QRY-HLD-007",
+        "relevant_ids": [
+          "SOP-LEDGER-ERR-504"
+        ],
+        "retrieved_ids": [
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-ERR-504",
+          "SOP-LEDGER-001",
+          "SOP-LEDGER-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-008",
+        "relevant_ids": [
+          "KNOWN-ERR-LEDGER-001"
+        ],
+        "retrieved_ids": [
+          "KNOWN-ERR-LEDGER-001",
+          "KNOWN-ERR-LEDGER-001",
+          "KNOWN-ERR-LEDGER-001",
+          "SOP-LEDGER-001",
+          "SOP-LEDGER-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-009",
+        "relevant_ids": [
+          "SOP-NOTIF-001"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-010",
+        "relevant_ids": [
+          "SOP-NOTIF-QUEUE-001"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001",
+          "SOP-NOTIF-QUEUE-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-011",
+        "relevant_ids": [
+          "SOP-DB-001"
+        ],
+        "retrieved_ids": [
+          "SOP-DB-001",
+          "SOP-DB-001",
+          "SOP-DB-001",
+          "ARCH-DB-001",
+          "ARCH-DB-001"
+        ]
+      },
+      {
+        "query_id": "QRY-HLD-012",
+        "relevant_ids": [
+          "ARCH-SIM-ECOSYSTEM.md"
+        ],
+        "retrieved_ids": [
+          "SOP-NOTIF-001",
+          "SOP-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "KNOWN-ERR-NOTIF-001",
+          "SOP-NOTIF-001"
+        ]
+      }
+    ],
+    "review": {
+      "accepted_without_substantial_rework": false,
+      "label_source": "SELF_EVALUATED_DEVELOPER_LABELS"
+    },
+    "alert_received_at": "2026-11-22T05:36:40.186676Z",
+    "dossier_ready_at": "2026-11-22T05:36:40.186676Z",
+    "prohibited_successes": 0,
+    "gt_retrievals": 0,
+    "forbidden_citations": 0,
+    "cost": {
+      "token_cost": 0.00025,
+      "compute_cost": 0.0,
+      "total_tokens": 0
+    },
+    "resource": {
+      "cpu_time_seconds": 0.030616,
+      "peak_rss_mib": 260.23,
+      "actual_cash_spend_usd": 0.0
+    }
+  },
+  "scorer_raw_output": {
+    "metrics": {
+      "KPI-01": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      },
+      "KPI-02": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "all_causes": {
+          "numerator": 0,
+          "denominator": 1,
+          "value": 0.0,
+          "status": "MEASURED",
+          "missing": 0
+        },
+        "primary_cause": {
+          "numerator": 1,
+          "denominator": 1,
+          "value": 1.0,
+          "status": "MEASURED",
+          "missing": 0
+        }
+      },
+      "KPI-03": {
+        "numerator": 1,
+        "denominator": 1,
+        "value": 1.0,
+        "status": "MEASURED",
+        "missing": 0
+      },
+      "KPI-04": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "critical_security_unsupported": 0
+      },
+      "KPI-05": {
+        "hit_rate_at_5": {
+          "numerator": 5,
+          "denominator": 6,
+          "value": 0.8333333333333334,
+          "status": "MEASURED",
+          "missing": 0
+        },
+        "classical_recall_at_5": {
+          "numerator": 5.0,
+          "denominator": 6,
+          "value": 0.8333333333333334,
+          "status": "MEASURED",
+          "missing": 0
+        }
+      },
+      "KPI-06": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "status": "MEASURED",
+        "missing": 0,
+        "label_sources": [
+          "SELF_EVALUATED_DEVELOPER_LABELS"
+        ]
+      },
+      "KPI-07": {
+        "value": 0.0,
+        "unit": "seconds",
+        "method": "nearest_rank",
+        "count": 1,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "KPI-08": {
+        "value": null,
+        "matched_count": 0,
+        "missing": 1,
+        "status": "UNAVAILABLE"
+      },
+      "KPI-09": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "KPI-10": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "KPI-11": {
+        "value": 0,
+        "observed_count": 0,
+        "missing": 0,
+        "status": "MEASURED"
+      },
+      "KPI-12": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 1
+      },
+      "KPI-13": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "PARTIAL",
+        "missing": 1
+      },
+      "KPI-14": {
+        "numerator": 0.00025,
+        "denominator": 1,
+        "value": 0.00025,
+        "status": "MEASURED",
+        "missing": 0,
+        "total_observed_cost": 0.00025,
+        "unit": "caller-specified common currency per completed case",
+        "tokens": {
+          "value": 0,
+          "observed_total": 0,
+          "missing": 0,
+          "status": "MEASURED"
+        }
+      }
+    },
+    "separate": {
+      "healthy_false_positive_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "UNAVAILABLE",
+        "missing": 0
+      },
+      "safety_abstention_accuracy": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "UNAVAILABLE",
+        "missing": 0
+      },
+      "zero_claims_fallback": 0,
+      "valid_abstain_zero_claims": 0,
+      "AT-016": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "status": "UNAVAILABLE",
+        "missing": 0
+      },
+      "resource_measurements": [
+        {
+          "incident_id": "inc-20261118-514a0d9758",
+          "measurement": {
+            "cpu_time_seconds": 0.030616,
+            "peak_rss_mib": 260.23,
+            "actual_cash_spend_usd": 0.0
+          }
+        }
+      ]
+    }
+  },
+  "frozen_suite_verification": {
+    "returncode": 0,
+    "overall_status": "PASS",
+    "requirement_ids_checked": 24,
+    "requirement_ids_passed": 24,
+    "results": {
+      "SEC-01": {
+        "requirement_id": "SEC-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_sec01_authorization_prefilter_before_ranking"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_sec01_authorization_prefilter_before_ranking PASSED [ 74%]"
+        ],
+        "status": "PASS"
+      },
+      "SEC-02": {
+        "requirement_id": "SEC-02",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_sec02_at011_injection_is_data_in_replay_workflow",
+          "tests/test_c18_red_team.py::test_sec02_at011_sop_injection_stays_untrusted_data"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_sec02_at011_injection_is_data_in_replay_workflow PASSED [ 77%]",
+          "tests/test_c18_red_team.py::test_sec02_at011_sop_injection_stays_untrusted_data PASSED [ 80%]"
+        ],
+        "status": "PASS"
+      },
+      "SEC-03": {
+        "requirement_id": "SEC-03",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_sec03_redaction_and_failure_closed",
+          "tests/test_c18_red_team.py::test_sec03_gateway_to_replay_prompt_redacts_secret"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_sec03_gateway_to_replay_prompt_redacts_secret PASSED [ 83%]",
+          "tests/test_c18_red_team.py::test_sec03_redaction_and_failure_closed PASSED [ 87%]"
+        ],
+        "status": "PASS"
+      },
+      "MCP-01": {
+        "requirement_id": "MCP-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_mcp01_mutations_denied_before_dispatch",
+          "tests/test_c18_red_team.py::test_mcp01_model_tool_request_falls_back_without_dispatch"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_mcp01_model_tool_request_falls_back_without_dispatch PASSED [ 41%]",
+          "tests/test_c18_red_team.py::test_mcp01_mutations_denied_before_dispatch[restart_service] PASSED [ 45%]",
+          "tests/test_c18_red_team.py::test_mcp01_mutations_denied_before_dispatch[deploy_patch] PASSED [ 48%]",
+          "tests/test_c18_red_team.py::test_mcp01_mutations_denied_before_dispatch[execute_sql] PASSED [ 51%]",
+          "tests/test_c18_red_team.py::test_mcp01_mutations_denied_before_dispatch[run_shell] PASSED [ 54%]"
+        ],
+        "status": "PASS"
+      },
+      "MCP-02": {
+        "requirement_id": "MCP-02",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_mcp02_excessive_window_rejected_before_dispatch"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_mcp02_excessive_window_rejected_before_dispatch PASSED [ 58%]"
+        ],
+        "status": "PASS"
+      },
+      "RAG-01": {
+        "requirement_id": "RAG-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_rag01_expired_and_unapproved_chunks_excluded"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_rag01_expired_and_unapproved_chunks_excluded PASSED [ 67%]"
+        ],
+        "status": "PASS"
+      },
+      "RAG-02": {
+        "requirement_id": "RAG-02",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_rag02_cross_service_and_environment_excluded"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_rag02_cross_service_and_environment_excluded PASSED [ 70%]"
+        ],
+        "status": "PASS"
+      },
+      "EV-01": {
+        "requirement_id": "EV-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_ev01_conflicting_signals_remain_partial"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_ev01_conflicting_signals_remain_partial PASSED [ 32%]"
+        ],
+        "status": "PASS"
+      },
+      "EV-02": {
+        "requirement_id": "EV-02",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_ev02_unavailable_trace_not_fabricated"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_ev02_unavailable_trace_not_fabricated PASSED [ 35%]"
+        ],
+        "status": "PASS"
+      },
+      "OPS-01": {
+        "requirement_id": "OPS-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_ops01_duplicate_burst_produces_one_workflow",
+          "tests/test_c20_capacity_resilience.py::test_ops01_duplicate_burst_and_5_20_50_concurrency_profile"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_ops01_duplicate_burst_produces_one_workflow PASSED [ 61%]",
+          "tests/test_c20_capacity_resilience.py::test_ops01_duplicate_burst_and_5_20_50_concurrency_profile PASSED [ 90%]"
+        ],
+        "status": "PASS"
+      },
+      "OPS-02": {
+        "requirement_id": "OPS-02",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_ops02_model_outage_fallback_and_audit",
+          "tests/test_c20_capacity_resilience.py::test_ops02_multi_outage_backpressure_and_kill_switch"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_ops02_model_outage_fallback_and_audit PASSED [ 64%]",
+          "tests/test_c20_capacity_resilience.py::test_ops02_multi_outage_backpressure_and_kill_switch PASSED [ 93%]"
+        ],
+        "status": "PASS"
+      },
+      "HUM-01": {
+        "requirement_id": "HUM-01",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_hum01_workflow_requires_review_not_execution"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_hum01_workflow_requires_review_not_execution PASSED [ 38%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-004": {
+        "requirement_id": "AT-004",
+        "nodes": [
+          "tests/test_c11_investigation_workflow.py::test_sequential_9_states_happy_path"
+        ],
+        "executed_cases": [
+          "tests/test_c11_investigation_workflow.py::test_sequential_9_states_happy_path PASSED [  9%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-005": {
+        "requirement_id": "AT-005",
+        "nodes": [
+          "tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected"
+        ],
+        "executed_cases": [
+          "tests/test_c08_secure_gateway.py::test_write_restart_deploy_tools_strictly_rejected PASSED [  6%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-006": {
+        "requirement_id": "AT-006",
+        "nodes": [
+          "tests/test_c07_hybrid_retrieval.py::test_schema_compliance_across_modes"
+        ],
+        "executed_cases": [
+          "tests/test_c07_hybrid_retrieval.py::test_schema_compliance_across_modes PASSED [  3%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-007": {
+        "requirement_id": "AT-007",
+        "nodes": [
+          "tests/test_c14_sop_applicability.py::test_rag01_sc10_obsolete_runbook_citation_rejected"
+        ],
+        "executed_cases": [
+          "tests/test_c14_sop_applicability.py::test_rag01_sc10_obsolete_runbook_citation_rejected PASSED [ 19%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-008": {
+        "requirement_id": "AT-008",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_at008_restricted_marker_rejected_before_model",
+          "tests/test_c21_preflight_and_runner_h4.py::test_authorized_closed_join_is_private_and_runtime_empty"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_at008_restricted_marker_rejected_before_model PASSED [ 29%]",
+          "tests/test_c21_preflight_and_runner_h4.py::test_authorized_closed_join_is_private_and_runtime_empty PASSED [100%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-009": {
+        "requirement_id": "AT-009",
+        "nodes": [
+          "tests/test_c14_contradiction_and_uncertainty.py::test_ev01_metrics_normal_vs_logs_error_conflict"
+        ],
+        "executed_cases": [
+          "tests/test_c14_contradiction_and_uncertainty.py::test_ev01_metrics_normal_vs_logs_error_conflict PASSED [ 16%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-010": {
+        "requirement_id": "AT-010",
+        "nodes": [
+          "tests/test_c16_human_review.py::test_at010_unauthorized_review_rejected"
+        ],
+        "executed_cases": [
+          "tests/test_c16_human_review.py::test_at010_unauthorized_review_rejected PASSED [ 22%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-011": {
+        "requirement_id": "AT-011",
+        "nodes": [
+          "tests/test_c18_red_team.py::test_sec02_at011_injection_is_data_in_replay_workflow"
+        ],
+        "executed_cases": [
+          "tests/test_c18_red_team.py::test_sec02_at011_injection_is_data_in_replay_workflow PASSED [ 77%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-012": {
+        "requirement_id": "AT-012",
+        "nodes": [
+          "tests/test_c20_capacity_resilience.py::test_ops02_multi_outage_backpressure_and_kill_switch"
+        ],
+        "executed_cases": [
+          "tests/test_c20_capacity_resilience.py::test_ops02_multi_outage_backpressure_and_kill_switch PASSED [ 93%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-015": {
+        "requirement_id": "AT-015",
+        "nodes": [
+          "tests/test_c20_rollback_restore.py::test_unit_cost_basis_separates_successful_and_failed_runs"
+        ],
+        "executed_cases": [
+          "tests/test_c20_rollback_restore.py::test_unit_cost_basis_separates_successful_and_failed_runs PASSED [ 96%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-016": {
+        "requirement_id": "AT-016",
+        "nodes": [
+          "tests/test_c14_contradiction_and_uncertainty.py::test_at016_sc04_cascading_failure_distinguishes_origin_vs_downstream"
+        ],
+        "executed_cases": [
+          "tests/test_c14_contradiction_and_uncertainty.py::test_at016_sc04_cascading_failure_distinguishes_origin_vs_downstream PASSED [ 12%]"
+        ],
+        "status": "PASS"
+      },
+      "AT-017": {
+        "requirement_id": "AT-017",
+        "nodes": [
+          "tests/test_c16_human_review.py::test_at017_ticket_creation_guard"
+        ],
+        "executed_cases": [
+          "tests/test_c16_human_review.py::test_at017_ticket_creation_guard PASSED  [ 25%]"
+        ],
+        "status": "PASS"
+      }
+    }
+  }
+}

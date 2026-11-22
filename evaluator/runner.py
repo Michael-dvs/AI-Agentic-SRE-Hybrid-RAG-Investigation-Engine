@@ -1,12 +1,14 @@
-"""Offline delayed join for DEV and separately provisioned H-G3 records.
+"""Offline delayed join for DEV, H-G3 and explicitly authorized H-G4 records.
 
 C15 hashes are not signatures: a separately protected trusted chain head is required.
 C16 emits a final-dossier-bound closure event when its audit sink succeeds.
 Source directories are trusted configuration and must contain only the selected split;
 this runner cannot prove provenance or safely separate a mixed-split registry.
+The trusted C21 manifest digest is configuration, not a secret or identity authentication.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -27,7 +29,7 @@ def _private_directory(path: Path) -> Path:
     if path.resolve(strict=True) != path:
         raise EvaluationBlocked("Directory must not traverse symbolic links")
     info = path.stat()
-    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o700:
         raise EvaluationBlocked("Evaluator directories must be owner-only")
     return path
 
@@ -40,24 +42,29 @@ def _closure_payload(incident_id: str, version: int, dossier_hash: str) -> dict[
     return {"incident_id": incident_id, "dossier_version": version,
             "dossier_hash": dossier_hash, "terminal_state": "CLOSED"}
 
+def _verify_c21_manifest(manifest_path: Path | None, expected_sha256: str | None) -> None:
+    if (manifest_path is None or not isinstance(expected_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256)):
+        raise EvaluationBlocked("Missing or invalid trusted C21 manifest configuration")
+    try:
+        manifest_bytes = Path(manifest_path).read_bytes()
+        if hashlib.sha256(manifest_bytes).hexdigest() != expected_sha256:
+            raise EvaluationBlocked("C21 manifest digest mismatch")
+        manifest = json.loads(manifest_bytes)
+        runner_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        if (not isinstance(manifest, dict)
+                or manifest.get("status") != "C21_CANDIDATE_FROZEN_NOT_BENCHMARKED"
+                or not isinstance(manifest.get("source_tree"), dict)
+                or not isinstance(manifest["source_tree"].get("files"), dict)
+                or manifest["source_tree"]["files"].get("evaluator/runner.py") != runner_sha256):
+            raise EvaluationBlocked("C21 manifest does not bind the current evaluator")
+    except (OSError, TypeError, ValueError, UnicodeError) as exc:
+        raise EvaluationBlocked("Cannot verify C21 manifest") from exc
 
-def join_evaluator(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_head: str,
-                   incident_id: str, run_id: str, split_id: str, source_dir: Path,
-                   output_dir: Path, runtime_dir: Path) -> Path:
-    """Join one post-CLOSED record from a dedicated DEV or H-G3 directory.
 
-    Each source is an owner-only JSON object named <run_id>.json. The caller must
-    independently provision and verify a single-split directory; never supply a
-    mixed registry. H-G4 and all other split identifiers are rejected before source
-    access. Paths and the complete audit chain's independently trusted head are
-    trusted configuration; hashing alone cannot establish their trustworthiness.
-    """
-    if split_id == "H-G4":
-        raise EvaluationBlocked("H-G4 split remains strictly sealed until C21")
-    if split_id not in ("dev", "H-G3"):
-        raise EvaluationBlocked("Unsupported evaluation split")
-    if not re.fullmatch(r"inc-[a-z0-9-]+", incident_id) or not re.fullmatch(r"run-[a-z0-9-]+", run_id):
-        raise EvaluationBlocked("Invalid opaque identifier")
+def _require_closed_dossier(*, store: Any, audit_events: list[dict[str, Any]],
+                            trusted_audit_head: str, incident_id: str) -> dict[str, Any]:
+    """Require the final dossier and its independently anchored closure event."""
     incident = store.get_incident(incident_id)
     if not incident or incident.get("current_state") != "CLOSED" or incident.get("status") != "CLOSED":
         raise EvaluationBlocked("PREMATURE_EVALUATION_BLOCKED")
@@ -88,16 +95,63 @@ def join_evaluator(*, store: Any, audit_events: list[dict[str, Any]], trusted_au
                and event.get("result_code") == "ALLOW" and event.get("reason_code") == "OK"
                and event.get("request_fingerprint") == fingerprint for event in audit_events):
         raise EvaluationBlocked("No final-dossier-bound closure audit event")
+    return dossier
 
-    source = _private_directory(Path(source_dir))
+
+def join_evaluator(*, store: Any, audit_events: list[dict[str, Any]], trusted_audit_head: str,
+                   incident_id: str, run_id: str, split_id: str, source_dir: Path,
+                   output_dir: Path, runtime_dir: Path, allow_h_g4: bool = False,
+                   c21_release_manifest_path: Path | None = None,
+                   c21_release_manifest_sha256: str | None = None) -> Path:
+    """Join one post-CLOSED record from a dedicated single-split directory.
+
+    Each source is an owner-only JSON object named <run_id>.json. The caller must
+    independently provision and verify a single-split directory; never supply a
+    mixed registry. H-G4 additionally requires explicit authorization and a frozen
+    manifest bound to this runner. Its expected file digest must come from trusted
+    caller configuration, independently of the manifest: it is neither a secret
+    nor identity authentication. Paths and the complete audit chain's independently
+    trusted head are also trusted configuration.
+    """
+    if split_id == "H-G4":
+        if allow_h_g4 is not True:
+            raise EvaluationBlocked("H-G4 split remains strictly sealed until C21")
+        _verify_c21_manifest(c21_release_manifest_path, c21_release_manifest_sha256)
+    elif split_id not in ("dev", "H-G3"):
+        raise EvaluationBlocked("Unsupported evaluation split")
+    if not re.fullmatch(r"inc-[a-z0-9-]+", incident_id) or not re.fullmatch(r"run-[a-z0-9-]+", run_id):
+        raise EvaluationBlocked("Invalid opaque identifier")
+    dossier = _require_closed_dossier(store=store, audit_events=audit_events,
+                                      trusted_audit_head=trusted_audit_head,
+                                      incident_id=incident_id)
+
+    try:
+        source = _private_directory(Path(source_dir))
+    except (OSError, ValueError) as exc:
+        if split_id == "H-G4":
+            raise EvaluationBlocked("Invalid evaluation source directory") from exc
+        raise
     output = _private_directory(Path(output_dir))
     runtime = Path(runtime_dir).resolve(strict=True)
     if _overlap(source, output) or _overlap(source, runtime) or _overlap(output, runtime):
         raise EvaluationBlocked("Evaluator and runtime paths must be disjoint")
     # O_NOFOLLOW plus fstat prevents symlink and hard-link inputs from redirecting reads.
-    source_fd = os.open(source, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
-        fd = os.open(f"{run_id}.json", os.O_RDONLY | os.O_NOFOLLOW, dir_fd=source_fd)
+        source_fd = os.open(source, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    except OSError as exc:
+        if split_id == "H-G4":
+            raise EvaluationBlocked("Invalid evaluation source directory") from exc
+        raise
+    try:
+        try:
+            flags = os.O_RDONLY | os.O_NOFOLLOW
+            if split_id == "H-G4":
+                flags |= os.O_NONBLOCK
+            fd = os.open(f"{run_id}.json", flags, dir_fd=source_fd)
+        except OSError as exc:
+            if split_id == "H-G4":
+                raise EvaluationBlocked("Invalid evaluation source file") from exc
+            raise
         try:
             info = os.fstat(fd)
             if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
@@ -113,7 +167,7 @@ def join_evaluator(*, store: Any, audit_events: list[dict[str, Any]], trusted_au
         os.close(source_fd)
     if (not isinstance(ground_truth, dict) or ground_truth.get("split_id") != split_id
             or ground_truth.get("run_id") != run_id or ground_truth.get("incident_id") != incident_id):
-        raise EvaluationBlocked(f"Source is not a matching {'DEV' if split_id == 'dev' else 'H-G3'} record")
+        raise EvaluationBlocked(f"Source is not a matching {'DEV' if split_id == 'dev' else split_id} record")
     payload = {"run_id": run_id, "incident_id": incident_id,
                "dossier": dossier, "ground_truth": ground_truth}
     output_fd = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)

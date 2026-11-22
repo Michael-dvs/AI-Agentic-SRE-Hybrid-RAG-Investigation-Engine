@@ -1,0 +1,156 @@
+{
+  "sample_size_vs_tbd08": {
+    "h_g4_retrieval_queries": 6,
+    "h_g4_positive_retrieval_queries": 6,
+    "h_g4_negative_retrieval_queries": 0,
+    "h_g4_incident_replays": 1,
+    "tbd08_proposal_benchmark_target": {
+      "retrieval_queries": "100-200",
+      "incident_replays": "30-50"
+    },
+    "assessment": "C21 H-G4 sample (6 holdout queries + 1 closed multi-fault replay) meets Frozen G1/ADR-S08 PoC split size, but sits far below Proposal TBD-08 statistical target (100-200 queries, 30-50 replays). Confidence intervals remain wide and cannot support statistical generalization claims."
+  },
+  "retrieval_4mode_comparison": {
+    "h_g4_modes": {
+      "lexical_only": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.6667,
+        "document_recall_at_5": 0.6667,
+        "section_hit_rate_at_5": 0.6667,
+        "section_recall_at_5": 0.6667,
+        "mrr_at_5": 0.6667,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.647,
+        "latency_p95_ms": 1.2305,
+        "latency_mean_ms": 0.7715
+      },
+      "dense_only": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.5,
+        "section_recall_at_5": 0.5,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.5822,
+        "latency_p95_ms": 0.621,
+        "latency_mean_ms": 0.5952
+      },
+      "hybrid_rrf": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.6667,
+        "section_recall_at_5": 0.6667,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.5879,
+        "latency_p95_ms": 0.6223,
+        "latency_mean_ms": 0.5994
+      },
+      "hybrid_rerank": {
+        "total_queries_evaluated": 6,
+        "positive_queries": 6,
+        "negative_out_of_scope_queries": 0,
+        "document_hit_rate_at_5": 0.8333,
+        "document_recall_at_5": 0.8333,
+        "section_hit_rate_at_5": 0.8333,
+        "section_recall_at_5": 0.8333,
+        "mrr_at_5": 0.5972,
+        "negative_no_match_safety_rate": null,
+        "forbidden_or_cross_service_leaks": 0,
+        "latency_p50_ms": 0.6432,
+        "latency_p95_ms": 0.697,
+        "latency_mean_ms": 0.659
+      }
+    },
+    "c07_dev_reference_modes": {
+      "lexical_only": {
+        "total_queries_evaluated": 28,
+        "document_hit_rate_at_5": 1.0,
+        "document_recall_at_5": 1.0,
+        "section_hit_rate_at_5": 0.9286,
+        "section_recall_at_5": 0.9286,
+        "mrr_at_10": 0.9732,
+        "ndcg_at_5": 0.9797,
+        "latency_p50_ms": 0.48,
+        "latency_p95_ms": 0.82,
+        "latency_avg_ms": 0.51,
+        "memory_rss_delta_mb": 6.89
+      },
+      "dense_only": {
+        "total_queries_evaluated": 28,
+        "document_hit_rate_at_5": 1.0,
+        "document_recall_at_5": 1.0,
+        "section_hit_rate_at_5": 0.9286,
+        "section_recall_at_5": 0.9286,
+        "mrr_at_10": 0.9732,
+        "ndcg_at_5": 0.9797,
+        "latency_p50_ms": 0.49,
+        "latency_p95_ms": 1.45,
+        "latency_avg_ms": 0.65,
+        "memory_rss_delta_mb": 6.89
+      },
+      "hybrid_rrf": {
+        "total_queries_evaluated": 28,
+        "document_hit_rate_at_5": 1.0,
+        "document_recall_at_5": 1.0,
+        "section_hit_rate_at_5": 0.9286,
+        "section_recall_at_5": 0.9286,
+        "mrr_at_10": 0.9732,
+        "ndcg_at_5": 0.9797,
+        "latency_p50_ms": 0.49,
+        "latency_p95_ms": 1.29,
+        "latency_avg_ms": 0.57,
+        "memory_rss_delta_mb": 6.89
+      },
+      "hybrid_rerank": {
+        "total_queries_evaluated": 28,
+        "document_hit_rate_at_5": 0.9643,
+        "document_recall_at_5": 0.9643,
+        "section_hit_rate_at_5": 0.8929,
+        "section_recall_at_5": 0.8929,
+        "mrr_at_10": 0.8583,
+        "ndcg_at_5": 0.8839,
+        "latency_p50_ms": 0.55,
+        "latency_p95_ms": 1.57,
+        "latency_avg_ms": 0.75,
+        "memory_rss_delta_mb": 6.89
+      }
+    }
+  },
+  "kpi_06_and_08_solo_developer_caveat": {
+    "kpi_06_h_g4_value": 0.0,
+    "kpi_06_c19_dev_value": 0.8571,
+    "kpi_08_h_g4_status": "UNAVAILABLE (no matched manual H-G4 timing pairs; RULE-011 not triggered on holdout)",
+    "kpi_08_c19_dev_value": 0.8823,
+    "label_source": "SELF_EVALUATED_DEVELOPER_LABELS",
+    "disclosure": "C19 manual baseline (n=7) used anti-carryover SHA-256 locking before AI view, yet both manual and rubric assessments were executed by the solo lab developer (project-initiator-michael) on DEV cases, NOT independent banking L1/L2 SREs on blind H-G4."
+  },
+  "preflight_record_id_reconciliation": {
+    "preflight_doc_note": "Preflight holdout-g4-manifest cited historical note 'run-20261118-e39b744a19' line 7.",
+    "actual_jsonl_line_8": {
+      "run_id": "run-20261118-514a0d9758",
+      "incident_id": "inc-20261118-514a0d9758",
+      "split_id": "H-G4",
+      "line_number": 8,
+      "ground_truth_file_sha256": "149deae896aa78f18238958b974f08508307c0a6e52bd39dd667dc435fab7b95"
+    },
+    "note": "No files were modified; holdout SHA-256 remained 149deae8... unchanged since G1."
+  },
+  "in_process_vs_live_docker_caveat": {
+    "benchmark_execution_mode": "hermetic_in_process_lab",
+    "live_docker_daemon_status": "DOWN during C21 local run",
+    "c20_live_docker_reference": "evidence/c20-docker-20261121T004500Z/C20/docker-container-metrics.md",
+    "kpi_13_at_013_status": "NOT_RUN (scheduled for Chapter 22 two clean end-to-end replays)"
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "cash_cost_usd": 0.0,
+  "concurrency_waves": [
+    {
+      "accepted_incidents": 5,
+      "audit_event_count": 5,
+      "dossiers_generated": 5,
+      "lab_ram_limit_mib": 8192.0,
+      "latency_p50_ms": 0.383,
+      "latency_p95_ms": 0.433,
+      "level": 5,
+      "process_cpu_percent_of_one_core": 107.462,
+      "process_cpu_seconds": 0.002902,
+      "process_peak_rss_mib_after": 209.5,
+      "process_peak_rss_mib_before": 209.5,
+      "queue_depth_peak": 5,
+      "rejected_incidents": 0,
+      "series": [
+        {
+          "observed_at": "2026-11-20T17:42:43.737560Z",
+          "process_cpu_seconds": 2.057776,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 5
+        },
+        {
+          "observed_at": "2026-11-20T17:42:43.739750Z",
+          "process_cpu_seconds": 2.060058,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 0
+        }
+      ],
+      "status": "PASS",
+      "throughput_incidents_per_second": 1851.509
+    },
+    {
+      "accepted_incidents": 20,
+      "audit_event_count": 20,
+      "dossiers_generated": 20,
+      "lab_ram_limit_mib": 8192.0,
+      "latency_p50_ms": 0.361,
+      "latency_p95_ms": 0.42,
+      "level": 20,
+      "process_cpu_percent_of_one_core": 108.252,
+      "process_cpu_seconds": 0.01036,
+      "process_peak_rss_mib_after": 209.5,
+      "process_peak_rss_mib_before": 209.5,
+      "queue_depth_peak": 20,
+      "rejected_incidents": 0,
+      "series": [
+        {
+          "observed_at": "2026-11-20T17:42:43.741345Z",
+          "process_cpu_seconds": 2.062158,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 20
+        },
+        {
+          "observed_at": "2026-11-20T17:42:43.749353Z",
+          "process_cpu_seconds": 2.070443,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 0
+        }
+      ],
+      "status": "PASS",
+      "throughput_incidents_per_second": 2089.6
+    },
+    {
+      "accepted_incidents": 50,
+      "audit_event_count": 50,
+      "dossiers_generated": 50,
+      "lab_ram_limit_mib": 8192.0,
+      "latency_p50_ms": 0.359,
+      "latency_p95_ms": 0.435,
+      "level": 50,
+      "process_cpu_percent_of_one_core": 107.621,
+      "process_cpu_seconds": 0.02361,
+      "process_peak_rss_mib_after": 209.5,
+      "process_peak_rss_mib_before": 209.5,
+      "queue_depth_peak": 50,
+      "rejected_incidents": 0,
+      "series": [
+        {
+          "observed_at": "2026-11-20T17:42:43.752123Z",
+          "process_cpu_seconds": 2.074561,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 50
+        },
+        {
+          "observed_at": "2026-11-20T17:42:43.771344Z",
+          "process_cpu_seconds": 2.094093,
+          "process_peak_rss_mib": 209.5,
+          "queue_depth": 0
+        }
+      ],
+      "status": "PASS",
+      "throughput_incidents_per_second": 2278.947
+    }
+  ],
+  "docker_container_stats": {
+    "containers": [
+      {
+        "BlockIO": "3.15MB / 0B",
+        "CPUPerc": "0.23%",
+        "Container": "e900a43d7ea57970183f8497b867d604e8a002a17e06c19a5ce382f34d05217f",
+        "ID": "e900a43d7ea5",
+        "MemPerc": "10.47%",
+        "MemUsage": "53.6MiB / 512MiB",
+        "Name": "sre-sim-prometheus",
+        "NetIO": "22.1kB / 15.3kB",
+        "PIDs": "3"
+      },
+      {
+        "BlockIO": "10.4MB / 0B",
+        "CPUPerc": "0.31%",
+        "Container": "f46892e80ceca1f7ea9d1e797038ab0c621351f6e3046466b6612916fbf7c31d",
+        "ID": "f46892e80cec",
+        "MemPerc": "52.48%",
+        "MemUsage": "67.18MiB / 128MiB",
+        "Name": "sre-sim-api-gateway",
+        "NetIO": "415kB / 543kB",
+        "PIDs": "3"
+      },
+      {
+        "BlockIO": "4.09MB / 0B",
+        "CPUPerc": "0.22%",
+        "Container": "928b1caa2c08cce0d67216cd7add572c378694506c485b1298a362c308f42006",
+        "ID": "928b1caa2c08",
+        "MemPerc": "44.62%",
+        "MemUsage": "57.11MiB / 128MiB",
+        "Name": "sre-sim-transaction-service",
+        "NetIO": "424kB / 524kB",
+        "PIDs": "3"
+      },
+      {
+        "BlockIO": "168kB / 0B",
+        "CPUPerc": "0.23%",
+        "Container": "bf0a43d1c101dc45d73d6ac7d87a6c7d43bd605ee8ca6ac58f89ecafe4ac7848",
+        "ID": "bf0a43d1c101",
+        "MemPerc": "27.76%",
+        "MemUsage": "53.29MiB / 192MiB",
+        "Name": "sre-sim-otel-collector",
+        "NetIO": "796kB / 815kB",
+        "PIDs": "5"
+      },
+      {
+        "BlockIO": "5.39MB / 0B",
+        "CPUPerc": "0.34%",
+        "Container": "9d17b3ad7ab16942e6c5e151bbb242fbd5c8e39c3423dc8e5999d629effa2027",
+        "ID": "9d17b3ad7ab1",
+        "MemPerc": "32.73%",
+        "MemUsage": "41.89MiB / 128MiB",
+        "Name": "sre-sim-auth-service",
+        "NetIO": "189kB / 280kB",
+        "PIDs": "2"
+      },
+      {
+        "BlockIO": "9.85MB / 0B",
+        "CPUPerc": "0.98%",
+        "Container": "17dc8dcccb3f5719318a4304c2630c8857a1477bfdf8b62a916b68b5bc641a21",
+        "ID": "17dc8dcccb3f",
+        "MemPerc": "37.16%",
+        "MemUsage": "47.56MiB / 128MiB",
+        "Name": "sre-sim-notification-service",
+        "NetIO": "312kB / 691kB",
+        "PIDs": "3"
+      },
+      {
+        "BlockIO": "6.05MB / 0B",
+        "CPUPerc": "0.33%",
+        "Container": "23fc7459edf783ae0bd86e7724afb201daf8f5f3c045b51ceb7149111e9a168f",
+        "ID": "23fc7459edf7",
+        "MemPerc": "11.56%",
+        "MemUsage": "44.38MiB / 384MiB",
+        "Name": "sre-sim-tempo",
+        "NetIO": "319kB / 94.4kB",
+        "PIDs": "2"
+      },
+      {
+        "BlockIO": "2.99MB / 0B",
+        "CPUPerc": "0.30%",
+        "Container": "080088cd46074aa42298f692baf6c8ad7d683e6556a40e55b538568a549a26a8",
+        "ID": "080088cd4607",
+        "MemPerc": "8.29%",
+        "MemUsage": "42.45MiB / 512MiB",
+        "Name": "sre-sim-loki",
+        "NetIO": "337kB / 87.1kB",
+        "PIDs": "2"
+      },
+      {
+        "BlockIO": "0B / 0B",
+        "CPUPerc": "0.27%",
+        "Container": "d8cea420cdc1f01f202f283197b96bc37519eb4caf26a01f0f2b371a3cdd1870",
+        "ID": "d8cea420cdc1",
+        "MemPerc": "35.86%",
+        "MemUsage": "45.91MiB / 128MiB",
+        "Name": "sre-sim-ledger-service",
+        "NetIO": "285kB / 310kB",
+        "PIDs": "2"
+      },
+      {
+        "BlockIO": "316MB / 4.6MB",
+        "CPUPerc": "1.97%",
+        "Container": "29bb1c9f5d7a37138ab3171c398073bc80d3335de5461aaf4e3227e162dc7b7d",
+        "ID": "29bb1c9f5d7a",
+        "MemPerc": "28.72%",
+        "MemUsage": "73.52MiB / 256MiB",
+        "Name": "sre-sim-grafana",
+        "NetIO": "21.5kB / 7.63kB",
+        "PIDs": "18"
+      },
+      {
+        "BlockIO": "131kB / 684kB",
+        "CPUPerc": "0.04%",
+        "Container": "05c7c3a44feaf5b8889903f7fd919810f80e086ed4b458f480687247a4d6e404",
+        "ID": "05c7c3a44fea",
+        "MemPerc": "10.58%",
+        "MemUsage": "20.3MiB / 192MiB",
+        "Name": "sre-sim-postgres",
+        "NetIO": "151kB / 179kB",
+        "PIDs": "6"
+      },
+      {
+        "BlockIO": "39.5MB / 319kB",
+        "CPUPerc": "0.67%",
+        "Container": "77249ff5645d19309740d4b423d76874243776bc51b474c5bea80171dc0e1028",
+        "ID": "77249ff5645d",
+        "MemPerc": "41.34%",
+        "MemUsage": "105.8MiB / 256MiB",
+        "Name": "sre-sim-rabbitmq",
+        "NetIO": "621kB / 284kB",
+        "PIDs": "38"
+      },
+      {
+        "BlockIO": "216MB / 4.1kB",
+        "CPUPerc": "0.00%",
+        "Container": "5b726234fe3f81dbd32020aa595d54e846b3e507b144fb57b3b2d10eeb433616",
+        "ID": "5b726234fe3f",
+        "MemPerc": "2.44%",
+        "MemUsage": "193.6MiB / 7.748GiB",
+        "Name": "botseri-dashboard",
+        "NetIO": "166kB / 79.9kB",
+        "PIDs": "22"
+      },
+      {
+        "BlockIO": "173MB / 2.04MB",
+        "CPUPerc": "0.00%",
+        "Container": "dd3c97560db2afba9e3c46954d70fabe0a5a9e3c6717d7a7aa16786081a390c1",
+        "ID": "dd3c97560db2",
+        "MemPerc": "3.09%",
+        "MemUsage": "245.4MiB / 7.748GiB",
+        "Name": "botseri-n8n",
+        "NetIO": "9.42kB / 9.56kB",
+        "PIDs": "12"
+      },
+      {
+        "BlockIO": "416MB / 127kB",
+        "CPUPerc": "0.42%",
+        "Container": "164eb7782772124dd59d0aa76044b65c405295411940567fe0e9a307bd911c34",
+        "ID": "164eb7782772",
+        "MemPerc": "8.79%",
+        "MemUsage": "697.1MiB / 7.748GiB",
+        "Name": "botseri-waha",
+        "NetIO": "60.6kB / 23.5kB",
+        "PIDs": "35"
+      },
+      {
+        "BlockIO": "35.2MB / 1.21MB",
+        "CPUPerc": "1.31%",
+        "Container": "6ac933f595150bb2fbb828e687699fc4163da1d1374256c3fb92e9f2e3833c52",
+        "ID": "6ac933f59515",
+        "MemPerc": "0.69%",
+        "MemUsage": "54.54MiB / 7.748GiB",
+        "Name": "botseri-db",
+        "NetIO": "68.5kB / 146kB",
+        "PIDs": "8"
+      }
+    ],
+    "reason": null,
+    "status": "MEASURED"
+  },
+  "duplicate_burst": {
+    "action_counts": {
+      "backpressure": 0,
+      "create": 1,
+      "merge": 99,
+      "split": 0
+    },
+    "alerts_submitted": 100,
+    "audit_event_count": 100,
+    "dossiers_generated": 1,
+    "final_hit_count": 100,
+    "latency_p50_ms": 0.763,
+    "latency_p95_ms": 0.763,
+    "process_cpu_seconds": 0.01075,
+    "process_peak_rss_mib_after": 209.5,
+    "process_peak_rss_mib_before": 207.047,
+    "series": [
+      {
+        "observed_at": "2026-11-20T17:42:43.736131Z",
+        "process_cpu_seconds": 2.056221,
+        "process_peak_rss_mib": 209.5,
+        "queue_depth": 1
+      },
+      {
+        "observed_at": "2026-11-20T17:42:43.736985Z",
+        "process_cpu_seconds": 2.057102,
+        "process_peak_rss_mib": 209.5,
+        "queue_depth": 0
+      }
+    ],
+    "status": "PASS",
+    "throughput_alerts_per_second": 14627.368,
+    "unique_incidents": 1
+  },
+  "final_e20_package": false,
+  "generated_at_utc": "2026-11-20T17:42:43.771418Z",
+  "honest_labeling": "Container metrics are marked UNAVAILABLE when Docker or running lab containers are absent; process CPU/RSS metrics remain measured and are not relabeled as container metrics.",
+  "lab_ram_limit_gib": 8.0,
+  "run_id": "c20-docker-20261121T004500Z",
+  "schema_version": "1.0",
+  "scope": "C20_STAGE_2A_DEV_ONLY",
+  "workload": "in-process alert deduplication plus canonical dossier serialization"
+}

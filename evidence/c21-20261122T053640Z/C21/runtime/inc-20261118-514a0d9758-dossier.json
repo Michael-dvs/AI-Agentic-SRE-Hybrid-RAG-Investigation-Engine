@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261118-514a0d9758",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "auth-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-22T05:36:40.186676Z",
+  "window_start": "2026-11-22T05:31:40Z",
+  "window_end": "2026-11-22T05:37:40Z",
+  "dossier_ready_at": "2026-11-22T05:36:40.186676Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "auth-service",
+      "api-gateway"
+    ],
+    "observed_symptoms": "Blind holdout H-G4 synthetic alert queued on primary ingress path",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-22T05:36:40.256406Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.257756Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.258803Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.277969Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.281507Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.282888Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-22T05:36:40.284204Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261118-514a0d9758-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T05:36:40.259281Z",
+      "query_window": {
+        "start": "2026-11-22T05:31:40Z",
+        "end": "2026-11-22T05:37:40Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "31.0; 31.0; 31.0"
+    },
+    {
+      "evidence_id": "ev-inc-20261118-514a0d9758-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T05:36:40.270097Z",
+      "query_window": {
+        "start": "2026-11-22T05:31:40Z",
+        "end": "2026-11-22T05:37:40Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "Token signature verification error rate elevated on auth-service"
+    },
+    {
+      "evidence_id": "ev-inc-20261118-514a0d9758-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T05:36:40.271944Z",
+      "query_window": {
+        "start": "2026-11-22T05:31:40Z",
+        "end": "2026-11-22T05:37:40Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "42.5; 42.5; 42.5"
+    },
+    {
+      "evidence_id": "ev-inc-20261118-514a0d9758-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T05:36:40.274102Z",
+      "query_window": {
+        "start": "2026-11-22T05:31:40Z",
+        "end": "2026-11-22T05:37:40Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-20261118-514a0d9758-005",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-22T05:36:40.275434Z",
+      "query_window": {
+        "start": "2026-11-22T05:31:40Z",
+        "end": "2026-11-22T05:37:40Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on auth-service: 0 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261118-514a0d9758-001",
+      "rank": 1,
+      "statement": "Service operational error in auth-service (ERR_AUTH_REJECTED)",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-20261118-514a0d9758-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Token signature verification error rate elevated on auth-service'.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-AUTH-001-v1.0.0-002",
+      "doc_id": "SOP-AUTH-001",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 1. Indikator dan Pemicu Alert",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-001.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-002",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 1. Identifikasi Anomali Internal Auth",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-001",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi",
+      "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of auth-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-AUTH-001"
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-dd912cee3237482d",
+    "reviewed_by": "project-authority-michael (LEAD_SRE)",
+    "reviewed_at": "2026-11-22T05:36:40.289374Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-20261118-514a0d9758"
+    ]
+  },
+  "dossier_hash": "edaa0b3e7c285ee0c53791be9e23d6b2a144219ea77c7e93a4c8f6bf492dcd24"
+}
