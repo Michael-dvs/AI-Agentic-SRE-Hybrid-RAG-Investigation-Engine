@@ -1,0 +1,380 @@
+{
+  "schema_version": "1.0",
+  "run_id": "c23-20261122T071432Z",
+  "generated_at_utc": "2026-11-22T07:14:32.283502Z",
+  "scope_boundary": "SCALED_DOWN_LAB_POC_ONLY",
+  "production_readiness_claimed": false,
+  "regulatory_compliance_certified": false,
+  "safety_must_violations": 0,
+  "empirical_findings": [
+    {
+      "finding_id": "C21-FAIL-001",
+      "metric": "KPI-02",
+      "observed": "0.0 main (0/1 on H-G4 SC-08; primary_cause=1.0 auth-service, all_causes=0.0 notification-service missed)",
+      "target": ">= 0.85 (PROPOSED)",
+      "severity": "MEDIUM_NON_SAFETY",
+      "root_cause": "Frozen DependencyCorrelator traverses single-entry DAG from alert service_id; AlertDeduplicator keys on (service_id, environment, alert_type, window).",
+      "target_fix": "Multi-Root Temporal Event Clustering and connected-component subgraph aggregation (CAP-01).",
+      "requires_cap_before_phase5": true
+    },
+    {
+      "finding_id": "C21-RET-QRY-HLD-012",
+      "metric": "KPI-05",
+      "observed": "0.8333 Hit@5/Recall@5 (5/6 on H-G4 hybrid_rrf, dense_only, hybrid_rerank; 0.6667 lexical_only)",
+      "target": ">= 0.90 (PROPOSED)",
+      "severity": "MEDIUM_NON_SAFETY",
+      "root_cause": "ARCH-SIM-ECOSYSTEM.md has frontmatter service_id='api-gateway' and document_id='ARCH-SIM-ECOSYSTEM' (without .md); RAG-02 StrictPreFilter excludes it for target_service_id='notification-service'.",
+      "target_fix": "Multi-tier metadata entitlement (service_private vs shared_platform with affected_services ACL) and canonical document_id normalization (CAP-02).",
+      "requires_cap_before_phase5": true
+    },
+    {
+      "finding_id": "TBD-08",
+      "metric": "STATISTICAL_POWER",
+      "observed": "H-G4 n=1 closed replay + n=6 holdout queries; H-G3 n=2 replays + n=6 queries",
+      "target": "30-50 incident replays, 100-200 retrieval queries (Proposal TBD-08)",
+      "severity": "MEDIUM_METHODOLOGICAL",
+      "root_cause": "Frozen G1/ADR-S08 scaled-down lab split restricts statistical power; binomial confidence intervals remain wide.",
+      "target_fix": "Execute stratified 30-50 replay and 100-200 query benchmark on banking staging corpus (CAP-03).",
+      "requires_cap_before_phase5": true
+    },
+    {
+      "finding_id": "C19-DEF-005",
+      "metric": "KPI-06 / KPI-08",
+      "observed": "H-G4 KPI-08=UNAVAILABLE, KPI-06=0.0 (rework); C19 DEV n=7 median reduction -88.23% (340.0s vs 40.032s) & KPI-06=85.71% tagged SELF_EVALUATED_DEVELOPER_LABELS",
+      "target": ">= 40% efficiency by independent SME (RULE-011), >= 85% acceptance",
+      "severity": "MEDIUM_METHODOLOGICAL",
+      "root_cause": "Solo developer (project-initiator-michael) served as both scenario author and reviewer in lab (TBD-01/02).",
+      "target_fix": "Blinded crossover evaluation by independent L1/L2 banking SRE panel (CAP-04).",
+      "requires_cap_before_phase5": true
+    },
+    {
+      "finding_id": "C20-22-DOCKER-FIDELITY",
+      "metric": "KPI-07 / INFRA_FIDELITY",
+      "observed": "C20 Stage 2A/C21/C22 executed in-process while host Docker daemon was DOCKER_INACTIVE (6 Compose tests skipped); H-G4 KPI-07=0.0s warm in-process vs 75.0s H-G3; historical C20 Docker snapshot measured 652.99-683.03 MiB across 12 containers",
+      "target": "Reproducible containerized lab <= 8 GiB RAM, P95 <= 120s",
+      "severity": "LOW_NON_SAFETY",
+      "root_cause": "Host Docker Desktop daemon inactive during C20 Stage 2B, C21, and C22 execution windows; in-process Python omits HTTP/RabbitMQ/Postgres network & disk latency.",
+      "target_fix": "Re-verify full 12-container Compose throughput and latency in Phase 5 staging Kubernetes/container environment.",
+      "requires_cap_before_phase5": false
+    }
+  ],
+  "brd_risk_register": [
+    {
+      "risk_id": "RISK-01",
+      "title": "Demo works only on rehearsed scenarios",
+      "initial_impact": "High",
+      "lab_status": "MITIGATED_WITH_SAMPLE_CAVEAT",
+      "evidence": "E18, E21, E22",
+      "residual_enterprise": "Expand to 30-50 blind incidents (CAP-03)."
+    },
+    {
+      "risk_id": "RISK-02",
+      "title": "Oracle/GT leaks into agent prompt/KB",
+      "initial_impact": "Critical",
+      "lab_status": "CLOSED_VERIFIED_KPI10_ZERO",
+      "evidence": "E04-E22",
+      "residual_enterprise": "Preserve strict out-of-band evaluator & RBAC in production."
+    },
+    {
+      "risk_id": "RISK-03",
+      "title": "Confident but incorrect root cause",
+      "initial_impact": "High",
+      "lab_status": "ACTIVE_RESIDUAL_SC08_ALL_CAUSES",
+      "evidence": "E14, E21",
+      "residual_enterprise": "KPI-04=0.0, but SC-08 second cause missed; fixed via CAP-01."
+    },
+    {
+      "risk_id": "RISK-04",
+      "title": "Invalid/obsolete runbook cited",
+      "initial_impact": "High",
+      "lab_status": "CLOSED_FOR_OBSOLETE_RESIDUAL_CROSS_SERVICE",
+      "evidence": "E06, E07, E14, E21",
+      "residual_enterprise": "KPI-11=0; cross-service shared doc metadata fixed via CAP-02."
+    },
+    {
+      "risk_id": "RISK-05",
+      "title": "Prompt injection via synthetic logs",
+      "initial_impact": "High",
+      "lab_status": "CLOSED_IN_LAB_SEC02_PASS",
+      "evidence": "E13, E18, E21, E22",
+      "residual_enterprise": "Re-test continuously whenever enterprise LLM models change."
+    },
+    {
+      "risk_id": "RISK-06",
+      "title": "Overengineering simulation stack",
+      "initial_impact": "Medium",
+      "lab_status": "CLOSED_VIA_ADR_TBD05",
+      "evidence": "E08, E11",
+      "residual_enterprise": "Python state machine & typed adapters scale cleanly to K8s."
+    },
+    {
+      "risk_id": "RISK-07",
+      "title": "Insufficient laptop/server resources",
+      "initial_impact": "High",
+      "lab_status": "MANAGED_IN_LAB_UNDER_8GIB",
+      "evidence": "E05, E20, E21",
+      "residual_enterprise": "10k-100k EPS requires distributed enterprise cluster (Pillar 1/3)."
+    },
+    {
+      "risk_id": "RISK-08",
+      "title": "Uncontrolled model cost",
+      "initial_impact": "Medium",
+      "lab_status": "CLOSED_IN_LAB_ZERO_CASH",
+      "evidence": "E15, E20, E21",
+      "residual_enterprise": "Budget GPU CapEx/OpEx & private API quotas via TCO model."
+    },
+    {
+      "risk_id": "RISK-09",
+      "title": "Benchmark claims not comparable / bias",
+      "initial_impact": "High",
+      "lab_status": "OPEN_RESIDUAL_SELF_EVALUATED",
+      "evidence": "E19, E21",
+      "residual_enterprise": "Require blinded independent L1/L2 SRE panel (CAP-04)."
+    },
+    {
+      "risk_id": "RISK-10",
+      "title": "Fragile manual demo",
+      "initial_impact": "High",
+      "lab_status": "CLOSED_IN_LAB_AT013_PASS",
+      "evidence": "E22",
+      "residual_enterprise": "Maintain CI clean-replay checks & PRE_RECORDED_FALLBACK_RUN protocol."
+    },
+    {
+      "risk_id": "RISK-11",
+      "title": "False sense of production readiness",
+      "initial_impact": "Critical",
+      "lab_status": "MITIGATED_BY_GOVERNANCE_C23_C24",
+      "evidence": "E23, E24",
+      "residual_enterprise": "Enforced via CONDITIONAL GO & Phase 5 gating."
+    },
+    {
+      "risk_id": "RISK-12",
+      "title": "Vendor/framework lock-in",
+      "initial_impact": "Medium",
+      "lab_status": "MITIGATED_VIA_TYPED_CONTRACTS",
+      "evidence": "E02, E09, E20",
+      "residual_enterprise": "Typed adapters decouple LLM/vector/ITSM backends."
+    },
+    {
+      "risk_id": "RISK-13",
+      "title": "Missing ownership/approval of BRD",
+      "initial_impact": "High",
+      "lab_status": "MANAGED_FOR_LAB_TBD01",
+      "evidence": "E01, E23, E24",
+      "residual_enterprise": "Executive bank sponsor & Security Board required for Phase 5."
+    },
+    {
+      "risk_id": "RISK-14",
+      "title": "Synthetic dataset misses real-world complexity",
+      "initial_impact": "High",
+      "lab_status": "OPEN_ENTERPRISE_GAP",
+      "evidence": "E21, E23",
+      "residual_enterprise": "Validate on anonymized bank historical incidents in Phase 5."
+    }
+  ],
+  "proposal_risk_register": [
+    {
+      "risk_id": "R01",
+      "title": "Data/PII/GT leakage",
+      "lab_status": "CLOSED_IN_LAB_KPI10_ZERO_SEC03_PASS",
+      "evidence": "E06, E08, E15, E18, E22"
+    },
+    {
+      "risk_id": "R02",
+      "title": "Out-of-scope or write tool query",
+      "lab_status": "CLOSED_IN_LAB_KPI09_ZERO_MCP01_02_PASS",
+      "evidence": "E08, E09, E18, E21, E22"
+    },
+    {
+      "risk_id": "R03",
+      "title": "Wrong / overconfident diagnosis",
+      "lab_status": "PARTIAL_RESIDUAL_SC08_CAP01",
+      "evidence": "E14, E21"
+    },
+    {
+      "risk_id": "R04",
+      "title": "Stale or unauthorized SOP cited",
+      "lab_status": "CLOSED_OBSOLETE_CAP02_CROSS_SERVICE",
+      "evidence": "E06, E07, E14, E21"
+    },
+    {
+      "risk_id": "R05",
+      "title": "Alert surge & runaway cost",
+      "lab_status": "CLOSED_IN_LAB_OPS01_PASS",
+      "evidence": "E10, E12, E20, E21, E22"
+    },
+    {
+      "risk_id": "R06",
+      "title": "LLM / backend vendor outage",
+      "lab_status": "CLOSED_IN_LAB_OPS02_6_OF_6_PASS",
+      "evidence": "E13, E15, E20, E21"
+    },
+    {
+      "risk_id": "R07",
+      "title": "Inaccurate dependency topology",
+      "lab_status": "OPEN_ENTERPRISE_CMDB_GAP",
+      "evidence": "E05, E10, E23"
+    },
+    {
+      "risk_id": "R08",
+      "title": "Holdout overfitting / small sample",
+      "lab_status": "OPEN_RESIDUAL_TBD08_CAP03",
+      "evidence": "E18, E21, E23"
+    },
+    {
+      "risk_id": "R09",
+      "title": "Production ownership & support boundary",
+      "lab_status": "DISCLOSED_OUT_OF_POC_SCOPE",
+      "evidence": "E23, E24"
+    }
+  ],
+  "non_pass_items_reconciliation": [
+    {
+      "item": "KPI-02 (H-G4)",
+      "status": "MISS (0.0 main; primary=1.0, all=0.0)",
+      "evidence": "E21 (kpi-report.json)",
+      "owner": "Agent & Correlation Lead (Phase 5A)",
+      "disposition": "Mandatory CAP-01 before bank sandbox"
+    },
+    {
+      "item": "KPI-05 (H-G4)",
+      "status": "MISS (0.8333 [5/6] vs >= 0.90)",
+      "evidence": "E21 (raw-scores.json)",
+      "owner": "RAG Lead (Phase 5A)",
+      "disposition": "Mandatory CAP-02 before bank sandbox"
+    },
+    {
+      "item": "KPI-06 (H-G4 & C19)",
+      "status": "CAVEAT (0.0 H-G4 rework; 85.71% C19 self-eval)",
+      "evidence": "E19, E21",
+      "owner": "Independent SRE Panel (Phase 5B)",
+      "disposition": "Disclosed honestly; resolved via CAP-03/CAP-04"
+    },
+    {
+      "item": "KPI-07 (H-G4)",
+      "status": "PASS_WITH_CAVEAT (0.0s warm in-process; 75.0s H-G3)",
+      "evidence": "E18, E21",
+      "owner": "Platform Engineer (Phase 5)",
+      "disposition": "Re-benchmark under distributed K8s/network latency"
+    },
+    {
+      "item": "KPI-08 (H-G4 & C19)",
+      "status": "UNAVAILABLE (H-G4) / CAVEAT (-88.23% C19 solo-dev)",
+      "evidence": "E19, E21",
+      "owner": "Independent SRE Panel (Phase 5B)",
+      "disposition": "Do not claim 40% savings officially; resolved via CAP-04"
+    },
+    {
+      "item": "KPI-12 (H-G4 nominal)",
+      "status": "PARTIAL (H-G4 nominal untriggered) / PASS via C20",
+      "evidence": "E20 (6/6 drills), E21",
+      "owner": "Resilience Lead",
+      "disposition": "Accepted via E20 6/6 fallback drills + E21 frozen suite"
+    },
+    {
+      "item": "AT-006 (H-G4)",
+      "status": "PARTIAL (DEV 28/28=100%; H-G4 5/6=83.33%)",
+      "evidence": "E07, E21",
+      "owner": "RAG Lead (Phase 5A)",
+      "disposition": "Linked to CAP-02 (shared_platform metadata)"
+    },
+    {
+      "item": "AT-014 (H-G4)",
+      "status": "EXECUTED_WITH_HONEST_GAPS",
+      "evidence": "E21",
+      "owner": "Evaluation Owner (Phase 5B)",
+      "disposition": "Sample size TBD-08 addressed in CAP-03"
+    },
+    {
+      "item": "AT-017 (ITSM Ticket)",
+      "status": "PASS_LAB_STUB (DummyTicketManager local)",
+      "evidence": "E16, E21",
+      "owner": "ITSM Integration Lead (Phase 5)",
+      "disposition": "Sandbox ServiceNow/Jira connector required via CAP-05"
+    },
+    {
+      "item": "6 pytest skipped (Compose)",
+      "status": "SKIPPED (Host Docker daemon inactive)",
+      "evidence": "E20, E21, E22",
+      "owner": "Lab Operator / Platform",
+      "disposition": "Historical 12-container RSS verified in E20 docker-container-metrics.md"
+    },
+    {
+      "item": "RFC-F4-01 (TUI Console)",
+      "status": "PROPOSED / UNDER_REVIEW",
+      "evidence": "C19, E22",
+      "owner": "project-initiator-michael",
+      "disposition": "Accepted for lab demonstration alongside dossier.html"
+    }
+  ],
+  "risk_register_coverage": {
+    "brd_risks_reconciled": 14,
+    "proposal_risks_reconciled": 9,
+    "total_risks_reconciled": 23,
+    "non_pass_items_disposed": true
+  },
+  "enterprise_gap_pillars": [
+    {
+      "pillar_id": 1,
+      "name": "Skala & Volume Telemetri",
+      "lab_state": "5 synthetic services, ~100 burst EPS, local Loki/Prom/Tempo facades, 20 KB docs / 71 chunks",
+      "enterprise_target": "10,000-100,000 EPS, distributed OpenSearch/ClickHouse/Mimir, dynamic tail-based trace sampling, 10k-1M chunks"
+    },
+    {
+      "pillar_id": 2,
+      "name": "Enterprise IAM, CMDB & ITSM",
+      "lab_state": "Static scoped tokens (ADR-S03), static service-catalog.json, local DummyTicketManager stub (AT-017)",
+      "enterprise_target": "Active Directory/LDAP, OAuth2/OIDC + mTLS, dynamic ServiceNow CMDB sync, bidirectional ServiceNow/Jira ITSM (CAP-05)"
+    },
+    {
+      "pillar_id": 3,
+      "name": "HA/DR & Resiliensi Operasional",
+      "lab_state": "Single-instance Docker Compose, local SQLite orchestrator_state.db, best-effort SLA (NFR-009)",
+      "enterprise_target": "Multi-zone Kubernetes, stateless workers, replicated PostgreSQL/etcd/Kafka HA, conceptual targets RTO < 15 min & RPO < 1 min"
+    },
+    {
+      "pillar_id": 4,
+      "name": "Kepatuhan Regulasi, Privasi & Kedaulatan Data",
+      "lab_state": "100% synthetic data/accounts/logs, optional synthetic-only OpenRouter Free-Tier ($0.00)",
+      "enterprise_target": "UU PDP No. 27/2022 & POJK/PBI compliance, strict bank data residency, DPIA, on-premise/air-gapped LLM, KMS/HSM encryption"
+    },
+    {
+      "pillar_id": 5,
+      "name": "Postur Keamanan Enterprise",
+      "lab_state": "Internal PolicyGateway, FAIL_CLOSED sanitizer, 19 red-team tests (E18) & DLP scanner",
+      "enterprise_target": "Independent third-party VAPT/pentest, formal STRIDE threat model, SIEM/SOC integration, ISO/IEC 27001 & PCI-DSS audit"
+    }
+  ],
+  "enterprise_gaps_count": 5,
+  "historical_c18_risk_dispositions": [
+    {
+      "id": "C18-RISK-01",
+      "finding": "H-G3 ground truth records derived from simulation runs.",
+      "disposition": "RESOLVED: Evaluated via offline join_evaluator with post-CLOSED incident binding and hash verification.",
+      "status": "ACCEPTED"
+    },
+    {
+      "id": "C18-RISK-02",
+      "finding": "Human review performed by Project Initiator / Lead SRE under TBD-08 protocol.",
+      "disposition": "RESOLVED: Formally tagged as SELF_EVALUATED_DEVELOPER_LABELS in evaluation metadata.",
+      "status": "ACCEPTED"
+    },
+    {
+      "id": "C18-RISK-03",
+      "finding": "H-G4 holdout preservation for Phase 4 final pilot evaluation.",
+      "disposition": "RESOLVED: Verified 100% unread, unparsed, and sealed.",
+      "status": "ACCEPTED"
+    },
+    {
+      "id": "C18-RISK-04",
+      "finding": "Zero automated remediation rule (RULE-008, HUM-01).",
+      "disposition": "RESOLVED: No remediation tools present in registry; auto_action_triggered is false.",
+      "status": "ACCEPTED"
+    }
+  ],
+  "c22_reproducibility_reference": {
+    "at_013_status": "PASS",
+    "kpi_13_reproducibility_rate": 1.0,
+    "docker_status": "DOCKER_INACTIVE"
+  }
+}

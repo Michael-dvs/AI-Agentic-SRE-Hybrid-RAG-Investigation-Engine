@@ -724,7 +724,7 @@ def execute_clean_replay(
                 "incidents_emitted": 1,
                 "dossiers_generated": 1,
                 "fingerprint": fp,
-                "dedup_raw_incident_id": dedup_generated_id,
+                "dedup_raw_incident_id": dedup_generated_id.replace("-", "_"),
             },
         )
 

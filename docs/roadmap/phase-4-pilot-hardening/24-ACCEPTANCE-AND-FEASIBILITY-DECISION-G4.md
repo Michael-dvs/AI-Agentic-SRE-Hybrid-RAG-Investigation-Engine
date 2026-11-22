@@ -5,10 +5,10 @@
 - **Chapter ID:** `C24 — Acceptance and Feasibility Decision G4`
 - **Phase:** `F4 — Pilot & Hardening` *(Owner **Gate `G4 — Concept Approval Gate`**)*
 - **Version:** `1.0.0`
-- **Status:** `DOCUMENTED / REVIEW_REQUIRED`
+- **Status:** `APPROVED`
 - **Documentation Status:** `APPROVED`
-- **Implementation Status:** `NOT_STARTED` *(eksekusi audit dan penandatanganan Gate `G4` dijadwalkan pada Tahap 4C setelah `E22` dan `E23` selesai)*
-- **Gate G4 Status:** **`NOT_EVALUATED`** *(PERHATIAN: Dokumen chapter ini menyusun instrumen, matriks audit, dan logika keputusan tata kelola Gate `G4` — **BUKAN** pengesahan kelulusan Gate `G4` pada saat authoring Tahap 4A)*
+- **Implementation Status:** `VERIFIED` *(paket bukti `E24` diterbitkan dan diverifikasi di [`evidence/c24-20261122T071432Z/C24/readiness-check.md`](../../../evidence/c24-20261122T071432Z/C24/readiness-check.md))*
+- **Gate G4 Status:** **`CONDITIONAL GO`** *(Approved with Corrective Action Plan `CAP-01`–`CAP-05`; `assessment_kind: "self_review_lab_owner"`, `external_bank_sme_validated: false` — lihat [`docs/gates/G4-CONCEPT-APPROVAL-GATE.md`](../../gates/G4-CONCEPT-APPROVAL-GATE.md))*
 - **Owner:** `project-initiator-michael` *(Project Initiator & Lab Sign-Off Authority per `TBD-01`; evaluasi internal wajib berlabel `assessment_kind: "self_review_lab_owner"`)*
 - **Prerequisites:**
   - [C21 — Final Holdout and Benchmark](21-FINAL-HOLDOUT-AND-BENCHMARK.md) (`VERIFIED`, paket bukti [`E21`](../../../evidence/c21-20261122T053640Z/C21/readiness-check.md))
@@ -228,7 +228,7 @@ flowchart TD
    - Gunakan template di bawah untuk membuat `docs/gates/G4-CONCEPT-APPROVAL-GATE.md` pada **Tahap 4C** setelah seluruh bukti `E21`, `E22`, dan `E23` terverifikasi.
    - Lakukan serah terima final paket publik terpisah dari `restricted/` dan terbitkan deklarasi batas otorisasi penutupan PoC.
 4. **File / Folder Terkait:**
-   - Target pengisian Tahap 4C: `docs/gates/G4-CONCEPT-APPROVAL-GATE.md` *(saat ini masih `NOT_STARTED` / Gate `G4 = NOT_EVALUATED`)*
+   - Target pengisian Tahap 4C: [`docs/gates/G4-CONCEPT-APPROVAL-GATE.md`](../../gates/G4-CONCEPT-APPROVAL-GATE.md) *(telah diisi pada Tahap 4C dengan status akhir **`CONDITIONAL GO`**, `c24-20261122T071432Z`)*
    - Output bukti `E24`: `evidence/<run_id>/C24/final-package-manifest.json`
 5. **Konfigurasi (Template Resmi `docs/gates/G4-CONCEPT-APPROVAL-GATE.md` — Siap Diisi di Tahap 4C):**
 
@@ -385,12 +385,12 @@ Disimpan di `evidence/<run_id>/C24/` serta [`docs/gates/`](../../gates/):
 - Pengisian & penandatanganan resmi [`docs/gates/G4-CONCEPT-APPROVAL-GATE.md`](../../gates/G4-CONCEPT-APPROVAL-GATE.md) pada Tahap 4C
 
 ### 9.2 Definition of Done (DoD)
-- [ ] Seluruh bukti prasyarat `E21`, `E22` (`AT-013`), dan `E23` telah diaudit tanpa kontradiksi.
-- [ ] Seluruh 43 butir (12 Lampiran A + 17 BRD AT + 14 KPI) memiliki disposisi eksplisit yang dapat ditelusuri ke artefak bukti nyata.
-- [ ] Logika keputusan tiga cabang (`NO-GO` / `CONDITIONAL GO` / `GO`) lulus uji unit positif/negatif (`C24-POS-01..02`, `C24-NEG-01..04`).
-- [ ] Jika keputusan adalah `CONDITIONAL GO`, seluruh `CAP-G4-01`–`04` memiliki pemilik, tenggat, dan kriteria verifikasi tertulis.
-- [ ] Penandatanganan mencantumkan `assessment_kind: "self_review_lab_owner"` secara jujur dan `docs/gates/G4-CONCEPT-APPROVAL-GATE.md` diterbitkan lengkap.
-- [ ] Commit Git lokal penutupan `C24` dibuat (tanpa `git push` otomatis).
+- [x] Seluruh bukti prasyarat `E21`, `E22` (`AT-013`), dan `E23` telah diaudit tanpa kontradiksi.
+- [x] Seluruh 43 butir (12 Lampiran A + 17 BRD AT + 14 KPI) memiliki disposisi eksplisit yang dapat ditelusuri ke artefak bukti nyata.
+- [x] Logika keputusan tiga cabang (`NO-GO` / `CONDITIONAL GO` / `GO`) lulus uji unit positif/negatif (`C24-POS-01..02`, `C24-NEG-01..04`).
+- [x] Keputusan **`CONDITIONAL GO`** ditetapkan dengan 5 item wajib `CAP-01`–`CAP-05` (tertaut silang dengan `CAP-G4-01`–`04`) lengkap dengan pemilik, tenggat, dan kriteria verifikasi tertulis.
+- [x] Penandatanganan mencantumkan `assessment_kind: "self_review_lab_owner"` secara jujur dan `docs/gates/G4-CONCEPT-APPROVAL-GATE.md` diterbitkan lengkap.
+- [x] Commit Git lokal penutupan `C24` dibuat (tanpa `git push` otomatis).
 
 ### 9.3 Closeout & Cleanup Protocol
 Setelah Gate `G4` ditandatangani pada Tahap 4C:
@@ -399,5 +399,21 @@ Setelah Gate `G4` ditandatangani pada Tahap 4C:
 3. Arsipkan paket bukti final `E24` serta perbarui `DOCUMENT-MANIFEST.md` dan `REQUIREMENTS-TRACEABILITY-MATRIX.md` sebagai rekaman penutupan fase PoC.
 
 ### 9.4 Risks & `TBD — Decision Required`
-- **`TBD — Decision Required` (Eksekusi Pra-Gate di Tahap 4B & 4C):** Gate `G4` saat ini tetap **`NOT_EVALUATED`**. Risiko utama yang dapat mengubah keputusan menjadi `NO-GO` adalah apabila eksekusi `AT-013` pada Tahap 4B (`C22`) gagal memproduksi dua *clean replay* yang konsisten atau menemukan kebocoran `restricted/`.
-- **Batas Penutupan PoC:** Pengembangan apa pun di luar maket digital ini (termasuk pengerjaan `CAP-G4-01` s/d `CAP-G4-04` untuk sandbox bank) memerlukan *scope statement*, *BRD addendum*, *DPIA*, *security review*, dan otorisasi sponsor baru.
+- **Status Gate `G4` Terkini:** Gate `G4` resmi berstatus **`CONDITIONAL GO`** berdasarkan bukti `E20`–`E24` (`AT-013 PASS`, `KPI-13 = 1.0`, Safety `MUST` 100% `PASS`, 0 kebocoran `restricted/`, dan 5 `CAP` atas keterbatasan empiris `KPI-02`, `KPI-05`, `TBD-08`, `C19-DEF-005`, serta gap enterprise/ITSM).
+- **Batas Penutupan PoC:** Pengembangan apa pun di luar maket digital ini (termasuk pengerjaan `CAP-01`–`CAP-05` / `CAP-G4-01`–`04` untuk sandbox bank) memerlukan *scope statement*, *BRD addendum*, *DPIA*, *security review*, dan otorisasi sponsor baru.
+
+---
+
+## 10. Recorded Execution Results (`E24`: `c24-20261122T071432Z` & Gate `G4`)
+
+- **Run ID:** `c24-20261122T071432Z` (dieksekusi melalui [`scripts/run_c23_c24_governance.py`](../../../scripts/run_c23_c24_governance.py))
+- **Keputusan Resmi Gate `G4`:** **`CONDITIONAL GO`** (`assessment_kind: "self_review_lab_owner"`, `external_bank_sme_validated: false`, penandatangan `project-initiator-michael`) pada [`docs/gates/G4-CONCEPT-APPROVAL-GATE.md`](../../gates/G4-CONCEPT-APPROVAL-GATE.md).
+- **Artefak Paket Bukti `E24`:**
+  - [`evidence/c24-20261122T071432Z/C24/g4-acceptance-summary.json`](../../../evidence/c24-20261122T071432Z/C24/g4-acceptance-summary.json) & [`g4-acceptance-summary.md`](../../../evidence/c24-20261122T071432Z/C24/g4-acceptance-summary.md) — Audit eksplisit `43/43` butir (`12` Lampiran A + `17` BRD `AT-001`–`AT-017` + `14` `KPI-01`–`KPI-14`).
+  - [`evidence/c24-20261122T071432Z/C24/acceptance-checklist.md`](../../../evidence/c24-20261122T071432Z/C24/acceptance-checklist.md) — `12/12` klausul `BRD §22.1`.
+  - [`evidence/c24-20261122T071432Z/C24/corrective-action-register.md`](../../../evidence/c24-20261122T071432Z/C24/corrective-action-register.md) — Register formal `CAP-01`–`CAP-05` (tertaut silang `CAP-G4-01`–`04`).
+  - [`evidence/c24-20261122T071432Z/C24/g4-decision-memo.md`](../../../evidence/c24-20261122T071432Z/C24/g4-decision-memo.md) — Memo keputusan resmi `CONDITIONAL GO` dan batas non-produksi `BRD §23`.
+  - [`evidence/c24-20261122T071432Z/C24/final-package-manifest.json`](../../../evidence/c24-20261122T071432Z/C24/final-package-manifest.json) — Manifes final `24` chapter, `24` paket bukti (`E01`–`E24`), hash manifes rilis terbeku (`fc7e6a70...`), dan `0` kebocoran GT/`.env`.
+  - [`evidence/c24-20261122T071432Z/C24/readiness-check.md`](../../../evidence/c24-20261122T071432Z/C24/readiness-check.md).
+- **Verifikasi DLP & GT Isolation:** `7/7` berkas `E24` dipindai bersih (`dlp_violations: 0`, `env_files: 0`, `restricted_files: 0`).
+- **Uji Otomatis:** [`tests/test_c23_c24_governance_decision.py`](../../../tests/test_c23_c24_governance_decision.py) (`7/7` PASS).

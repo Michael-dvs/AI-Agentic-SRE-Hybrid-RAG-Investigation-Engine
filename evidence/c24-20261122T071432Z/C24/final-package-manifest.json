@@ -1,0 +1,378 @@
+{
+  "schema_version": "1.0",
+  "package_id": "poc-final-package-c24-20261122T071432Z",
+  "generated_at_utc": "2026-11-22T07:14:32.284840Z",
+  "gate_g4_decision": "CONDITIONAL_GO",
+  "assessment_kind": "self_review_lab_owner",
+  "external_bank_sme_validated": false,
+  "authorization_scope": "MECHANISTIC_POC_CONCEPT_FEASIBILITY_ONLY",
+  "frozen_release_manifest": {
+    "path": "evidence/c21-preflight-20261122T051612608117Z/C21/final-release-manifest.json",
+    "file_sha256": "b7fcc5484b83b9f5d67766d1a1b4adb21c215f8c25430ee00ecbeb66ae3d1c4f",
+    "self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+    "contracts_count": 20,
+    "contracts_sha256": "ef40fc00d64bad87d7f8f45ffe0af366095d9faec338815287726778c609d663",
+    "total_source_files_verified": 162
+  },
+  "security_and_isolation": {
+    "restricted_zone_excluded_from_public_bundle": true,
+    "restricted_zone_permissions": "0o700",
+    "public_bundle_gt_leaks": 0,
+    "public_bundle_env_files": 0,
+    "e22_handover_categories_verified": 15
+  },
+  "chapters_inventory": [
+    {
+      "chapter_id": "C01",
+      "path": "docs/roadmap/phase-1-foundation/01-SCOPE-DECISIONS-AND-G0.md",
+      "sha256": "dd8b94c7ef18db36df36f214959b317770e327a2c55492e7cea68c19e2b3d5b4",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C02",
+      "path": "docs/roadmap/phase-1-foundation/02-ARCHITECTURE-CONTRACTS-AND-EVALUATION-DESIGN.md",
+      "sha256": "58100302661569e3a37dfc90ad0f848fd4bee93afe963033eafe4c8266e56d94",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C03",
+      "path": "docs/roadmap/phase-1-foundation/03-LAB-SERVICES-AND-SYNTHETIC-TRAFFIC.md",
+      "sha256": "2b17ee6921b741b19aafe0944089c7f90ed527823812d210f5d511565d261e2d",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C04",
+      "path": "docs/roadmap/phase-1-foundation/04-FAULT-HARNESS-AND-GROUND-TRUTH-ISOLATION.md",
+      "sha256": "3be4ae5595aa892c4cd1d7b25de34aaf4b77460605efd57489354101a4634c56",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C05",
+      "path": "docs/roadmap/phase-1-foundation/05-TELEMETRY-AND-SERVICE-CATALOG.md",
+      "sha256": "6b066f787416510b45ddd7164919361c1f284ed6113d112daf8f75e6f1e60e64",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C06",
+      "path": "docs/roadmap/phase-1-foundation/06-SYNTHETIC-KNOWLEDGE-AND-INGESTION.md",
+      "sha256": "2b038b2fdcc2b6525aabab91f2030da7aee52703101f140585c151201d9bdde5",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C07",
+      "path": "docs/roadmap/phase-1-foundation/07-HYBRID-RETRIEVAL-AND-BASELINES.md",
+      "sha256": "2c723c0ebb1f55b7662a1f782b3e6da3f8f168f1f9d84fa41fbbb1714b0dd469",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C08",
+      "path": "docs/roadmap/phase-1-foundation/08-SECURE-GATEWAY-AND-FOUNDATION-G1.md",
+      "sha256": "5548d21df04cb2aedcea78c956bedf3a6a3d0390619f7f2140db147b6e416fcd",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C09",
+      "path": "docs/roadmap/phase-2-controlled-integration/09-READ-ONLY-TELEMETRY-ADAPTERS.md",
+      "sha256": "97915b3bdffbbe226409ef048ab7636e73673c3b6de57a112430752ce31a8de6",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C10",
+      "path": "docs/roadmap/phase-2-controlled-integration/10-ALERT-INTAKE-AND-DEPENDENCY-CORRELATION.md",
+      "sha256": "44d8a8441c607b68042fe1c7c3fba1f96fd5d58b5c99982260b8d11bbbb47943",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C11",
+      "path": "docs/roadmap/phase-2-controlled-integration/11-DURABLE-INVESTIGATION-WORKFLOW.md",
+      "sha256": "d1578ce3cb1705304e006e07391670e559a3403b44dfadace0a994529f3097b6",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C12",
+      "path": "docs/roadmap/phase-2-controlled-integration/12-BASELINE-DOSSIER-AND-END-TO-END-G2.md",
+      "sha256": "31a7440f38bfb62902dcb4fb1772b5e24d294fa7373a571e2b5d587c28cc9670",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C13",
+      "path": "docs/roadmap/phase-3-reasoning-observability/13-CONTROLLED-LLM-INVESTIGATOR.md",
+      "sha256": "f585c032b200159656c4457b510f37a9e964d42f054b48062d1089ea9c9e7cf5",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C14",
+      "path": "docs/roadmap/phase-3-reasoning-observability/14-EVIDENCE-VALIDATION-AND-UNCERTAINTY.md",
+      "sha256": "fa23e189561a79d2e5bd106a20a75f8830549ca95077dce31177c7b60e95d6a3",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C15",
+      "path": "docs/roadmap/phase-3-reasoning-observability/15-AI-OBSERVABILITY-AUDIT-AND-COST.md",
+      "sha256": "5fff02be5fae4a4f6cce5f267d18f83ac73ea8bb8ac98619441fe16b3340a3cd",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C16",
+      "path": "docs/roadmap/phase-3-reasoning-observability/16-HUMAN-REVIEW-AND-HANDOVER.md",
+      "sha256": "5c488da36fc6e623f4c49e3bf30a10ec7899351c91b747058e5b0de309723859",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C17",
+      "path": "docs/roadmap/phase-3-reasoning-observability/17-OFFLINE-EVALUATION-AND-UAT-HARNESS.md",
+      "sha256": "69118b655bc9fc7858d577d81b339e39ca847ece9bdec603f93f6e55e77719e6",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C18",
+      "path": "docs/roadmap/phase-3-reasoning-observability/18-RED-TEAM-HOLDOUT-AND-G3.md",
+      "sha256": "3b1fd7b0b0bb781ee0b43c754b6aa7475e41663cdded6db4053ce75894784261",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C19",
+      "path": "docs/roadmap/phase-4-pilot-hardening/19-LAB-SHADOW-PILOT-AND-MANUAL-BASELINE.md",
+      "sha256": "085d1ca273194b651cbb91f8af48d4928404f092362ef2fc22d28c3f7b5079b5",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C20",
+      "path": "docs/roadmap/phase-4-pilot-hardening/20-CAPACITY-RESILIENCE-AND-ROLLBACK.md",
+      "sha256": "5b95448313de5c5245b10afec1da5cbf9b826624d8f89d36fa71e18e6ac1649f",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C21",
+      "path": "docs/roadmap/phase-4-pilot-hardening/21-FINAL-HOLDOUT-AND-BENCHMARK.md",
+      "sha256": "fddf925fc5193065b590d457a6b59a464a6d8cc016379da2b75f3cca68adfcab",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C22",
+      "path": "docs/roadmap/phase-4-pilot-hardening/22-REPRODUCIBILITY-OPERATIONS-AND-DEMO.md",
+      "sha256": "1313f6fba38248c85c22b114114e903be315a8387359cd95324defcbb5cc2d41",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C23",
+      "path": "docs/roadmap/phase-4-pilot-hardening/23-RISK-AND-ENTERPRISE-GAP-REVIEW.md",
+      "sha256": "a960349b462b81a60717a148efd54b6d79b389c152f3fa51e320dc119094ba74",
+      "status": "VERIFIED"
+    },
+    {
+      "chapter_id": "C24",
+      "path": "docs/roadmap/phase-4-pilot-hardening/24-ACCEPTANCE-AND-FEASIBILITY-DECISION-G4.md",
+      "sha256": "9a138b8159a5e28f67810f117a84202a8b9cd3dbb49848b4c5a774b950472ce6",
+      "status": "VERIFIED"
+    }
+  ],
+  "evidence_packages_inventory": [
+    {
+      "evidence_id": "E01",
+      "primary_record_path": "evidence/c01-20261109T043813Z/C01/g0-record.md",
+      "sha256": "1c18077555090419d7370b8edaff6b67ab26b06618dc9b24c8af180e4c58a2e0",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E02",
+      "primary_record_path": "evidence/c02-20261109T070500Z/C02/design-approval.md",
+      "sha256": "a22a4aff76546b2e16886b8da98f97eb47939f69259ce27646d6f96b64e1d042",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E03",
+      "primary_record_path": "evidence/c03-20261109T084600Z/C03/readiness-check.md",
+      "sha256": "55edc983ce1054bb24995cbf46defd9ebe2af451389caaecf9132a9e1c2bde6f",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E04",
+      "primary_record_path": "evidence/c04-20261110T102500Z/C04/readiness-check.md",
+      "sha256": "5ba676aef3822bed380bfcd6332b2fb76ca09e69e52cf0700bfb02cb4708c727",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E05",
+      "primary_record_path": "evidence/c05-20261111T113000Z/C05/readiness-check.md",
+      "sha256": "396bbaa3027c6363d3354451b5e7721942c100d4723415abca7d6c79d7a65460",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E06",
+      "primary_record_path": "evidence/c06-20261111T150000Z/C06/readiness-check.md",
+      "sha256": "2ffe0b40e1dce7a7dcdc84eb027d1029efc73027a03665448f8494babdaaf148",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E07",
+      "primary_record_path": "evidence/c07-20261111T160000Z/C07/readiness-check.md",
+      "sha256": "76d097bd0b87b68bba4d89077dc98bbb645622d2f0f99e3885f167842da082d8",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E08",
+      "primary_record_path": "evidence/c08-20261112T000000Z/C08/g1-record.md",
+      "sha256": "6f4b7dd4ff81434cfe355fc9458fcb29714e129a99c578fd019d130338d7d448",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E09",
+      "primary_record_path": "evidence/c09-20261112T041500Z/C09/readiness-check.md",
+      "sha256": "4319ddba72f29d0d72ab9b05a7a446bbf65fa8f50f7f4d6f49520a2865eaa233",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E10",
+      "primary_record_path": "evidence/c10-final-20261112T063556Z/C10/readiness-check.md",
+      "sha256": "bb0037761ec06c9aeb222b3209cdf17a02317395c4d8bf5fa4f85fa7f759a02c",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E11",
+      "primary_record_path": "evidence/c11-20261112T072000Z/C11/readiness-check.md",
+      "sha256": "c725ae1c276425e34975bd5979fb43f81c607413cd414152c23c4baba9358a59",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E12",
+      "primary_record_path": "evidence/c12-20261112T083000Z/C12/g2-record.md",
+      "sha256": "37bb296b30ef69bcd0c7d9747b94aa5ae22c46ef0f3ce6347753b460e557b8b1",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E13",
+      "primary_record_path": "evidence/c13-20261116T024951Z/C13/readiness-check.md",
+      "sha256": "c536d4dcd0426814c29b41ae61435af30a4d0a3ae735db6c4b10d4c0643b33d8",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E14",
+      "primary_record_path": "evidence/c14-20261116T075346Z/C14/readiness-check.md",
+      "sha256": "ccea119fbfc9b35958a2eacb1dfb5995f5ca09da0e9198080a784f2490942eb2",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E15",
+      "primary_record_path": "evidence/c15-20261116T085541Z/C15/readiness-check.md",
+      "sha256": "eb8c79c5c61ffeee5c67a58f07bab79529959aeea35b61b531b09553bcda8522",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E16",
+      "primary_record_path": "evidence/c16-20261119T013728Z/C16/readiness-check.md",
+      "sha256": "a1a1907e34708258f2896e080e55e5eb7fc9d774d445fd8e4402516fa39cfefc",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E17",
+      "primary_record_path": "evidence/c17-20261119T032931Z-6ad5ea8e/C17/readiness-check.md",
+      "sha256": "2574f6cee65636e57e3cdc4669bd8c84323c6d0feef345539a98140ccdf62962",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E18",
+      "primary_record_path": "evidence/c18-20261119T040000Z-final/C18/g3-record.md",
+      "sha256": "cc32af42822f757fcc8057803dace4210fefc4af50bb5fa4c318b8ab98103dc0",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E19",
+      "primary_record_path": "evidence/c19-20261120T083752Z/C19/readiness-check.md",
+      "sha256": "9ac88bcaa96ed28465a479466c3d8d3e19d565efe64fc01f364b476ccbd94dab",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E20",
+      "primary_record_path": "evidence/c20-20261120T093645Z/C20/readiness-check.md",
+      "sha256": "c734a85905b63c792606e7b1d9b6f7c94d741ea25b5ab7ea39681683872c565d",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E21",
+      "primary_record_path": "evidence/c21-20261122T053640Z/C21/readiness-check.md",
+      "sha256": "a058121ea3bfa4e6dd7c6452f6ab0b29e12c67ddf6ef2020cd798838ae744740",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E22",
+      "primary_record_path": "evidence/c22-20261122T064546Z/C22/readiness-check.md",
+      "sha256": "bd3b1aea71405809157901d94df546a01223f695edbdaccffdc6458db85c55ef",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E23",
+      "primary_record_path": "evidence/c23-20261122T071432Z/C23/readiness-check.md",
+      "sha256": "3bf5fde55f4c202870a55a3a14956b0f1977bd5675988c1bb03112d96189e865",
+      "status": "VERIFIED"
+    },
+    {
+      "evidence_id": "E24",
+      "primary_record_path": "evidence/c24-20261122T071432Z/C24/readiness-check.md",
+      "sha256": "3ef82fd3e0805b9d0f095bcc34800d174dec7898fccf66cd4966743cfbaa8a4b",
+      "status": "VERIFIED"
+    }
+  ],
+  "architecture_and_gate_records": [
+    {
+      "path": "docs/architecture/README.md",
+      "sha256": "6ed11b7cc1335658557283e2299c2a855b8a0048352a3edfc814d8f4c47fc8a1"
+    },
+    {
+      "path": "docs/decisions/ADR-DC02-contract-conventions-and-qualification.md",
+      "sha256": "e8eeb5cb5c6f17563c355f3ede0ec98c93dfa9053924c465a74a0eb4f68cc0df"
+    },
+    {
+      "path": "docs/decisions/ADR-S01-service-runtime-and-state-store.md",
+      "sha256": "ff299c7fc944ad490a5fc27f6da91a7894113eb39b5a4e099446b6e0464c8806"
+    },
+    {
+      "path": "docs/decisions/ADR-S02-telemetry-backends-and-alert-transport.md",
+      "sha256": "fe8a6618496c80e815003a0553f38e4617dad9ff9ae46e6767bc3d4186251c45"
+    },
+    {
+      "path": "docs/decisions/ADR-S03-gateway-transport-and-identities.md",
+      "sha256": "b69e76650b66cce339a33a1cb5d7e3be23e61423b1cbcd62272e7452758fd249"
+    },
+    {
+      "path": "docs/decisions/ADR-S04-rag-chunking-fusion-and-reranker.md",
+      "sha256": "e09db5bb499649a78d15178e6216015526bd50b1c78ee501622012ad800e7afb"
+    },
+    {
+      "path": "docs/decisions/ADR-S05-quotas-deadlines-and-correlation-bounds.md",
+      "sha256": "33e2f3ebe4c4d8f9bea7d1e577d9edcd8b53ab08713088988514476286868cc6"
+    },
+    {
+      "path": "docs/decisions/ADR-S06-ai-observability-sink-and-buffering.md",
+      "sha256": "7ab5b8a92f973f1777ab80cf6fe867b051bc7d19071d7df3f5431c88990d313a"
+    },
+    {
+      "path": "docs/decisions/ADR-S07-optional-ticket-and-apm-disposition.md",
+      "sha256": "3a229d383b2cccf50083ce8bb396382426aeddb02dbc44374da60c46db0a078f"
+    },
+    {
+      "path": "docs/decisions/ADR-S08-holdout-sizing-and-scoring-rules.md",
+      "sha256": "0b1aff4840d12a016dc926cdcb0e1955b2381746e3992f9fcfea8f25540efbd5"
+    },
+    {
+      "path": "docs/decisions/ADR-TBD05-workflow-orchestration-dify-evaluation.md",
+      "sha256": "0d9c915fd5fa9f8ec8286fe05ebb475a6528007a258bea438e47111a2f0032fe"
+    },
+    {
+      "path": "docs/gates/G1-FOUNDATION-GATE.md",
+      "sha256": "fe29464eea1bacaf8dd8e3f3ea33da386c887ab4a05c642fbbdb76295db325d4"
+    },
+    {
+      "path": "docs/gates/G2-CONTROLLED-INTEGRATION-GATE.md",
+      "sha256": "f3552ffce63f56fa9a8a67384e617c2385b037b56a98aa9a2ed166a4fc55f933"
+    },
+    {
+      "path": "docs/gates/G3-GATE-RECORD.md",
+      "sha256": "cc32af42822f757fcc8057803dace4210fefc4af50bb5fa4c318b8ab98103dc0"
+    },
+    {
+      "path": "docs/gates/G4-CONCEPT-APPROVAL-GATE.md",
+      "sha256": "67d13fd36b50226a768f3649aeb2e1138bbb8fcadf4001acd4d0c53419dac6de"
+    }
+  ]
+}
