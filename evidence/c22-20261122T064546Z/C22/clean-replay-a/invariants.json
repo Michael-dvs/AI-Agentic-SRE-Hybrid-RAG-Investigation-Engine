@@ -1,0 +1,363 @@
+{
+  "replay_id": "clean-replay-a",
+  "seed": 20261109,
+  "mode": "deterministic_baseline",
+  "wipe_before_run": true,
+  "generated_at_utc": "2026-11-22T06:45:49.252457Z",
+  "release_manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+  "kb_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+  "state_sequence": {
+    "SC-01": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW"
+    ],
+    "SC-02": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW",
+      "CLOSED"
+    ],
+    "SC-03": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW",
+      "CLOSED"
+    ],
+    "SC-09": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW"
+    ],
+    "SC-11": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW"
+    ],
+    "SC-12": [
+      "RECEIVED",
+      "CORRELATED",
+      "TRIAGED",
+      "EVIDENCE_COLLECTED",
+      "RETRIEVED",
+      "HYPOTHESES",
+      "VALIDATED",
+      "DRAFTED",
+      "HUMAN_REVIEW"
+    ]
+  },
+  "schema_valid": {
+    "all_valid": true,
+    "per_scenario": {
+      "SC-01": true,
+      "SC-02": true,
+      "SC-03": true,
+      "SC-09": true,
+      "SC-11": true,
+      "SC-12": true
+    }
+  },
+  "evidence_ids": {
+    "SC-01": {
+      "evidence_ids": [
+        "ev-inc-sc01-nominal-001-001",
+        "ev-inc-sc01-nominal-001-002",
+        "ev-inc-sc01-nominal-001-003",
+        "ev-inc-sc01-nominal-001-004",
+        "ev-inc-sc01-nominal-001-005",
+        "ev-inc-sc01-nominal-001-006",
+        "ev-inc-sc01-nominal-001-007",
+        "ev-inc-sc01-nominal-001-008",
+        "ev-inc-sc01-nominal-001-009",
+        "ev-inc-sc01-nominal-001-010",
+        "ev-inc-sc01-nominal-001-011"
+      ],
+      "missing_sources": []
+    },
+    "SC-02": {
+      "evidence_ids": [
+        "ev-inc-sc02-5xx-burst-001-001",
+        "ev-inc-sc02-5xx-burst-001-002",
+        "ev-inc-sc02-5xx-burst-001-003",
+        "ev-inc-sc02-5xx-burst-001-004",
+        "ev-inc-sc02-5xx-burst-001-005",
+        "ev-inc-sc02-5xx-burst-001-006",
+        "ev-inc-sc02-5xx-burst-001-007",
+        "ev-inc-sc02-5xx-burst-001-008",
+        "ev-inc-sc02-5xx-burst-001-009",
+        "ev-inc-sc02-5xx-burst-001-010",
+        "ev-inc-sc02-5xx-burst-001-011"
+      ],
+      "missing_sources": []
+    },
+    "SC-03": {
+      "evidence_ids": [
+        "ev-inc-sc03-db-exhaustion-001-001",
+        "ev-inc-sc03-db-exhaustion-001-002",
+        "ev-inc-sc03-db-exhaustion-001-003",
+        "ev-inc-sc03-db-exhaustion-001-004",
+        "ev-inc-sc03-db-exhaustion-001-005",
+        "ev-inc-sc03-db-exhaustion-001-006",
+        "ev-inc-sc03-db-exhaustion-001-007",
+        "ev-inc-sc03-db-exhaustion-001-008",
+        "ev-inc-sc03-db-exhaustion-001-009"
+      ],
+      "missing_sources": []
+    },
+    "SC-09": {
+      "evidence_ids": [
+        "ev-inc-sc09-trace-outage-001-001",
+        "ev-inc-sc09-trace-outage-001-002",
+        "ev-inc-sc09-trace-outage-001-003",
+        "ev-inc-sc09-trace-outage-001-004",
+        "ev-inc-sc09-trace-outage-001-005",
+        "ev-inc-sc09-trace-outage-001-006",
+        "ev-inc-sc09-trace-outage-001-007",
+        "ev-inc-sc09-trace-outage-001-008",
+        "ev-inc-sc09-trace-outage-001-009",
+        "ev-inc-sc09-trace-outage-001-010"
+      ],
+      "missing_sources": [
+        {
+          "tool_name": "get_trace_summary",
+          "error_code": "SOURCE_UNAVAILABLE"
+        }
+      ]
+    },
+    "SC-11": {
+      "evidence_ids": [
+        "ev-inc-sc11-adv-injection-001-001",
+        "ev-inc-sc11-adv-injection-001-002",
+        "ev-inc-sc11-adv-injection-001-003",
+        "ev-inc-sc11-adv-injection-001-004",
+        "ev-inc-sc11-adv-injection-001-005"
+      ],
+      "missing_sources": []
+    },
+    "SC-12": {
+      "evidence_ids": [
+        "ev-inc-sc12-storm-51702f10dd8a-001",
+        "ev-inc-sc12-storm-51702f10dd8a-002",
+        "ev-inc-sc12-storm-51702f10dd8a-003",
+        "ev-inc-sc12-storm-51702f10dd8a-004",
+        "ev-inc-sc12-storm-51702f10dd8a-005",
+        "ev-inc-sc12-storm-51702f10dd8a-006",
+        "ev-inc-sc12-storm-51702f10dd8a-007",
+        "ev-inc-sc12-storm-51702f10dd8a-008",
+        "ev-inc-sc12-storm-51702f10dd8a-009",
+        "ev-inc-sc12-storm-51702f10dd8a-010",
+        "ev-inc-sc12-storm-51702f10dd8a-011"
+      ],
+      "missing_sources": []
+    }
+  },
+  "sop_citation_hashes": {
+    "SC-01": [
+      {
+        "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+        "doc_id": "SOP-GW-ERR-504",
+        "version": "1.0.0",
+        "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+        "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+        "citation_sha256": "a3a347992e2761ed1378f47b685d790275ca38e7c1e7e7ebe8ce8bebf949b0d3"
+      },
+      {
+        "chunk_id": "chk-SOP-GW-001-v1.2.0-003",
+        "doc_id": "SOP-GW-001",
+        "version": "1.2.0",
+        "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 2. Prosedur Mitigasi Operasional",
+        "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-001.md",
+        "citation_sha256": "76079518faad54e6fa50f15cc7604b88dc8b05a36ec7d383574ad6eed78ff87c"
+      },
+      {
+        "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-002",
+        "doc_id": "ARCH-SIM-ECOSYSTEM",
+        "version": "1.0.0",
+        "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)",
+        "source_uri": "kb://corpus/api-gateway/security/ARCH-SIM-ECOSYSTEM.md",
+        "citation_sha256": "30ac3e97106479cfebf68c1e652fee534dd6ea2726f7f8264db205382d050fdf"
+      }
+    ],
+    "SC-02": [
+      {
+        "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-002",
+        "doc_id": "SOP-TX-ERR-500",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik Insiden",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+        "citation_sha256": "0b21b30397a009851d3dc18a6a9c79241ceb341bb49cf89277f36f35c022f18d"
+      },
+      {
+        "chunk_id": "chk-SOP-TX-001-v1.0.0-001",
+        "doc_id": "SOP-TX-001",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-001.md",
+        "citation_sha256": "39147935b3b6fba3a354c5f54e4d0eeeb98a350546c6b121c34afd087baa1563"
+      },
+      {
+        "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-001",
+        "doc_id": "SOP-TX-ERR-500",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+        "citation_sha256": "c8cdd8cba47ee2ff76efdff60492037d3ca99a3e6ab399572e640e354fde404d"
+      }
+    ],
+    "SC-03": [
+      {
+        "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+        "doc_id": "SOP-LEDGER-ERR-504",
+        "version": "1.0.0",
+        "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+        "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-ERR-504.md",
+        "citation_sha256": "84786248eb429934a2bde2d302eb4b6a38b9ddcb62f9a805476c1d9ec1dad35b"
+      },
+      {
+        "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-001",
+        "doc_id": "KNOWN-ERR-LEDGER-001",
+        "version": "1.0.0",
+        "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+        "source_uri": "kb://corpus/ledger-service/ledger_service/KNOWN-ERR-LEDGER-001.md",
+        "citation_sha256": "f67b006418e9ca36f790a6e93433d7c012290b778fb5dd33f850cfa0aae614a5"
+      },
+      {
+        "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-003",
+        "doc_id": "KNOWN-ERR-LEDGER-001",
+        "version": "1.0.0",
+        "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+        "source_uri": "kb://corpus/ledger-service/ledger_service/KNOWN-ERR-LEDGER-001.md",
+        "citation_sha256": "735c143d71cc18b8d729fa2ec3e675d67164e7c82162784c92e1d3d905720128"
+      }
+    ],
+    "SC-09": [
+      {
+        "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+        "doc_id": "SOP-GW-ERR-504",
+        "version": "1.0.0",
+        "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+        "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+        "citation_sha256": "a3a347992e2761ed1378f47b685d790275ca38e7c1e7e7ebe8ce8bebf949b0d3"
+      },
+      {
+        "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-002",
+        "doc_id": "ARCH-SIM-ECOSYSTEM",
+        "version": "1.0.0",
+        "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)",
+        "source_uri": "kb://corpus/api-gateway/security/ARCH-SIM-ECOSYSTEM.md",
+        "citation_sha256": "30ac3e97106479cfebf68c1e652fee534dd6ea2726f7f8264db205382d050fdf"
+      },
+      {
+        "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-002",
+        "doc_id": "SOP-GW-ERR-504",
+        "version": "1.0.0",
+        "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 1. Gejala dan Karakteristik Error",
+        "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+        "citation_sha256": "06df7d700850c162b411083113e6aa1a2b58b182245a6117d4a4cb763b6069b5"
+      }
+    ],
+    "SC-11": [
+      {
+        "chunk_id": "chk-SOP-AUTH-001-v1.0.0-002",
+        "doc_id": "SOP-AUTH-001",
+        "version": "1.0.0",
+        "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi > 1. Indikator dan Pemicu Alert",
+        "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-001.md",
+        "citation_sha256": "1a53fc929dc81553cefcf08e9678053db73eb05d39131e71a0e2b60ce5d62bf7"
+      },
+      {
+        "chunk_id": "chk-KNOWN-ERR-AUTH-001-v1.0.0-002",
+        "doc_id": "KNOWN-ERR-AUTH-001",
+        "version": "1.0.0",
+        "section_path": "KNOWN-ERR-AUTH-001: Mismatch Key pada Validasi Signature Token > 1. Deskripsi Masalah",
+        "source_uri": "kb://corpus/auth-service/auth_service/KNOWN-ERR-AUTH-001.md",
+        "citation_sha256": "f28312bcda2befa680d9cca31a8b4f96207e5e53661ec20c28722b98afcc6475"
+      },
+      {
+        "chunk_id": "chk-SOP-AUTH-001-v1.0.0-001",
+        "doc_id": "SOP-AUTH-001",
+        "version": "1.0.0",
+        "section_path": "SOP-AUTH-001: Investigasi Lonjakan Kegagalan Autentikasi",
+        "source_uri": "kb://corpus/auth-service/auth_service/SOP-AUTH-001.md",
+        "citation_sha256": "4fa5f37bcf00640ae5d4fa11cbe4ecf2db1bdbd55ab70331edcfec9929ffbd6d"
+      }
+    ],
+    "SC-12": [
+      {
+        "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-002",
+        "doc_id": "SOP-TX-ERR-500",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik Insiden",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+        "citation_sha256": "0b21b30397a009851d3dc18a6a9c79241ceb341bb49cf89277f36f35c022f18d"
+      },
+      {
+        "chunk_id": "chk-SOP-TX-001-v1.0.0-001",
+        "doc_id": "SOP-TX-001",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-001.md",
+        "citation_sha256": "39147935b3b6fba3a354c5f54e4d0eeeb98a350546c6b121c34afd087baa1563"
+      },
+      {
+        "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-001",
+        "doc_id": "SOP-TX-ERR-500",
+        "version": "1.0.0",
+        "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi",
+        "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+        "citation_sha256": "c8cdd8cba47ee2ff76efdff60492037d3ca99a3e6ab399572e640e354fde404d"
+      }
+    ]
+  },
+  "support_status": {
+    "SC-01": "SUPPORTED",
+    "SC-02": "PARTIAL",
+    "SC-03": "INCONCLUSIVE",
+    "SC-09": "INCONCLUSIVE",
+    "SC-11": "INCONCLUSIVE",
+    "SC-12": "PARTIAL"
+  },
+  "normalized_dossier_hashes": {
+    "SC-01": "5913bba64df32359cb89bff8515cf90bee9be4ffb120f85b6813eb16bec3afbb",
+    "SC-02": "8e8ced6c4c19c38e31d3864212238b40c874b219bc529719fb70b3949cc0e578",
+    "SC-03": "63b69a7ce3ba70212cacc01a45dba9dc64e332090fb0dc5742aa46a75f190385",
+    "SC-09": "07516e4954a3776a270750db11ccec259b69450697a4fec06d4b3eb342408c4f",
+    "SC-11": "82863489fcf299b20ea2f4bb229fd2fd872c1f7096db96c38884d805b8eeef17",
+    "SC-12": "d88e5758986bcea6f1f629a047823d164996d8c4626a24cff5cdcdad971064d7"
+  },
+  "kpi_09": 0,
+  "kpi_10": 0,
+  "kpi_11": 0,
+  "auto_action_triggered": false,
+  "dlp_clean": true
+}

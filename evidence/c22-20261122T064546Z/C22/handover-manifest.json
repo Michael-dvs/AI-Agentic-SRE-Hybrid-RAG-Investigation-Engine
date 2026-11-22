@@ -1,0 +1,401 @@
+{
+  "schema_version": "1.0",
+  "handover_id": "e22-handover-c22-20261122T064546Z",
+  "generated_at_utc": "2026-11-22T06:45:50.473421Z",
+  "release_manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+  "release_manifest_file_sha256": "b7fcc5484b83b9f5d67766d1a1b4adb21c215f8c25430ee00ecbeb66ae3d1c4f",
+  "total_inventory_categories": 15,
+  "all_local_links_valid": true,
+  "broken_links": [],
+  "public_bundle_gt_leaks": 0,
+  "public_bundle_env_files": 0,
+  "restricted_zone_permissions": "0o700",
+  "restricted_zone_excluded_from_public_bundle": true,
+  "dlp_scan": {
+    "public_handover": {
+      "clean": true,
+      "env_files": 0,
+      "restricted_files": 0,
+      "dlp_violations": 0,
+      "scanned_files_count": 6
+    },
+    "e22_directory": {
+      "clean": true,
+      "env_files": 0,
+      "restricted_files": 0,
+      "dlp_violations": 0,
+      "scanned_files_count": 44
+    }
+  },
+  "git_tracked_env_files": [],
+  "sample_handover_exports": {
+    "sc02-http-5xx-burst": {
+      "json": "public_handover/sc02-http-5xx-burst/dossier_final.json",
+      "markdown": "public_handover/sc02-http-5xx-burst/dossier.md",
+      "html": "public_handover/sc02-http-5xx-burst/dossier.html"
+    },
+    "sc09-trace-outage-ev02": {
+      "json": "public_handover/sc09-trace-outage-ev02/dossier_final.json",
+      "markdown": "public_handover/sc09-trace-outage-ev02/dossier.md",
+      "html": "public_handover/sc09-trace-outage-ev02/dossier.html"
+    },
+    "sc11-adversarial-injection-sec02": {
+      "json": "public_handover/sc11-adversarial-injection-sec02/dossier_final.json",
+      "markdown": "public_handover/sc11-adversarial-injection-sec02/dossier.md",
+      "html": "public_handover/sc11-adversarial-injection-sec02/dossier.html"
+    }
+  },
+  "inventory_items": [
+    {
+      "item_number": 1,
+      "category": "BRD & Change Log",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "BRD_AI_Agentic_SRE_RAG_Simulation_PoC_v1.0.md",
+          "exists": true,
+          "sha256": "eafc44b7f7cb24aed9cb5dcc4f061590ab3e0cc22a7327e373f3316829d6c59f"
+        },
+        {
+          "path": "docs/roadmap/00-IMPLEMENTATION-MASTER-ROADMAP.md",
+          "exists": true,
+          "sha256": "95366b781e809424e8be37c064e474d2e58206a743c17eaf48554544e1fd72fc"
+        }
+      ]
+    },
+    {
+      "item_number": 2,
+      "category": "Architecture & ADRs",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "docs/architecture/README.md",
+          "exists": true,
+          "sha256": "6ed11b7cc1335658557283e2299c2a855b8a0048352a3edfc814d8f4c47fc8a1"
+        },
+        {
+          "path": "docs/decisions/ADR-S01-service-runtime-and-state-store.md",
+          "exists": true,
+          "sha256": "ff299c7fc944ad490a5fc27f6da91a7894113eb39b5a4e099446b6e0464c8806"
+        }
+      ]
+    },
+    {
+      "item_number": 3,
+      "category": "Repository / Source Code (Frozen Release)",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "services/api_gateway/app.py",
+          "exists": true,
+          "sha256": "4eb6c0d2ee75663baad5d4e182b0af75612090e0bf2bc5f83eb5033c2362c8a1"
+        },
+        {
+          "path": "gateway/policy.py",
+          "exists": true,
+          "sha256": "15f5a82f7fb8301b54058768fd4b32f1dd1ad659a743dd01784476e31627a146"
+        },
+        {
+          "path": "knowledge_base/retrieval/engine.py",
+          "exists": true,
+          "sha256": "b08b4b66be669ef69919f176a95eee545f73168f5411a0f5fd8b5e73a4dc4240"
+        },
+        {
+          "path": "observability/backends.py",
+          "exists": true,
+          "sha256": "031f0e328aa93110f58cb3f93f6079e069934d6d31c5ad9d8c47515de2b9b34c"
+        },
+        {
+          "path": "orchestrator/investigator.py",
+          "exists": true,
+          "sha256": "904da10be1ee31014abe141a3de88dfb16cf1302490fb0f9afa943b6e676e9f3"
+        },
+        {
+          "path": "fault_harness/runner.py",
+          "exists": true,
+          "sha256": "f43f13a9e3bf1df449a82db1a8acfb9fb85ef2e1172d1c09c2b73c0e7835b262"
+        },
+        {
+          "path": "traffic/generator.py",
+          "exists": true,
+          "sha256": "d1f270eeaecc0da20f21beb178690a5e654d5e3e18448faf49f42d9be65aa2bb"
+        },
+        {
+          "path": "evaluator/runner.py",
+          "exists": true,
+          "sha256": "c07610ab6b91763da769ddeeb7b05c30e1f3c869c8d2ab5ed71f0f6d86a6b2c1"
+        }
+      ]
+    },
+    {
+      "item_number": 4,
+      "category": "Deployment Manifests & Env Template (.env excluded)",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "docker-compose.yml",
+          "exists": true,
+          "sha256": "edf7fcb68dfaae21d457901cefe5bd686c3264f5eca3d2ccf4002e11925d1966"
+        },
+        {
+          "path": "Dockerfile",
+          "exists": true,
+          "sha256": "2f71aa533c95613089ff9223fd9527439094099c22bc39f4deadc41474b2f83e"
+        },
+        {
+          "path": "Dockerfile.rabbitmq",
+          "exists": true,
+          "sha256": "d1dc6f9cf73a16a004c9f787353249e40c634ab2b829a507a0a55f6caf0ab39a"
+        },
+        {
+          "path": ".env.example",
+          "exists": true,
+          "sha256": "25be0ec6a9f14ec6682b447ca942dd141b33255ff0bacb6e3345ceec76aa9328"
+        },
+        {
+          "path": "scripts/lab_up.sh",
+          "exists": true,
+          "sha256": "3f3fead2e5982149ef5e6470487b6ab66f7bc9eea5a9173a80647ac7c27a93d3"
+        },
+        {
+          "path": "scripts/lab_down.sh",
+          "exists": true,
+          "sha256": "bc53922012f800355c65195bb5f6e7f1f5df83bb110107b057d44f056217dea7"
+        }
+      ]
+    },
+    {
+      "item_number": 5,
+      "category": "Microservice API Contracts (20 JSON Schemas)",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "evidence/c02-20261109T070500Z/C02/contracts/dossier.v1.schema.json",
+          "exists": true,
+          "sha256": "406ec507f3f58aac1dd6f0a9304b3639d80f4eb4a9201a0793b5b8769f0c4836"
+        },
+        {
+          "path": "evidence/c02-20261109T070500Z/C02/schema-manifest.csv",
+          "exists": true,
+          "sha256": "979e250f729af64695d3946aea697bc175e42e3ddf6c713e3b018a155f8a9dae"
+        }
+      ]
+    },
+    {
+      "item_number": 6,
+      "category": "Fault Scenarios & Isolated Oracle Registry",
+      "zone": "SPLIT_PUBLIC_VS_RESTRICTED_0O700",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "fault_harness/scenarios.py",
+          "exists": true,
+          "sha256": "1e0b7e3d544800bb73da3a24f7247390abfb73119bd1168e3c786a21785df9fe"
+        },
+        {
+          "path": "fault_harness/runner.py",
+          "exists": true,
+          "sha256": "f43f13a9e3bf1df449a82db1a8acfb9fb85ef2e1172d1c09c2b73c0e7835b262"
+        }
+      ],
+      "restricted_zone_note": "Isolated under restricted/ (mode 0o700); excluded from public bundle."
+    },
+    {
+      "item_number": 7,
+      "category": "Telemetry Query / Tool Contracts",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "gateway/policy.py",
+          "exists": true,
+          "sha256": "15f5a82f7fb8301b54058768fd4b32f1dd1ad659a743dd01784476e31627a146"
+        },
+        {
+          "path": "gateway/adapters/metrics.py",
+          "exists": true,
+          "sha256": "21d0157301e392d8138ac26d8c94517e509ba4017d3f0bc7b538d6d3c9316b93"
+        },
+        {
+          "path": "gateway/adapters/logs.py",
+          "exists": true,
+          "sha256": "f6f04476f1a6f371217da21fe75c343393a6585eaad1099448223394dc1ab3c7"
+        },
+        {
+          "path": "gateway/adapters/traces.py",
+          "exists": true,
+          "sha256": "b8d50ccb60bc4c8e1ef1967b718d25441531a97bbb15a49fd3b13537afbbca35"
+        }
+      ]
+    },
+    {
+      "item_number": 8,
+      "category": "Simulated Runbooks / SOP & Corpus Metadata",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "knowledge_base/corpus/api_gateway/SOP-GW-ERR-504.md",
+          "exists": true,
+          "sha256": "198937354389ea1a678290289f1a29b9aaeeac311161a3e4e4249c876de2aeb0"
+        },
+        {
+          "path": "knowledge_base/corpus/ledger_service/SOP-LEDGER-001-v2.md",
+          "exists": true,
+          "sha256": "f83d99ae8ad690c9da2c382d824ae41db8ee4aae3e5cae74a5b47ef4cb78fa27"
+        }
+      ]
+    },
+    {
+      "item_number": 9,
+      "category": "Hybrid RAG Indexing & Eval Scripts",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "knowledge_base/ingestion/lifecycle.py",
+          "exists": true,
+          "sha256": "940f536f8327c1f772bf34972ea765f34fca22caf2b1da4ebc8bcbd60d4075c7"
+        },
+        {
+          "path": "knowledge_base/retrieval/service.py",
+          "exists": true,
+          "sha256": "86b19dbe00479a04b9e81fa71e514ad33fb14445d75d41ed2221383dcb19a348"
+        }
+      ]
+    },
+    {
+      "item_number": 10,
+      "category": "Agent Workflow Specifications",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "orchestrator/state_machine.py",
+          "exists": true,
+          "sha256": "ee2130c4492f4bb8dd97b2e994b8ed81ec4da31fa4a509f89169a9e0063fcd6b"
+        },
+        {
+          "path": "docs/roadmap/phase-2-controlled-integration/11-DURABLE-INVESTIGATION-WORKFLOW.md",
+          "exists": true,
+          "sha256": "d1578ce3cb1705304e006e07391670e559a3403b44dfadace0a994529f3097b6"
+        }
+      ]
+    },
+    {
+      "item_number": 11,
+      "category": "Dossier Schema & Sample Reports (Success, Uncertainty & Failure Disclosure)",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/public_handover/sc02-http-5xx-burst/dossier_final.json",
+          "exists": true,
+          "sha256": "089fd73d1ac2e246cd8edd953f0c82ef89f1a441ff649f5103644ebcbce743f5"
+        },
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/public_handover/sc09-trace-outage-ev02/dossier_final.json",
+          "exists": true,
+          "sha256": "fd3fe903170eb9379e1c81cb9414b51734075816cef4571193b5a422535290c9"
+        },
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/public_handover/sc11-adversarial-injection-sec02/dossier_final.json",
+          "exists": true,
+          "sha256": "3fb1415a7f512f0526613fb0bef65d55c8dd08b88db0f8c356c84b1a64db81c2"
+        },
+        {
+          "path": "evidence/c21-20261122T053640Z/C21/reviewed-failure-analysis.md",
+          "exists": true,
+          "sha256": "8ba0e68f232bef81905eafdcde74c19e9f8997c308edafd1bf585faca4e82b7e"
+        }
+      ]
+    },
+    {
+      "item_number": 12,
+      "category": "UAT + Risk + Defect Register",
+      "zone": "PUBLIC",
+      "status": "COMPLETE_WITH_C23_HANDOVER",
+      "files": [
+        {
+          "path": "evidence/c20-20261120T093645Z/C20/pilot-defect-closure.md",
+          "exists": true,
+          "sha256": "c3cb605a5f54265ca782b4beb7bba4bf83079cfa4fce0d2338c4a853a141001a"
+        },
+        {
+          "path": "evidence/c21-20261122T053640Z/C21/reviewed-failure-analysis.md",
+          "exists": true,
+          "sha256": "8ba0e68f232bef81905eafdcde74c19e9f8997c308edafd1bf585faca4e82b7e"
+        },
+        {
+          "path": "docs/roadmap/phase-4-pilot-hardening/23-RISK-AND-ENTERPRISE-GAP-REVIEW.md",
+          "exists": true,
+          "sha256": "da8d601882b0724bbfcb5e8ee838a31d6d4f83467ec3e271fbb00dbb0c20e194"
+        }
+      ]
+    },
+    {
+      "item_number": 13,
+      "category": "Benchmark Report & Raw Scores",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "evidence/c21-20261122T053640Z/C21/kpi-report.md",
+          "exists": true,
+          "sha256": "aff2a404eccb5ef5bc6497d784f2344856297d5af08c42a49407a13d4049a8af"
+        },
+        {
+          "path": "evidence/c21-20261122T053640Z/C21/raw-scores.json",
+          "exists": true,
+          "sha256": "cd1a1565cb30636fd53794604ce3b06854606559b65dbe72311cd8c774a3b348"
+        }
+      ]
+    },
+    {
+      "item_number": 14,
+      "category": "Demo Script & Operations SOP",
+      "zone": "PUBLIC",
+      "status": "COMPLETE",
+      "files": [
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/demo-rehearsal.md",
+          "exists": true,
+          "sha256": "d715f8592a61fd953b0334a4ecd1efa5f38565dfdf4140ea40f4e218d9fcba54"
+        },
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/operations-guide.md",
+          "exists": true,
+          "sha256": "7a4cb5546b7ab66fdc5a0db44b43ff8654628e7051b763543214cb1347a61e8d"
+        },
+        {
+          "path": "evidence/c22-20261122T064546Z/C22/training-record.md",
+          "exists": true,
+          "sha256": "f262dbe5acb7a88516fbb1a6e66b6d25d930ba5f52520cf78fb44475857d756d"
+        }
+      ]
+    },
+    {
+      "item_number": 15,
+      "category": "Scale-Up Gap & Gate G4 Concept Recommendation",
+      "zone": "PUBLIC",
+      "status": "SCHEDULED_TAHAP_4C",
+      "files": [
+        {
+          "path": "docs/roadmap/phase-4-pilot-hardening/23-RISK-AND-ENTERPRISE-GAP-REVIEW.md",
+          "exists": true,
+          "sha256": "da8d601882b0724bbfcb5e8ee838a31d6d4f83467ec3e271fbb00dbb0c20e194"
+        },
+        {
+          "path": "docs/roadmap/phase-4-pilot-hardening/24-ACCEPTANCE-AND-FEASIBILITY-DECISION-G4.md",
+          "exists": true,
+          "sha256": "f761e5d124362ab133b16202fd8d11bcba0c6e67206ec5675c4894fb5bf1bc91"
+        }
+      ]
+    }
+  ]
+}

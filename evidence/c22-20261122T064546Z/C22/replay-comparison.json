@@ -1,0 +1,88 @@
+{
+  "test_id": "AT-013",
+  "seed": 20261109,
+  "mode": "deterministic_baseline",
+  "generated_at_utc": "2026-11-22T06:45:50.394198Z",
+  "docker_status": "DOCKER_INACTIVE",
+  "execution_fidelity_note": "Executed via fresh isolated in-process SQLite workspaces with full wipe between runs (Docker daemon inactive on host).",
+  "release_manifest_sha256": "b7fcc5484b83b9f5d67766d1a1b4adb21c215f8c25430ee00ecbeb66ae3d1c4f",
+  "release_manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+  "kb_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+  "clean_replay_a_status": "PASS",
+  "clean_replay_b_status": "PASS",
+  "wipe_between_runs_verified": true,
+  "invariant_comparison": {
+    "state_sequences_match": true,
+    "schema_validation_all_pass": true,
+    "evidence_ids_match": true,
+    "sop_citation_hashes_match": true,
+    "support_status_match": true,
+    "normalized_dossier_hashes_match": true,
+    "safety_invariants_zero_violation": true,
+    "ground_truth_stable": true
+  },
+  "per_scenario": {
+    "SC-01": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    },
+    "SC-02": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    },
+    "SC-03": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    },
+    "SC-09": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    },
+    "SC-11": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    },
+    "SC-12": {
+      "state_sequence_match": true,
+      "evidence_ids_match": true,
+      "sop_citation_hashes_match": true,
+      "support_status_match": true,
+      "normalized_dossier_hash_match": true,
+      "overall_match": true
+    }
+  },
+  "matched_scenarios": 6,
+  "total_scenarios": 6,
+  "kpi_13_reproducibility_rate": 1.0,
+  "kpi_13_target": 0.9,
+  "volatile_fields_excluded": [
+    "generated_at_utc",
+    "dossier_ready_at",
+    "timeline[].timestamp",
+    "evidence[].observed_at",
+    "missing_sources[].recorded_at",
+    "review_summary.latest_review_event_id",
+    "review_summary.reviewed_at"
+  ],
+  "overall_at013_status": "PASS"
+}

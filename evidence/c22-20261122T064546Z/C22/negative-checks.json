@@ -1,0 +1,44 @@
+{
+  "suite": "C22_NEGATIVE_HYGIENE_AND_SECURITY_CHECKS",
+  "generated_at_utc": "2026-11-22T06:45:50.414778Z",
+  "total_checks": 4,
+  "passed_checks": 4,
+  "all_passed": true,
+  "checks": [
+    {
+      "test_id": "C22-NEG-01",
+      "status": "PASS",
+      "expected_exit_code": 3,
+      "actual_exit_code": 3,
+      "symbol": "RESIDUAL_STATE_DETECTED",
+      "dossiers_written": 0,
+      "message": "Residual SQLite state detected before clean replay: ['/var/folders/05/xnq5lwx51_s1cdsch9b9hfwc0000gn/T/c22_neg_0f68qcjj/neg01_residual/orchestrator_state.db']"
+    },
+    {
+      "test_id": "C22-NEG-02",
+      "status": "PASS",
+      "expected_exit_code": 2,
+      "actual_exit_code": 2,
+      "symbol": "PORT_CONFLICT_OR_ENV_ERROR",
+      "probed_port": 64119,
+      "message": "Local TCP port conflict detected on 127.0.0.1: [64119]"
+    },
+    {
+      "test_id": "C22-NEG-03",
+      "status": "PASS",
+      "expected_exit_code": 4,
+      "actual_exit_code": 4,
+      "symbol": "GT_LEAK_OR_SECURITY_VIOLATION",
+      "message": "Prohibited restricted/GT file detected in public handover bundle: ['ground_truth_records.jsonl']"
+    },
+    {
+      "test_id": "C22-NEG-04",
+      "status": "PASS",
+      "expected_exit_code": 2,
+      "actual_exit_code": 2,
+      "symbol": "PORT_CONFLICT_OR_ENV_ERROR",
+      "drifted_key": "orchestrator/__init__.py",
+      "message": "Frozen release file drift detected (1 file(s)): ['orchestrator/__init__.py:f40deef98aebec40982d52cf007c701ff6f45f4f644d956373d6f5532f9c7026!=040deef98aebec40982d52cf007c701ff6f45f4f644d956373d6f5532f9c7026']"
+    }
+  ]
+}

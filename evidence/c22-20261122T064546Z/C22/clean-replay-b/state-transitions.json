@@ -1,0 +1,462 @@
+{
+  "SC-01": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ],
+  "SC-02": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HUMAN_REVIEW",
+      "to_state": "CLOSED",
+      "reason_code": "OK",
+      "terminal_outcome": "CLOSED_APPROVED",
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ],
+  "SC-03": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HUMAN_REVIEW",
+      "to_state": "CLOSED",
+      "reason_code": "OK",
+      "terminal_outcome": "CLOSED_APPROVED",
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ],
+  "SC-09": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ],
+  "SC-11": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ],
+  "SC-12": [
+    {
+      "from_state": null,
+      "to_state": "RECEIVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RECEIVED",
+      "to_state": "CORRELATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "CORRELATED",
+      "to_state": "TRIAGED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "TRIAGED",
+      "to_state": "EVIDENCE_COLLECTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "EVIDENCE_COLLECTED",
+      "to_state": "RETRIEVED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "RETRIEVED",
+      "to_state": "HYPOTHESES",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "HYPOTHESES",
+      "to_state": "VALIDATED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "VALIDATED",
+      "to_state": "DRAFTED",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    },
+    {
+      "from_state": "DRAFTED",
+      "to_state": "HUMAN_REVIEW",
+      "reason_code": "OK",
+      "terminal_outcome": null,
+      "workflow_version": "1.0.0",
+      "policy_version": "1.0.0"
+    }
+  ]
+}

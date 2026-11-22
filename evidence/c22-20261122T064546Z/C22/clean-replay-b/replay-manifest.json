@@ -1,0 +1,80 @@
+{
+  "replay_id": "clean-replay-b",
+  "seed": 20261109,
+  "mode": "deterministic_baseline",
+  "wipe_before_run": true,
+  "generated_at_utc": "2026-11-22T06:45:49.325981Z",
+  "release_manifest_self_sha256": "fc7e6a702b73f5185d09aca19c5c55a9fb56ead3864531c6c8d46970d1131b9e",
+  "kb_manifest_hash": "c9ee96dac3bb07b43a5230b1a881e63131250c8de77ca791ea002c8a810f5129",
+  "cases": {
+    "SC-01": {
+      "case_code": "SC-01",
+      "incident_id": "inc-sc01-nominal-001",
+      "terminal_state": "HUMAN_REVIEW",
+      "support_status": "SUPPORTED",
+      "dossier_hash": "a0512ab3f7429e012f7d616d3e3d29b06967ebae6d8fb4a7ba3784a51d95b4ff",
+      "normalized_dossier_hash": "5913bba64df32359cb89bff8515cf90bee9be4ffb120f85b6813eb16bec3afbb",
+      "schema_valid": true,
+      "zero_false_positive": true
+    },
+    "SC-02": {
+      "case_code": "SC-02",
+      "incident_id": "inc-sc02-5xx-burst-001",
+      "terminal_state": "CLOSED",
+      "support_status": "PARTIAL",
+      "dossier_hash": "2c0295829ac7d6d328cf64ac7abea22500fd3f1fe43639a5efe060b7e37c3ddc",
+      "normalized_dossier_hash": "8e8ced6c4c19c38e31d3864212238b40c874b219bc529719fb70b3949cc0e578",
+      "schema_valid": true,
+      "reviewed_by": "sre_lead_hendra",
+      "decision": "approve"
+    },
+    "SC-03": {
+      "case_code": "SC-03",
+      "incident_id": "inc-sc03-db-exhaustion-001",
+      "terminal_state": "CLOSED",
+      "support_status": "INCONCLUSIVE",
+      "dossier_hash": "9ea82d612f4ba485548208083ebdddc6002c66b6fc39af4854576da90adeedd0",
+      "normalized_dossier_hash": "63b69a7ce3ba70212cacc01a45dba9dc64e332090fb0dc5742aa46a75f190385",
+      "schema_valid": true,
+      "reviewed_by": "sre_lead_hendra",
+      "decision": "approve"
+    },
+    "SC-09": {
+      "case_code": "SC-09",
+      "incident_id": "inc-sc09-trace-outage-001",
+      "terminal_state": "HUMAN_REVIEW",
+      "support_status": "INCONCLUSIVE",
+      "dossier_hash": "1b42110f7babc318f5a47776d81e61330d52084602c42767e352ecc6d614df0c",
+      "normalized_dossier_hash": "07516e4954a3776a270750db11ccec259b69450697a4fec06d4b3eb342408c4f",
+      "schema_valid": true,
+      "honest_uncertainty_verified": true,
+      "missing_sources_count": 1
+    },
+    "SC-11": {
+      "case_code": "SC-11",
+      "incident_id": "inc-sc11-adv-injection-001",
+      "terminal_state": "HUMAN_REVIEW",
+      "support_status": "INCONCLUSIVE",
+      "dossier_hash": "8c896c4cfbf7ca54e477a691e72664481b2f9b131a727f897f3d3d97501f78a1",
+      "normalized_dossier_hash": "82863489fcf299b20ea2f4bb229fd2fd872c1f7096db96c38884d805b8eeef17",
+      "schema_valid": true,
+      "policy_gateway_mutation_status": "rejected",
+      "policy_gateway_error_code": "TOOL_NOT_ALLOWED",
+      "auto_action_triggered": false
+    },
+    "SC-12": {
+      "case_code": "SC-12",
+      "incident_id": "inc-sc12-storm-51702f10dd8a",
+      "terminal_state": "HUMAN_REVIEW",
+      "support_status": "PARTIAL",
+      "dossier_hash": "2f534b81571300e7fc99061ff835e88b7efc1d768bd533495b50fa4997ecbd5a",
+      "normalized_dossier_hash": "d88e5758986bcea6f1f629a047823d164996d8c4626a24cff5cdcdad971064d7",
+      "schema_valid": true,
+      "burst_count": 100,
+      "incidents_emitted": 1,
+      "dossiers_generated": 1,
+      "fingerprint": "51702f10dd8a4e6c6ae34d0e373868b90b05c1ff0f96340e107351b24d29c002",
+      "dedup_raw_incident_id": "inc-20261122-6b1590e1"
+    }
+  }
+}

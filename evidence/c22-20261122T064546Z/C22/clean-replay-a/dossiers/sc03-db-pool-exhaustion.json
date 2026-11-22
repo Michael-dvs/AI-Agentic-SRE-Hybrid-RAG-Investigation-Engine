@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-sc03-db-exhaustion-001",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "ledger-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T08:10:00Z",
+  "window_start": "2026-11-12T08:05:00Z",
+  "window_end": "2026-11-12T08:11:00Z",
+  "dossier_ready_at": "2026-11-12T08:10:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "ledger-service",
+      "api-gateway",
+      "transaction-service",
+      "db-dummy"
+    ],
+    "observed_symptoms": "Database connection checkout timeout exceeded in ledger-service (seed=20261109)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-22T06:45:48.577668Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.578746Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.580051Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.728893Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.732098Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.733382Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.734583Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.580357Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.617499Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.620013Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.654330Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.655470Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.688585Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.689744Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.725549Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc03-db-exhaustion-001-009",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-22T06:45:48.726942Z",
+      "query_window": {
+        "start": "2026-11-12T08:05:00Z",
+        "end": "2026-11-12T08:11:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on ledger-service: 0 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-sc03-db-exhaustion-001-001",
+      "rank": 1,
+      "statement": "Transient or unobserved anomaly on ledger-service",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "No definitive error patterns or metric anomalies captured in observation window.",
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-001",
+      "doc_id": "KNOWN-ERR-LEDGER-001",
+      "version": "1.0.0",
+      "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/KNOWN-ERR-LEDGER-001.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-KNOWN-ERR-LEDGER-001-v1.0.0-003",
+      "doc_id": "KNOWN-ERR-LEDGER-001",
+      "version": "1.0.0",
+      "section_path": "KNOWN-ERR-LEDGER-001: Kebocoran Koneksi Idle pada Pool Database Ledger > 2. Prosedur Workaround dan Mitigasi",
+      "source_uri": "kb://corpus/ledger-service/ledger_service/KNOWN-ERR-LEDGER-001.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of ledger-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-LEDGER-ERR-504"
+    }
+  ],
+  "review_summary": {
+    "status": "APPROVED",
+    "latest_review_event_id": "rev-fb5b687a9d434436",
+    "reviewed_by": "sre_lead_hendra (L2_SRE_REVIEWER)",
+    "reviewed_at": "2026-11-22T06:45:48.739125Z"
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-sc03-db-exhaustion-001"
+    ]
+  },
+  "dossier_hash": "ea19dfd71205b2a330f65078e53de0b4f72f443384a82859f3e582a437730264"
+}

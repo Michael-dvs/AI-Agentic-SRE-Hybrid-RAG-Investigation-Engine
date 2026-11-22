@@ -1,0 +1,300 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-sc01-nominal-001",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "api-gateway",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T08:00:00Z",
+  "window_start": "2026-11-12T07:55:00Z",
+  "window_end": "2026-11-12T08:01:00Z",
+  "dossier_ready_at": "2026-11-12T08:00:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "api-gateway",
+      "auth-service",
+      "ledger-service",
+      "notification-service",
+      "transaction-service"
+    ],
+    "observed_symptoms": "Routine synthetic health check verification (seed=20261109)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-22T06:45:48.130719Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.131859Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.133029Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.360543Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.364882Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.366017Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:48.367585Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.133369Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.211945Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.213716Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on auth-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.249521Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on auth-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.250817Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.286156Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.287483Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.322171Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:48.324613Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:48.357308Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc01-nominal-001-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-22T06:45:48.358481Z",
+      "query_window": {
+        "start": "2026-11-12T07:55:00Z",
+        "end": "2026-11-12T08:01:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "{\"attributes\": {}, \"duration_ms\": 324.5, \"error\": true, \"operation\": \"HTTP POST /transactions\", \"parent_span_id\": null, \"service_name\": \"api-gateway\", \"span_id\": \"00f067aa0ba902b7\", \"status_code\": \"ERROR\"}"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-sc01-nominal-001-002",
+      "rank": 1,
+      "statement": "High latency / error span observed on api-gateway",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-sc01-nominal-001-011"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Distributed trace captured span 'HTTP POST /transactions' with error status.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+      "doc_id": "SOP-GW-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-ERR-504.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-SOP-GW-001-v1.2.0-003",
+      "doc_id": "SOP-GW-001",
+      "version": "1.2.0",
+      "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 2. Prosedur Mitigasi Operasional",
+      "source_uri": "kb://corpus/api-gateway/api_gateway/SOP-GW-001.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-ARCH-SIM-ECOSYSTEM-v1.0.0-002",
+      "doc_id": "ARCH-SIM-ECOSYSTEM",
+      "version": "1.0.0",
+      "section_path": "ARCH-SIM-ECOSYSTEM: Topologi Arsitektur Ekosistem Simulasi SRE > 1. Aliran Permintaan Sinkron (Synchronous Flow)",
+      "source_uri": "kb://corpus/api-gateway/security/ARCH-SIM-ECOSYSTEM.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of api-gateway.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-GW-ERR-504"
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-sc01-nominal-001"
+    ]
+  },
+  "dossier_hash": "a75665b1b9037d99738a1bb5198e93cf681ad317ab35bd65a46969dcf9ea1327"
+}

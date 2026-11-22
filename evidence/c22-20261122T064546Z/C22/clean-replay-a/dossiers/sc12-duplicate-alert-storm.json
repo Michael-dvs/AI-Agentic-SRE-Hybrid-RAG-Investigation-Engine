@@ -1,0 +1,300 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-sc12-storm-51702f10dd8a",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "transaction-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-12T08:20:00Z",
+  "window_start": "2026-11-12T08:15:00Z",
+  "window_end": "2026-11-12T08:21:00Z",
+  "dossier_ready_at": "2026-11-12T08:20:00Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "transaction-service",
+      "api-gateway",
+      "db-dummy",
+      "ledger-service",
+      "notification-service"
+    ],
+    "observed_symptoms": "100 duplicate alert storm merged on transaction-service (seed=20261109)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-22T06:45:49.043013Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.045098Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.046801Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.228371Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.231878Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.233312Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-22T06:45:49.234528Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:49.047421Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on transaction-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:49.082684Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "Transaction processing failed for transaction-service"
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:49.084035Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:49.116665Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:49.117835Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:49.150620Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:49.151835Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:49.184982Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://localhost:9090",
+      "observed_at": "2026-11-22T06:45:49.187701Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://localhost:3100",
+      "observed_at": "2026-11-22T06:45:49.225194Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned."
+    },
+    {
+      "evidence_id": "ev-inc-sc12-storm-51702f10dd8a-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://localhost:3200",
+      "observed_at": "2026-11-22T06:45:49.226584Z",
+      "query_window": {
+        "start": "2026-11-12T08:15:00Z",
+        "end": "2026-11-12T08:21:00Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_trace_summary queried on transaction-service: 0 records returned."
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-sc12-storm-51702f10dd8a-001",
+      "rank": 1,
+      "statement": "Service operational error in transaction-service (ERR_TRANSACTION_FAILED)",
+      "support_status": "PARTIAL",
+      "supporting_evidence_ids": [
+        "ev-inc-sc12-storm-51702f10dd8a-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Transaction processing failed for transaction-service'.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-002",
+      "doc_id": "SOP-TX-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik Insiden",
+      "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-SOP-TX-001-v1.0.0-001",
+      "doc_id": "SOP-TX-001",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-001: Penanganan Kegagalan Dependensi Layanan Transaksi",
+      "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-001.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    },
+    {
+      "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-001",
+      "doc_id": "SOP-TX-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi",
+      "source_uri": "kb://corpus/transaction-service/transaction_service/SOP-TX-ERR-500.md",
+      "applicability_verified": true,
+      "excerpt": "Excerpt tidak tersedia pada payload retrieval tersanitasi.",
+      "sanitized": true
+    }
+  ],
+  "unknowns": [],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "Manually verify health and upstream connectivity of transaction-service.",
+      "risk_level": "medium",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-TX-ERR-500"
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "corr-inc-sc12-storm-51702f10dd8a"
+    ]
+  },
+  "dossier_hash": "716a6e92e49d9205e462487ded881a4b3a321d097f608d55529ffb63f0df5281"
+}
