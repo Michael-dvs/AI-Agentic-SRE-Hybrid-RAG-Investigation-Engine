@@ -95,7 +95,7 @@ class DummyTicketManager:
             incident_id = f"inc-{incident_id}"
 
         revision_number = int(dossier.get("dossier_version", 1))
-        approved_by = review_summary.get("reviewed_by") or "authorized_reviewer"
+        approved_by = review_summary.get("reviewed_by") or "UNSPECIFIED_REVIEWER"
 
         # Primary hypothesis extraction
         rca = dossier.get("root_cause_analysis", {})
@@ -144,6 +144,12 @@ class DummyTicketManager:
         elif rca.get("ranked_hypotheses"):
             primary_support_status = str(rca["ranked_hypotheses"][0].get("evaluation_status") or "INCONCLUSIVE")
 
+        missing_source_codes = [
+            str(ms.get("error_code", "UNAVAILABLE"))
+            for ms in (dossier.get("missing_sources") or [])
+            if isinstance(ms, dict)
+        ]
+
         ticket: Dict[str, Any] = {
             "ticket_id": ticket_id,
             "incident_id": incident_id,
@@ -152,9 +158,15 @@ class DummyTicketManager:
             "primary_hypothesis": primary_hypothesis,
             "diagnosis_support_status": primary_support_status,
             "diagnosis_verified": False,
+            "root_cause_proven": False,
+            "closure_meaning": "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED",
+            "technical_incident_resolved": False,
             "remediation_authorized": False,
-            "has_applicable_sop": bool(normalized_sop_refs),
+            "sop_compliance_confirmed": False,
+            "has_applicable_sop": bool(normalized_sop_refs) and "NO_APPLICABLE_RUNBOOK" not in missing_source_codes,
             "sop_references": normalized_sop_refs,
+            "unknowns": list(dossier.get("unknowns") or []),
+            "missing_source_codes": missing_source_codes,
             "status": "OPEN",
             "priority": ticket_priority,
             "assignee": assignee or "L2_SRE_TEAM",

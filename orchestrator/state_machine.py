@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import hashlib
 import json
 import pathlib
 import sqlite3
+import threading
 import uuid
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -101,14 +103,72 @@ class WorkflowStateStore:
         self.db_path = db_path
         self._conn = sqlite3.connect(
             db_path,
+            timeout=10.0,
             check_same_thread=False,
-            isolation_level=None,  # autocommit mode
+            isolation_level=None,  # autocommit mode unless inside transaction()
         )
         self._conn.row_factory = sqlite3.Row
+        if db_path != ":memory:":
+            self._conn.execute("PRAGMA busy_timeout = 10000")
+        self._conn_lock = threading.RLock()
+        self._tx_depth = 0
         self._init_tables()
 
+    def _commit(self) -> None:
+        self._conn.execute("COMMIT")
+
+    def _rollback(self) -> None:
+        self._conn.execute("ROLLBACK")
+
+    @contextlib.contextmanager
+    def transaction(self, *, immediate: bool = False) -> Iterator[None]:
+        """Provide an atomic SQLite transaction boundary (reentrant via SAVEPOINT)."""
+        with self._conn_lock:
+            if self._tx_depth == 0:
+                self._conn.execute("BEGIN IMMEDIATE" if immediate else "BEGIN")
+                self._tx_depth = 1
+                try:
+                    yield
+                except BaseException:
+                    if self._conn.in_transaction:
+                        try:
+                            self._rollback()
+                        except sqlite3.Error:
+                            pass
+                    raise
+                else:
+                    if self._conn.in_transaction:
+                        try:
+                            self._commit()
+                        except BaseException:
+                            if self._conn.in_transaction:
+                                try:
+                                    self._rollback()
+                                except sqlite3.Error:
+                                    pass
+                            raise
+                finally:
+                    self._tx_depth = 0
+            else:
+                sp_name = f"sp_wf_{self._tx_depth}"
+                self._conn.execute(f"SAVEPOINT {sp_name}")
+                self._tx_depth += 1
+                try:
+                    yield
+                except BaseException:
+                    try:
+                        self._conn.execute(f"ROLLBACK TO SAVEPOINT {sp_name}")
+                        self._conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                    except sqlite3.Error:
+                        pass
+                    raise
+                else:
+                    self._conn.execute(f"RELEASE SAVEPOINT {sp_name}")
+                finally:
+                    self._tx_depth -= 1
+
     def _init_tables(self) -> None:
-        with self._conn:
+        with self.transaction(immediate=(self.db_path != ":memory:")):
             self._conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS incidents (
@@ -187,6 +247,20 @@ class WorkflowStateStore:
                 );
                 """
             )
+            self._conn.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_review_records_single_final
+                ON review_records (incident_id)
+                WHERE decision IN ('approve', 'reject', 'escalate_manual');
+                """
+            )
+            self._conn.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_review_records_unique_edit_version
+                ON review_records (incident_id, target_dossier_version)
+                WHERE decision = 'edit';
+                """
+            )
 
     def create_incident(
         self,
@@ -198,33 +272,52 @@ class WorkflowStateStore:
         status: str = "ACTIVE",
     ) -> None:
         now = utc_now_z()
-        self._conn.execute(
-            """
-            INSERT OR IGNORE INTO incidents (incident_id, current_state, created_at, updated_at, status, service_id, environment, fingerprint)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (incident_id, initial_state, now, now, status, service_id, environment, fingerprint),
-        )
+        with self._conn_lock:
+            self._conn.execute(
+                """
+                INSERT OR IGNORE INTO incidents (incident_id, current_state, created_at, updated_at, status, service_id, environment, fingerprint)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (incident_id, initial_state, now, now, status, service_id, environment, fingerprint),
+            )
 
     def get_incident(self, incident_id: str) -> dict[str, Any] | None:
-        cursor = self._conn.execute(
-            "SELECT * FROM incidents WHERE incident_id = ?", (incident_id,)
-        )
-        row = cursor.fetchone()
-        return dict(row) if row else None
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT * FROM incidents WHERE incident_id = ?", (incident_id,)
+            )
+            row = cursor.fetchone()
+            return dict(row) if row else None
 
     def update_incident_state(
-        self, incident_id: str, new_state: str, status: str = "ACTIVE"
-    ) -> None:
+        self,
+        incident_id: str,
+        new_state: str,
+        status: str = "ACTIVE",
+        *,
+        expected_state: str | None = None,
+    ) -> int:
         now = utc_now_z()
-        self._conn.execute(
-            """
-            UPDATE incidents
-            SET current_state = ?, updated_at = ?, status = ?
-            WHERE incident_id = ?
-            """,
-            (new_state, now, status, incident_id),
-        )
+        with self._conn_lock:
+            if expected_state is not None:
+                cursor = self._conn.execute(
+                    """
+                    UPDATE incidents
+                    SET current_state = ?, updated_at = ?, status = ?
+                    WHERE incident_id = ? AND current_state = ?
+                    """,
+                    (new_state, now, status, incident_id, expected_state),
+                )
+            else:
+                cursor = self._conn.execute(
+                    """
+                    UPDATE incidents
+                    SET current_state = ?, updated_at = ?, status = ?
+                    WHERE incident_id = ?
+                    """,
+                    (new_state, now, status, incident_id),
+                )
+            return int(cursor.rowcount)
 
     def record_transition(
         self,
@@ -233,58 +326,62 @@ class WorkflowStateStore:
         output_hash: str | None = None,
         reason: str | None = None,
     ) -> None:
-        self._conn.execute(
-            """
-            INSERT INTO state_transitions (
-                event_id, incident_id, idempotency_key, from_state, to_state,
-                occurred_at, input_hash, output_hash, reason, producer_ref,
-                workflow_version, policy_version, terminal_outcome, reason_code, artifact_ref
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                event["event_id"],
-                event["incident_id"],
-                event["idempotency_key"],
-                event["from_state"],
-                event["to_state"],
-                event["occurred_at"],
-                input_hash,
-                output_hash,
-                reason,
-                event["producer_ref"],
-                event["workflow_version"],
-                event["policy_version"],
-                event["terminal_outcome"],
-                event["reason_code"],
-                event["artifact_ref"],
-            ),
-        )
+        with self._conn_lock:
+            self._conn.execute(
+                """
+                INSERT INTO state_transitions (
+                    event_id, incident_id, idempotency_key, from_state, to_state,
+                    occurred_at, input_hash, output_hash, reason, producer_ref,
+                    workflow_version, policy_version, terminal_outcome, reason_code, artifact_ref
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event["event_id"],
+                    event["incident_id"],
+                    event["idempotency_key"],
+                    event["from_state"],
+                    event["to_state"],
+                    event["occurred_at"],
+                    input_hash,
+                    output_hash,
+                    reason,
+                    event["producer_ref"],
+                    event["workflow_version"],
+                    event["policy_version"],
+                    event["terminal_outcome"],
+                    event["reason_code"],
+                    event["artifact_ref"],
+                ),
+            )
 
     def get_transitions(self, incident_id: str) -> list[dict[str, Any]]:
-        cursor = self._conn.execute(
-            "SELECT * FROM state_transitions WHERE incident_id = ? ORDER BY id ASC",
-            (incident_id,),
-        )
-        return [dict(row) for row in cursor.fetchall()]
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT * FROM state_transitions WHERE incident_id = ? ORDER BY id ASC",
+                (incident_id,),
+            )
+            return [dict(row) for row in cursor.fetchall()]
 
     def save_checkpoint(
         self, incident_id: str, state: str, context: dict[str, Any]
     ) -> None:
         now = utc_now_z()
         blob = json.dumps(context, sort_keys=True, default=str)
-        self._conn.execute(
-            """
-            INSERT OR REPLACE INTO checkpoints (incident_id, state, context_blob, updated_at)
-            VALUES (?, ?, ?, ?)
-            """,
-            (incident_id, state, blob, now),
-        )
+        with self._conn_lock:
+            self._conn.execute(
+                """
+                INSERT OR REPLACE INTO checkpoints (incident_id, state, context_blob, updated_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (incident_id, state, blob, now),
+            )
 
     def get_checkpoint(self, incident_id: str) -> dict[str, Any] | None:
-        cursor = self._conn.execute(
-            "SELECT * FROM checkpoints WHERE incident_id = ?", (incident_id,)
-        )
-        row = cursor.fetchone()
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT * FROM checkpoints WHERE incident_id = ?", (incident_id,)
+            )
+            row = cursor.fetchone()
         if not row:
             return None
         return {
@@ -295,30 +392,32 @@ class WorkflowStateStore:
         }
 
     def get_active_incidents(self) -> list[dict[str, Any]]:
-        cursor = self._conn.execute(
-            "SELECT * FROM incidents WHERE status = 'ACTIVE' ORDER BY created_at ASC"
-        )
-        return [dict(row) for row in cursor.fetchall()]
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT * FROM incidents WHERE status = 'ACTIVE' ORDER BY created_at ASC"
+            )
+            return [dict(row) for row in cursor.fetchall()]
 
     def list_incidents(
         self,
         current_states: set[str] | None = None,
     ) -> list[dict[str, Any]]:
         """List incidents, optionally restricted to an allowlisted set of workflow states."""
-        if not current_states:
+        with self._conn_lock:
+            if not current_states:
+                cursor = self._conn.execute(
+                    "SELECT * FROM incidents ORDER BY updated_at DESC, incident_id ASC"
+                )
+                return [dict(row) for row in cursor.fetchall()]
+
+            ordered_states = sorted(current_states)
+            placeholders = ", ".join("?" for _ in ordered_states)
             cursor = self._conn.execute(
-                "SELECT * FROM incidents ORDER BY updated_at DESC, incident_id ASC"
+                f"SELECT * FROM incidents WHERE current_state IN ({placeholders}) "
+                "ORDER BY updated_at DESC, incident_id ASC",
+                ordered_states,
             )
             return [dict(row) for row in cursor.fetchall()]
-
-        ordered_states = sorted(current_states)
-        placeholders = ", ".join("?" for _ in ordered_states)
-        cursor = self._conn.execute(
-            f"SELECT * FROM incidents WHERE current_state IN ({placeholders}) "
-            "ORDER BY updated_at DESC, incident_id ASC",
-            ordered_states,
-        )
-        return [dict(row) for row in cursor.fetchall()]
 
     def save_dossier(
         self,
@@ -327,31 +426,42 @@ class WorkflowStateStore:
         dossier_hash: str,
         dossier_json: dict[str, Any],
         dossier_markdown: str,
+        allow_overwrite: bool = True,
     ) -> None:
         now = utc_now_z()
         json_blob = json.dumps(dossier_json, sort_keys=True)
-        self._conn.execute(
+        stmt = (
             """
             INSERT OR REPLACE INTO dossiers (incident_id, dossier_version, dossier_hash, dossier_json, dossier_markdown, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (incident_id, dossier_version, dossier_hash, json_blob, dossier_markdown, now),
+            """
+            if allow_overwrite
+            else """
+            INSERT INTO dossiers (incident_id, dossier_version, dossier_hash, dossier_json, dossier_markdown, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """
         )
+        with self._conn_lock:
+            self._conn.execute(
+                stmt,
+                (incident_id, dossier_version, dossier_hash, json_blob, dossier_markdown, now),
+            )
 
     def get_dossier(
         self, incident_id: str, version: int | None = None
     ) -> dict[str, Any] | None:
-        if version is not None:
-            cursor = self._conn.execute(
-                "SELECT * FROM dossiers WHERE incident_id = ? AND dossier_version = ?",
-                (incident_id, version),
-            )
-        else:
-            cursor = self._conn.execute(
-                "SELECT * FROM dossiers WHERE incident_id = ? ORDER BY dossier_version DESC LIMIT 1",
-                (incident_id,),
-            )
-        row = cursor.fetchone()
+        with self._conn_lock:
+            if version is not None:
+                cursor = self._conn.execute(
+                    "SELECT * FROM dossiers WHERE incident_id = ? AND dossier_version = ?",
+                    (incident_id, version),
+                )
+            else:
+                cursor = self._conn.execute(
+                    "SELECT * FROM dossiers WHERE incident_id = ? ORDER BY dossier_version DESC LIMIT 1",
+                    (incident_id,),
+                )
+            row = cursor.fetchone()
         if not row:
             return None
         return {
@@ -364,56 +474,61 @@ class WorkflowStateStore:
         }
 
     def get_latest_dossier_version(self, incident_id: str) -> int:
-        cursor = self._conn.execute(
-            "SELECT MAX(dossier_version) AS max_v FROM dossiers WHERE incident_id = ?",
-            (incident_id,),
-        )
-        row = cursor.fetchone()
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT MAX(dossier_version) AS max_v FROM dossiers WHERE incident_id = ?",
+                (incident_id,),
+            )
+            row = cursor.fetchone()
         if row and row["max_v"] is not None:
             return int(row["max_v"])
         return 0
 
     def record_review(self, event: dict[str, Any]) -> None:
         now = utc_now_z()
-        self._conn.execute(
-            """
-            INSERT INTO review_records (
-                review_event_id, incident_id, target_dossier_version, target_dossier_hash,
-                reviewer_ref, reviewer_role, reviewed_at, decision, rationale,
-                edited_dossier_version, escalation_target, auto_action_triggered, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                event["review_event_id"],
-                event["incident_id"],
-                event["target_dossier_version"],
-                event["target_dossier_hash"],
-                event["reviewer_ref"],
-                event["reviewer_role"],
-                event["reviewed_at"],
-                event["decision"],
-                event["rationale"],
-                event.get("edited_dossier_version"),
-                event.get("escalation_target"),
-                1 if event.get("auto_action_triggered") else 0,
-                now,
-            ),
-        )
+        with self._conn_lock:
+            self._conn.execute(
+                """
+                INSERT INTO review_records (
+                    review_event_id, incident_id, target_dossier_version, target_dossier_hash,
+                    reviewer_ref, reviewer_role, reviewed_at, decision, rationale,
+                    edited_dossier_version, escalation_target, auto_action_triggered, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event["review_event_id"],
+                    event["incident_id"],
+                    event["target_dossier_version"],
+                    event["target_dossier_hash"],
+                    event["reviewer_ref"],
+                    event["reviewer_role"],
+                    event["reviewed_at"],
+                    event["decision"],
+                    event["rationale"],
+                    event.get("edited_dossier_version"),
+                    event.get("escalation_target"),
+                    1 if event.get("auto_action_triggered") else 0,
+                    now,
+                ),
+            )
 
     def get_reviews(self, incident_id: str) -> list[dict[str, Any]]:
-        cursor = self._conn.execute(
-            "SELECT * FROM review_records WHERE incident_id = ? ORDER BY reviewed_at ASC",
-            (incident_id,),
-        )
+        with self._conn_lock:
+            cursor = self._conn.execute(
+                "SELECT * FROM review_records WHERE incident_id = ? ORDER BY reviewed_at ASC",
+                (incident_id,),
+            )
+            rows = cursor.fetchall()
         records = []
-        for row in cursor.fetchall():
+        for row in rows:
             d = dict(row)
             d["auto_action_triggered"] = bool(d["auto_action_triggered"])
             records.append(d)
         return records
 
     def close(self) -> None:
-        self._conn.close()
+        with self._conn_lock:
+            self._conn.close()
 
 
 class InvestigationStateMachine:
@@ -466,89 +581,100 @@ class InvestigationStateMachine:
         input_data: Any = None,
         output_data: Any = None,
     ) -> dict[str, Any]:
-        """Execute and durably record a state transition."""
+        """Execute and durably record a state transition within an atomic transaction."""
         now = utc_now_z()
         event_id = f"wfe-{uuid.uuid4().hex[:16]}"
 
-        incident = self.store.get_incident(incident_id)
-        from_state = incident["current_state"] if incident else None
-
-        # Validate transition legitimacy
-        if not self.can_transition(from_state, to_state):
-            raise InvalidStateTransitionError(
-                f"Illegal state transition from {from_state!r} to {to_state!r} for incident {incident_id}"
-            )
-
-        # Derive terminal outcome and status
-        status = "ACTIVE"
-        if to_state == "CLOSED":
-            status = "CLOSED"
-            terminal_outcome = terminal_outcome or "CLOSED_APPROVED"
-        elif to_state == "LEARNED":
-            status = "CLOSED"
-        elif to_state == "REJECTED":
-            status = "REJECTED"
-            terminal_outcome = terminal_outcome or "TERMINATED_REJECTED"
-        elif to_state == "MANUAL_TRIAGE_REQUIRED":
-            status = "MANUAL_TRIAGE_REQUIRED"
-            terminal_outcome = terminal_outcome or "TERMINATED_MANUAL_TRIAGE"
-        elif to_state == "CANCELLED":
-            status = "CANCELLED"
-            terminal_outcome = terminal_outcome or "TERMINATED_CANCELLED"
-        elif to_state == "FAILED_SAFE":
-            status = "FAILED_SAFE"
-            terminal_outcome = terminal_outcome or "TERMINATED_FAILED_SAFE"
+        # Format canonical incident ID prior to lookup
+        formatted_inc_id = incident_id
+        if not formatted_inc_id.startswith("inc-"):
+            formatted_inc_id = f"inc-{formatted_inc_id}"
 
         # Compute cryptographic fingerprints for audit reproducibility
         in_hash = compute_sha256_hash(input_data) if input_data is not None else None
         out_hash = compute_sha256_hash(output_data) if output_data is not None else None
 
-        # Format canonical incident ID
-        formatted_inc_id = incident_id
-        if not formatted_inc_id.startswith("inc-"):
-            formatted_inc_id = f"inc-{formatted_inc_id}"
+        with self.store.transaction(immediate=True):
+            incident = self.store.get_incident(incident_id)
+            if incident is None and formatted_inc_id != incident_id:
+                incident = self.store.get_incident(formatted_inc_id)
+            from_state = incident["current_state"] if incident else None
 
-        # Construct canonical workflow-event.v1 payload
-        event_payload: dict[str, Any] = {
-            "schema_version": "1.0",
-            "event_id": event_id,
-            "incident_id": formatted_inc_id,
-            "idempotency_key": idempotency_key,
-            "occurred_at": now,
-            "from_state": from_state,
-            "to_state": to_state,
-            "producer_ref": self.producer_ref,
-            "workflow_version": self.workflow_version,
-            "policy_version": self.policy_version,
-            "terminal_outcome": terminal_outcome,
-            "reason_code": reason_code,
-            "artifact_ref": artifact_ref,
-        }
+            # Validate transition legitimacy
+            if not self.can_transition(from_state, to_state):
+                raise InvalidStateTransitionError(
+                    f"Illegal state transition from {from_state!r} to {to_state!r} for incident {incident_id}"
+                )
 
-        # Validate against strict contract
-        if _VALIDATOR is not None:
-            errors = list(_VALIDATOR.iter_errors(event_payload))
-            if errors:
-                err_msg = "; ".join(e.message for e in errors)
-                raise ValueError(f"State machine emitted invalid workflow event: {err_msg}")
+            # Derive terminal outcome and status
+            status = "ACTIVE"
+            if to_state == "CLOSED":
+                status = "CLOSED"
+                terminal_outcome = terminal_outcome or "CLOSED_APPROVED"
+            elif to_state == "LEARNED":
+                status = "CLOSED"
+            elif to_state == "REJECTED":
+                status = "REJECTED"
+                terminal_outcome = terminal_outcome or "TERMINATED_REJECTED"
+            elif to_state == "MANUAL_TRIAGE_REQUIRED":
+                status = "MANUAL_TRIAGE_REQUIRED"
+                terminal_outcome = terminal_outcome or "TERMINATED_MANUAL_TRIAGE"
+            elif to_state == "CANCELLED":
+                status = "CANCELLED"
+                terminal_outcome = terminal_outcome or "TERMINATED_CANCELLED"
+            elif to_state == "FAILED_SAFE":
+                status = "FAILED_SAFE"
+                terminal_outcome = terminal_outcome or "TERMINATED_FAILED_SAFE"
 
-        # Update persistence store
-        if not incident:
-            self.store.create_incident(
-                incident_id=formatted_inc_id,
-                initial_state=to_state,
-                status=status,
+            # Construct canonical workflow-event.v1 payload
+            event_payload: dict[str, Any] = {
+                "schema_version": "1.0",
+                "event_id": event_id,
+                "incident_id": formatted_inc_id,
+                "idempotency_key": idempotency_key,
+                "occurred_at": now,
+                "from_state": from_state,
+                "to_state": to_state,
+                "producer_ref": self.producer_ref,
+                "workflow_version": self.workflow_version,
+                "policy_version": self.policy_version,
+                "terminal_outcome": terminal_outcome,
+                "reason_code": reason_code,
+                "artifact_ref": artifact_ref,
+            }
+
+            # Validate against strict contract
+            if _VALIDATOR is not None:
+                errors = list(_VALIDATOR.iter_errors(event_payload))
+                if errors:
+                    err_msg = "; ".join(e.message for e in errors)
+                    raise ValueError(f"State machine emitted invalid workflow event: {err_msg}")
+
+            # Update persistence store atomically
+            if not incident:
+                self.store.create_incident(
+                    incident_id=formatted_inc_id,
+                    initial_state=to_state,
+                    status=status,
+                )
+            else:
+                target_db_inc_id = incident["incident_id"]
+                updated_rows = self.store.update_incident_state(
+                    incident_id=target_db_inc_id,
+                    new_state=to_state,
+                    status=status,
+                    expected_state=from_state,
+                )
+                if updated_rows != 1:
+                    raise InvalidStateTransitionError(
+                        f"Concurrent state modification detected for {formatted_inc_id}: expected {from_state!r}"
+                    )
+
+            self.store.record_transition(
+                event=event_payload,
+                input_hash=in_hash,
+                output_hash=out_hash,
+                reason=reason or f"Transition to {to_state}",
             )
-        else:
-            self.store.update_incident_state(
-                incident_id=formatted_inc_id, new_state=to_state, status=status
-            )
-
-        self.store.record_transition(
-            event=event_payload,
-            input_hash=in_hash,
-            output_hash=out_hash,
-            reason=reason or f"Transition to {to_state}",
-        )
 
         return event_payload

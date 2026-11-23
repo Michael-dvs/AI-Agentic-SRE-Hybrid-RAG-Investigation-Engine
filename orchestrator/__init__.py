@@ -39,6 +39,7 @@ from orchestrator.review import (
     StaleDossierVersionError,
     UnauthorizedReviewerError,
     build_human_correction_payload,
+    reconcile_review_audit,
 )
 from orchestrator.ticketing import (
     DummyTicketManager,
@@ -90,6 +91,7 @@ __all__ = [
     "InvalidDossierError",
     "ReviewStateConflictError",
     "build_human_correction_payload",
+    "reconcile_review_audit",
     "ALLOWED_REVIEWER_ROLES",
     "ALLOWED_DECISIONS",
     # Ticketing (C16)

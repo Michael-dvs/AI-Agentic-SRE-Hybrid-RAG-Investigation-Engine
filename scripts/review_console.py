@@ -35,6 +35,12 @@ def display_dossier_summary(
     severity = str(dossier.get("severity") or inc_sum.get("severity", "medium")).upper()
     services = ", ".join(dossier.get("investigation_scope", [dossier.get("service_id", "unknown")]))
 
+    closure_meaning = (
+        "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED"
+        if str(status).upper() == "APPROVED"
+        else str(status).upper()
+    )
+
     print("=" * 76)
     print("      AI AGENTIC SRE — HUMAN REVIEW AND INVESTIGATION CONSOLE (TBD-11)      ")
     print("=" * 76)
@@ -42,8 +48,10 @@ def display_dossier_summary(
     print(f"Severity           : {severity}")
     print(f"Scope & Services   : {services}")
     print(f"Review Status      : {status}")
+    print(f"Closure Semantics  : {closure_meaning} (technical_resolved=False)")
     print(f"Canonical Hash     : {dossier_hash[:32]}...")
     print(f"Diagnosis Verified : False (APPROVE = Handover acceptance only)")
+    print(f"Identity Trust     : Local PoC caller-asserted identifier (unauthenticated)")
     print(f"Auto Remediation   : DISABLED (RULE-008 & HUM-01: auto_action_triggered=False)")
     print("-" * 76)
 
@@ -121,9 +129,15 @@ def run_review_action(
     audit_chain: Any = None,
     handover_root: Optional[pathlib.Path | str] = None,
     ticket_storage_path: Optional[pathlib.Path | str] = None,
+    auth_context: Any = None,
+    reviewer_directory: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute review action (APPROVE, REJECT, CORRECT, ESCALATE) programmatically or interactively."""
-    rm = review_manager or AuthorizedReviewManager(store=store, audit_chain=audit_chain)
+    rm = review_manager or AuthorizedReviewManager(
+        store=store,
+        audit_chain=audit_chain,
+        reviewer_directory=reviewer_directory,
+    )
     inc_id = dossier.get("incident_id", "inc-unknown")
     target_version = int(dossier.get("dossier_version", 1))
 
@@ -146,6 +160,7 @@ def run_review_action(
         edited_dossier_data=effective_corrections,
         escalation_target=escalation_target,
         target_version=target_version,
+        auth_context=auth_context,
     )
 
     artifacts_generated = {}
@@ -168,6 +183,7 @@ def run_review_action(
     return {
         "review_result": res,
         "approval_semantics": res.get("approval_semantics"),
+        "authorization_context": res.get("authorization_context"),
         "artifacts": artifacts_generated,
         "action": action,
         "incident_id": inc_id,

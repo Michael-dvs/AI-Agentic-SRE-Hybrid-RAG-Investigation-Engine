@@ -161,7 +161,13 @@ class HandoverExporter:
         reviewed_by = review_summary.get("reviewed_by", "Pending L1/L2 Review")
         reviewed_at = review_summary.get("reviewed_at", "N/A")
 
+        closure_meaning = (
+            "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED"
+            if status == "APPROVED"
+            else status
+        )
         lines.append(f"- **Current Disposition:** `{status}`")
+        lines.append(f"- **Closure Semantics:** `{closure_meaning}`")
         lines.append(f"- **Final Reviewer:** {reviewed_by}")
         lines.append(f"- **Timestamp:** `{reviewed_at}`")
         lines.append(
@@ -175,6 +181,9 @@ class HandoverExporter:
             )
         )
         lines.append("- **Diagnosis Verified:** `false` (Dossier approval indicates handover acceptance only)")
+        lines.append("- **Technical Incident Resolved:** `false`")
+        lines.append("- **Remediation Authorized:** `false`")
+        lines.append("- **SOP Compliance Confirmed:** `false`")
         lines.append(
             f"- **Missing Sources / SOP Disclosure:** {len(dossier.get('missing_sources', []))} missing source(s), "
             f"{len(dossier.get('sop_citations', []))} applicable SOP citation(s)"
@@ -245,6 +254,19 @@ class HandoverExporter:
                 f"<li><strong><a href='file://{uri}'>{title}</a></strong> ({doc_id}) — Section: {sec}</li>"
             )
 
+        # Unknowns & Missing Sources
+        unknown_items = [
+            f"<li>{html.escape(str(u))}</li>"
+            for u in (dossier.get("unknowns") or [])
+        ]
+        missing_items = [
+            f"<li><strong>{html.escape(str(ms.get('tool_name', 'unknown')))}</strong> "
+            f"(<code>{html.escape(str(ms.get('error_code', 'UNAVAILABLE')))}</code>): "
+            f"{html.escape(str(ms.get('impact_note', '')))}</li>"
+            for ms in (dossier.get("missing_sources") or [])
+            if isinstance(ms, dict)
+        ]
+
         # Review history table
         history_rows = []
         for ev in review_history:
@@ -294,7 +316,12 @@ class HandoverExporter:
 
     <div class="rule-banner">
       <strong>Zero Auto-Remediation &amp; Approval Semantics (RULE-007, RULE-008 &amp; HUM-01):</strong>
-      Automated action triggered: <code>false</code>. Remediation requires explicit human authorization.
+      Closure Meaning: <code>ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED</code> |
+      Diagnosis Verified: <code>false</code> |
+      Technical Incident Resolved: <code>false</code> |
+      Remediation Authorized: <code>false</code> |
+      SOP Compliance Confirmed: <code>false</code> |
+      Automated action triggered: <code>false</code>.
       Dossier <code>APPROVED</code> status represents administrative handover acceptance only and does not prove unconfirmed root causes or satisfy missing SOP/evidence requirements.
     </div>
 
@@ -314,6 +341,11 @@ class HandoverExporter:
     <h2>2. Authoritative SOP & Runbook Citations</h2>
     <ul>
       {''.join(sop_items) if sop_items else '<li>No SOP references cited.</li>'}
+    </ul>
+
+    <h2>2b. Unknowns &amp; Missing Sources</h2>
+    <ul>
+      {''.join(unknown_items + missing_items) if (unknown_items or missing_items) else '<li>None reported.</li>'}
     </ul>
 
     <h2>3. Review Decision History (Append-Only Audit)</h2>

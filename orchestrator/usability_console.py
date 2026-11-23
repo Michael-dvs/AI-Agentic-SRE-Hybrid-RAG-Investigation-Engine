@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import webbrowser
-from typing import Any, Mapping, Sequence
+from typing import Any, Dict, Mapping, Sequence
 from urllib.parse import urlencode
 
 try:
@@ -237,11 +237,17 @@ class ReviewActionController:
         *,
         audit_path: pathlib.Path | str = "artifacts/audit/c19-review-audit.jsonl",
         handover_root: pathlib.Path | str = "artifacts/handover",
+        reviewer_directory: Mapping[str, Any] | None = None,
+        require_registered_reviewer: bool = False,
+        require_authenticated_context: bool = False,
     ) -> None:
         self.audit_chain = AuditHashChain(log_path=audit_path)
         self.review_manager = AuthorizedReviewManager(
             store=store,
             audit_chain=self.audit_chain,
+            reviewer_directory=reviewer_directory,
+            require_registered_reviewer=require_registered_reviewer,
+            require_authenticated_context=require_authenticated_context,
         )
         self.exporter = HandoverExporter(export_root=handover_root)
 
@@ -255,6 +261,7 @@ class ReviewActionController:
         rationale: str,
         corrected_hypothesis: str | None = None,
         escalation_target: str | None = None,
+        auth_context: Any = None,
     ) -> dict[str, Any]:
         action_upper = action.upper()
         corrections = None
@@ -279,6 +286,7 @@ class ReviewActionController:
             edited_dossier_data=corrections,
             escalation_target=escalation_target,
             target_version=int(dossier.get("dossier_version", 1)),
+            auth_context=auth_context,
         )
         artifacts: dict[str, str] = {}
         if action_upper == "APPROVE":
@@ -294,6 +302,7 @@ class ReviewActionController:
             "action": action_upper,
             "review_result": result,
             "approval_semantics": result.get("approval_semantics"),
+            "authorization_context": result.get("authorization_context"),
             "artifacts": artifacts,
             "auto_action_triggered": result["review_event"]["auto_action_triggered"],
         }
@@ -662,13 +671,22 @@ class SREDashboard:
             mode_text = Text("OFFLINE DETERMINISTIC (NO AI MODEL)", style="bold yellow")
             tok_str = "0 tokens (Offline Rule Engine)"
 
+        review_status = str(dossier.get("review_summary", {}).get("status", "PENDING_REVIEW"))
+        closure_display = (
+            "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (diagnosis_verified=False, technical_resolved=False, remediation_authorized=False)"
+            if review_status.upper() == "APPROVED"
+            else f"{review_status} (diagnosis_verified=False, remediation_authorized=False)"
+        )
+
         header = Table.grid(expand=True)
         header.add_column(ratio=1)
         header.add_column(ratio=2)
         header.add_row("Incident", str(dossier.get("incident_id", "unknown")))
         header.add_row("Severity", str(dossier.get("severity", "unknown")).upper())
         header.add_row("Services", ", ".join(str(item) for item in services))
-        header.add_row("Status", str(dossier.get("review_summary", {}).get("status", "PENDING_REVIEW")))
+        header.add_row("Status", review_status)
+        header.add_row("Closure / Diagnosis", closure_display)
+        header.add_row("Reviewer Trust", "Local PoC caller-asserted identity (unauthenticated)")
         header.add_row("Auto remediation", "DISABLED | auto_action_triggered=False")
         header.add_row("Reasoning Mode", mode_text)
         header.add_row("Provider / Model", f"{provider_name} / {model_ver}")
@@ -988,6 +1006,9 @@ class SREDashboard:
 
     def _action_bar(self) -> Text:
         if self.selected_incident_id:
+            inc = self.store.get_incident(self.selected_incident_id)
+            if inc and inc.get("current_state") != "HUMAN_REVIEW":
+                return Text("[REVIEW LOCKED - FINALIZED]  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT", style="bold yellow")
             return Text("[A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT", style="bold yellow")
         if self.view == "model":
             return Text(f"[P] PROVIDER  [K] API KEY  [F] FETCH MODEL  [M] MANUAL  [T] TEST  [X] RESET | {self.notice}", style="bold")

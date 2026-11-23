@@ -11,6 +11,11 @@ import threading
 import uuid
 from typing import Any, Iterator
 
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - non-POSIX fallback
+    fcntl = None  # type: ignore[assignment]
+
 from jsonschema import Draft202012Validator, FormatChecker
 
 _CONTRACT_PATH = (
@@ -132,6 +137,11 @@ class HashChainedAuditStore:
 
     def __init__(self, log_path: pathlib.Path | str | None = None) -> None:
         self.log_path = pathlib.Path(log_path) if log_path else None
+        self.lock_path = (
+            self.log_path.with_name(f"{self.log_path.name}.lock")
+            if self.log_path
+            else None
+        )
         self.checkpoint_path = (
             self.log_path.with_name(f"{self.log_path.name}.checkpoint.json")
             if self.log_path
@@ -308,7 +318,17 @@ class HashChainedAuditStore:
                     raise ValueError(f"Generated audit event violates audit-event.v1 schema: {err_msg}")
 
             if self.log_path:
+                lock_fd: int | None = None
                 try:
+                    if self.lock_path is not None:
+                        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+                        lock_fd = os.open(
+                            str(self.lock_path),
+                            os.O_CREAT | os.O_RDWR,
+                            0o600,
+                        )
+                        if fcntl is not None:
+                            fcntl.flock(lock_fd, fcntl.LOCK_EX)
                     if self.log_path.exists():
                         stat = self.log_path.stat()
                         if (
@@ -329,19 +349,31 @@ class HashChainedAuditStore:
                     stat = self.log_path.stat()
                     self._log_size = stat.st_size
                     self._log_mtime_ns = stat.st_mtime_ns
+                    self.last_event_hash = event_hash
+                    if isinstance(self.events, _LazyAuditEvents):
+                        self.events.append_persisted(event)
+                    else:
+                        self.events.append(event)
+                    self._write_checkpoint()
                 except AuditWriteError:
                     raise
                 except Exception as exc:
                     raise AuditWriteError(
                         f"FAIL_CLOSED: Failed to write audit event {event_id} to {self.log_path}: {exc}"
                     ) from exc
-
-            self.last_event_hash = event_hash
-            if isinstance(self.events, _LazyAuditEvents):
-                self.events.append_persisted(event)
+                finally:
+                    if lock_fd is not None:
+                        try:
+                            if fcntl is not None:
+                                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+                        finally:
+                            os.close(lock_fd)
             else:
-                self.events.append(event)
-            self._write_checkpoint()
+                self.last_event_hash = event_hash
+                if isinstance(self.events, _LazyAuditEvents):
+                    self.events.append_persisted(event)
+                else:
+                    self.events.append(event)
             return event
 
 
