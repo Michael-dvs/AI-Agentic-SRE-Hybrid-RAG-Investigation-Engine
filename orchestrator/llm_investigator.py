@@ -22,7 +22,7 @@ from orchestrator.llm_provider import ProviderError
 from orchestrator.resilience import ResilienceController
 from orchestrator.state_machine import utc_now_z
 
-_TEXT = {"type": "string", "minLength": 5, "maxLength": 512}
+_TEXT = {"type": "string", "minLength": 5, "maxLength": 1024}
 _IDS = {"type": "array", "maxItems": 32, "uniqueItems": True,
         "items": {"type": "string", "pattern": "^ev-[A-Za-z0-9._-]+$"}}
 _HYPOTHESIS = {
@@ -65,6 +65,10 @@ HYPOTHESIS_SCHEMA = {
         "contradicting_evidence_ids": {"$ref": "#/$defs/ids"},
         "unknowns": {"type": "array", "maxItems": 10,
                      "items": {"type": "string", "minLength": 3, "maxLength": 512}},
+        "recommended_checks": {
+            "type": "array", "maxItems": 5,
+            "items": {"type": "string", "minLength": 5, "maxLength": 512},
+        },
     },
 }
 _VALIDATOR = Draft202012Validator(HYPOTHESIS_SCHEMA)

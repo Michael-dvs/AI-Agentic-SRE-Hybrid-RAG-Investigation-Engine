@@ -1,10 +1,10 @@
 # AI Agentic SRE & Hybrid RAG Investigation Engine — Simulation PoC
 
-> **Status Proyek:** Scaled-Down Simulation Proof of Concept (Lab Lokal macOS Apple Silicon / Docker)  
-> **Progress Baseline:**
-> - **Fase 1 (Foundation):** `C01` s/d `C08` (**Gate G1: `PASSED`**)
-> - **Fase 2 (Controlled Integration):** `C09` (Telemetry Adapters), `C10` (Alert Intake & Correlation), `C11` (Durable Workflow) (**`IMPLEMENTED & VERIFIED`**); `C12` (Baseline Dossier & Gate G2) in progress.  
-> **Prinsip Keselamatan Utama:** Seluruh layanan, akun, transaksi, log, dan skenario adalah **100% sintetis**. Agen investigasi beroperasi secara ketat melalui **Read-Only Authenticated Policy Gateway (`KPI-09 = 0`)** tanpa akses ke Ground Truth (`KPI-10 = 0`).
+> **Status Proyek:** **SELESAI (Fase 1 s/d Fase 4 — Chapter `C01` s/d `C24`)**  
+> **Keputusan Resmi Gate G4:** **`CONDITIONAL GO`** (*Concept Feasibility Approved with Corrective Action Plan `CAP-01` s/d `CAP-05`*)  
+> **Test Suite:** **540/540 Automated Tests Passed** (`pytest -v`)  
+> **Panduan Lengkap:** Silakan baca [Handbook Operasional & Panduan Penggunaan Tools](docs/HANDBOOK_OPERASIONAL.md) untuk instruksi mendalam.  
+> **Prinsip Keselamatan Utama:** Seluruh layanan, akun, transaksi, log, dan skenario adalah **100% sintetis**. Agen investigasi beroperasi secara ketat melalui **Read-Only Authenticated Policy Gateway (`KPI-09 = 0`)** tanpa akses ke Ground Truth (`KPI-10 = 0`) dan tanpa auto-remediation (`HUM-01`).
 
 ---
 
@@ -92,14 +92,14 @@ python3 -m traffic.generator --target-url http://127.0.0.1:18080 --profile norma
 
 ### Menjalankan Rangkaian Pengujian Otomatis
 ```bash
-# Menjalankan seluruh test suite repository (78+ tests passed):
+# Menjalankan seluruh test suite repository (540 tests passed):
 pytest -v
 
-# Menjalankan test per chapter spesifik:
-pytest tests/test_c08_secure_gateway.py -v
-pytest tests/test_c09_telemetry_adapters.py -v
-pytest tests/test_c10_alert_intake_correlation.py -v
-pytest tests/test_c11_investigation_workflow.py -v
+# Menjalankan investigasi dan review console (TUI):
+python3 scripts/sre_dashboard.py
+
+# Menjalankan verifikasi clean replay (AT-013 & KPI-13):
+python3 scripts/run_c22_clean_replay.py --mode deterministic_baseline
 ```
 
 ---

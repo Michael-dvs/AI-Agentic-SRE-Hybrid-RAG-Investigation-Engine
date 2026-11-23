@@ -892,12 +892,22 @@ class DeterministicInvestigator:
 
         context["hypotheses"] = hypotheses
         if self.llm:
-            result = self.llm.generate(context, self.resilience)
+            llm_context = self._compact_llm_context(context)
+            result = self.llm.generate(llm_context, self.resilience)
             context["llm_result"] = result
+            usage = result.get("usage") if isinstance(result.get("usage"), dict) else {}
+            manifest_info = result.get("manifest") if isinstance(result.get("manifest"), dict) else {}
             context["version_manifest"] = {
                 **context["version_manifest"],
-                "model_version": result["manifest"]["version"],
-                "prompt_version": result["manifest"]["prompt_sha256"],
+                "provider": manifest_info.get("provider"),
+                "model_name": manifest_info.get("model_name"),
+                "model_version": manifest_info.get("version", "unknown"),
+                "prompt_version": manifest_info.get("prompt_sha256", "unknown"),
+                "llm_status": result.get("status"),
+                "llm_reason": result.get("reason_code"),
+                "input_tokens": usage.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
+                "total_tokens": usage.get("total_tokens"),
             }
             if result["status"] == "accepted":
                 candidates = result["candidates"]
@@ -909,8 +919,8 @@ class DeterministicInvestigator:
                         "hypothesis_id": f"hyp-{incident_id}-{index:03d}",
                         "title": hypothesis["summary"],
                         "description": (
-                            f"{hypothesis['diagnosis']} "
-                            f"Candidate cause (not proven): {hypothesis['estimated_root_cause']}"
+                            f"Mechanism / Why: {hypothesis['diagnosis']} | "
+                            f"Candidate Root Cause (unconfirmed): {hypothesis['estimated_root_cause']}"
                         ),
                         "candidate_cause": hypothesis["estimated_root_cause"],
                         "diagnosis": hypothesis["diagnosis"],
@@ -926,6 +936,8 @@ class DeterministicInvestigator:
                     )
                 ]
                 context["unknowns"] = candidates["unknowns"]
+                if candidates.get("recommended_checks"):
+                    context["recommended_checks"] = list(candidates["recommended_checks"])
                 context["investigation_mode"] = "agentic_llm"
             else:
                 context["investigation_mode"] = "manual_fallback"
@@ -954,6 +966,81 @@ class DeterministicInvestigator:
         context["timeline"].append({"state": "HYPOTHESES", "timestamp": utc_now_z()})
         self.checkpoint.save_checkpoint(incident_id, "HYPOTHESES", context)
         return context
+
+    def _compact_llm_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Compact evidence and citations so SanitizedContextBuilder stays within max_input_tokens."""
+        primary_svc = context["service_id"]
+        all_ev = context.get("evidence_items", [])
+        primary_ev = [e for e in all_ev if e.get("service_id") == primary_svc]
+        with_records = [e for e in (primary_ev or all_ev) if e.get("records")]
+        pool_ev = (with_records or primary_ev or all_ev)[:3]
+        keep_rec_keys = {
+            "metric_name", "metric_enum", "value", "unit", "timestamp",
+            "severity", "error_code", "message",
+            "span_id", "duration_ms", "operation", "status_code", "error",
+            "service_name", "sanitized",
+        }
+
+        def _shrink_record(rec: Any, ev_svc: Any) -> Any:
+            if not isinstance(rec, dict):
+                return rec
+            out = {k: v for k, v in rec.items() if k in keep_rec_keys}
+            if "service_id" in rec and rec["service_id"] != ev_svc:
+                out["service_id"] = rec["service_id"]
+            if "environment" in rec and rec["environment"] != context.get("environment"):
+                out["environment"] = rec["environment"]
+            if isinstance(out.get("message"), str) and len(out["message"]) > 140:
+                out["message"] = out["message"][:137] + "..."
+            return out
+
+        def _build_candidate(max_ev: int, max_recs: int, max_cites: int, excerpt_len: int) -> Dict[str, Any]:
+            compact_ev = []
+            for ev in pool_ev[:max_ev]:
+                ev_svc = ev.get("service_id")
+                recs = [_shrink_record(r, ev_svc) for r in ev.get("records", [])[:max_recs]]
+                data_obj = ev.get("data")
+                compact_item = {**ev, "records": recs}
+                if isinstance(data_obj, dict) and "records" in data_obj:
+                    compact_item["data"] = {**data_obj, "records": recs}
+                compact_ev.append(compact_item)
+            compact_cites = []
+            for cite in context.get("runbook_citations", [])[:max_cites]:
+                if isinstance(cite, dict):
+                    c = dict(cite)
+                    if isinstance(c.get("sanitized_excerpt"), str) and len(c["sanitized_excerpt"]) > excerpt_len:
+                        c["sanitized_excerpt"] = c["sanitized_excerpt"][: excerpt_len - 3] + "..."
+                    compact_cites.append(c)
+            llm_scope = list(dict.fromkeys([primary_svc, *(e.get("service_id", primary_svc) for e in compact_ev)]))
+            return {
+                **context,
+                "investigation_scope": llm_scope,
+                "evidence_items": compact_ev,
+                "runbook_citations": compact_cites,
+            }
+
+        max_tokens = getattr(getattr(self.llm, "limits", None), "max_input_tokens", 4096)
+        try:
+            from orchestrator.context_builder import SanitizedContextBuilder
+            from orchestrator.llm_investigator import HYPOTHESIS_SCHEMA
+            builder = SanitizedContextBuilder()
+        except Exception:
+            return _build_candidate(3, 1, 1, 160)
+
+        for max_ev, max_recs, max_cites, excerpt_len in (
+            (3, 1, 1, 160),
+            (3, 1, 1, 80),
+            (3, 1, 0, 0),
+            (2, 1, 0, 0),
+            (1, 1, 0, 0),
+        ):
+            candidate = _build_candidate(max_ev, max_recs, max_cites, excerpt_len)
+            try:
+                prepared = builder.build(candidate, HYPOTHESIS_SCHEMA)
+                if prepared.input_tokens_upper_bound <= max_tokens:
+                    return candidate
+            except Exception:
+                return candidate
+        return _build_candidate(1, 1, 0, 0)
 
     def _step_validated(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Validate hypotheses with honest uncertainty checking (EV-01, EV-02, RULE-006)."""

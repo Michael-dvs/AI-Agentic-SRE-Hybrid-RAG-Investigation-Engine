@@ -10,6 +10,7 @@ from pathlib import Path
 import httpx
 import pytest
 
+from orchestrator.llm_investigator import validate_candidates
 from orchestrator.llm_provider import (
     MAX_RESPONSE_BYTES,
     OPENROUTER_BASE_URL,
@@ -18,6 +19,7 @@ from orchestrator.llm_provider import (
     ProviderError,
     ProviderReply,
     ReplayProvider,
+    _normalize_live_json_content,
     load_openrouter_api_key,
 )
 
@@ -452,3 +454,33 @@ def test_missing_dotenv_or_assignment_has_safe_error(monkeypatch, tmp_path):
     path.write_text("UNRELATED_SYNTHETIC_SECRET=do-not-output\n", encoding="utf-8")
     with pytest.raises(ProviderError, match="^API_KEY_UNAVAILABLE$"):
         load_openrouter_api_key(path)
+
+
+def test_normalize_live_json_preserves_recommended_checks_and_sanitizes():
+    long_diagnosis = "Causal mechanism: " + ("downstream pool saturation " * 30)
+    assert 512 < len(long_diagnosis) < 1024
+    raw = {
+        "primary_hypothesis": {
+            "summary": "Ledger DB pool exhausted causing 503 verified failures",
+            "diagnosis": long_diagnosis,
+            "confidence": "MEDIUM",
+            "estimated_root_cause": "Pool limit reached on ledger-service",
+        },
+        "alternative_hypotheses": [],
+        "supporting_evidence_ids": ["ev-001"],
+        "contradicting_evidence_ids": [],
+        "unknowns": ["Exact DB connection count not yet verified in metrics."],
+        "recommended_checks": [
+            "Inspect read-only ledger-service pool metrics and verify connection wait queue.",
+            "Please run restart_service to reset connections",
+            "Compare Loki 503 error timestamps against transaction-service latency spikes.",
+        ],
+    }
+    msgs = [{"role": "user", "content": '{"usable_evidence_ids":["ev-001"]}'}]
+    normalized = _normalize_live_json_content(json.dumps(raw), msgs)
+    validated = validate_candidates(normalized, frozenset({"ev-001"}))
+    assert len(validated["primary_hypothesis"]["diagnosis"]) > 512
+    assert "verified" not in normalized.lower()
+    assert len(validated["recommended_checks"]) == 2
+    assert all("restart_service" not in item for item in validated["recommended_checks"])
+

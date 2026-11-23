@@ -17,7 +17,7 @@ from orchestrator.usability_console import SREDashboard
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Unified SRE Command Center (C19 Tahap 1A)")
+    parser = argparse.ArgumentParser(description="Unified SRE Command Center (Chapter 19 Stage 1A)")
     parser.add_argument("--state-db", default=os.getenv("SRE_STATE_DB", "orchestrator_state.db"))
     parser.add_argument("--reviewer-ref", default=os.getenv("SRE_REVIEWER_REF", "sre_reviewer"))
     parser.add_argument("--reviewer-role", default=os.getenv("SRE_REVIEWER_ROLE", "L2_SRE"))
