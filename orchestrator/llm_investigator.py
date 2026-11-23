@@ -123,10 +123,12 @@ def validate_candidates(content: str, evidence_ids: frozenset[str]) -> dict[str,
     check(value)
     if not _VALIDATOR.is_valid(value):
         raise OutputRejected()
-    for hypothesis in [value, *value["alternative_hypotheses"]]:
+    for idx, hypothesis in enumerate([value, *value["alternative_hypotheses"]]):
         supporting = set(hypothesis["supporting_evidence_ids"])
         contradicting = set(hypothesis["contradicting_evidence_ids"])
-        if not supporting or supporting & contradicting or not (supporting | contradicting) <= evidence_ids:
+        if idx == 0 and not supporting:
+            raise OutputRejected("EVIDENCE_REFERENCE_INVALID")
+        if supporting & contradicting or not (supporting | contradicting) <= evidence_ids:
             raise OutputRejected("EVIDENCE_REFERENCE_INVALID")
     clean, _ = DeterministicSanitizer().sanitize_object(value)
     if not _VALIDATOR.is_valid(clean):

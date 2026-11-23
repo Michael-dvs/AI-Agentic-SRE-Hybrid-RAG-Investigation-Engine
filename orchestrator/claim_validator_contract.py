@@ -27,12 +27,16 @@ class HypothesisStatus(str, Enum):
     PARTIAL = "PARTIAL"
     INCONCLUSIVE = "INCONCLUSIVE"
     UNSUPPORTED = "UNSUPPORTED"
+    CONTRADICTED = "CONTRADICTED"
 
 
 class ValidationReasonCode(str, Enum):
     """Canonical reason codes for claim and evidence validation."""
     CLAIM_CORROBORATED = "CLAIM_CORROBORATED"
     MISSING_EVIDENCE_REF = "MISSING_EVIDENCE_REF"
+    MISSING_SUPPORTING_EVIDENCE = "MISSING_SUPPORTING_EVIDENCE"
+    IRRELEVANT_EVIDENCE = "IRRELEVANT_EVIDENCE"
+    CLAIM_CONTRADICTED = "CLAIM_CONTRADICTED"
     OUT_OF_WINDOW = "OUT_OF_WINDOW"
     VALUE_MISMATCH = "VALUE_MISMATCH"
     CONTRADICTING_SIGNALS = "CONTRADICTING_SIGNALS"
@@ -49,6 +53,41 @@ VALIDATION_REASON_CODES: frozenset[str] = frozenset(code.value for code in Valid
 
 _VERIFIED_PATTERN = re.compile(r"\bVERIFIED\b", re.IGNORECASE)
 _NUMERIC_PATTERN = re.compile(r"(?<![A-Za-z0-9_])(\d+(?:\.\d+)?)(?:\s*(?:ms|s|%|req/s|rps|errors?|hits?|pts?|points?|kb|mb|gb))?\b", re.IGNORECASE)
+_KNOWN_SERVICES: tuple[str, ...] = (
+    "api-gateway",
+    "auth-service",
+    "transaction-service",
+    "ledger-service",
+    "notification-service",
+    "db-dummy",
+)
+_NO_ERROR_PATTERN = re.compile(
+    r"\b(?:no\s+(?:degradation|error|errors|failure|failures|fault)|normal|nominal|healthy|zero\s+error)\b",
+    re.IGNORECASE,
+)
+_RATE_LIMIT_PATTERN = re.compile(
+    r"\b(?:rate[\s_-]?limit\w*|throttl\w*|429|too\s+many\s+requests|quota\s+exceeded)\b",
+    re.IGNORECASE,
+)
+_TRAFFIC_SURGE_PATTERN = re.compile(
+    r"\b(?:traffic[\s_-]?(?:surge|spike)|request[\s_-]?surge|spike\s+in\s+traffic|"
+    r"sudden\s+increase\s+in\s+(?:client\s+)?request\w*|high\s+request\s+rate|"
+    r"load\s+spike|overwhelming\b.*\bcapacity|ddos|burst\s+of\s+traffic)\b",
+    re.IGNORECASE,
+)
+_DB_POOL_PATTERN = re.compile(
+    r"\b(?:database|db|connection\s+pool|pool\s+exhaust\w*|deadlock|lock\s+timeout|postgres\w*|sqlite)\b",
+    re.IGNORECASE,
+)
+_AUTH_FAILURE_PATTERN = re.compile(
+    r"\b(?:401|403|unauthorized|forbidden|invalid\s+(?:bearer\s+)?token|token\s+signature|"
+    r"invalid\s+credentials|authentication\s+(?:reject|fail)\w*)\b",
+    re.IGNORECASE,
+)
+_FAILURE_ASSERTION_PATTERN = re.compile(
+    r"\b(?:500|502|503|504|error|errors|fail\w*|outage|degrad\w*|timeout|refus\w*|exhaust\w*|spike|reject\w*)\b",
+    re.IGNORECASE,
+)
 
 
 def parse_utc_iso(value: str) -> datetime:
@@ -113,6 +152,229 @@ class ValidationReport:
             raise ValueError("RULE-007 Violation: Status 'VERIFIED' is strictly prohibited.")
 
 
+def _detect_claim_mechanisms(text: str) -> set[str]:
+    """Identify specific failure mechanisms asserted in a claim or hypothesis."""
+    mechanisms: set[str] = set()
+    if _RATE_LIMIT_PATTERN.search(text):
+        mechanisms.add("rate_limit")
+    if _TRAFFIC_SURGE_PATTERN.search(text):
+        mechanisms.add("traffic_surge")
+    if _DB_POOL_PATTERN.search(text):
+        mechanisms.add("db_pool")
+    if _AUTH_FAILURE_PATTERN.search(text):
+        mechanisms.add("auth_failure")
+    if _FAILURE_ASSERTION_PATTERN.search(text) and not _NO_ERROR_PATTERN.search(text):
+        mechanisms.add("failure_assertion")
+    return mechanisms
+
+
+def _extract_evidence_signals(ev: dict[str, Any]) -> dict[str, Any]:
+    """Extract structured telemetry signals from an evidence item for relevance checking."""
+    records = [r for r in ev.get("records", []) if isinstance(r, dict)]
+    status_codes_str: set[str] = set()
+    error_codes: set[str] = set()
+    messages_parts: list[str] = []
+    metric_names: set[str] = set()
+    metric_values: list[tuple[str, float]] = []
+    record_services: set[str] = set()
+    ok_trace_count = 0
+
+    for rec in records:
+        sc = rec.get("status_code")
+        if sc is not None and sc != "":
+            status_codes_str.add(str(sc).strip().upper())
+        ec = rec.get("error_code")
+        if isinstance(ec, str) and ec.strip():
+            error_codes.add(ec.strip().upper())
+        for key in ("message", "exception.message", "error.message", "operation", "operation_name"):
+            val = rec.get(key)
+            if isinstance(val, str) and val.strip():
+                messages_parts.append(val.strip().lower())
+        m_name = rec.get("metric_enum") or rec.get("metric_name")
+        m_name_norm = str(m_name).strip().lower() if isinstance(m_name, str) and m_name.strip() else ""
+        if m_name_norm:
+            metric_names.add(m_name_norm)
+        val = rec.get("value")
+        if isinstance(val, (int, float)) and not isinstance(val, bool):
+            metric_values.append((m_name_norm, float(val)))
+        for svc_key in ("service_id", "service_name", "peer.service"):
+            svc_val = rec.get(svc_key)
+            if isinstance(svc_val, str) and svc_val.strip():
+                record_services.add(svc_val.strip())
+        if str(sc).strip().upper() == "OK" and rec.get("error") is not True:
+            ok_trace_count += 1
+
+    return {
+        "records": records,
+        "status_codes": status_codes_str,
+        "error_codes": error_codes,
+        "messages": " ".join(messages_parts),
+        "metric_names": metric_names,
+        "metric_values": metric_values,
+        "record_services": record_services,
+        "all_ok_traces": (
+            ev.get("tool_name") == "get_trace_summary"
+            and bool(records)
+            and ok_trace_count == len(records)
+        ),
+    }
+
+
+def _assess_evidence_relevance(
+    claim_text: str,
+    ev: dict[str, Any],
+    context: dict[str, Any],
+) -> tuple[HypothesisStatus, str, str] | None:
+    """Verify that evidence item is available, in-scope, relevant, and non-contradicting."""
+    ev_id = ev.get("evidence_id") or "unknown"
+    tool_name = str(ev.get("tool_name") or "")
+
+    if ev.get("data_quality") == "unavailable" or ev.get("error_code"):
+        return (
+            HypothesisStatus.UNSUPPORTED,
+            ValidationReasonCode.SOURCE_UNAVAILABLE.value,
+            f"Evidence {ev_id} is unavailable ({ev.get('error_code') or 'unavailable'}) and cannot support claims.",
+        )
+
+    signals = _extract_evidence_signals(ev)
+    records = signals["records"]
+    is_no_error = bool(_NO_ERROR_PATTERN.search(claim_text))
+
+    if not records and not is_no_error:
+        return (
+            HypothesisStatus.UNSUPPORTED,
+            ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+            f"Evidence {ev_id} ({tool_name}) returned 0 telemetry records and cannot substantiate the claim.",
+        )
+
+    known_services = set(_KNOWN_SERVICES)
+    if isinstance(context.get("service_id"), str) and context["service_id"]:
+        known_services.add(context["service_id"])
+    for svc in context.get("investigation_scope") or []:
+        if isinstance(svc, str) and svc:
+            known_services.add(svc)
+    for item in context.get("evidence_items") or []:
+        if isinstance(item, dict) and isinstance(item.get("service_id"), str) and item["service_id"]:
+            known_services.add(item["service_id"])
+
+    claim_lower = claim_text.lower()
+    mentioned_services = {svc for svc in known_services if re.search(rf"\b{re.escape(svc)}\b", claim_lower)}
+    ev_service = ev.get("service_id")
+    if mentioned_services and isinstance(ev_service, str) and ev_service:
+        in_ev_service = ev_service in mentioned_services
+        in_record_services = bool(signals["record_services"] & mentioned_services)
+        in_messages = any(svc.lower() in signals["messages"] for svc in mentioned_services)
+        if not (in_ev_service or in_record_services or in_messages):
+            return (
+                HypothesisStatus.UNSUPPORTED,
+                ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                f"Evidence {ev_id} belongs to '{ev_service}' and does not match claimed service(s) {sorted(mentioned_services)}.",
+            )
+
+    mechanisms = _detect_claim_mechanisms(claim_text)
+    status_codes = signals["status_codes"]
+    error_codes = signals["error_codes"]
+    messages = signals["messages"]
+    metric_names = signals["metric_names"]
+    metric_values = signals["metric_values"]
+
+    if "rate_limit" in mechanisms:
+        has_rate_limit_signal = (
+            "429" in status_codes
+            or any("rate" in ec.lower() or "throttl" in ec.lower() or "quota" in ec.lower() or "429" in ec for ec in error_codes)
+            or bool(_RATE_LIMIT_PATTERN.search(messages))
+            or any("rate_limit" in mn or "throttl" in mn or "rejected" in mn for mn in metric_names)
+        )
+        if not has_rate_limit_signal:
+            if tool_name in ("search_error_logs", "get_trace_summary") or (
+                tool_name == "get_service_metrics" and bool(metric_names)
+            ):
+                observed_desc = sorted(status_codes | error_codes | metric_names) or ["unrelated telemetry"]
+                return (
+                    HypothesisStatus.UNSUPPORTED,
+                    ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                    f"Evidence {ev_id} ({tool_name}: {', '.join(observed_desc)}) does not show HTTP 429, throttling, or rate-limit configuration.",
+                )
+
+    if "traffic_surge" in mechanisms:
+        if tool_name == "search_error_logs":
+            has_surge_signal = any(
+                kw in messages or any(kw in ec.lower() for ec in error_codes)
+                for kw in ("surge", "overload", "too many", "429", "queue full", "backpressure", "high load", "rate limit")
+            ) or "429" in status_codes
+            if not has_surge_signal:
+                observed_desc = sorted(status_codes | error_codes) or ["unrelated error logs"]
+                return (
+                    HypothesisStatus.UNSUPPORTED,
+                    ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                    f"Log evidence {ev_id} ({', '.join(observed_desc)}) reflects downstream/runtime errors rather than an upstream traffic surge.",
+                )
+        elif tool_name == "get_service_metrics":
+            req_vals = [
+                v for name, v in metric_values
+                if name in ("request_rate", "rps", "qps", "throughput", "traffic_rate")
+            ]
+            if req_vals:
+                if len(req_vals) >= 2 and max(req_vals) <= req_vals[0] and max(req_vals) <= 1.0:
+                    return (
+                        HypothesisStatus.CONTRADICTED,
+                        ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                        f"Metric evidence {ev_id} reports flat/non-increasing low request_rate ({req_vals}), contradicting a traffic surge claim.",
+                    )
+                if max(req_vals) <= 1.0:
+                    return (
+                        HypothesisStatus.UNSUPPORTED,
+                        ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                        f"Metric evidence {ev_id} reports low request_rate ({req_vals}) with no traffic baseline demonstrating a surge.",
+                    )
+
+    if "db_pool" in mechanisms and tool_name == "search_error_logs":
+        has_db_signal = any(
+            kw in messages or any(kw in ec.lower() for ec in error_codes)
+            for kw in ("db", "database", "pool", "sql", "postgres", "sqlite", "lock", "deadlock", "timeout", "connection")
+        ) or bool({"500", "503", "504"} & status_codes)
+        if not has_db_signal:
+            return (
+                HypothesisStatus.UNSUPPORTED,
+                ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                f"Log evidence {ev_id} ({sorted(status_codes | error_codes)}) does not indicate database or connection pool issues.",
+            )
+
+    if "auth_failure" in mechanisms and tool_name == "search_error_logs":
+        has_auth_signal = bool({"401", "403"} & status_codes) or any(
+            kw in messages or any(kw in ec.lower() for ec in error_codes)
+            for kw in ("auth", "token", "unauthorized", "forbidden", "credential", "signature")
+        )
+        if not has_auth_signal:
+            if ("not an http 5xx" in claim_lower or "not 5xx" in claim_lower) and bool({"500", "502", "503", "504"} & status_codes):
+                return (
+                    HypothesisStatus.CONTRADICTED,
+                    ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                    f"Log evidence {ev_id} shows 5xx errors ({sorted(status_codes)}), contradicting non-5xx auth claim.",
+                )
+            return (
+                HypothesisStatus.UNSUPPORTED,
+                ValidationReasonCode.IRRELEVANT_EVIDENCE.value,
+                f"Log evidence {ev_id} ({sorted(status_codes | error_codes)}) does not indicate authentication or token errors.",
+            )
+
+    if "failure_assertion" in mechanisms and not is_no_error:
+        if signals["all_ok_traces"] and not any(k in claim_lower for k in ("latency", "duration", "slow", "ms")):
+            return (
+                HypothesisStatus.CONTRADICTED,
+                ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                f"Trace evidence {ev_id} shows only OK spans without errors, contradicting failure claim.",
+            )
+        if tool_name == "get_service_metrics" and metric_names == {"error_rate"} and metric_values and all(v == 0.0 for _, v in metric_values):
+            return (
+                HypothesisStatus.CONTRADICTED,
+                ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                f"Metric evidence {ev_id} reports error_rate=0.0, contradicting failure claim.",
+            )
+
+    return None
+
+
 class ClaimValidator:
     """Deterministic evidence and applicability validator for Chapter 14 (C14)."""
 
@@ -125,6 +387,8 @@ class ClaimValidator:
         evidence_id: str | None,
         context: dict[str, Any],
         claimed_value: float | None = None,
+        *,
+        hypothesis_text: str | None = None,
     ) -> ValidatedClaim:
         """Validate a single claim string against the original evidence context."""
         # 1. Check for forbidden VERIFIED keyword (RULE-007)
@@ -209,7 +473,20 @@ class ClaimValidator:
                         details=f"Claimed value {extracted_claimed} mismatches observed telemetry {closest}.",
                     )
 
-        # 5. Claim corroborated
+        # 5. Check evidence availability, scope, mechanism relevance, and direct contradiction
+        relevance_issue = _assess_evidence_relevance(hypothesis_text or claim_text, ev, context)
+        if relevance_issue is not None:
+            rel_status, rel_code, rel_details = relevance_issue
+            return ValidatedClaim(
+                claim_text=claim_text,
+                evidence_id=evidence_id,
+                status=rel_status,
+                reason_code=rel_code,
+                observed_at=observed_at,
+                details=rel_details,
+            )
+
+        # 6. Claim corroborated
         return ValidatedClaim(
             claim_text=claim_text,
             evidence_id=evidence_id,
@@ -441,13 +718,14 @@ class ClaimValidator:
         contradicting_ids = list(hypothesis.get("contradicting_evidence_ids", []))
 
         evidence_items = context.get("evidence_items", [])
-        evidence_map = {ev.get("evidence_id"): ev for ev in evidence_items if ev.get("evidence_id")}
+        claim_text = diagnosis or title or summary or root_cause
 
         for ev_id in supporting_ids:
             claim_val = self.validate_claim(
-                claim_text=diagnosis,
+                claim_text=claim_text,
                 evidence_id=ev_id,
                 context=context,
+                hypothesis_text=all_text,
             )
             claims.append(claim_val)
             if claim_val.reason_code not in reason_codes:
@@ -458,6 +736,20 @@ class ClaimValidator:
         for r in contra_reasons:
             if r not in reason_codes:
                 reason_codes.append(r)
+
+        # Retain only corroborated evidence IDs as supporting; move directly contradicting IDs
+        validated_supporting_ids: list[str] = []
+        validated_contradicting_ids: list[str] = list(dict.fromkeys(contradicting_ids))
+        for claim_val in claims:
+            if claim_val.status == HypothesisStatus.SUPPORTED and claim_val.evidence_id:
+                if claim_val.evidence_id not in validated_supporting_ids:
+                    validated_supporting_ids.append(claim_val.evidence_id)
+            elif claim_val.status == HypothesisStatus.CONTRADICTED:
+                if claim_val.evidence_id and claim_val.evidence_id not in validated_contradicting_ids:
+                    validated_contradicting_ids.append(claim_val.evidence_id)
+                unknowns.append(f"Rejected supporting evidence {claim_val.evidence_id}: {claim_val.details}")
+            elif claim_val.status == HypothesisStatus.UNSUPPORTED:
+                unknowns.append(f"Evidence {claim_val.evidence_id or 'none'} does not substantiate hypothesis: {claim_val.details}")
 
         # 4. SOP Applicability Validation
         citations = context.get("runbook_citations", [])
@@ -486,29 +778,47 @@ class ClaimValidator:
             reason_codes.append(ValidationReasonCode.CONCURRENT_INDEPENDENT_FAULT.value)
 
         # 6. Determine final status and confidence score
-        # FAIL-CLOSED principle: any severe issue downgrades to INCONCLUSIVE or PARTIAL
+        # FAIL-CLOSED principle: never upgrade unvalidated or contradicted claims
         trace_outage = ValidationReasonCode.SOURCE_UNAVAILABLE.value in reason_codes
         has_contradictions = bool(contradictions) or ValidationReasonCode.CONTRADICTING_SIGNALS.value in reason_codes
-        has_unsupported_claims = any(c.status == HypothesisStatus.UNSUPPORTED for c in claims)
+        supported_claims = [c for c in claims if c.status == HypothesisStatus.SUPPORTED]
+        contradicted_claims = [c for c in claims if c.status == HypothesisStatus.CONTRADICTED]
+        unsupported_claims = [c for c in claims if c.status == HypothesisStatus.UNSUPPORTED]
         has_missing_refs = ValidationReasonCode.MISSING_EVIDENCE_REF.value in reason_codes
         has_out_of_window = ValidationReasonCode.OUT_OF_WINDOW.value in reason_codes
+        has_irrelevant = ValidationReasonCode.IRRELEVANT_EVIDENCE.value in reason_codes
+        claims_specific_mechanism = bool(_detect_claim_mechanisms(all_text) - {"failure_assertion"})
+
+        if not supporting_ids:
+            if ValidationReasonCode.MISSING_SUPPORTING_EVIDENCE.value not in reason_codes:
+                reason_codes.append(ValidationReasonCode.MISSING_SUPPORTING_EVIDENCE.value)
+            unknowns.append(f"Hypothesis '{hyp_id}' has no supporting evidence IDs attached.")
+
+        unknowns = list(dict.fromkeys(unknowns))
 
         if has_forbidden_verified:
             # Strictly downgraded per RULE-007
             final_status = HypothesisStatus.INCONCLUSIVE if trace_outage else HypothesisStatus.PARTIAL
             confidence = min(0.30, hypothesis.get("confidence_score", 0.5))
+        elif (contradicted_claims and not supported_claims) or (validated_contradicting_ids and not supporting_ids and not supported_claims):
+            final_status = HypothesisStatus.CONTRADICTED
+            confidence = 0.10
+        elif (unsupported_claims or has_missing_refs or has_irrelevant) and not supported_claims:
+            final_status = HypothesisStatus.UNSUPPORTED
+            confidence = 0.15
         elif trace_outage:
             final_status = HypothesisStatus.INCONCLUSIVE
             confidence = min(0.40, hypothesis.get("confidence_score", 0.5))
-        elif has_contradictions or has_out_of_window:
+        elif not supporting_ids:
+            if claims_specific_mechanism and any(ev.get("records") for ev in evidence_items):
+                final_status = HypothesisStatus.UNSUPPORTED
+                confidence = 0.15
+            else:
+                final_status = HypothesisStatus.INCONCLUSIVE
+                confidence = 0.20
+        elif has_contradictions or has_out_of_window or contradicted_claims or unsupported_claims or has_irrelevant:
             final_status = HypothesisStatus.PARTIAL
             confidence = min(0.45, hypothesis.get("confidence_score", 0.5))
-        elif has_unsupported_claims or has_missing_refs:
-            final_status = HypothesisStatus.UNSUPPORTED
-            confidence = 0.15
-        elif not supporting_ids:
-            final_status = HypothesisStatus.INCONCLUSIVE
-            confidence = 0.20
         else:
             final_status = HypothesisStatus.SUPPORTED
             confidence = max(0.60, min(0.85, hypothesis.get("confidence_score", 0.75)))
@@ -520,8 +830,8 @@ class ClaimValidator:
             claims=claims,
             contradictions=contradictions,
             unknowns=unknowns,
-            supporting_evidence_ids=supporting_ids,
-            contradicting_evidence_ids=contradicting_ids,
+            supporting_evidence_ids=validated_supporting_ids,
+            contradicting_evidence_ids=validated_contradicting_ids,
             rejected_sop_citations=rejected_citations,
             valid_sop_citations=valid_citations,
             reason_codes=reason_codes,

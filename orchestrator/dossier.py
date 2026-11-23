@@ -259,15 +259,23 @@ class DossierSerializer:
             if not h_id.startswith("hyp-"):
                 h_id = f"hyp-{h_id}"
 
-            status_val = str(h.get("status", "INCONCLUSIVE")).upper()
-            if status_val not in ("SUPPORTED", "PARTIAL", "INCONCLUSIVE"):
-                status_val = "INCONCLUSIVE"
+            raw_val = h.get("status", "INCONCLUSIVE")
+            raw_status = str(raw_val.value if hasattr(raw_val, "value") else raw_val).upper()
+            v_val = h.get("validation_status") or raw_status
+            validation_status = str(v_val.value if hasattr(v_val, "value") else v_val).upper()
+            # Frozen dossier.v1 schema permits SUPPORTED | PARTIAL | INCONCLUSIVE;
+            # UNSUPPORTED and CONTRADICTED map non-breakingly to INCONCLUSIVE in dossier.v1
+            # and are preserved verbatim in validation_summary.
+            status_val = raw_status if raw_status in ("SUPPORTED", "PARTIAL", "INCONCLUSIVE") else "INCONCLUSIVE"
 
             stmt = h.get("title") or h.get("statement") or f"Service anomaly on {service_id}"
             if len(stmt) < 5:
                 stmt = f"Service failure detected on {service_id}"
 
-            sup_ids = [eid for eid in h.get("supporting_evidence_ids", []) if eid in available_ev_ids]
+            if validation_status in ("UNSUPPORTED", "CONTRADICTED"):
+                sup_ids = []
+            else:
+                sup_ids = [eid for eid in h.get("supporting_evidence_ids", []) if eid in available_ev_ids]
             ref_ids = [eid for eid in h.get("contradicting_evidence_ids", h.get("refuting_evidence_ids", [])) if eid in available_ev_ids]
 
             # Do not assign unrelated evidence to satisfy the schema.
@@ -277,6 +285,8 @@ class DossierSerializer:
             reason = h.get("description") or h.get("reason_summary") or f"Hypothesis derived from observed signals on {service_id}."
             if len(reason) < 5:
                 reason = "Candidate cause derived from telemetry logs and metrics."
+            if validation_status in ("UNSUPPORTED", "CONTRADICTED") and f"[{validation_status}]" not in reason:
+                reason = f"[{validation_status}] {reason}"
 
             h_unknowns = h.get("unknowns") or []
             if not h_unknowns and status_val == "INCONCLUSIVE":
@@ -450,12 +460,51 @@ class DossierSerializer:
                 if key not in seen_rejections:
                     seen_rejections.add(key)
                     rejected_citations.append(rejection)
+        def _status_str(val: Any, default: str = "INCONCLUSIVE") -> str:
+            if val is None:
+                return default
+            return str(val.value) if hasattr(val, "value") else str(val)
+
+        hypotheses_by_id = {
+            h.get("hypothesis_id"): h
+            for h in context.get("hypotheses", [])
+            if isinstance(h, dict) and h.get("hypothesis_id")
+        }
+        hypothesis_validations = []
+        for report in reports:
+            r_status = _status_str(report.get("status"), "INCONCLUSIVE")
+            r_hyp = hypotheses_by_id.get(report.get("hypothesis_id"), {})
+            d_status = _status_str(r_hyp.get("status"), r_status)
+            if d_status not in ("SUPPORTED", "PARTIAL", "INCONCLUSIVE"):
+                d_status = "INCONCLUSIVE"
+            rejected_claims = [
+                {
+                    "evidence_id": c.get("evidence_id"),
+                    "status": _status_str(c.get("status")),
+                    "reason_code": c.get("reason_code"),
+                    "details": c.get("details", ""),
+                }
+                for c in report.get("claims", [])
+                if _status_str(c.get("status")) in ("UNSUPPORTED", "CONTRADICTED")
+            ]
+            hypothesis_validations.append({
+                "hypothesis_id": report.get("hypothesis_id"),
+                "validation_status": r_status,
+                "dossier_support_status": d_status,
+                "reason_codes": list(report.get("reason_codes", [])),
+                "supporting_evidence_ids": list(report.get("supporting_evidence_ids", [])),
+                "contradicting_evidence_ids": list(report.get("contradicting_evidence_ids", [])),
+                "rejected_claims": rejected_claims,
+            })
         return {
-            "supported_claims_count": sum(claim.get("status") == "SUPPORTED" for claim in claims),
-            "unsupported_claims_count": sum(claim.get("status") == "UNSUPPORTED" for claim in claims),
+            "supported_claims_count": sum(_status_str(claim.get("status")) == "SUPPORTED" for claim in claims),
+            "unsupported_claims_count": sum(_status_str(claim.get("status")) == "UNSUPPORTED" for claim in claims),
+            "contradicted_claims_count": sum(_status_str(claim.get("status")) == "CONTRADICTED" for claim in claims),
+            "irrelevant_evidence_claims_count": sum(claim.get("reason_code") == "IRRELEVANT_EVIDENCE" for claim in claims),
             "total_material_claims_count": len(claims),
             "contradictions": list(dict.fromkeys(contradictions)),
             "rejected_sop_citations": rejected_citations,
+            "hypothesis_validations": hypothesis_validations,
         }
 
 
@@ -574,10 +623,12 @@ class DossierMarkdownRenderer:
                 "",
                 "### Validation results",
                 "",
-                "Claim counts reflect validator reference, time and value checks, not semantic corroboration.",
+                "Claim counts reflect validator reference, time, value, and relevance checks.",
                 "",
                 f"- Supported claims: {validation['supported_claims_count']}",
                 f"- Unsupported claims: {validation['unsupported_claims_count']}",
+                f"- Contradicted claims: {validation.get('contradicted_claims_count', 0)}",
+                f"- Irrelevant evidence claims: {validation.get('irrelevant_evidence_claims_count', 0)}",
                 f"- Total material claims: {validation['total_material_claims_count']}",
                 "",
                 "**Contradictions:**",
@@ -586,6 +637,19 @@ class DossierMarkdownRenderer:
                 md_lines.append(f"- {contradiction}")
             if not validation["contradictions"]:
                 md_lines.append("- None reported.")
+            hyp_vals = validation.get("hypothesis_validations") or []
+            if hyp_vals:
+                md_lines.extend(["", "**Per-hypothesis validation statuses:**"])
+                for hv in hyp_vals:
+                    codes = ", ".join(hv.get("reason_codes", [])) or "none"
+                    md_lines.append(
+                        f"- `{hv.get('hypothesis_id')}`: `{hv.get('validation_status')}` "
+                        f"(dossier `support_status`: `{hv.get('dossier_support_status')}`, reasons: `{codes}`)"
+                    )
+                    for rc in hv.get("rejected_claims", []):
+                        md_lines.append(
+                            f"  - Rejected evidence `{rc.get('evidence_id')}` (`{rc.get('reason_code')}`): {rc.get('details')}"
+                        )
             md_lines.extend(["", "**Rejected SOP citations:**"])
             for citation in validation["rejected_sop_citations"]:
                 md_lines.append(

@@ -183,3 +183,195 @@ def test_claim_within_tolerance_percentage_accepted(validator, base_context):
     )
     assert claim.status == HypothesisStatus.SUPPORTED
     assert claim.reason_code == ValidationReasonCode.CLAIM_CORROBORATED.value
+
+
+@pytest.fixture
+def gateway_dependency_context():
+    return {
+        "incident_id": "inc-p0-01-gateway",
+        "service_id": "api-gateway",
+        "environment": "lab",
+        "event_time": "2026-11-23T03:44:14Z",
+        "query_window": {
+            "start": "2026-11-23T03:39:14Z",
+            "end": "2026-11-23T03:45:14Z",
+        },
+        "evidence_items": [
+            {
+                "evidence_id": "ev-gw-rate-01",
+                "tool_name": "get_service_metrics",
+                "service_id": "api-gateway",
+                "source_ref": "prometheus",
+                "observed_at": "2026-11-23T03:44:28Z",
+                "data_quality": "complete",
+                "records": [
+                    {"service_id": "api-gateway", "metric_enum": "request_rate", "value": 0.4833},
+                    {"service_id": "api-gateway", "metric_enum": "request_rate", "value": 0.4833},
+                ],
+            },
+            {
+                "evidence_id": "ev-gw-log-503",
+                "tool_name": "search_error_logs",
+                "service_id": "api-gateway",
+                "source_ref": "loki",
+                "observed_at": "2026-11-23T03:44:28Z",
+                "data_quality": "complete",
+                "records": [
+                    {
+                        "service_id": "api-gateway",
+                        "status_code": 503,
+                        "error_code": "ERR_DEPENDENCY_UNAVAILABLE",
+                        "message": "ERR_DEPENDENCY_UNAVAILABLE: Downstream dependency on transaction-service refused connection",
+                    }
+                ],
+            },
+            {
+                "evidence_id": "ev-gw-trace-ok",
+                "tool_name": "get_trace_summary",
+                "service_id": "api-gateway",
+                "source_ref": "tempo",
+                "observed_at": "2026-11-23T03:44:28Z",
+                "data_quality": "complete",
+                "records": [
+                    {"service_id": "api-gateway", "span_id": "4d6de2bc32063db7", "duration_ms": 17.281, "status_code": "OK"}
+                ],
+            },
+            {
+                "evidence_id": "ev-notif-empty",
+                "tool_name": "search_error_logs",
+                "service_id": "notification-service",
+                "source_ref": "loki",
+                "observed_at": "2026-11-23T03:44:28Z",
+                "data_quality": "complete",
+                "records": [],
+            },
+            {
+                "evidence_id": "ev-notif-err",
+                "tool_name": "search_error_logs",
+                "service_id": "notification-service",
+                "source_ref": "loki",
+                "observed_at": "2026-11-23T03:44:28Z",
+                "data_quality": "complete",
+                "records": [
+                    {"service_id": "notification-service", "status_code": 500, "message": "SMTP relay timeout"}
+                ],
+            },
+        ],
+        "runbook_citations": [],
+    }
+
+
+def test_irrelevant_downstream_503_rejected_for_rate_limit_hypothesis(validator, gateway_dependency_context):
+    """Rate-limiting hypothesis citing 503 ERR_DEPENDENCY_UNAVAILABLE must be UNSUPPORTED, not PARTIAL/SUPPORTED."""
+    hyp = {
+        "hypothesis_id": "hyp-rate-limit",
+        "title": "api-gateway rate limiting or configuration change causing reduced request acceptance.",
+        "summary": "api-gateway rate limiting or configuration change",
+        "diagnosis": "Alternative degradation pathway in observation window.",
+        "estimated_root_cause": "api-gateway internal rate limiting or misconfigured thresholds blocking traffic.",
+        "supporting_evidence_ids": ["ev-gw-log-503"],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.UNSUPPORTED
+    assert ValidationReasonCode.IRRELEVANT_EVIDENCE.value in report.reason_codes
+    assert report.supporting_evidence_ids == []
+    assert any("ev-gw-log-503" in u for u in report.unknowns)
+
+
+def test_irrelevant_downstream_503_rejected_for_traffic_surge_hypothesis(validator, gateway_dependency_context):
+    """Traffic-surge hypothesis citing downstream 503 connection refusal must be UNSUPPORTED."""
+    hyp = {
+        "hypothesis_id": "hyp-traffic-surge",
+        "title": "upstream client traffic surge overwhelming api-gateway capacity.",
+        "summary": "upstream client traffic surge",
+        "diagnosis": "Sudden increase in client request rate exceeding api-gateway capacity.",
+        "supporting_evidence_ids": ["ev-gw-log-503"],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.UNSUPPORTED
+    assert ValidationReasonCode.IRRELEVANT_EVIDENCE.value in report.reason_codes
+    assert report.supporting_evidence_ids == []
+
+
+def test_flat_low_request_rate_contradicts_traffic_surge(validator, gateway_dependency_context):
+    """Flat low request_rate (0.4833 req/s) directly contradicts a traffic-surge claim -> CONTRADICTED."""
+    hyp = {
+        "hypothesis_id": "hyp-surge-contradicted",
+        "title": "upstream client traffic surge",
+        "diagnosis": "Sudden increase in client request rate overwhelming api-gateway.",
+        "supporting_evidence_ids": ["ev-gw-rate-01"],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.CONTRADICTED
+    assert ValidationReasonCode.CLAIM_CONTRADICTED.value in report.reason_codes
+    assert report.supporting_evidence_ids == []
+    assert "ev-gw-rate-01" in report.contradicting_evidence_ids
+
+
+def test_empty_records_and_service_mismatch_rejected(validator, gateway_dependency_context):
+    """Zero-record evidence and unrelated-service evidence cannot substantiate a failure claim."""
+    empty_claim = validator.validate_claim(
+        claim_text="transaction-service error spike",
+        evidence_id="ev-notif-empty",
+        context=gateway_dependency_context,
+    )
+    assert empty_claim.status == HypothesisStatus.UNSUPPORTED
+    assert empty_claim.reason_code == ValidationReasonCode.IRRELEVANT_EVIDENCE.value
+
+    wrong_svc = validator.validate_claim(
+        claim_text="transaction-service database connection failed",
+        evidence_id="ev-notif-err",
+        context=gateway_dependency_context,
+    )
+    assert wrong_svc.status == HypothesisStatus.UNSUPPORTED
+    assert wrong_svc.reason_code == ValidationReasonCode.IRRELEVANT_EVIDENCE.value
+
+
+def test_missing_supporting_evidence_preserves_uncertainty(validator, gateway_dependency_context):
+    """Hypothesis without supporting_evidence_ids stays UNSUPPORTED/INCONCLUSIVE with explicit unknowns."""
+    hyp = {
+        "hypothesis_id": "hyp-missing-ev",
+        "title": "api-gateway rate limiting configuration change",
+        "diagnosis": "Rate limit thresholds may have changed without configuration telemetry.",
+        "supporting_evidence_ids": [],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.UNSUPPORTED
+    assert ValidationReasonCode.MISSING_SUPPORTING_EVIDENCE.value in report.reason_codes
+    assert report.supporting_evidence_ids == []
+    assert any("no supporting evidence" in u.lower() for u in report.unknowns)
+
+
+def test_valid_downstream_dependency_evidence_corroborated_without_verified(validator, gateway_dependency_context):
+    """Valid downstream 503 ERR_DEPENDENCY_UNAVAILABLE evidence supports downstream dependency hypothesis, never VERIFIED."""
+    hyp = {
+        "hypothesis_id": "hyp-valid-dep",
+        "title": "api-gateway degraded due to downstream transaction-service connection refusal",
+        "diagnosis": "Downstream dependency on transaction-service refused connection causing 503 ERR_DEPENDENCY_UNAVAILABLE.",
+        "supporting_evidence_ids": ["ev-gw-log-503"],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.SUPPORTED
+    assert report.status != "VERIFIED"
+    assert report.supporting_evidence_ids == ["ev-gw-log-503"]
+    assert ValidationReasonCode.CLAIM_CORROBORATED.value in report.reason_codes
+
+
+def test_mixed_valid_and_irrelevant_evidence_yields_partial_pruned(validator, gateway_dependency_context):
+    """When valid and irrelevant evidence are both cited, irrelevant ID is pruned and status is PARTIAL."""
+    hyp = {
+        "hypothesis_id": "hyp-mixed",
+        "title": "api-gateway downstream transaction-service failure",
+        "diagnosis": "Downstream transaction-service refused connection causing 503 ERR_DEPENDENCY_UNAVAILABLE.",
+        "supporting_evidence_ids": ["ev-gw-log-503", "ev-notif-empty"],
+        "contradicting_evidence_ids": [],
+    }
+    report = validator.validate_hypothesis(hyp, gateway_dependency_context)
+    assert report.status == HypothesisStatus.PARTIAL
+    assert report.supporting_evidence_ids == ["ev-gw-log-503"]
+    assert ValidationReasonCode.IRRELEVANT_EVIDENCE.value in report.reason_codes

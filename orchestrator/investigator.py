@@ -1177,8 +1177,7 @@ class DeterministicInvestigator:
             }
             for hypothesis, report in zip(hypotheses, reports):
                 status = HypothesisStatus(report["status"])
-                # The current validator checks references and bounds, not semantic entailment.
-                # It cannot promote an LLM diagnosis to a supported finding.
+                # The validator cannot promote an unconfirmed LLM diagnosis to a verified/proven finding.
                 checked_ids = {
                     claim["evidence_id"] for claim in report["claims"]
                     if claim["status"] == HypothesisStatus.SUPPORTED
@@ -1187,11 +1186,21 @@ class DeterministicInvestigator:
                     evidence_id for evidence_id in report["supporting_evidence_ids"]
                     if evidence_id in usable_ids and evidence_id in checked_ids
                 ]
-                if not supporting_ids and status != HypothesisStatus.UNSUPPORTED:
+                if not supporting_ids and status not in (
+                    HypothesisStatus.UNSUPPORTED,
+                    HypothesisStatus.CONTRADICTED,
+                ):
                     status = HypothesisStatus.INCONCLUSIVE
                 elif status == HypothesisStatus.SUPPORTED:
                     status = HypothesisStatus.PARTIAL
                 hypothesis["status"] = status.value
+                raw_report_status = report["status"]
+                hypothesis["validation_status"] = (
+                    raw_report_status.value
+                    if hasattr(raw_report_status, "value")
+                    else str(raw_report_status)
+                )
+                hypothesis["validation_reason_codes"] = list(report.get("reason_codes", []))
                 hypothesis["confidence_score"] = min(
                     hypothesis.get("confidence_score", 0.5), report["confidence_score"]
                 )

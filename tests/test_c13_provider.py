@@ -484,3 +484,40 @@ def test_normalize_live_json_preserves_recommended_checks_and_sanitizes():
     assert len(validated["recommended_checks"]) == 2
     assert all("restart_service" not in item for item in validated["recommended_checks"])
 
+
+def test_normalize_live_json_does_not_attach_fake_evidence_to_uncorroborated_alternatives():
+    raw = {
+        "primary_hypothesis": {
+            "summary": "api-gateway downstream dependency unavailable",
+            "diagnosis": "transaction-service connection refused caused 503 ERR_DEPENDENCY_UNAVAILABLE.",
+            "confidence": "MEDIUM",
+            "estimated_root_cause": "Downstream transaction-service outage.",
+        },
+        "alternative_hypotheses": [
+            {
+                "summary": "api-gateway rate limiting configuration change",
+                "diagnosis": "Rate limit configuration might block requests, but no rate-limit telemetry exists.",
+                "confidence": "LOW",
+                "estimated_root_cause": "Misconfigured rate limit threshold.",
+                "supporting_evidence_ids": [],
+                "contradicting_evidence_ids": [],
+            },
+            {
+                "summary": "upstream client traffic surge",
+                "confidence": "LOW",
+                "estimated_root_cause": "Sudden surge in client requests.",
+            },
+        ],
+        "supporting_evidence_ids": ["ev-002"],
+        "contradicting_evidence_ids": [],
+        "unknowns": ["api-gateway rate limit configuration values"],
+    }
+    msgs = [{"role": "user", "content": '{"usable_evidence_ids":["ev-001","ev-002"]}'}]
+    normalized = _normalize_live_json_content(json.dumps(raw), msgs)
+    validated = validate_candidates(normalized, frozenset({"ev-001", "ev-002"}))
+    assert validated["supporting_evidence_ids"] == ["ev-002"]
+    assert len(validated["alternative_hypotheses"]) == 2
+    assert validated["alternative_hypotheses"][0]["supporting_evidence_ids"] == []
+    assert validated["alternative_hypotheses"][1]["supporting_evidence_ids"] == []
+
+

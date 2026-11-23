@@ -233,8 +233,6 @@ def _normalize_live_json_content(content: str, messages: list[dict[str, str]]) -
     }
 
     sup_ids = _filter_ids(raw.get("supporting_evidence_ids") or prim_raw.get("supporting_evidence_ids"))
-    if not sup_ids and usable_ids:
-        sup_ids = [usable_ids[0]]
     con_ids = [x for x in _filter_ids(raw.get("contradicting_evidence_ids") or prim_raw.get("contradicting_evidence_ids")) if x not in sup_ids]
 
     alt_list: list[dict[str, object]] = []
@@ -244,18 +242,15 @@ def _normalize_live_json_content(content: str, messages: list[dict[str, str]]) -
             if not isinstance(item, dict):
                 continue
             a_sup = _filter_ids(item.get("supporting_evidence_ids"))
-            if not a_sup and usable_ids:
-                a_sup = [usable_ids[-1]]
             a_con = [x for x in _filter_ids(item.get("contradicting_evidence_ids")) if x not in a_sup]
-            if a_sup:
-                alt_list.append({
-                    "summary": _clean_text(item.get("summary"), "Alternative transient anomaly candidate."),
-                    "diagnosis": _clean_text(item.get("diagnosis"), "Alternative degradation pathway in observation window."),
-                    "confidence": _clean_conf(item.get("confidence") or "LOW"),
-                    "estimated_root_cause": _clean_text(item.get("estimated_root_cause"), "Alternative upstream or resource contention factor."),
-                    "supporting_evidence_ids": a_sup,
-                    "contradicting_evidence_ids": a_con,
-                })
+            alt_list.append({
+                "summary": _clean_text(item.get("summary"), "Alternative transient anomaly candidate."),
+                "diagnosis": _clean_text(item.get("diagnosis"), "Candidate hypothesis requires supporting telemetry verification."),
+                "confidence": _clean_conf(item.get("confidence") or "LOW"),
+                "estimated_root_cause": _clean_text(item.get("estimated_root_cause"), "Alternative upstream or resource contention factor."),
+                "supporting_evidence_ids": a_sup,
+                "contradicting_evidence_ids": a_con,
+            })
 
     raw_unk = raw.get("unknowns")
     unknowns: list[str] = []
