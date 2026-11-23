@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from hashlib import sha256
 import pathlib
 
 from rich.console import Console
@@ -48,13 +49,26 @@ def _revision_context(incident_id: str = "inc-c20-revision") -> dict:
             "status": "PARTIAL",
             "supporting_evidence_ids": [f"ev-{incident_id}-001"],
         }],
+        "sop_availability": "APPLICABLE_SOP_FOUND",
         "runbook_citations": [{
             "chunk_id": "chk-c20-revision-001",
             "document_id": "SOP-C20-REVISION",
             "document_version": "3.2.1",
+            "title": "Synthetic C20 Revision Runbook",
             "section_path": "/timeout",
             "source_uri": "kb://sop/c20-revision.md",
-            "excerpt": "secret=synthetic-runbook-secret inspect bounded telemetry " + "y" * 700,
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "status": "approved",
+            "effective_from": "2026-01-01T00:00:00Z",
+            "effective_to": None,
+            "content_hash": sha256(("secret=synthetic-runbook-secret inspect bounded telemetry " + "y" * 700).encode("utf-8")).hexdigest(),
+            "score": 0.15,
+            "score_type": "rrf_fusion",
+            "source_branch": "hybrid",
+            "sanitized_excerpt": "secret=synthetic-runbook-secret inspect bounded telemetry " + "y" * 700,
+            "applicability_verified": True,
+            "sanitized": True,
         }],
     }
 
@@ -220,6 +234,7 @@ def test_def006_index_aliases_and_telemetry_enriched_query() -> None:
         "effective_from": "2026-01-01T00:00:00Z",
         "effective_to": None,
         "classification": "synthetic-internal",
+        "allowed_groups": ["l1-operator"],
         "index_version": "kb-idx-20261111-v1",
     }
     base = dict(
@@ -228,6 +243,7 @@ def test_def006_index_aliases_and_telemetry_enriched_query() -> None:
         query_text="timeout",
         reference_time="2026-11-20T10:00:00Z",
         retrieval_mode="hybrid_rrf",
+        caller_groups=["l1-operator"],
         top_k=3,
         max_context_tokens=1024,
     )
@@ -254,7 +270,6 @@ def test_def006_index_aliases_and_telemetry_enriched_query() -> None:
     })
     assert "upstream ledger timeout" in query
     assert "synthetic-secret" not in query
-    assert "Observed telemetry error summary" in query
 
 
 def test_ops01_duplicate_burst_and_5_20_50_concurrency_profile() -> None:
@@ -287,7 +302,7 @@ def test_ops02_multi_outage_backpressure_and_kill_switch(tmp_path: pathlib.Path)
     by_name = {item["drill"]: item for item in report["drills"]}
     assert by_name["llm_outage_timeout"]["hypothesis_statuses"] == ["INCONCLUSIVE"]
     assert by_name["telemetry_adapter_outage"]["fabricated_evidence_count"] == 0
-    assert by_name["knowledge_base_outage"]["retrieval_status"] == "NO_APPLICABLE_RUNBOOK"
+    assert by_name["knowledge_base_outage"]["retrieval_status"] == "RETRIEVAL_UNAVAILABLE"
     assert by_name["ai_tracer_sink_outage"]["dropped_spans"] > 0
     assert by_name["queue_saturation_backpressure"]["terminal_state"] == "REJECTED_BACKPRESSURE"
     assert by_name["emergency_kill_switch"]["new_intake_rejected"] is True

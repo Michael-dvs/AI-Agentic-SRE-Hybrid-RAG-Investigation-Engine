@@ -15,9 +15,14 @@ from observability.ai_tracer import SanitizedAITracer
 from observability.cost_tracker import CostAndResourceTracker
 from orchestrator.claim_validator_contract import ClaimValidator, HypothesisStatus
 from orchestrator.checkpoint import CheckpointManager
+from orchestrator.confidence import (
+    assess_sop_diagnostic_relevance,
+    compute_evidence_confidence,
+    confidence_label_for_score,
+    rank_hypotheses,
+)
 from orchestrator.dossier import DossierMarkdownRenderer, DossierSerializer
 from orchestrator.fallback import ManualFallbackGenerator
-from orchestrator.context_builder import ContextRejected
 from orchestrator.llm_investigator import LLMInvestigator, sanitized_citations
 from orchestrator.resilience import (
     BudgetExhaustedError,
@@ -71,34 +76,68 @@ class DeterministicInvestigator:
 
     @staticmethod
     def _retrieval_query_text(context: Dict[str, Any]) -> str:
-        service_id = str(context.get("service_id", "unknown-service"))
-        error_code = str(context.get("error_code", "ERR_UNKNOWN"))
-        observed: list[str] = []
+        service_id = context.get("service_id")
+        error_code = context.get("error_code")
+        observed = [error_code] if error_code and error_code != "ERR_UNKNOWN" else []
+        downstream_details: list[str] = []
+        primary_err_rate: str | None = None
         for evidence in context.get("evidence_items", []):
-            if evidence.get("tool_name") != "search_error_logs":
-                continue
-            for record in evidence.get("records", [])[:3]:
-                if not isinstance(record, dict):
-                    continue
-                detail = record.get("message") or record.get("error_code")
-                if detail:
-                    observed.append(str(detail))
-        if not observed and context.get("message"):
+            tname = evidence.get("tool_name")
+            ev_svc = evidence.get("service_id", service_id)
+            if tname == "search_error_logs":
+                for record in evidence.get("records", [])[:3]:
+                    if not isinstance(record, dict):
+                        continue
+                    rec_svc = record.get("service_id", ev_svc)
+                    detail = record.get("message") or record.get("error_code")
+                    if not detail:
+                        continue
+                    if rec_svc == service_id:
+                        observed.append(str(detail))
+                    elif len(downstream_details) < 2:
+                        downstream_details.append(f"{rec_svc}: {record.get('error_code') or detail}")
+            elif tname == "get_service_metrics" and ev_svc == service_id:
+                for record in evidence.get("records", []):
+                    if not isinstance(record, dict):
+                        continue
+                    m_name = str(record.get("metric_enum") or record.get("metric_name") or "").lower()
+                    val = record.get("value")
+                    if m_name in ("error_rate", "sim_red_error_rate_ratio") and isinstance(val, (int, float)) and val > 0:
+                        primary_err_rate = f"error_rate={float(val):.2f}"
+        if context.get("message"):
             observed.append(str(context["message"]))
-        sanitized, _ = DeterministicSanitizer().sanitize_text(" | ".join(observed))
-        telemetry_summary = sanitized[:512] or "no bounded error-log summary available"
-        return (
-            f"Troubleshooting runbook SOP for {service_id} {error_code}. "
-            f"Observed telemetry error summary: {telemetry_summary}"
-        )
+        if observed or primary_err_rate:
+            if primary_err_rate and len(observed) < 6:
+                observed.append(primary_err_rate)
+            for ds in downstream_details:
+                if ds not in observed:
+                    observed.append(ds)
+        sanitized, _ = DeterministicSanitizer().sanitize_text(" | ".join(dict.fromkeys(observed)))
+        return sanitized.strip()[:512]
 
     def investigate_incident(self, alert_or_incident: Dict[str, Any]) -> Dict[str, Any]:
         """Execute full 9-state investigation lifecycle: RECEIVED -> ... -> HUMAN_REVIEW."""
         raw_id = alert_or_incident.get("incident_id") or f"inc-{uuid.uuid4().hex[:12]}"
         incident_id = self._format_incident_id(raw_id)
-        service_id = alert_or_incident.get("service_id", "api-gateway")
-        environment = alert_or_incident.get("environment", "lab")
-        event_time = alert_or_incident.get("event_time") or utc_now_z()
+        raw_service = alert_or_incident.get("service_id")
+        has_service = isinstance(raw_service, str) and bool(raw_service.strip())
+        service_id = raw_service.strip() if has_service else "api-gateway"
+        raw_env = alert_or_incident.get("environment")
+        has_env = isinstance(raw_env, str) and bool(raw_env.strip())
+        environment = raw_env.strip() if has_env else "lab"
+        has_valid_time = True
+        if "event_time" in alert_or_incident:
+            raw_event_time = alert_or_incident.get("event_time")
+            has_valid_time = False
+            if isinstance(raw_event_time, str) and raw_event_time.endswith("Z"):
+                try:
+                    datetime.datetime.fromisoformat(raw_event_time[:-1] + "+00:00")
+                    has_valid_time = True
+                except ValueError:
+                    has_valid_time = False
+            event_time = raw_event_time if has_valid_time else utc_now_z()
+        else:
+            event_time = utc_now_z()
         error_code = alert_or_incident.get("error_code", "ERR_UNKNOWN")
         trace_id = alert_or_incident.get("trace_id")
 
@@ -132,6 +171,9 @@ class DeterministicInvestigator:
             "evidence_items": [],
             "runbook_citations": [],
             "no_applicable_runbook": False,
+            "sop_availability": "NOT_ASSESSED",
+            "sop_filter_reasons": [],
+            "has_match_context": has_service and has_env and has_valid_time,
             "hypotheses": [],
             "contradictions": [],
             "unknowns": [],
@@ -721,6 +763,52 @@ class DeterministicInvestigator:
             })
             seq += 1
 
+        # 4. Primary service error_rate (collected before retrieval & reasoning; non-fatal on open circuit)
+        primary_svc = context["service_id"]
+        has_primary_error_rate = any(
+            ev.get("tool_name") == "get_service_metrics"
+            and ev.get("service_id") == primary_svc
+            and any(
+                str(r.get("metric_enum") or r.get("metric_name") or "").lower()
+                in ("error_rate", "sim_red_error_rate_ratio")
+                for r in ev.get("records", [])
+                if isinstance(r, dict)
+            )
+            for ev in evidence_items
+        )
+        if not has_primary_error_rate:
+            try:
+                self.resilience.check_preflight(incident_id, "get_service_metrics")
+                err_metrics_res = self.gateway.execute_tool(
+                    tool_name="get_service_metrics",
+                    arguments={
+                        "service_id": primary_svc,
+                        "environment": context["environment"],
+                        "metric_enum": "error_rate",
+                        "start": window["start"],
+                        "end": window["end"],
+                        "max_points": 100,
+                    },
+                    token=f"Bearer {self.bearer_token}",
+                    incident_id=incident_id,
+                )
+                self.resilience.record_tool_result("get_service_metrics", err_metrics_res.get("status", "ok"))
+                evidence_items.append({
+                    "evidence_id": f"ev-{incident_id}-{seq:03d}",
+                    "tool_name": "get_service_metrics",
+                    "service_id": primary_svc,
+                    "source_ref": err_metrics_res.get("source_ref", "prometheus"),
+                    "observed_at": err_metrics_res.get("observed_at", utc_now_z()),
+                    "data_quality": err_metrics_res.get("data_quality", "complete"),
+                    "error_code": err_metrics_res.get("error_code"),
+                    "data": err_metrics_res,
+                    "records": err_metrics_res.get("records", []),
+                    "sanitized": err_metrics_res.get("sanitized") is True,
+                })
+                seq += 1
+            except CircuitOpenError:
+                context.setdefault("unknowns", []).append("Error-rate metrics source unavailable.")
+
         context["evidence_items"] = evidence_items
 
         self.sm.transition(
@@ -736,13 +824,12 @@ class DeterministicInvestigator:
         self.checkpoint.save_checkpoint(incident_id, "EVIDENCE_COLLECTED", context)
         return context
 
-    def _step_retrieved(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        self.resilience.check_cancellation(incident_id)
-        self.resilience.check_deadline(incident_id)
-
+    def _assess_runbooks(self, incident_id: str, context: dict) -> tuple[str, list[dict]]:
+        query = self._retrieval_query_text(context)
+        if (not context.get("has_match_context", True) or len(query) < 3
+                or not all(context.get(k) for k in ("service_id", "environment", "event_time"))):
+            return "INSUFFICIENT_MATCH_CONTEXT", []
         primary_service = context["service_id"]
-        error_code = context.get("error_code", "ERROR")
-
         try:
             self.resilience.check_preflight(incident_id, "retrieve_runbooks")
             retrieval_res = self.gateway.execute_tool(
@@ -750,7 +837,7 @@ class DeterministicInvestigator:
                 arguments={
                     "service_id": primary_service,
                     "environment": context["environment"],
-                    "query_text": self._retrieval_query_text(context),
+                    "query_text": query,
                     "reference_time": context["event_time"],
                     "retrieval_mode": "hybrid_rrf",
                     "top_k": 3,
@@ -760,38 +847,98 @@ class DeterministicInvestigator:
                 token=f"Bearer {self.bearer_token}",
                 incident_id=incident_id,
             )
-            self.resilience.record_tool_result("retrieve_runbooks", retrieval_res.get("status", "ok"))
+            status = retrieval_res.get("status")
+            self.resilience.record_tool_result("retrieve_runbooks", "ok" if status == "no_match" else status or "unavailable")
+            if status in ("ok", "no_match"):
+                candidates = sanitized_citations(retrieval_res)
+                filters = retrieval_res["applied_filters"]
+                principal = self.gateway.authenticator.authenticate(self.bearer_token, incident_id).principal_id
+                if (not retrieval_res["index_version"] or filters["caller_scope_ref"] != principal
+                        or filters["service_id"] != primary_service or filters["environment"] != context["environment"]
+                        or filters["reference_time"] != context["event_time"]
+                        or retrieval_res["retrieval_mode_executed"] != "hybrid_rrf"):
+                    return "RETRIEVAL_UNAVAILABLE", []
+                context["version_manifest"]["kb_version"] = retrieval_res["index_version"]
+                if status == "no_match" and not candidates and retrieval_res["gap_reason"] == "NO_APPLICABLE_RUNBOOK":
+                    return "NO_APPLICABLE_RUNBOOK", []
+                if status == "ok" and candidates and retrieval_res.get("gap_reason") is None:
+                    unique = {}
+                    for candidate in candidates:
+                        previous = unique.setdefault(candidate["chunk_id"], candidate)
+                        if previous != candidate:
+                            return "RETRIEVAL_UNAVAILABLE", []
+                    citations, _, sop_reasons = self.claim_validator.validate_sop_citations(
+                        list(unique.values()), primary_service, context["environment"], context["event_time"]
+                    )
+                    if citations:
+                        docs = {(c["document_id"], c["document_version"]) for c in citations}
+                        return ("CONFLICTING_OR_COMPETING_SOPS" if len(docs) > 1 else "APPLICABLE_SOP_FOUND"), citations
+                    allowed_filter_reasons = {
+                        "OBSOLETE_SOP",
+                        "SCOPE_MISMATCH",
+                        "OUT_OF_WINDOW",
+                        "MISSING_EVIDENCE_REF",
+                        "VALUE_MISMATCH",
+                    }
+                    context["sop_filter_reasons"] = [
+                        r for r in dict.fromkeys(sop_reasons) if r in allowed_filter_reasons
+                    ]
+                    return "SOP_FILTERED_OUT", []
+            if status == "rejected":
+                return "RETRIEVAL_REJECTED", []
+        except (DeadlineExceededError, BudgetExhaustedError, IncidentCancelledError):
+            raise
+        except Exception:
+            _LOG.warning("Runbook retrieval unavailable for incident %s", incident_id)
+        return "RETRIEVAL_UNAVAILABLE", []
 
-            citations = retrieval_res.get("citations", [])
+    def _step_retrieved(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        self.resilience.check_cancellation(incident_id)
+        self.resilience.check_deadline(incident_id)
+        availability, citations = self._assess_runbooks(incident_id, context)
 
-            if not citations or retrieval_res.get("status") != "ok":
-                context["no_applicable_runbook"] = True
-                context["runbook_citations"] = []
-                _LOG.info("No applicable runbook found for %s (%s)", primary_service, error_code)
-            else:
-                context["no_applicable_runbook"] = False
-                if self.llm:
-                    try:
-                        context["runbook_citations"] = sanitized_citations(retrieval_res)
-                    except ContextRejected:
-                        context["runbook_citations"] = []
-                        context["llm_context_error"] = "SCHEMA_INVALID"
-                        context["no_applicable_runbook"] = True
-                else:
-                    context["runbook_citations"] = citations
+        sop_relevance = assess_sop_diagnostic_relevance(citations, context)
 
-        except Exception as e:
-            _LOG.warning("Runbook retrieval failed for %s: %s", primary_service, e)
-            context["no_applicable_runbook"] = True
-            context["runbook_citations"] = []
+        context["runbook_citations"] = citations
+        context["sop_availability"] = availability
+        context["sop_relevance"] = sop_relevance
+        context["no_applicable_runbook"] = availability in ("NO_APPLICABLE_RUNBOOK", "SOP_FILTERED_OUT")
+        context["retrieval_diagnostics"] = {
+            "query_text": self._retrieval_query_text(context),
+            "retrieved_count": len(citations),
+            "retrieved_doc_ids": [
+                f"{c.get('document_id')}@{c.get('document_version')}"
+                for c in citations
+                if c.get("document_id")
+            ],
+            "sop_availability": availability,
+            "relevance_status": sop_relevance.get("status"),
+            "multi_sop_relation": sop_relevance.get("multi_sop_relation"),
+            "specific_coverage_gap": bool(sop_relevance.get("specific_coverage_gap")),
+        }
+        if sop_relevance.get("specific_coverage_gap"):
+            codes_str = ", ".join(sop_relevance.get("incident_error_codes") or []) or "observed error"
+            doc_str = ", ".join(
+                f"{c.get('document_id')} v{c.get('document_version')}"
+                for c in citations
+                if c.get("document_id")
+            )
+            gap_msg = (
+                f"Retrieved {context['service_id']} runbook(s) ({doc_str}) provide general/adjacent guidance only "
+                f"and do not specifically cover {codes_str} (no exact SOP match for {context['service_id']})."
+            )
+            unknowns = list(context.get("unknowns", []))
+            if gap_msg not in unknowns:
+                unknowns.append(gap_msg)
+            context["unknowns"] = unknowns
 
         self.sm.transition(
             incident_id=incident_id,
             to_state="RETRIEVED",
             idempotency_key=f"idem-{incident_id}-retrieved",
             reason_code="OK",
-            reason=f"Runbook retrieval completed (citations: {len(context['runbook_citations'])}, no_applicable: {context['no_applicable_runbook']})",
-            input_data={"service_id": primary_service, "error_code": error_code},
+            reason=f"Runbook assessment: {availability} ({len(citations)} citations)",
+            input_data={"service_id": context["service_id"], "error_code": context.get("error_code")},
             output_data={"citations_count": len(context["runbook_citations"])},
         )
         context["timeline"].append({"state": "RETRIEVED", "timestamp": utc_now_z()})
@@ -897,6 +1044,11 @@ class DeterministicInvestigator:
             context["llm_result"] = result
             usage = result.get("usage") if isinstance(result.get("usage"), dict) else {}
             manifest_info = result.get("manifest") if isinstance(result.get("manifest"), dict) else {}
+            in_tok = usage.get("input_tokens") if usage.get("input_tokens") is not None else usage.get("input_reported")
+            out_tok = usage.get("output_tokens") if usage.get("output_tokens") is not None else usage.get("output_reported")
+            tot_tok = usage.get("total_tokens")
+            if tot_tok is None and in_tok is not None and out_tok is not None:
+                tot_tok = in_tok + out_tok
             context["version_manifest"] = {
                 **context["version_manifest"],
                 "provider": manifest_info.get("provider"),
@@ -905,10 +1057,15 @@ class DeterministicInvestigator:
                 "prompt_version": manifest_info.get("prompt_sha256", "unknown"),
                 "llm_status": result.get("status"),
                 "llm_reason": result.get("reason_code"),
-                "input_tokens": usage.get("input_tokens"),
-                "output_tokens": usage.get("output_tokens"),
-                "total_tokens": usage.get("total_tokens"),
+                "input_tokens": in_tok,
+                "output_tokens": out_tok,
+                "total_tokens": tot_tok,
             }
+            ctx_diag = dict(context.get("llm_context_diagnostics") or {})
+            if isinstance(result.get("context_diagnostics"), dict):
+                ctx_diag.update(result["context_diagnostics"])
+            ctx_diag["provider_status"] = result.get("status")
+            ctx_diag["provider_reason_code"] = result.get("reason_code")
             if result["status"] == "accepted":
                 candidates = result["candidates"]
                 primary = {**candidates["primary_hypothesis"],
@@ -925,6 +1082,7 @@ class DeterministicInvestigator:
                         "candidate_cause": hypothesis["estimated_root_cause"],
                         "diagnosis": hypothesis["diagnosis"],
                         "confidence": hypothesis["confidence"],
+                        "llm_proposed_confidence": hypothesis["confidence"],
                         "confidence_score": {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}[hypothesis["confidence"]],
                         "status": "PARTIAL",
                         "supporting_evidence_ids": hypothesis["supporting_evidence_ids"],
@@ -935,24 +1093,21 @@ class DeterministicInvestigator:
                         [primary, *candidates["alternative_hypotheses"]], start=1
                     )
                 ]
-                context["unknowns"] = candidates["unknowns"]
-                if candidates.get("recommended_checks"):
-                    context["recommended_checks"] = list(candidates["recommended_checks"])
+                context["unknowns"] = list(dict.fromkeys([*context.get("unknowns", []), *candidates["unknowns"]]))
                 context["investigation_mode"] = "agentic_llm"
+                ctx_diag["hypothesis_generation_path"] = "llm_accepted"
             else:
                 context["investigation_mode"] = "manual_fallback"
-                context["unknowns"] = [
-                    f"LLM synthesis unavailable ({result['reason_code']}); C11 evidence baseline requires human triage."
-                ]
+                context["unknowns"] = list(dict.fromkeys([
+                    *context.get("unknowns", []),
+                    f"LLM synthesis unavailable ({result['reason_code']}); C11 evidence baseline requires human triage.",
+                ]))
                 context["review_summary"] = {
                     "status": "MANUAL_TRIAGE", "latest_review_event_id": None,
                     "reviewed_by": None, "reviewed_at": None,
                 }
-                context["recommended_checks"] = [
-                    "Manually correlate the collected logs, metrics and trace observation windows.",
-                    "Check unavailable telemetry sources and consult the applicable approved runbook.",
-                    "Have L1/L2 review the evidence and alternative causes before any human-controlled action.",
-                ]
+                ctx_diag["hypothesis_generation_path"] = "manual_fallback"
+            context["llm_context_diagnostics"] = ctx_diag
 
         self.sm.transition(
             incident_id=incident_id,
@@ -971,14 +1126,61 @@ class DeterministicInvestigator:
         """Compact evidence and citations so SanitizedContextBuilder stays within max_input_tokens."""
         primary_svc = context["service_id"]
         all_ev = context.get("evidence_items", [])
-        primary_ev = [e for e in all_ev if e.get("service_id") == primary_svc]
-        with_records = [e for e in (primary_ev or all_ev) if e.get("records")]
-        pool_ev = (with_records or primary_ev or all_ev)[:3]
+
+        def _ev_priority(ev: Dict[str, Any]) -> tuple[int, int, str]:
+            has_recs = bool(ev.get("records"))
+            tname = str(ev.get("tool_name") or "")
+            is_primary = ev.get("service_id") == primary_svc
+            if is_primary and tname == "search_error_logs" and has_recs:
+                tier = 0
+            elif is_primary and tname == "get_service_metrics" and has_recs:
+                m_names = {
+                    str(r.get("metric_enum") or r.get("metric_name") or "").lower()
+                    for r in ev.get("records", [])
+                    if isinstance(r, dict)
+                }
+                tier = 1 if ("error_rate" in m_names or "sim_red_error_rate_ratio" in m_names) else 2
+            elif not is_primary and tname == "search_error_logs" and has_recs:
+                tier = 3
+            elif is_primary and tname == "get_trace_summary" and has_recs:
+                tier = 4
+            elif has_recs:
+                tier = 5
+            elif ev.get("data_quality") == "unavailable" or ev.get("error_code"):
+                tier = 6
+            else:
+                tier = 7
+            return (tier, 0 if is_primary else 1, str(ev.get("evidence_id") or ""))
+
+        ordered_ev = sorted(all_ev, key=_ev_priority)
+        pool_ev = ordered_ev[:4]
+
+        raw_citations = [c for c in context.get("runbook_citations", []) if isinstance(c, dict)]
+        rel_map: dict[str, str] = {}
+        sop_rel = context.get("sop_relevance")
+        if isinstance(sop_rel, dict):
+            for entry in sop_rel.get("citations", []):
+                if isinstance(entry, dict) and entry.get("chunk_id") and entry.get("relevance_class"):
+                    rel_map[str(entry["chunk_id"])] = str(entry["relevance_class"])
+        rel_order = {
+            "EXACT_ERROR_CODE_MATCH": 0,
+            "MECHANISM_MATCH": 1,
+            "GENERAL_SERVICE_GUIDANCE": 2,
+            "ADJACENT_MECHANISM_MISMATCH": 3,
+        }
+        ordered_citations = sorted(
+            raw_citations,
+            key=lambda c: (
+                rel_order.get(rel_map.get(str(c.get("chunk_id") or ""), ""), 2),
+                str(c.get("chunk_id") or ""),
+            ),
+        )
+
         keep_rec_keys = {
-            "metric_name", "metric_enum", "value", "unit", "timestamp",
+            "metric_name", "metric_enum", "value", "unit",
             "severity", "error_code", "message",
             "span_id", "duration_ms", "operation", "status_code", "error",
-            "service_name", "sanitized",
+            "service_name",
         }
 
         def _shrink_record(rec: Any, ev_svc: Any) -> Any:
@@ -1000,16 +1202,22 @@ class DeterministicInvestigator:
                 recs = [_shrink_record(r, ev_svc) for r in ev.get("records", [])[:max_recs]]
                 data_obj = ev.get("data")
                 compact_item = {**ev, "records": recs}
-                if isinstance(data_obj, dict) and "records" in data_obj:
-                    compact_item["data"] = {**data_obj, "records": recs}
+                if isinstance(data_obj, dict):
+                    shrunk_data = {
+                        k: data_obj[k]
+                        for k in ("status", "data_quality", "error_code", "sanitized")
+                        if k in data_obj
+                    }
+                    if "records" in data_obj:
+                        shrunk_data["records"] = recs
+                    compact_item["data"] = shrunk_data
                 compact_ev.append(compact_item)
             compact_cites = []
-            for cite in context.get("runbook_citations", [])[:max_cites]:
-                if isinstance(cite, dict):
-                    c = dict(cite)
-                    if isinstance(c.get("sanitized_excerpt"), str) and len(c["sanitized_excerpt"]) > excerpt_len:
-                        c["sanitized_excerpt"] = c["sanitized_excerpt"][: excerpt_len - 3] + "..."
-                    compact_cites.append(c)
+            for cite in ordered_citations[:max_cites]:
+                c = dict(cite)
+                if isinstance(c.get("sanitized_excerpt"), str) and len(c["sanitized_excerpt"]) > excerpt_len:
+                    c["sanitized_excerpt"] = c["sanitized_excerpt"][: max(3, excerpt_len) - 3] + "..."
+                compact_cites.append(c)
             llm_scope = list(dict.fromkeys([primary_svc, *(e.get("service_id", primary_svc) for e in compact_ev)]))
             return {
                 **context,
@@ -1019,28 +1227,65 @@ class DeterministicInvestigator:
             }
 
         max_tokens = getattr(getattr(self.llm, "limits", None), "max_input_tokens", 4096)
+        chosen: Dict[str, Any] | None = None
+        chosen_rung = "fallback_1_1_0_0"
+        builder = None
         try:
             from orchestrator.context_builder import SanitizedContextBuilder
             from orchestrator.llm_investigator import HYPOTHESIS_SCHEMA
             builder = SanitizedContextBuilder()
         except Exception:
-            return _build_candidate(3, 1, 1, 160)
+            builder = None
 
-        for max_ev, max_recs, max_cites, excerpt_len in (
-            (3, 1, 1, 160),
-            (3, 1, 1, 80),
+        ladder = (
+            (4, 1, 2, 240),
+            (4, 1, 2, 160),
+            (3, 1, 2, 160),
+            (3, 1, 2, 120),
+            (3, 1, 1, 140),
+            (2, 1, 2, 120),
+            (2, 1, 1, 100),
+            (2, 1, 1, 80),
             (3, 1, 0, 0),
             (2, 1, 0, 0),
             (1, 1, 0, 0),
-        ):
-            candidate = _build_candidate(max_ev, max_recs, max_cites, excerpt_len)
-            try:
-                prepared = builder.build(candidate, HYPOTHESIS_SCHEMA)
-                if prepared.input_tokens_upper_bound <= max_tokens:
-                    return candidate
-            except Exception:
-                return candidate
-        return _build_candidate(1, 1, 0, 0)
+        )
+        if builder is None:
+            chosen = _build_candidate(3, 1, 1, 160)
+            chosen_rung = "no_builder_3_1_1_160"
+        else:
+            for max_ev, max_recs, max_cites, excerpt_len in ladder:
+                candidate = _build_candidate(max_ev, max_recs, max_cites, excerpt_len)
+                rung_name = f"{max_ev}_{max_recs}_{max_cites}_{excerpt_len}"
+                try:
+                    prepared = builder.build(candidate, HYPOTHESIS_SCHEMA)
+                    if prepared.input_tokens_upper_bound <= max_tokens:
+                        chosen = candidate
+                        chosen_rung = rung_name
+                        break
+                except Exception:
+                    chosen = candidate
+                    chosen_rung = f"error_{rung_name}"
+                    break
+            if chosen is None:
+                chosen = _build_candidate(1, 1, 0, 0)
+                chosen_rung = "exhausted_1_1_0_0"
+
+        context["llm_context_diagnostics"] = {
+            "retrieved_citations_count": len(raw_citations),
+            "selected_citations_count": len(chosen.get("runbook_citations", [])),
+            "selected_citation_chunk_ids": [
+                c.get("chunk_id") for c in chosen.get("runbook_citations", []) if c.get("chunk_id")
+            ],
+            "selected_evidence_ids": [
+                e.get("evidence_id") for e in chosen.get("evidence_items", []) if e.get("evidence_id")
+            ],
+            "compaction_rung": chosen_rung,
+            "budget_truncated_citations": len(chosen.get("runbook_citations", [])) < len(raw_citations),
+            "budget_dropped_all_citations": bool(raw_citations) and not chosen.get("runbook_citations"),
+            "max_input_tokens_budget": max_tokens,
+        }
+        return chosen
 
     def _step_validated(self, incident_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Validate hypotheses with honest uncertainty checking (EV-01, EV-02, RULE-006)."""
@@ -1051,27 +1296,39 @@ class DeterministicInvestigator:
         if context.get("investigation_mode") == "agentic_llm":
             window = context["query_window"]
             svc = context["service_id"]
-            try:
-                self.resilience.check_preflight(incident_id, "get_service_metrics")
-                result = self.gateway.execute_tool(
-                    tool_name="get_service_metrics",
-                    arguments={"service_id": svc, "environment": context["environment"],
-                               "metric_enum": "error_rate", "start": window["start"],
-                               "end": window["end"], "max_points": 100},
-                    token=f"Bearer {self.bearer_token}", incident_id=incident_id,
+            already_has_error_rate = any(
+                ev.get("tool_name") == "get_service_metrics"
+                and ev.get("service_id") == svc
+                and any(
+                    str(r.get("metric_enum") or r.get("metric_name") or "").lower()
+                    in ("error_rate", "sim_red_error_rate_ratio")
+                    for r in ev.get("records", [])
+                    if isinstance(r, dict)
                 )
-                self.resilience.record_tool_result("get_service_metrics", result.get("status", "ok"))
-                evidence_items.append({
-                    "evidence_id": f"ev-{incident_id}-{len(evidence_items) + 1:03d}",
-                    "tool_name": "get_service_metrics", "service_id": svc,
-                    "source_ref": result.get("source_ref", "prometheus"),
-                    "observed_at": result.get("observed_at", utc_now_z()),
-                    "data_quality": result.get("data_quality", "complete"),
-                    "error_code": result.get("error_code"), "data": result,
-                    "records": result.get("records", []), "sanitized": result.get("sanitized") is True,
-                })
-            except CircuitOpenError:
-                context.setdefault("unknowns", []).append("Error-rate metrics source unavailable.")
+                for ev in evidence_items
+            )
+            if not already_has_error_rate:
+                try:
+                    self.resilience.check_preflight(incident_id, "get_service_metrics")
+                    result = self.gateway.execute_tool(
+                        tool_name="get_service_metrics",
+                        arguments={"service_id": svc, "environment": context["environment"],
+                                   "metric_enum": "error_rate", "start": window["start"],
+                                   "end": window["end"], "max_points": 100},
+                        token=f"Bearer {self.bearer_token}", incident_id=incident_id,
+                    )
+                    self.resilience.record_tool_result("get_service_metrics", result.get("status", "ok"))
+                    evidence_items.append({
+                        "evidence_id": f"ev-{incident_id}-{len(evidence_items) + 1:03d}",
+                        "tool_name": "get_service_metrics", "service_id": svc,
+                        "source_ref": result.get("source_ref", "prometheus"),
+                        "observed_at": result.get("observed_at", utc_now_z()),
+                        "data_quality": result.get("data_quality", "complete"),
+                        "error_code": result.get("error_code"), "data": result,
+                        "records": result.get("records", []), "sanitized": result.get("sanitized") is True,
+                    })
+                except CircuitOpenError:
+                    context.setdefault("unknowns", []).append("Error-rate metrics source unavailable.")
         if context.get("investigation_mode") == "agentic_llm":
             return self._validate_agentic(incident_id, context)
 
@@ -1107,30 +1364,40 @@ class DeterministicInvestigator:
                 "Discrepancy detected: Error logs capture active exceptions, but metrics query returned no telemetry points (EV-01)."
             )
 
-        # 3. Assign validated status to hypotheses
+        # 3. Assign validated status and evidence-aware confidence to hypotheses
+        is_manual_fb = context.get("investigation_mode") == "manual_fallback"
         for hyp in hypotheses:
-            if context.get("investigation_mode") == "manual_fallback":
+            sup_ids = list(hyp.get("supporting_evidence_ids", []))
+            ref_ids = list(hyp.get("refuting_evidence_ids", []))
+            if is_manual_fb:
                 hyp["status"] = "INCONCLUSIVE"
-                hyp["confidence_score"] = min(hyp.get("confidence_score", 0.5), 0.30)
             elif trace_outage:
-                # Must abstain / downgrade when trace is missing
                 hyp["status"] = "INCONCLUSIVE"
-                hyp["confidence_score"] = min(hyp.get("confidence_score", 0.5), 0.40)
             elif contradictions:
-                # Contradictory evidence
                 hyp["status"] = "PARTIAL"
-                hyp["confidence_score"] = min(hyp.get("confidence_score", 0.5), 0.50)
-            elif not hyp.get("supporting_evidence_ids"):
+            elif not sup_ids:
                 hyp["status"] = "INCONCLUSIVE"
-                hyp["confidence_score"] = 0.20
-            elif context.get("investigation_mode") == "agentic_llm":
-                # C13 proves schema/references, not the semantic claim validation owned by C14.
-                hyp["status"] = "PARTIAL"
             else:
                 hyp["status"] = "SUPPORTED"
 
+            assessment = compute_evidence_confidence(
+                status=hyp["status"],
+                supporting_evidence_ids=sup_ids,
+                contradicting_evidence_ids=ref_ids,
+                evidence_items=evidence_items,
+                contradictions=contradictions,
+                unknowns=unknowns,
+                trace_outage=trace_outage,
+                manual_fallback=is_manual_fb,
+            )
+            hyp["confidence_score"] = assessment.score
+            hyp["confidence"] = assessment.label
+            hyp["confidence_breakdown"] = assessment.breakdown
+            hyp["confidence_rationale"] = assessment.rationale
+
+        hypotheses = rank_hypotheses(hypotheses)
         context["contradictions"] = contradictions
-        context["unknowns"] = unknowns
+        context["unknowns"] = list(dict.fromkeys(unknowns))
         context["hypotheses"] = hypotheses
 
         self.sm.transition(
@@ -1195,23 +1462,79 @@ class DeterministicInvestigator:
                     status = HypothesisStatus.PARTIAL
                 hypothesis["status"] = status.value
                 raw_report_status = report["status"]
-                hypothesis["validation_status"] = (
+                validation_status = (
                     raw_report_status.value
                     if hasattr(raw_report_status, "value")
                     else str(raw_report_status)
                 )
+                hypothesis["validation_status"] = validation_status
                 hypothesis["validation_reason_codes"] = list(report.get("reason_codes", []))
-                hypothesis["confidence_score"] = min(
-                    hypothesis.get("confidence_score", 0.5), report["confidence_score"]
+                hypothesis["llm_proposed_confidence"] = (
+                    hypothesis.get("llm_proposed_confidence") or hypothesis.get("confidence")
                 )
+                if supporting_ids == report["supporting_evidence_ids"] and report.get("confidence_breakdown"):
+                    validated_score = float(report["confidence_score"])
+                    breakdown = dict(report["confidence_breakdown"])
+                    validated_label = str(
+                        report.get("confidence_label") or confidence_label_for_score(validated_score)
+                    )
+                else:
+                    recomputed = compute_evidence_confidence(
+                        status=validation_status,
+                        supporting_evidence_ids=supporting_ids,
+                        contradicting_evidence_ids=report["contradicting_evidence_ids"],
+                        evidence_items=context.get("evidence_items", []),
+                        claims=report.get("claims", []),
+                        contradictions=report.get("contradictions", []),
+                        unknowns=report.get("unknowns", []),
+                        reason_codes=report.get("reason_codes", []),
+                        llm_proposed_confidence=str(hypothesis.get("llm_proposed_confidence") or ""),
+                        trace_outage=("SOURCE_UNAVAILABLE" in report.get("reason_codes", [])),
+                        has_forbidden_verified=("VERIFIED_STATUS_FORBIDDEN" in report.get("reason_codes", [])),
+                    )
+                    validated_score = recomputed.score
+                    validated_label = recomputed.label
+                    breakdown = {
+                        **recomputed.breakdown,
+                        "rationale": recomputed.rationale,
+                        "score_semantics": recomputed.score_semantics,
+                        "is_calibrated_probability": recomputed.is_calibrated_probability,
+                    }
+                hypothesis["confidence_score"] = validated_score
+                hypothesis["confidence"] = validated_label
+                hypothesis["confidence_breakdown"] = breakdown
+                if breakdown.get("rationale"):
+                    hypothesis["confidence_rationale"] = str(breakdown["rationale"])
                 hypothesis["supporting_evidence_ids"] = supporting_ids
                 hypothesis["refuting_evidence_ids"] = report["contradicting_evidence_ids"]
                 hypothesis["unknowns"] = list(dict.fromkeys(
                     [*hypothesis.get("unknowns", []), *report["unknowns"]]
                 ))
-            context["validation_reports"] = reports
+            hypotheses = rank_hypotheses(hypotheses)
+            context["hypotheses"] = hypotheses
+            report_by_id = {r["hypothesis_id"]: r for r in reports}
+            context["validation_reports"] = [
+                report_by_id[h["hypothesis_id"]] for h in hypotheses if h["hypothesis_id"] in report_by_id
+            ]
             context["runbook_citations"] = valid_citations
-            context["no_applicable_runbook"] = not bool(valid_citations)
+            if citations and not valid_citations:
+                allowed_filter_reasons = {
+                    "OBSOLETE_SOP",
+                    "SCOPE_MISMATCH",
+                    "OUT_OF_WINDOW",
+                    "MISSING_EVIDENCE_REF",
+                    "VALUE_MISMATCH",
+                }
+                context["sop_filter_reasons"] = list(dict.fromkeys(
+                    r for report in reports for r in report.get("reason_codes", []) if r in allowed_filter_reasons
+                ))
+                context["sop_availability"] = "SOP_FILTERED_OUT"
+                context["no_applicable_runbook"] = True
+            elif valid_citations:
+                docs = {(c["document_id"], c["document_version"]) for c in valid_citations}
+                context["sop_availability"] = (
+                    "CONFLICTING_OR_COMPETING_SOPS" if len(docs) > 1 else "APPLICABLE_SOP_FOUND"
+                )
             context["contradictions"] = list(dict.fromkeys([
                 *context.get("contradictions", []),
                 *(item for report in reports for item in report["contradictions"]),
@@ -1222,10 +1545,12 @@ class DeterministicInvestigator:
             ]))
         except Exception:
             context["runbook_citations"] = []
-            context["no_applicable_runbook"] = True
+            context["sop_availability"] = "RETRIEVAL_UNAVAILABLE"
+            context["no_applicable_runbook"] = False
             for hypothesis in hypotheses:
                 hypothesis["status"] = "INCONCLUSIVE"
                 hypothesis["confidence_score"] = min(hypothesis.get("confidence_score", 0.5), 0.30)
+                hypothesis["confidence"] = confidence_label_for_score(hypothesis["confidence_score"])
             raise
 
         self.sm.transition(

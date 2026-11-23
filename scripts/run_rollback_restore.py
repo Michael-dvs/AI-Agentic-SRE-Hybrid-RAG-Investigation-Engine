@@ -357,7 +357,8 @@ def drill_kb_index_alias_rollback(repo_root: pathlib.Path) -> dict[str, Any]:
         "max_context_tokens": 1024,
         "index_version_policy": "kb_active_alias",
     }
-    res_base = retrieval_service.execute_retrieval(req)
+    drill_groups = ["l1-operator"]  # Declared by the synthetic ledger SOPs used in this drill.
+    res_base = retrieval_service.execute_retrieval(req, caller_groups=drill_groups)
     base_doc_versions = [(c.document_id, c.document_version) for c in res_base.citations]
     query_cache["ledger_latency"] = [f"{d}:{v}" for d, v in base_doc_versions]
 
@@ -371,7 +372,7 @@ def drill_kb_index_alias_rollback(repo_root: pathlib.Path) -> dict[str, Any]:
     staging_engine = RetrievalEngine(chunks=staging_manifest.chunks, index_version=staging_manifest.index_version)
     retrieval_service = RetrievalService(engine=staging_engine)
     query_cache.clear()
-    res_staging = retrieval_service.execute_retrieval(req)
+    res_staging = retrieval_service.execute_retrieval(req, caller_groups=drill_groups)
     staging_doc_versions = [(c.document_id, c.document_version) for c in res_staging.citations]
 
     # 3. 1-step deterministic rollback to baseline_manifest via kb_active_alias
@@ -382,7 +383,7 @@ def drill_kb_index_alias_rollback(repo_root: pathlib.Path) -> dict[str, Any]:
     restored_engine = RetrievalEngine(chunks=restored_manifest.chunks, index_version=restored_manifest.index_version)
     retrieval_service = RetrievalService(engine=restored_engine)
     query_cache.clear()
-    res_restored = retrieval_service.execute_retrieval(req)
+    res_restored = retrieval_service.execute_retrieval(req, caller_groups=drill_groups)
     restored_doc_versions = [(c.document_id, c.document_version) for c in res_restored.citations]
 
     has_active_v2_base = ("SOP-LEDGER-001", "2.0.0") in base_doc_versions

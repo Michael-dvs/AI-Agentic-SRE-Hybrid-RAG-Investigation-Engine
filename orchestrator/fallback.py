@@ -82,42 +82,6 @@ class ManualFallbackGenerator:
         unknowns.append("Full dependency graph and span waterfall could not be verified automatically.")
         fallback_ctx["unknowns"] = unknowns
 
-        # Add Standard Emergency Manual Triage Checklist
-        fallback_ctx["recommended_checks"] = [
-            {
-                "check_id": "chk-fb-01",
-                "description": f"Inspect live service metrics and 5xx error rates directly on Prometheus for {service_id}.",
-                "risk_level": "medium",
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": None,
-            },
-            {
-                "check_id": "chk-fb-02",
-                "description": f"Perform raw error log query on Loki for {service_id} over the incident window.",
-                "risk_level": "medium",
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": None,
-            },
-            {
-                "check_id": "chk-fb-03",
-                "description": "Check database connection pool utilization and pending locks on backend databases.",
-                "risk_level": "high",
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": None,
-            },
-            {
-                "check_id": "chk-fb-04",
-                "description": "Consult incident runbook repository and coordinate with primary service owner.",
-                "risk_level": "low",
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": None,
-            },
-        ]
-
         # Set review summary to MANUAL_TRIAGE
         fallback_ctx["review_summary"] = {
             "status": "MANUAL_TRIAGE",

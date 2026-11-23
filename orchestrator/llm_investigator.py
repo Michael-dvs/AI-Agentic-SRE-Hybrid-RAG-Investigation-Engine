@@ -261,25 +261,32 @@ class LLMInvestigator:
             target_ref="controlled_llm", result_code="ALLOW" if dispatch else "FALLBACK",
             reason_code=code, incident_id=incident_id, request_payload={"reason_code": reason})
 
-    def _fallback(self, incident_id: str, code: str) -> dict:
+    def _fallback(self, incident_id: str, code: str, *, context_diagnostics: dict | None = None) -> dict:
         self._audit(incident_id, code)
         event = {"incident_id": incident_id, "observed_at": utc_now_z(), "reason_code": code,
                  "status": "INCONCLUSIVE", "investigation_mode": "manual_fallback",
                  "sanitized": True, "usage": self.ledger.usage(incident_id)}
         self._append("llm-outage-fallback-audit.jsonl", event)
-        return {"status": "fallback", "reason_code": code, "usage": event["usage"], "manifest": self.manifest()}
+        payload = {"status": "fallback", "reason_code": code, "usage": event["usage"], "manifest": self.manifest()}
+        if context_diagnostics is not None:
+            payload["context_diagnostics"] = context_diagnostics
+        return payload
 
     def generate(self, context: dict, resilience: ResilienceController) -> dict:
         incident_id = context["incident_id"]
         resilience.check_cancellation(incident_id)
         if context.get("llm_context_error"):
-            return self._fallback(incident_id, "SCHEMA_INVALID")
+            return self._fallback(incident_id, "SCHEMA_INVALID", context_diagnostics={"context_rejected": "SCHEMA_INVALID"})
         try:
             prepared = self.builder.build(context, HYPOTHESIS_SCHEMA)
         except ContextRejected as exc:
-            return self._fallback(incident_id, exc.code)
+            return self._fallback(incident_id, exc.code, context_diagnostics={"context_rejected": exc.code})
         if prepared.input_tokens_upper_bound > self.limits.max_input_tokens:
-            return self._fallback(incident_id, "LIMIT_EXCEEDED")
+            return self._fallback(
+                incident_id,
+                "LIMIT_EXCEEDED",
+                context_diagnostics={**prepared.diagnostics, "limit_exceeded": True},
+            )
         identity = {"messages": prepared.messages, "manifest": self.manifest()}
         fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
         owner, previous = self.ledger.begin(incident_id, fingerprint)
@@ -329,14 +336,24 @@ class LLMInvestigator:
                     "sanitized": True,
                     "candidates": candidates,
                 })
-                return {"status": "accepted", "reason_code": "OK", "candidates": candidates,
-                        "usage": self.ledger.usage(incident_id), "manifest": self.manifest()}
+                return {
+                    "status": "accepted",
+                    "reason_code": "OK",
+                    "candidates": candidates,
+                    "usage": self.ledger.usage(incident_id),
+                    "manifest": self.manifest(),
+                    "context_diagnostics": dict(getattr(prepared, "diagnostics", {}) or {}),
+                }
             except OutputRejected as exc:
                 self._append("sanitized-model-io.jsonl", {
                     "incident_id": incident_id, "attempt": attempt + 1, "direction": "output",
                     "sanitized": True, "content_retained": False, "reason_code": exc.code,
                 })
-                return self._fallback(incident_id, exc.code)
+                return self._fallback(
+                    incident_id,
+                    exc.code,
+                    context_diagnostics=dict(getattr(prepared, "diagnostics", {}) or {}),
+                )
             except (ProviderError, TimeoutError) as exc:
                 last_error = exc.code if isinstance(exc, ProviderError) else "BACKEND_TIMEOUT"
                 self.ledger.record_usage(incident_id, None, None)
@@ -348,4 +365,8 @@ class LLMInvestigator:
                 if attempt < self.limits.max_retries:
                     delay = 0.1 * (2 ** attempt) + random.uniform(0, 0.05)
                     await asyncio.sleep(min(delay, max(0, remaining - timeout)))
-        return self._fallback(incident_id, last_error)
+        return self._fallback(
+            incident_id,
+            last_error,
+            context_diagnostics=dict(getattr(prepared, "diagnostics", {}) or {}),
+        )

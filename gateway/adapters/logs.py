@@ -83,7 +83,8 @@ class LogsAdapter(BaseTelemetryAdapter):
         service_id = arguments.get("service_id")
         start = arguments.get("start") or arguments.get("start_time")
         end = arguments.get("end") or arguments.get("end_time")
-        severity = arguments.get("severity", "ERROR")
+        explicit_severity = arguments.get("severity")
+        severity = explicit_severity if explicit_severity is not None else "ERROR"
         search_query = arguments.get("search_query")
         error_code = arguments.get("error_code")
         req_max_hits = arguments.get("max_hits", self.max_hits_cap)
@@ -159,9 +160,14 @@ class LogsAdapter(BaseTelemetryAdapter):
 
         params: dict[str, Any] = {
             "service_id": service_id,
-            "severity": severity.upper() if severity else "ERROR",
             "limit": fetch_limit,
         }
+        # When an explicit error_code is queried without explicit severity, allow WARN/ERROR/CRITICAL/FATAL
+        # so HTTP 4xx errors (e.g., 403 ERR_AUTH_POLICY_MISMATCH) and WARN_DB_SLOW_QUERY are observable.
+        if explicit_severity is not None:
+            params["severity"] = str(explicit_severity).upper()
+        elif not error_code:
+            params["severity"] = "ERROR"
         if error_code:
             params["error_code"] = error_code
         if search_query:
@@ -219,7 +225,13 @@ class LogsAdapter(BaseTelemetryAdapter):
                 query_window=query_window,
             )
 
-        # Step I: Truncate to max_hits (ADR-S05 cap: 500)
+        # Step I: Filter non-error/non-warn records when severity omitted and truncate to max_hits (ADR-S05 cap: 500)
+        if explicit_severity is None and error_code:
+            raw_records = [
+                rec for rec in raw_records
+                if isinstance(rec, dict)
+                and (not rec.get("severity") or str(rec.get("severity")).upper() in ALLOWED_SEVERITIES)
+            ]
         truncated = False
         if len(raw_records) > target_limit:
             records = raw_records[:target_limit]

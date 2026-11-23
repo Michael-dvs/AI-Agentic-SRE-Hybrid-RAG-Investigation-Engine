@@ -55,7 +55,12 @@ def test_evaluate_retrieval_queries_handles_positive_and_negative_synthetic_quer
     manifest, _ = manager.build_manifest_from_corpus(
         _REPO_ROOT / "knowledge_base" / "corpus", "kb-idx-20261111-v1"
     )
-    engine = RetrievalEngine(chunks=manifest.chunks, index_version="kb-idx-20261111-v1")
+    # The benchmark fixes its L1 principal. Bind only this positive test corpus to that role.
+    fixture_chunks = [
+        {**chunk, "allowed_groups": ["sre-core-l1"]} if chunk["classification"] == "synthetic-internal" else chunk
+        for chunk in manifest.chunks
+    ]
+    engine = RetrievalEngine(chunks=fixture_chunks, index_version=manifest.index_version)
     service = RetrievalService(engine=engine)
 
     synthetic_queries = [

@@ -48,6 +48,21 @@ METRIC_QUERY_MAP = {
     "latency_p95": "sim_red_latency_p95_ms",
 }
 
+# Explicit units per metric name to avoid mislabeling absolute request rates as ratios
+METRIC_UNIT_MAP = {
+    "request_rate": "req/s",
+    "sim_red_request_rate_rps": "req/s",
+    "error_rate": "ratio",
+    "sim_red_error_rate_ratio": "ratio",
+    "latency_p95": "ms",
+    "sim_red_latency_p95_ms": "ms",
+    "http_requests_total": "count",
+    "http_request_duration_seconds_count": "count",
+    "http_request_duration_seconds_bucket": "s",
+    "process_cpu_seconds_total": "s",
+    "process_resident_memory_bytes": "bytes",
+}
+
 # Known services from Service Catalog (C05)
 KNOWN_SERVICES = {
     "api-gateway",
@@ -219,7 +234,7 @@ class MetricsAdapter(BaseTelemetryAdapter):
                                 "service_id": meta.get("service_id", service_id),
                                 "metric_name": metric_name,
                                 "value": val_num,
-                                "unit": "ratio" if "rate" in metric_name else "ms",
+                                "unit": METRIC_UNIT_MAP.get(metric_name, "ms"),
                             })
             elif "records" in body and isinstance(body["records"], list):
                 records = body["records"]

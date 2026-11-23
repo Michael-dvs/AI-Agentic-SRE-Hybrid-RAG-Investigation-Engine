@@ -11,6 +11,9 @@ from typing import Any, Dict, List, Optional
 from jsonschema import Draft202012Validator, FormatChecker
 
 from gateway.sanitizer import DeterministicSanitizer
+from orchestrator.claim_validator_contract import ClaimValidator
+from orchestrator.confidence import confidence_label_for_score
+from orchestrator.verification_plan import SOP_GAPS, availability_text, build_pending_checks, sop_document_keys
 
 
 _DOSSIER_SANITIZER = DeterministicSanitizer()
@@ -228,15 +231,6 @@ class DossierSerializer:
                 "summary": _bounded_sanitized_text(summary_source, limit=2048),
             })
 
-        # Ensure missing sources from context errors are captured
-        if context.get("no_applicable_runbook"):
-            missing_sources.append({
-                "tool_name": "retrieve_runbooks",
-                "error_code": "NO_APPLICABLE_RUNBOOK",
-                "recorded_at": dossier_ready_at,
-                "impact_note": "No active approved SOP runbook found matching the observed error pattern in corpus.",
-            })
-
         # 4. Hypotheses
         raw_hyp = context.get("hypotheses", [])
         hypotheses_list: List[Dict[str, Any]] = []
@@ -305,79 +299,65 @@ class DossierSerializer:
 
         # 5. SOP Citations
         citation_context = context.get("runbook_citations")
-        raw_citations = citation_context if isinstance(citation_context, list) else context.get("sop_citations", [])
-        sop_citations: List[Dict[str, Any]] = []
-        for cit in raw_citations:
-            doc_id = cit.get("doc_id") or cit.get("document_id") or "SOP-GENERIC"
-            ver = cit.get("version") or cit.get("document_version") or "1.0.0"
-            sec = cit.get("section_path") or "/troubleshooting"
-            src_uri = cit.get("source_uri") or f"kb://sop/{doc_id.lower()}.md"
-            if not src_uri.startswith("kb://"):
-                src_uri = f"kb://sop/{doc_id.lower()}.md"
-
-            cid = cit.get("chunk_id") or f"chk-{doc_id.lower()}-001"
-            excerpt_source = (
-                cit.get("excerpt")
-                or cit.get("text_excerpt")
-                or cit.get("summary")
-                or "Excerpt tidak tersedia pada payload retrieval tersanitasi."
+        # A human edit reserializes the existing canonical dossier, not a new
+        # retrieval response. Keep its protected references and pending plan.
+        review_revision = revision > 1 and "dossier_hash" in context and citation_context is None
+        sop_citations = list(context.get("sop_citations", [])) if review_revision else []
+        availability = context.get("sop_availability", "NOT_ASSESSED")
+        allowed_filter_reasons = {
+            "OBSOLETE_SOP",
+            "SCOPE_MISMATCH",
+            "OUT_OF_WINDOW",
+            "MISSING_EVIDENCE_REF",
+            "VALUE_MISMATCH",
+        }
+        filter_reasons = [
+            r for r in context.get("sop_filter_reasons", []) if r in allowed_filter_reasons
+        ]
+        if not review_revision and availability in ("APPLICABLE_SOP_FOUND", "CONFLICTING_OR_COMPETING_SOPS"):
+            eligible, _, sop_reasons = ClaimValidator().validate_sop_citations(
+                citation_context or [], context.get("service_id"), context.get("environment"), context.get("event_time") or "",
             )
-            sop_citations.append({
-                "chunk_id": cid[:128],
-                "doc_id": doc_id[:128],
-                "version": ver[:64],
-                "section_path": sec[:256],
-                "source_uri": src_uri,
-                "applicability_verified": True,
-                "excerpt": _bounded_sanitized_text(excerpt_source, limit=512),
-                "sanitized": True,
-            })
+            filter_reasons = list(dict.fromkeys([
+                *filter_reasons,
+                *(r for r in sop_reasons if r in allowed_filter_reasons),
+            ]))
+            for cit in eligible:
+                if cit.get("sanitized") is not True:
+                    continue
+                sop_citations.append({
+                    "chunk_id": cit["chunk_id"], "doc_id": cit["document_id"], "version": cit["document_version"],
+                    "section_path": cit["section_path"], "source_uri": cit["source_uri"],
+                    "applicability_verified": True, "sanitized": True,
+                    "excerpt": _bounded_sanitized_text(cit["sanitized_excerpt"], limit=512),
+                })
+            if not sop_citations:
+                availability = "SOP_FILTERED_OUT"
+        if not sop_citations and not any(m.get("tool_name") == "retrieve_runbooks" for m in missing_sources):
+            code, note = SOP_GAPS.get(availability, SOP_GAPS["NOT_ASSESSED"])
+            if availability == "SOP_FILTERED_OUT" and filter_reasons:
+                note = f"Returned references did not meet applicability checks ({', '.join(filter_reasons)}). No eligible reference can be cited."
+            missing_sources.append({"tool_name": "retrieve_runbooks", "error_code": code,
+                                    "recorded_at": dossier_ready_at, "impact_note": f"{availability}: {note}"[:512]})
 
         # 6. Unknowns
         unknowns = [u[:512] for u in context.get("unknowns", []) if len(u) >= 3]
-        if not unknowns and missing_sources:
-            unknowns.append("One or more telemetry backends were unavailable during investigation window.")
+        if not review_revision and len(sop_document_keys(sop_citations)) > 1:
+            conflict_note = "Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source."
+            if conflict_note not in unknowns:
+                unknowns.append(conflict_note)
+        if not unknowns and any(m.get("tool_name") != "retrieve_runbooks" for m in missing_sources):
+            unknowns.append("One or more investigation sources were unavailable during the observation window.")
 
-        # 7. Recommended Checks (Human-Controlled Only)
-        raw_checks = context.get("recommended_checks") or context.get("recommended_human_actions") or []
-        recommended_checks: List[Dict[str, Any]] = []
-        check_idx = 1
-        for chk in raw_checks:
-            desc = chk if isinstance(chk, str) else chk.get("description", "Inspect service logs and metric dashboard")
-            if len(desc) < 5:
-                desc = "Inspect service logs and metric dashboard"
-            
-            if isinstance(chk, dict) and chk.get("check_id"):
-                cid = chk["check_id"]
-            else:
-                cid = f"chk-{check_idx:02d}"
-
-            if isinstance(chk, dict) and chk.get("risk_level") in ("critical", "high", "medium", "low"):
-                risk = chk["risk_level"]
-            else:
-                risk = "high" if "critical" in desc.lower() else "medium"
-
-            sop_ref = chk.get("related_sop_doc_id") if isinstance(chk, dict) else (sop_citations[0]["doc_id"] if sop_citations else None)
-
-            recommended_checks.append({
-                "check_id": cid[:64],
-                "description": desc[:1024],
-                "risk_level": risk,
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": sop_ref,
-            })
-            check_idx += 1
-
-        if not recommended_checks:
-            recommended_checks.append({
-                "check_id": "chk-01",
-                "description": f"Manually verify health and upstream connectivity of {service_id}.",
-                "risk_level": "medium",
-                "requires_human_approval": True,
-                "auto_execution_allowed": False,
-                "related_sop_doc_id": sop_citations[0]["doc_id"] if sop_citations else None,
-            })
+        recommended_checks = (
+            (context.get("recommended_checks") or build_pending_checks(
+                context, hypotheses_list, sop_citations, fallback=investigation_mode == "manual_fallback",
+            ))
+            if review_revision
+            else build_pending_checks(
+                context, hypotheses_list, sop_citations, fallback=investigation_mode == "manual_fallback",
+            )
+        )
 
         # 8. Review Summary
         review_summary = context.get("review_summary") or {
@@ -494,16 +474,35 @@ class DossierSerializer:
                 for c in report.get("claims", [])
                 if _status_str(c.get("status")) in ("UNSUPPORTED", "CONTRADICTED")
             ]
+            raw_score = r_hyp.get("confidence_score")
+            if raw_score is None:
+                raw_score = report.get("confidence_score")
+            score_val = (
+                round(float(raw_score), 4)
+                if isinstance(raw_score, (int, float)) and not isinstance(raw_score, bool)
+                else None
+            )
+            c_label = confidence_label_for_score(score_val) if score_val is not None else None
+            c_rationale = (
+                r_hyp.get("confidence_rationale")
+                or (r_hyp.get("confidence_breakdown") or {}).get("rationale")
+                or (report.get("confidence_breakdown") or {}).get("rationale")
+            )
             hypothesis_validations.append({
                 "hypothesis_id": report.get("hypothesis_id"),
+                "rank": r_hyp.get("rank"),
                 "validation_status": r_status,
                 "dossier_support_status": d_status,
+                "confidence_score": score_val,
+                "confidence_label": c_label,
+                "confidence_rationale": c_rationale,
+                "llm_proposed_confidence": r_hyp.get("llm_proposed_confidence"),
                 "reason_codes": list(report.get("reason_codes", [])),
                 "supporting_evidence_ids": list(report.get("supporting_evidence_ids", [])),
                 "contradicting_evidence_ids": list(report.get("contradicting_evidence_ids", [])),
                 "rejected_claims": rejected_claims,
             })
-        return {
+        summary_out: Dict[str, Any] = {
             "supported_claims_count": sum(_status_str(claim.get("status")) == "SUPPORTED" for claim in claims),
             "unsupported_claims_count": sum(_status_str(claim.get("status")) == "UNSUPPORTED" for claim in claims),
             "contradicted_claims_count": sum(_status_str(claim.get("status")) == "CONTRADICTED" for claim in claims),
@@ -513,6 +512,11 @@ class DossierSerializer:
             "rejected_sop_citations": rejected_citations,
             "hypothesis_validations": hypothesis_validations,
         }
+        if isinstance(context.get("sop_relevance"), dict):
+            summary_out["sop_relevance"] = dict(context["sop_relevance"])
+        if isinstance(context.get("llm_context_diagnostics"), dict):
+            summary_out["llm_context_diagnostics"] = dict(context["llm_context_diagnostics"])
+        return summary_out
 
 
 class DossierMarkdownRenderer:
@@ -594,17 +598,16 @@ class DossierMarkdownRenderer:
             "",
             "## 6. Relevant Runbooks & SOP Citations",
             "",
+            availability_text(dossier),
+            "",
             "| Document ID & Version | Section Path | Source URI | Applicability Verified |",
             "|---|---|---|---|",
         ])
 
         for sop in dossier.get("sop_citations", []):
             md_lines.append(
-                f"| `{sop['doc_id']} v{sop['version']}` | `{sop['section_path']}` | `{sop['source_uri']}` | `{sop['applicability_verified']}` |"
+                f"| `{sop['doc_id']} v{sop['version']}` (`{sop['chunk_id']}`) | `{sop['section_path']}` | `{sop['source_uri']}` | `{sop['applicability_verified']}` |"
             )
-
-        if not dossier.get("sop_citations"):
-            md_lines.append("| *NO_APPLICABLE_RUNBOOK* | *No matching SOP in corpus* | `kb://sop/unmapped` | `False` |")
 
         md_lines.extend([
             "",
@@ -617,10 +620,9 @@ class DossierMarkdownRenderer:
                 md_lines.append(f"> [!WARNING] **Telemetry Uncertainty:** {u}")
         else:
             md_lines.append("No material telemetry gaps reported.")
-
         if dossier.get("missing_sources"):
             md_lines.append("")
-            md_lines.append("**Unavailable Telemetry Sources:**")
+            md_lines.append("**Source limitations:**")
             for ms in dossier["missing_sources"]:
                 md_lines.append(f"- Tool `{ms['tool_name']}` reported `{ms['error_code']}` at `{ms['recorded_at']}`: {ms['impact_note']}")
 
@@ -649,10 +651,19 @@ class DossierMarkdownRenderer:
                 md_lines.extend(["", "**Per-hypothesis validation statuses:**"])
                 for hv in hyp_vals:
                     codes = ", ".join(hv.get("reason_codes", [])) or "none"
+                    c_score = hv.get("confidence_score")
+                    c_lbl = hv.get("confidence_label")
+                    conf_part = (
+                        f", confidence: `{float(c_score):.0%} ({c_lbl or confidence_label_for_score(float(c_score))})`"
+                        if isinstance(c_score, (int, float)) and not isinstance(c_score, bool)
+                        else ""
+                    )
                     md_lines.append(
                         f"- `{hv.get('hypothesis_id')}`: `{hv.get('validation_status')}` "
-                        f"(dossier `support_status`: `{hv.get('dossier_support_status')}`, reasons: `{codes}`)"
+                        f"(dossier `support_status`: `{hv.get('dossier_support_status')}`{conf_part}, reasons: `{codes}`)"
                     )
+                    if hv.get("confidence_rationale"):
+                        md_lines.append(f"  - Confidence rationale: {hv['confidence_rationale']}")
                     for rc in hv.get("rejected_claims", []):
                         md_lines.append(
                             f"  - Rejected evidence `{rc.get('evidence_id')}` (`{rc.get('reason_code')}`): {rc.get('details')}"
@@ -665,6 +676,22 @@ class DossierMarkdownRenderer:
                 )
             if not validation["rejected_sop_citations"]:
                 md_lines.append("- None reported.")
+            sop_rel = validation.get("sop_relevance")
+            ctx_diag = validation.get("llm_context_diagnostics")
+            if isinstance(sop_rel, dict) or isinstance(ctx_diag, dict):
+                md_lines.extend(["", "**RAG & Context Integrity:**"])
+                if isinstance(sop_rel, dict):
+                    md_lines.append(
+                        f"- SOP diagnostic relevance: `{sop_rel.get('status', 'NONE')}` "
+                        f"(relation: `{sop_rel.get('multi_sop_relation', 'NONE')}`, "
+                        f"coverage_gap: `{bool(sop_rel.get('specific_coverage_gap'))}`)"
+                    )
+                if isinstance(ctx_diag, dict):
+                    md_lines.append(
+                        f"- Prompt context delivery: retrieved={ctx_diag.get('retrieved_citations_count', 0)}, "
+                        f"delivered={ctx_diag.get('citations_delivered_count', ctx_diag.get('selected_citations_count', 0))}, "
+                        f"rung=`{ctx_diag.get('compaction_rung', 'n/a')}`"
+                    )
 
         md_lines.extend([
             "",

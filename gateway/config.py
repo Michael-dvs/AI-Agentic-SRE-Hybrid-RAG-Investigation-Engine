@@ -76,13 +76,13 @@ SYNTHETIC_BEARER_TOKENS = {
     "sre-sim-coord-token-secret-2026": {
         "principal_id": "principal:investigator-coord",
         "actor_ref": "principal_investigator",
-        "default_groups": ["sre-core-l1"],
+        "default_groups": ["sre-core-l1", "l1-operator"],
         "description": "Agent coordinator and investigator principal",
     },
     "sre-sim-reviewer-token-secret-2026": {
         "principal_id": "principal:human-reviewer",
         "actor_ref": "principal_reviewer",
-        "default_groups": ["sre-core-l2", "security-admin"],
+        "default_groups": ["sre-core-l2", "l2-investigator", "security-admin"],
         "description": "L1/L2 Human Reviewer principal",
     },
     "sre-sim-harness-token-secret-2026": {

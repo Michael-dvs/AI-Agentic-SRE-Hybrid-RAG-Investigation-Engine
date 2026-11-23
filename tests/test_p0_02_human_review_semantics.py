@@ -95,12 +95,18 @@ def _make_dossier(
         [
             {
                 "chunk_id": "chk-gw-001",
-                "doc_id": "SOP-GW-001",
+                "document_id": "SOP-GW-001",
+                "service_id": "api-gateway",
+                "environment": "lab",
+                "status": "approved",
+                "title": "Dependency errors",
+                "effective_from": "2026-11-01T00:00:00Z", "effective_to": None,
+                "content_hash": "a" * 64, "score": 0.03, "score_type": "rrf_fusion", "source_branch": "hybrid",
                 "document_version": "1.0.0",
                 "section_path": "/dependency-errors",
                 "source_uri": "kb://sop/sop-gw-001.md",
                 "applicability_verified": True,
-                "excerpt": "Inspect downstream service health before manual intervention.",
+                "sanitized_excerpt": "Inspect downstream service health before manual intervention.",
                 "sanitized": True,
             }
         ]
@@ -117,6 +123,7 @@ def _make_dossier(
         "query_window": {"start": "2026-11-23T03:39:14Z", "end": "2026-11-23T03:45:14Z"},
         "evidence_items": [ev_log, ev_rate],
         "runbook_citations": cit,
+        "sop_availability": "APPLICABLE_SOP_FOUND" if with_sop else "NO_APPLICABLE_RUNBOOK",
         "no_applicable_runbook": not with_sop,
         "hypotheses": [
             {

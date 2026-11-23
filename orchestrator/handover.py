@@ -11,10 +11,12 @@ import pathlib
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from orchestrator.confidence import confidence_label_for_score
 from orchestrator.dossier import (
     DossierMarkdownRenderer,
     compute_canonical_dossier_hash,
 )
+from orchestrator.verification_plan import availability_text, hypothesis_label
 
 _LOG = logging.getLogger(__name__)
 
@@ -174,7 +176,7 @@ class HandoverExporter:
             "- **Diagnostic Support Statuses:** "
             + (
                 ", ".join(
-                    f"{h.get('hypothesis_id', '-')}: `{h.get('support_status', 'INCONCLUSIVE')}`"
+                    f"{h.get('hypothesis_id', '-')}: `{hypothesis_label(h)}`"
                     for h in dossier.get("hypotheses", [])
                 )
                 or "`INCONCLUSIVE`"
@@ -235,10 +237,14 @@ class HandoverExporter:
         for h in hypotheses:
             rank = h.get("rank", "-")
             stmt = html.escape(h.get("statement") or h.get("hypothesis_statement", ""))
-            eval_stat = html.escape(str(h.get("support_status") or h.get("evaluation_status", "INCONCLUSIVE")))
-            conf = h.get("confidence_score", 0.85 if eval_stat == "SUPPORTED" else 0.5)
+            eval_stat = html.escape(hypothesis_label(h))
+            raw_conf = h.get("confidence_score")
+            if isinstance(raw_conf, (int, float)) and not isinstance(raw_conf, bool):
+                conf = html.escape(f"{float(raw_conf):.0%} ({confidence_label_for_score(float(raw_conf))})")
+            else:
+                conf = "N/A"
             hypo_rows.append(
-                f"<tr><td>#{rank}</td><td>{stmt}</td><td><span class='badge'>{eval_stat}</span></td><td>{conf:.2f}</td></tr>"
+                f"<tr><td>#{rank}</td><td>{stmt}</td><td><span class='badge'>{eval_stat}</span></td><td>{conf}</td></tr>"
             )
 
         # SOP References (support both canonical contract and extended formats)
@@ -251,9 +257,12 @@ class HandoverExporter:
             sec = html.escape(sop.get("section_path") or sop.get("section", ""))
             uri = html.escape(sop.get("source_uri", "#"))
             sop_items.append(
-                f"<li><strong><a href='file://{uri}'>{title}</a></strong> ({doc_id}) — Section: {sec}</li>"
+                f"<li><strong>{title}</strong> ({doc_id} v{html.escape(str(sop.get('version', 'N/A')))}) "
+                f"{sec} · {html.escape(str(sop.get('chunk_id', 'N/A')))} · <code>{uri}</code></li>"
             )
 
+        plan_items = [f"<li>{html.escape(c['check_id'])}: {html.escape(c['description'])}</li>"
+                      for c in dossier.get("recommended_checks", [])]
         # Unknowns & Missing Sources
         unknown_items = [
             f"<li>{html.escape(str(u))}</li>"
@@ -339,6 +348,7 @@ class HandoverExporter:
     </table>
 
     <h2>2. Authoritative SOP & Runbook Citations</h2>
+    <p>{html.escape(availability_text(dossier))}</p>
     <ul>
       {''.join(sop_items) if sop_items else '<li>No SOP references cited.</li>'}
     </ul>
@@ -347,6 +357,8 @@ class HandoverExporter:
     <ul>
       {''.join(unknown_items + missing_items) if (unknown_items or missing_items) else '<li>None reported.</li>'}
     </ul>
+    <h2>Pending manual verification (human decision only)</h2>
+    <ol>{''.join(plan_items)}</ol>
 
     <h2>3. Review Decision History (Append-Only Audit)</h2>
     <table>

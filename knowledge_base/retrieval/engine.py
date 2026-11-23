@@ -8,8 +8,12 @@ import time
 from collections import Counter
 from typing import Any
 
+import hashlib
+from copy import deepcopy
+
 import numpy as np
 
+from knowledge_base.ingestion.chunker import CHUNK_SCHEMA
 from knowledge_base.retrieval.embeddings import (
     DEFAULT_MULTILINGUAL_MODEL,
     EMBEDDING_DIMENSION,
@@ -17,12 +21,11 @@ from knowledge_base.retrieval.embeddings import (
 )
 from knowledge_base.retrieval.models import (
     Citation,
-    RetrievalMode,
     RetrievalRequest,
     ScoreType,
     SourceBranch,
 )
-from knowledge_base.retrieval.prefilter import StrictPreFilter
+from knowledge_base.retrieval.prefilter import StrictPreFilter, is_runbook_id, matches_index
 
 
 def tokenize(text: str) -> list[str]:
@@ -43,18 +46,27 @@ class RetrievalEngine:
         index_version: str = "kb-idx-20261111-v1",
         embedding_model_name: str = DEFAULT_MULTILINGUAL_MODEL,
     ) -> None:
-        self.chunks = chunks
-        self.index_version = index_version
+        # Validate the published snapshot once; a broken index is not evidence of absence.
+        unique = {}
+        for chunk in chunks:
+            if (not CHUNK_SCHEMA.is_valid(chunk) or chunk["index_version"] != index_version
+                    or not chunk["document_version"].strip() or not chunk["content"].strip()
+                    or any(p in ("", ".", "..") for p in chunk["source_uri"][5:].split("/"))
+                    or hashlib.sha256(chunk["content"].encode()).hexdigest() != chunk["content_hash"]
+                    or (chunk["chunk_id"] in unique and unique[chunk["chunk_id"]] != chunk)):
+                unique.clear()
+                break
+            unique[chunk["chunk_id"]] = chunk
+        self.chunks = deepcopy(list(unique.values()))
+        self.index_version = index_version if self.chunks else None
         self.is_healthy: bool = True
         self.embedding_model_name = embedding_model_name
 
-        # Pre-build Lexical BM25 structures
-        self.corpus_tokens = [
-            tokenize(c["title"] + " " + c["section_path"] + " " + c["content"]) for c in chunks
-        ]
+        doc_texts = [f"{c['title']} {c['section_path']} {c['content']}" for c in self.chunks]
+        self.corpus_tokens = [tokenize(text) for text in doc_texts]
         self.doc_lens = [len(tokens) for tokens in self.corpus_tokens]
         self.avgdl = sum(self.doc_lens) / len(self.doc_lens) if self.doc_lens else 1.0
-        self.N = len(chunks)
+        self.N = len(self.chunks)
 
         self.df = Counter()
         for tokens in self.corpus_tokens:
@@ -67,9 +79,9 @@ class RetrievalEngine:
         }
 
         # Pre-build Dense vector index via MultilingualDenseEmbedder (384-d, L2 normalized)
-        doc_texts = [c["title"] + " " + c["section_path"] + " " + c["content"] for c in chunks]
         self.embedder = MultilingualDenseEmbedder(model_name=self.embedding_model_name)
-        self.dense_vectors = self.embedder.fit_corpus(doc_texts)
+        self.dense_vectors = (self.embedder.fit_corpus(doc_texts) if doc_texts else
+                              np.empty((0, EMBEDDING_DIMENSION), dtype=np.float32))
 
     def set_healthy(self, healthy: bool) -> None:
         """Toggle backend health/availability for outage simulation (NFR-016, SC-09, AT-012)."""
@@ -89,13 +101,8 @@ class RetrievalEngine:
                 score += self.idf.get(q, 0.0) * (term_freq * (k1 + 1.0)) / denom
         return score
 
-    def _score_dense(self, query_text: str, doc_idx: int) -> float:
-        """Compute cosine similarity between query dense vector and chunk dense vector."""
-        q_vec = self.embedder.embed_query(query_text)
-        return float(np.dot(self.dense_vectors[doc_idx], q_vec))
-
     def query(
-        self, request: RetrievalRequest
+        self, request: RetrievalRequest, *, runbooks_only: bool = False
     ) -> tuple[list[Citation], str, str | None, float]:
         """Execute authorized retrieval request according to requested mode.
 
@@ -104,12 +111,14 @@ class RetrievalEngine:
         start_time = time.perf_counter()
 
         # Check backend availability
-        if not self.is_healthy:
+        if not self.is_healthy or not self.index_version or not matches_index(request.index_version_policy, self.index_version):
             latency = (time.perf_counter() - start_time) * 1000.0
             return [], "unavailable", "RETRIEVAL_UNAVAILABLE", latency
 
         # Step 1: Mandatory Pre-Filtering across all modes (FR-RAG-004, RULE-005)
         applicable_pairs = StrictPreFilter.filter_chunks(self.chunks, request)
+        if runbooks_only:
+            applicable_pairs = [(idx, c) for idx, c in applicable_pairs if is_runbook_id(c["document_id"])]
         if not applicable_pairs:
             latency = (time.perf_counter() - start_time) * 1000.0
             return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
@@ -119,27 +128,23 @@ class RetrievalEngine:
 
         # Step 2: Branch scoring
         # Lexical scoring
-        bm25_scores = [
-            (idx, self._score_bm25(q_tokens, idx)) for idx, _ in applicable_pairs
-        ]
-        bm25_scores.sort(key=lambda x: x[1], reverse=True)
+        bm25_scores = []
+        if mode != "dense_only":
+            bm25_scores = [(idx, self._score_bm25(q_tokens, idx)) for idx, _ in applicable_pairs]
+            bm25_scores.sort(key=lambda pair: pair[1], reverse=True)
 
-        # Dense scoring via multilingual embedding vector (384-d, L2 normalized)
-        q_vec = self.embedder.embed_query(request.query_text)
-        dense_scores = [
-            (idx, float(np.dot(self.dense_vectors[idx], q_vec)))
-            for idx, _ in applicable_pairs
-        ]
-        dense_scores.sort(key=lambda x: x[1], reverse=True)
+        dense_scores = []
+        if mode != "lexical_only":
+            q_vec = self.embedder.embed_query(request.query_text)
+            dense_scores = [(idx, float(np.dot(self.dense_vectors[idx], q_vec))) for idx, _ in applicable_pairs]
+            dense_scores.sort(key=lambda pair: pair[1], reverse=True)
 
         # Step 3: Selection / Fusion
         ranked_candidates: list[tuple[int, float, ScoreType, SourceBranch]] = []
 
         if mode == "lexical_only":
-            # Filter out zero BM25 scores if possible, unless all are zero
             for idx, sc in bm25_scores:
-                if sc > 0.0 or len(ranked_candidates) == 0:
-                    ranked_candidates.append((idx, sc, "bm25_sparse", "sparse"))
+                ranked_candidates.append((idx, sc, "bm25_sparse", "sparse"))
 
         elif mode == "dense_only":
             for idx, sc in dense_scores:
@@ -189,38 +194,21 @@ class RetrievalEngine:
             for idx, sc in reranked:
                 ranked_candidates.append((idx, sc, "cross_encoder_rerank", "reranked"))
 
-        # Step 4: Verification and No-Match check (FR-RAG-009, RULE-006)
-        if not ranked_candidates:
-            latency = (time.perf_counter() - start_time) * 1000.0
-            return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
-
-        top_cand_idx, top_cand_score, _, _ = ranked_candidates[0]
-
-        # Honesty threshold: check if top candidate has meaningful relevance
-        # Rather than returning hallucinations on completely unrelated queries
-        top_bm25 = dict(bm25_scores).get(top_cand_idx, 0.0)
-        top_dense = dict(dense_scores).get(top_cand_idx, 0.0)
-
-        if mode == "lexical_only":
-            if top_cand_score < 2.5:
-                latency = (time.perf_counter() - start_time) * 1000.0
-                return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
-        elif mode == "dense_only":
-            if top_cand_score < 0.08:
-                latency = (time.perf_counter() - start_time) * 1000.0
-                return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
-        else:  # hybrid_rrf / hybrid_rerank
-            if top_bm25 < 2.5 and top_dense < 0.08:
-                latency = (time.perf_counter() - start_time) * 1000.0
-                return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
-
-        # Step 5: Format citations
+        # Preserve the existing relevance thresholds for each cited chunk, not just the winner.
+        relevant = {idx for idx, score in bm25_scores if score >= 2.5}
+        relevant.update(idx for idx, score in dense_scores if score >= 0.08)
         citations: list[Citation] = []
-        for idx, score, score_type, source_branch in ranked_candidates[: request.top_k]:
+        sections = set()
+        for idx, score, score_type, source_branch in ranked_candidates:
+            if idx not in relevant:
+                continue
             c = self.chunks[idx]
-            # Excerpt: clean first 1000 chars of content
-            clean_content = c["content"].strip()
-            excerpt = clean_content[:1500] if len(clean_content) > 1500 else clean_content
+            # Differing content is not a duplicate: preserve competing guidance.
+            key = (c["document_id"], c["document_version"], c["section_path"], c["source_uri"], c["content_hash"])
+            if key in sections:
+                continue
+            sections.add(key)
+            excerpt = c["content"].strip()[:1500]
 
             citation = Citation(
                 chunk_id=c["chunk_id"],
@@ -242,6 +230,10 @@ class RetrievalEngine:
                 applicability_verified=True,
             )
             citations.append(citation)
+            if len(citations) == request.top_k:
+                break
 
         latency = (time.perf_counter() - start_time) * 1000.0
+        if not citations:
+            return [], "no_match", "NO_APPLICABLE_RUNBOOK", latency
         return citations, "ok", None, latency

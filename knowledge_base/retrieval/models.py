@@ -31,7 +31,7 @@ class RetrievalRequest:
     index_version_policy: str
     # Server-side injected security context
     caller_scope_ref: str = "sre-core-agent"
-    caller_groups: list[str] = field(default_factory=lambda: ["sre-core-l1"])
+    caller_groups: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {

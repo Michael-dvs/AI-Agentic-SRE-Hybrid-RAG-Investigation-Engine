@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+from hashlib import sha256
 import json
 import pathlib
 import sys
@@ -15,6 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from gateway.policy import PolicyGateway
+from knowledge_base.retrieval.service import unavailable_result
 from observability.ai_tracer import SanitizedAITracer
 from observability.audit_chain import AuditHashChain, verify_chain_integrity
 from orchestrator.capacity_resilience import CapacityProfiler, read_docker_stats, utc_now_z
@@ -49,22 +51,54 @@ class _DrillDispatcher:
     def __init__(self, outage: str | None = None) -> None:
         self.outage = outage
 
-    def dispatch(self, tool_name: str, arguments: Mapping[str, Any], **_: Any) -> tuple[dict[str, Any], str, str | None, str]:
+    def dispatch(self, tool_name: str, arguments: Mapping[str, Any], **kwargs: Any) -> tuple[dict[str, Any], str, str | None, str]:
         if self.outage == "telemetry" and tool_name != "retrieve_runbooks":
             return {}, "unavailable", "SOURCE_UNAVAILABLE", f"c20:{tool_name}"
         if self.outage == "knowledge_base" and tool_name == "retrieve_runbooks":
-            return {"status": "unavailable", "citations": []}, "unavailable", "NO_APPLICABLE_RUNBOOK", "c20:kb"
+            res = unavailable_result(dict(arguments), str(kwargs.get("caller_scope_ref", "principal:investigator-coord"))).to_dict()
+            return res, "unavailable", "RETRIEVAL_UNAVAILABLE", "c20:kb"
         if tool_name == "retrieve_runbooks":
+            svc = str(arguments.get("service_id", "api-gateway"))
+            env = str(arguments.get("environment", "lab"))
+            ref_time = str(arguments.get("reference_time", "2026-11-20T10:00:00Z"))
+            excerpt = "Inspect the bounded synthetic telemetry window before any human-controlled action."
             return {
+                "schema_version": "1.0",
+                "request_id": "req-ret-c20-dev-001",
                 "status": "ok",
+                "retrieval_mode_executed": str(arguments.get("retrieval_mode", "hybrid_rrf")),
+                "index_version": "kb-idx-20261111-v1",
+                "observed_at": ref_time,
+                "applied_filters": {
+                    "service_id": svc,
+                    "environment": env,
+                    "reference_time": ref_time,
+                    "status_required": "approved",
+                    "caller_scope_ref": str(kwargs.get("caller_scope_ref", "principal:investigator-coord")),
+                },
                 "citations": [{
                     "chunk_id": "chk-c20-dev-001",
                     "document_id": "SOP-C20-DEV-001",
                     "document_version": "2.1.0",
+                    "title": "Synthetic C20 Dev Runbook",
                     "section_path": "/diagnosis",
                     "source_uri": "kb://sop/c20-dev.md",
-                    "excerpt": "Inspect the bounded synthetic telemetry window before any human-controlled action.",
+                    "service_id": svc,
+                    "environment": env,
+                    "status": "approved",
+                    "effective_from": "2026-01-01T00:00:00Z",
+                    "effective_to": None,
+                    "content_hash": sha256(excerpt.encode("utf-8")).hexdigest(),
+                    "score": 0.15,
+                    "score_type": "rrf_fusion",
+                    "source_branch": "hybrid",
+                    "sanitized_excerpt": excerpt,
+                    "applicability_verified": True,
                 }],
+                "truncated": False,
+                "context_tokens_used": 20,
+                "latency_ms": 1.0,
+                "gap_reason": None,
             }, "ok", None, "c20:kb"
         records: list[dict[str, Any]] = []
         if tool_name == "search_error_logs":
@@ -117,13 +151,26 @@ def _process_capacity_incident(incident: Mapping[str, Any]) -> Mapping[str, Any]
             "status": "PARTIAL",
             "supporting_evidence_ids": [f"ev-{incident['incident_id']}-001"],
         }],
+        "sop_availability": "APPLICABLE_SOP_FOUND",
         "runbook_citations": [{
             "chunk_id": "chk-c20-capacity-001",
             "document_id": "SOP-C20-CAPACITY",
             "document_version": "1.0.0",
+            "title": "Synthetic C20 Capacity Runbook",
             "section_path": "/capacity",
             "source_uri": "kb://sop/c20-capacity.md",
-            "excerpt": "Review the synthetic capacity evidence before taking a human-controlled action.",
+            "service_id": incident["service_id"],
+            "environment": incident["environment"],
+            "status": "approved",
+            "effective_from": "2026-01-01T00:00:00Z",
+            "effective_to": None,
+            "content_hash": sha256(b"Review the synthetic capacity evidence before taking a human-controlled action.").hexdigest(),
+            "score": 0.15,
+            "score_type": "rrf_fusion",
+            "source_branch": "hybrid",
+            "sanitized_excerpt": "Review the synthetic capacity evidence before taking a human-controlled action.",
+            "applicability_verified": True,
+            "sanitized": True,
         }],
     }
     return DossierSerializer.serialize(context)
@@ -234,18 +281,25 @@ def run_resilience_drills(audit_path: pathlib.Path) -> dict[str, Any]:
     kb_dossier = kb_result["dossier"]
     kb_valid = (
         kb_result["status"] == "HUMAN_REVIEW"
-        and kb_result["no_applicable_runbook"] is True
-        and any(item["error_code"] == "NO_APPLICABLE_RUNBOOK" for item in kb_dossier["missing_sources"])
+        and kb_result.get("sop_availability") == "RETRIEVAL_UNAVAILABLE"
+        and kb_result["no_applicable_runbook"] is False
+        and kb_dossier["sop_citations"] == []
+        and any(
+            item["tool_name"] == "retrieve_runbooks"
+            and item["error_code"] == "SOURCE_UNAVAILABLE"
+            and item["impact_note"].startswith("RETRIEVAL_UNAVAILABLE:")
+            for item in kb_dossier["missing_sources"]
+        )
     )
     drills.append({
         "drill": "knowledge_base_outage",
         "incident_id": "inc-c20-kb-outage",
         "status": "PASS" if kb_valid else "FAIL",
         "terminal_state": kb_result["status"],
-        "retrieval_status": "NO_APPLICABLE_RUNBOOK",
+        "retrieval_status": "RETRIEVAL_UNAVAILABLE",
         "citation_count": len(kb_dossier["sop_citations"]),
     })
-    _record_drill(audit, incident_id="inc-c20-kb-outage", drill="knowledge_base_outage", reason_code="NO_APPLICABLE_RUNBOOK", payload=drills[-1])
+    _record_drill(audit, incident_id="inc-c20-kb-outage", drill="knowledge_base_outage", reason_code="SOURCE_UNAVAILABLE", payload=drills[-1])
 
     tracer_result, tracer = _run_investigation(
         audit,

@@ -61,10 +61,20 @@ def _dossier(incident_id: str) -> dict[str, Any]:
                 "records": [{"message": "connection checkout timeout"}],
             }
         ],
+        "sop_availability": "APPLICABLE_SOP_FOUND",
         "runbook_citations": [
             {
                 "chunk_id": "chunk-sop-ledger-002-04",
-                "doc_id": "SOP-LEDGER-002",
+                "document_id": "SOP-LEDGER-002",
+                "service_id": "ledger-service",
+                "environment": "lab",
+                "status": "approved",
+                "applicability_verified": True,
+                "title": "Pool saturation",
+                "effective_from": "2026-11-01T00:00:00Z", "effective_to": None,
+                "score": 0.03, "score_type": "rrf_fusion", "source_branch": "hybrid",
+                "sanitized_excerpt": "Inspect pool checkout latency.",
+                "sanitized": True,
                 "document_version": "2.0.0",
                 "section_path": "4.2 Pool saturation",
                 "source_uri": "kb://sop-ledger-002",

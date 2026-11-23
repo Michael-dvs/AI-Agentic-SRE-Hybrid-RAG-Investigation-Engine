@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from pathlib import Path
 from typing import Any
 
 from starlette.testclient import TestClient
@@ -16,6 +17,7 @@ from gateway.adapters import (
 )
 from knowledge_base.ingestion.lifecycle import KnowledgeLifecycleManager
 from knowledge_base.retrieval import RetrievalEngine, RetrievalService
+from knowledge_base.retrieval.service import unavailable_result
 from observability.backends import (
     create_loki_app,
     create_prometheus_app,
@@ -43,9 +45,9 @@ class ToolDispatcher:
             try:
                 manager = KnowledgeLifecycleManager()
                 manifest, _ = manager.build_manifest_from_corpus(
-                    "knowledge_base/corpus", "kb-idx-20261111-v1"
+                    Path(__file__).resolve().parents[1] / "knowledge_base" / "corpus", "kb-idx-20261111-v1"
                 )
-                engine = RetrievalEngine(chunks=manifest.chunks, index_version="kb-idx-20261111-v1")
+                engine = RetrievalEngine(chunks=manifest.chunks, index_version=manifest.index_version)
                 self.retrieval_service = RetrievalService(engine=engine)
             except Exception:
                 self.retrieval_service = None
@@ -130,21 +132,21 @@ class ToolDispatcher:
 
         Status is one of: 'ok', 'partial', 'unavailable', 'rejected'.
         """
-        # Outage check
-        if tool_name in self.simulated_outages or "all_backends" in self.simulated_outages:
+        outage = tool_name in self.simulated_outages or "all_backends" in self.simulated_outages
+        if tool_name == "retrieve_runbooks":
+            if outage or self.retrieval_service is None:
+                res = unavailable_result(arguments, caller_scope_ref)
+            else:
+                res = self.retrieval_service.execute_retrieval(
+                    request_data=arguments, caller_scope_ref=caller_scope_ref,
+                    caller_groups=caller_groups,
+                    runbooks_only=True,
+                )
+            return res.to_dict(), res.status, res.gap_reason, "src-knowledge-base"
+        if outage:
             return {}, "unavailable", "SOURCE_UNAVAILABLE", f"src-{tool_name}"
 
-        if tool_name == "retrieve_runbooks":
-            if self.retrieval_service is None:
-                return {}, "unavailable", "SOURCE_UNAVAILABLE", "src-knowledge-base"
-            res = self.retrieval_service.execute_retrieval(
-                request_data=arguments,
-                caller_scope_ref=caller_scope_ref,
-                caller_groups=caller_groups or ["sre-core-l1"],
-            )
-            return res.to_dict(), res.status, res.gap_reason, "src-knowledge-base"
-
-        elif tool_name == "get_service_metrics":
+        if tool_name == "get_service_metrics":
             env = self.metrics_adapter.execute(arguments)
             if env.status != "ok":
                 return {}, env.status, env.error_code, env.source_ref

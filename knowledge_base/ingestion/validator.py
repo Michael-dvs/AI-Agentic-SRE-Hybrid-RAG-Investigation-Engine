@@ -76,32 +76,32 @@ def validate_document_metadata(raw_meta: dict[str, Any], file_path: str = "") ->
     """Strictly validate and normalize raw document metadata. Fail-fast on any anomaly."""
     context_prefix = f"In document [{file_path}]: " if file_path else ""
 
+    def required_text(key: str) -> str:
+        value = raw_meta.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{context_prefix}Missing or invalid '{key}'")
+        return value.strip()
+
     # 1. document_id
-    doc_id = str(raw_meta.get("document_id", "")).strip()
+    doc_id = required_text("document_id")
     if not doc_id or not _RE_DOC_ID.match(doc_id):
         raise ValueError(f"{context_prefix}Invalid or missing 'document_id': '{doc_id}'")
 
     # 2. document_version
-    version = str(raw_meta.get("document_version", "")).strip()
-    if not version:
-        raise ValueError(f"{context_prefix}Missing 'document_version'")
+    version = required_text("document_version")
 
     # 3. title
-    title = str(raw_meta.get("title", "")).strip()
+    title = required_text("title")
     if len(title) < 3 or len(title) > 256:
         raise ValueError(f"{context_prefix}'title' length must be between 3 and 256 characters")
 
     # 4. service_id & service.name
-    service_id = str(raw_meta.get("service_id", "")).strip()
-    if not service_id:
-        raise ValueError(f"{context_prefix}Missing 'service_id'")
+    service_id = required_text("service_id")
 
-    service_name = str(raw_meta.get("service.name") or raw_meta.get("service_name") or "").strip()
-    if not service_name:
-        raise ValueError(f"{context_prefix}Missing 'service.name' or 'service_name'")
+    service_name = required_text("service.name" if "service.name" in raw_meta else "service_name")
 
     # 5. environment
-    environment = str(raw_meta.get("environment", "lab")).strip()
+    environment = required_text("environment")
     if environment not in _VALID_ENVIRONMENTS:
         raise ValueError(f"{context_prefix}Invalid environment '{environment}'. Expected one of {_VALID_ENVIRONMENTS}")
 
@@ -124,10 +124,12 @@ def validate_document_metadata(raw_meta: dict[str, Any], file_path: str = "") ->
         raise ValueError(f"{context_prefix}Missing 'effective_from'")
     effective_from = _parse_iso_z(str(effective_from_raw), "effective_from")
 
-    effective_to_raw = raw_meta.get("effective_to")
+    if "effective_to" not in raw_meta:
+        raise ValueError(f"{context_prefix}Missing 'effective_to'")
+    effective_to_raw = raw_meta["effective_to"]
     effective_to: str | None = None
-    if effective_to_raw not in (None, "", "null"):
-        effective_to = _parse_iso_z(str(effective_to_raw), "effective_to")
+    if effective_to_raw is not None:
+        effective_to = _parse_iso_z(effective_to_raw, "effective_to")
         # Validate order
         dt_from = datetime.datetime.fromisoformat(effective_from[:-1] + "+00:00")
         dt_to = datetime.datetime.fromisoformat(effective_to[:-1] + "+00:00")
@@ -151,9 +153,9 @@ def validate_document_metadata(raw_meta: dict[str, Any], file_path: str = "") ->
     allowed_groups_raw = raw_meta.get("allowed_groups")
     if not isinstance(allowed_groups_raw, list) or len(allowed_groups_raw) == 0:
         raise ValueError(f"{context_prefix}'allowed_groups' must be a non-empty list of group identifiers")
-    allowed_groups = [str(g).strip() for g in allowed_groups_raw if str(g).strip()]
-    if not allowed_groups:
-        raise ValueError(f"{context_prefix}'allowed_groups' contains no non-empty identifiers")
+    if not all(isinstance(g, str) and g.strip() for g in allowed_groups_raw):
+        raise ValueError(f"{context_prefix}'allowed_groups' contains an invalid identifier")
+    allowed_groups = [g.strip() for g in allowed_groups_raw]
 
     # 11. owner_ref
     owner_ref = str(raw_meta.get("owner_ref", "")).strip()

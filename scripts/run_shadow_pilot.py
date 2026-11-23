@@ -123,27 +123,6 @@ def _seed_pilot_telemetry(gateway: PolicyGateway) -> None:
     dispatcher = gateway.dispatcher
     dispatcher._prom_app.state.http_client = _build_metrics_http_client()
 
-    if dispatcher.retrieval_service is not None:
-        raw_execute_retrieval = dispatcher.retrieval_service.execute_retrieval
-
-        def _normalized_execute_retrieval(
-            request_data: dict[str, Any],
-            caller_scope_ref: str = "sre-core-agent",
-            caller_groups: list[str] | None = None,
-            request_id: str | None = None,
-        ) -> Any:
-            normalized = dict(request_data)
-            if normalized.get("index_version_policy") == "active_only":
-                normalized["index_version_policy"] = "kb_active_alias"
-            return raw_execute_retrieval(
-                normalized,
-                caller_scope_ref=caller_scope_ref,
-                caller_groups=caller_groups,
-                request_id=request_id,
-            )
-
-        dispatcher.retrieval_service.execute_retrieval = _normalized_execute_retrieval  # type: ignore[method-assign]
-
     dispatcher._loki_app.state.ingest_records(
         [
             {

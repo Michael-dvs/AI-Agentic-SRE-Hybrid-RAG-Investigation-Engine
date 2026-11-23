@@ -10,6 +10,8 @@ Acceptance coverage:
 
 from __future__ import annotations
 
+from hashlib import sha256
+
 import pytest
 
 from orchestrator.claim_validator_contract import (
@@ -26,6 +28,7 @@ def validator():
 
 def test_rag01_sc10_obsolete_runbook_citation_rejected(validator):
     """Rekomendasi mengutip SOP versi kedaluwarsa (effective_to <= event_time) -> digugurkan dengan OBSOLETE_SOP."""
+    excerpt = "Compare the latency signal in the ledger test fixture."
     citations = [
         {
             "chunk_id": "chk-ledger-v1-obsolete",
@@ -42,7 +45,15 @@ def test_rag01_sc10_obsolete_runbook_citation_rejected(validator):
             "chunk_id": "chk-ledger-v2-active",
             "document_id": "SOP-LEDGER-001",
             "document_version": "2.0.0",
-            "source_uri": "synthetic://runbooks/ledger-service/v2.md",
+            "source_uri": "kb://unit/runbooks/ledger-service/v2.md",
+            "title": "Synthetic ledger runbook",
+            "section_path": "Latency checks",
+            "content_hash": sha256(excerpt.encode()).hexdigest(),
+            "sanitized_excerpt": excerpt,
+            "applicability_verified": True,
+            "score": 1.0,
+            "score_type": "bm25_sparse",
+            "source_branch": "sparse",
             "service_id": "ledger-service",
             "environment": "lab",
             "status": "approved",
@@ -61,7 +72,7 @@ def test_rag01_sc10_obsolete_runbook_citation_rejected(validator):
 
     # Obsolete v1 must be rejected
     assert len(rejected_citations) == 1
-    assert rejected_citations[0]["chunk_id"] == "chk-ledger-v1-obsolete"
+    assert "chunk_id" not in rejected_citations[0]
     assert rejected_citations[0]["rejection_reason"] == ValidationReasonCode.OBSOLETE_SOP.value
     assert ValidationReasonCode.OBSOLETE_SOP.value in reason_codes
 

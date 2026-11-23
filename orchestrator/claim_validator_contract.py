@@ -16,6 +16,13 @@ from enum import Enum
 import re
 from typing import Any, Sequence
 
+from knowledge_base.retrieval.prefilter import is_runbook_id
+from knowledge_base.retrieval.service import has_citation_provenance
+from orchestrator.confidence import (
+    compute_evidence_confidence,
+    confidence_label_for_score,
+)
+
 
 class HypothesisStatus(str, Enum):
     """Permitted hypothesis and investigation status levels.
@@ -52,7 +59,16 @@ class ValidationReasonCode(str, Enum):
 VALIDATION_REASON_CODES: frozenset[str] = frozenset(code.value for code in ValidationReasonCode)
 
 _VERIFIED_PATTERN = re.compile(r"\bVERIFIED\b", re.IGNORECASE)
-_NUMERIC_PATTERN = re.compile(r"(?<![A-Za-z0-9_])(\d+(?:\.\d+)?)(?:\s*(?:ms|s|%|req/s|rps|errors?|hits?|pts?|points?|kb|mb|gb))?\b", re.IGNORECASE)
+_NUMERIC_PATTERN = re.compile(
+    r"(?<![A-Za-z0-9_.:-])(\d+(?:\.\d+)?)"
+    r"(?:\s*(?:milliseconds?|msec|ms|seconds?|sec|s|%|percent|ratio|requests?/s|req/s|rps|qps|errors?|hits?|pts?|points?|kb|mb|gb))?"
+    r"(?![A-Za-z0-9_:-]|\.\d)",
+    re.IGNORECASE,
+)
+_NUMERIC_UNIT_TOKEN_RE = re.compile(
+    r"^\s*\d+(?:\.\d+)?\s*(milliseconds?|msec|ms|seconds?|sec|s|%|percent|ratio|requests?/s|req/s|rps|qps|errors?|hits?|pts?|points?|kb|mb|gb)?$",
+    re.IGNORECASE,
+)
 _KNOWN_SERVICES: tuple[str, ...] = (
     "api-gateway",
     "auth-service",
@@ -62,7 +78,8 @@ _KNOWN_SERVICES: tuple[str, ...] = (
     "db-dummy",
 )
 _NO_ERROR_PATTERN = re.compile(
-    r"\b(?:no\s+(?:degradation|error|errors|failure|failures|fault)|normal|nominal|healthy|zero\s+error)\b",
+    r"\b(?:no\s+(?:observed\s+|active\s+|recorded\s+|detected\s+)?(?:degradation|error|errors|failure|failures|fault)|"
+    r"normal|nominal|healthy|zero\s+(?:error|errors|error_code(?:\s+entries)?)|rather\s+than\s+failure)\b",
     re.IGNORECASE,
 )
 _RATE_LIMIT_PATTERN = re.compile(
@@ -112,6 +129,165 @@ def extract_numeric_value(text: str) -> float | None:
     return None
 
 
+def _canonical_unit(raw_unit: str | None) -> str | None:
+    if not raw_unit:
+        return None
+    u = raw_unit.strip().lower()
+    if u in ("ms", "msec", "millisecond", "milliseconds"):
+        return "ms"
+    if u in ("s", "sec", "second", "seconds"):
+        return "s"
+    if u in ("%", "percent"):
+        return "%"
+    if u == "ratio":
+        return "ratio"
+    if u in ("req/s", "requests/s", "rps", "qps"):
+        return "req/s"
+    if u in ("error", "errors", "hit", "hits", "pt", "pts", "point", "points"):
+        return "count"
+    return u
+
+
+def _infer_claim_dimension(
+    text: str,
+    start: int,
+    end: int,
+    unit: str | None,
+) -> str:
+    prefix = text[max(0, start - 36) : start].lower()
+    prefix_near = text[max(0, start - 22) : start].lower()
+    suffix = text[end : min(len(text), end + 24)].lower()
+    local = f"{prefix} {suffix}"
+    # Explicit near-token metric name takes precedence so unit conflicts (e.g. 'request_rate 500 ms') are caught
+    if any(k in prefix_near for k in ("request_rate", "request rate", "throughput", "rps", "qps")):
+        return "request_rate"
+    if any(k in prefix_near for k in ("error_rate", "error rate", "failure rate")):
+        return "error_rate"
+    if any(k in prefix_near for k in ("latency", "duration", "p95", "p99", "avg ~", "avg", "took")):
+        return "latency"
+    if unit in ("ms", "s"):
+        return "latency"
+    if unit == "req/s":
+        return "request_rate"
+    if any(k in prefix for k in ("request_rate", "request rate", "throughput", "rps", "qps")):
+        return "request_rate"
+    if any(k in prefix for k in ("error_rate", "error rate", "failure rate")):
+        return "error_rate"
+    if any(k in prefix for k in ("latency", "duration", "p95", "p99", "avg ~", "avg", "took")):
+        return "latency"
+    if unit in ("%", "ratio"):
+        if any(k in local for k in ("request", "throughput", "traffic", "rps", "qps")):
+            return "request_rate"
+        if any(k in local for k in ("error", "fail", "reject")):
+            return "error_rate"
+        return "ratio_generic"
+    if re.search(r"\b(?:http|status(?:\s+code)?|code|causing|returned|returning|response)\s*$", prefix):
+        return "status_code"
+    if re.search(r"^\s*(?:gateway|unauthorized|forbidden|internal|bad|too\s+many|err_)", suffix):
+        return "status_code"
+    return "generic"
+
+
+def _extract_typed_numeric_claims(text: str) -> list[dict[str, Any]]:
+    """Extract numeric mentions with normalized units and inferred metric dimensions."""
+    claims: list[dict[str, Any]] = []
+    for match in _NUMERIC_PATTERN.finditer(text):
+        try:
+            val = float(match.group(1))
+        except ValueError:
+            continue
+        unit_match = _NUMERIC_UNIT_TOKEN_RE.match(match.group(0))
+        raw_unit = unit_match.group(1) if unit_match else None
+        unit = _canonical_unit(raw_unit)
+        dim = _infer_claim_dimension(text, match.start(), match.end(), unit)
+        claims.append({
+            "value": val,
+            "unit": unit,
+            "dimension": dim,
+            "is_ratio_or_percent": unit in ("ratio", "%"),
+            "raw": match.group(0).strip(),
+        })
+    return claims
+
+
+def _extract_typed_observed_values(ev: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract observed numeric telemetry points with explicit metric dimension and unit."""
+    tool_name = str(ev.get("tool_name") or "")
+    observed: list[dict[str, Any]] = []
+    for rec in ev.get("records", []):
+        if not isinstance(rec, dict):
+            continue
+        if tool_name == "get_trace_summary":
+            dur = rec.get("duration_ms")
+            if isinstance(dur, (int, float)) and not isinstance(dur, bool):
+                observed.append({
+                    "value": float(dur),
+                    "unit": "ms",
+                    "dimension": "latency",
+                    "metric_identity": "duration_ms",
+                    "is_ratio_or_percent": False,
+                })
+        elif tool_name == "search_error_logs":
+            sc = rec.get("status_code")
+            if isinstance(sc, (int, float)) and not isinstance(sc, bool):
+                observed.append({
+                    "value": float(sc),
+                    "unit": "status_code",
+                    "dimension": "status_code",
+                    "metric_identity": "status_code",
+                    "is_ratio_or_percent": False,
+                })
+        elif tool_name == "get_service_metrics":
+            val = rec.get("value")
+            if not isinstance(val, (int, float)) or isinstance(val, bool):
+                continue
+            metric_id = str(rec.get("metric_enum") or rec.get("metric_name") or "metric").strip().lower()
+            raw_unit = _canonical_unit(str(rec.get("unit") or "").strip() or None)
+            if "request_rate" in metric_id or metric_id in ("rps", "qps", "throughput", "sim_red_request_rate_rps"):
+                dim = "request_rate"
+                unit = raw_unit or "req/s"
+            elif "error_rate" in metric_id or metric_id == "sim_red_error_rate_ratio":
+                dim = "error_rate"
+                unit = raw_unit or "ratio"
+            elif "latency" in metric_id or "duration" in metric_id or metric_id == "sim_red_latency_p95_ms":
+                dim = "latency"
+                unit = raw_unit or "ms"
+            else:
+                dim = "generic"
+                unit = raw_unit or "count"
+            observed.append({
+                "value": float(val),
+                "unit": unit,
+                "dimension": dim,
+                "metric_identity": metric_id,
+                "is_ratio_or_percent": unit in ("ratio", "%"),
+            })
+        else:
+            for key in ("value", "duration_ms", "status_code"):
+                val = rec.get(key)
+                if isinstance(val, (int, float)) and not isinstance(val, bool):
+                    dim = "latency" if key == "duration_ms" else ("status_code" if key == "status_code" else "generic")
+                    unit = "ms" if key == "duration_ms" else ("status_code" if key == "status_code" else None)
+                    observed.append({
+                        "value": float(val),
+                        "unit": unit,
+                        "dimension": dim,
+                        "metric_identity": key,
+                        "is_ratio_or_percent": False,
+                    })
+    return observed
+
+
+def _context_has_dimension_source(context: dict[str, Any], dimension: str) -> bool:
+    for item in context.get("evidence_items", []):
+        if not isinstance(item, dict):
+            continue
+        for obs in _extract_typed_observed_values(item):
+            if obs["dimension"] == dimension:
+                return True
+    return False
+
+
 @dataclass(frozen=True)
 class ValidatedClaim:
     """Detailed validation outcome for an individual material claim."""
@@ -145,6 +321,8 @@ class ValidationReport:
     origin_service: str | None = None
     is_cascade: bool = False
     is_multi_fault: bool = False
+    confidence_label: str = "LOW"
+    confidence_breakdown: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         # RULE-007 Hard enforcement: 'VERIFIED' is forbidden as a status
@@ -152,7 +330,7 @@ class ValidationReport:
             raise ValueError("RULE-007 Violation: Status 'VERIFIED' is strictly prohibited.")
 
 
-def _detect_claim_mechanisms(text: str) -> set[str]:
+def detect_claim_mechanisms(text: str) -> set[str]:
     """Identify specific failure mechanisms asserted in a claim or hypothesis."""
     mechanisms: set[str] = set()
     if _RATE_LIMIT_PATTERN.search(text):
@@ -271,7 +449,7 @@ def _assess_evidence_relevance(
                 f"Evidence {ev_id} belongs to '{ev_service}' and does not match claimed service(s) {sorted(mentioned_services)}.",
             )
 
-    mechanisms = _detect_claim_mechanisms(claim_text)
+    mechanisms = detect_claim_mechanisms(claim_text)
     status_codes = signals["status_codes"]
     error_codes = signals["error_codes"]
     messages = signals["messages"]
@@ -372,6 +550,47 @@ def _assess_evidence_relevance(
                 f"Metric evidence {ev_id} reports error_rate=0.0, contradicting failure claim.",
             )
 
+    if is_no_error:
+        target_services = mentioned_services or ({context.get("service_id")} if isinstance(context.get("service_id"), str) else set())
+        if tool_name == "get_service_metrics" and metric_names == {"error_rate"} and any(v > 0.0 for _, v in metric_values):
+            return (
+                HypothesisStatus.CONTRADICTED,
+                ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                f"Metric evidence {ev_id} reports positive error_rate ({[v for _, v in metric_values]}), contradicting no-error claim.",
+            )
+        if tool_name == "search_error_logs" and (
+            error_codes or any(sc.isdigit() and int(sc) >= 400 for sc in status_codes)
+        ):
+            return (
+                HypothesisStatus.CONTRADICTED,
+                ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                f"Log evidence {ev_id} records errors ({sorted(status_codes | error_codes)}), contradicting no-error claim.",
+            )
+        for other_ev in context.get("evidence_items", []):
+            if not isinstance(other_ev, dict):
+                continue
+            other_svc = other_ev.get("service_id")
+            if target_services and other_svc and other_svc not in target_services:
+                continue
+            other_sig = _extract_evidence_signals(other_ev)
+            other_tool = str(other_ev.get("tool_name") or "")
+            if other_tool == "get_service_metrics" and "error_rate" in other_sig["metric_names"]:
+                pos_errs = [v for mn, v in other_sig["metric_values"] if mn == "error_rate" and v > 0.0]
+                if pos_errs:
+                    return (
+                        HypothesisStatus.CONTRADICTED,
+                        ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                        f"Same-service telemetry {other_ev.get('evidence_id')} reports error_rate={pos_errs[0]}, contradicting no-error claim.",
+                    )
+            if other_tool == "search_error_logs" and (
+                other_sig["error_codes"] or any(sc.isdigit() and int(sc) >= 400 for sc in other_sig["status_codes"])
+            ):
+                return (
+                    HypothesisStatus.CONTRADICTED,
+                    ValidationReasonCode.CLAIM_CONTRADICTED.value,
+                    f"Same-service log evidence {other_ev.get('evidence_id')} shows active errors, contradicting no-error claim.",
+                )
+
     return None
 
 
@@ -419,20 +638,41 @@ class ClaimValidator:
 
         # 3. Check time window bounds (SC-14)
         query_window = context.get("query_window")
-        if query_window and observed_at:
+        records = ev.get("records", [])
+        if query_window:
             try:
-                obs_dt = parse_utc_iso(observed_at)
                 win_start = parse_utc_iso(query_window["start"])
                 win_end = parse_utc_iso(query_window["end"])
-                if obs_dt < win_start or obs_dt > win_end:
-                    return ValidatedClaim(
-                        claim_text=claim_text,
-                        evidence_id=evidence_id,
-                        status=HypothesisStatus.UNSUPPORTED,
-                        reason_code=ValidationReasonCode.OUT_OF_WINDOW.value,
-                        observed_at=observed_at,
-                        details=f"Evidence observed at {observed_at} is outside query window [{query_window['start']} - {query_window['end']}].",
-                    )
+                if observed_at:
+                    obs_dt = parse_utc_iso(observed_at)
+                    if obs_dt < win_start or obs_dt > win_end:
+                        return ValidatedClaim(
+                            claim_text=claim_text,
+                            evidence_id=evidence_id,
+                            status=HypothesisStatus.UNSUPPORTED,
+                            reason_code=ValidationReasonCode.OUT_OF_WINDOW.value,
+                            observed_at=observed_at,
+                            details=f"Evidence observed at {observed_at} is outside query window [{query_window['start']} - {query_window['end']}].",
+                        )
+                for rec in records:
+                    if not isinstance(rec, dict):
+                        continue
+                    for ts_key in ("timestamp", "sample_at"):
+                        ts_val = rec.get(ts_key)
+                        if isinstance(ts_val, str) and ts_val.strip():
+                            rec_dt = parse_utc_iso(ts_val.strip())
+                            if rec_dt < win_start or rec_dt > win_end:
+                                return ValidatedClaim(
+                                    claim_text=claim_text,
+                                    evidence_id=evidence_id,
+                                    status=HypothesisStatus.UNSUPPORTED,
+                                    reason_code=ValidationReasonCode.OUT_OF_WINDOW.value,
+                                    observed_at=observed_at or ts_val.strip(),
+                                    details=(
+                                        f"Record {ts_key}={ts_val.strip()} on {evidence_id} is outside query window "
+                                        f"[{query_window['start']} - {query_window['end']}]."
+                                    ),
+                                )
             except Exception as exc:
                 return ValidatedClaim(
                     claim_text=claim_text,
@@ -443,35 +683,165 @@ class ClaimValidator:
                     details=f"Time window validation failed: {exc}",
                 )
 
-        # 4. Check values against evidence records (VALUE_MISMATCH)
-        records = ev.get("records", [])
-        extracted_claimed = claimed_value if claimed_value is not None else extract_numeric_value(claim_text)
-
-        if extracted_claimed is not None and records:
-            observed_values = []
-            for rec in records:
-                if isinstance(rec, dict):
-                    for key in ("value", "duration_ms", "status_code"):
-                        if key in rec and isinstance(rec[key], (int, float)):
-                            observed_values.append(float(rec[key]))
+        # 4. Check values against evidence records (dimension- and unit-aware VALUE_MISMATCH)
+        if claimed_value is not None and records:
+            observed_values: list[float] = []
+            has_ratio_obs = False
+            for obs in _extract_typed_observed_values(ev):
+                observed_values.append(float(obs["value"]))
+                if obs["is_ratio_or_percent"] or obs["dimension"] == "error_rate":
+                    has_ratio_obs = True
+            if not observed_values:
+                for rec in records:
+                    if isinstance(rec, dict):
+                        for key in ("value", "duration_ms", "status_code"):
+                            if key in rec and isinstance(rec[key], (int, float)) and not isinstance(rec[key], bool):
+                                observed_values.append(float(rec[key]))
 
             if observed_values:
-                # Find closest observed value
-                closest = min(observed_values, key=lambda v: abs(v - extracted_claimed))
-                # Check discrepancy threshold
-                abs_diff = abs(closest - extracted_claimed)
-                # Allow tolerance percentage or small absolute delta
-                threshold = max(abs(closest) * self.value_tolerance_pct, 1.0)
+                closest = min(observed_values, key=lambda v: abs(v - claimed_value))
+                abs_diff = abs(closest - claimed_value)
+                min_abs_tol = 0.02 if (has_ratio_obs and 0.0 <= abs(closest) <= 1.0 and 0.0 <= abs(claimed_value) <= 1.0) else 1.0
+                threshold = max(abs(closest) * self.value_tolerance_pct, min_abs_tol)
                 if abs_diff > threshold:
                     return ValidatedClaim(
                         claim_text=claim_text,
                         evidence_id=evidence_id,
                         status=HypothesisStatus.UNSUPPORTED,
                         reason_code=ValidationReasonCode.VALUE_MISMATCH.value,
-                        value_delta={"claimed": extracted_claimed, "observed": closest, "difference": abs_diff},
+                        value_delta={"claimed": claimed_value, "observed": closest, "difference": abs_diff},
                         observed_at=observed_at,
-                        details=f"Claimed value {extracted_claimed} mismatches observed telemetry {closest}.",
+                        details=f"Claimed value {claimed_value} mismatches observed telemetry {closest}.",
                     )
+        elif claimed_value is None and records:
+            typed_claims = [
+                c for c in _extract_typed_numeric_claims(claim_text)
+                if c["dimension"] != "status_code"
+            ]
+            typed_observed = _extract_typed_observed_values(ev)
+            quant_observed = [o for o in typed_observed if o["dimension"] != "status_code"]
+            if typed_claims and quant_observed:
+                for mc in typed_claims:
+                    dim = mc["dimension"]
+                    if dim in ("request_rate", "error_rate", "latency"):
+                        same_dim_obs = [o for o in quant_observed if o["dimension"] == dim]
+                        if not same_dim_obs and ev.get("tool_name") not in ("get_trace_summary", "search_error_logs"):
+                            same_dim_obs = [o for o in quant_observed if o["dimension"] == "generic"]
+                    elif dim == "ratio_generic":
+                        same_dim_obs = [o for o in quant_observed if o["dimension"] == "error_rate" or o["is_ratio_or_percent"]]
+                    else:
+                        same_dim_obs = list(quant_observed)
+
+                    if not same_dim_obs:
+                        if dim in ("request_rate", "error_rate", "latency"):
+                            if _context_has_dimension_source(context, dim):
+                                continue
+                            # Explicit ratio/percent claim on wrong quantitative metric source
+                            if mc["is_ratio_or_percent"]:
+                                obs_rep = quant_observed[0]
+                                return ValidatedClaim(
+                                    claim_text=claim_text,
+                                    evidence_id=evidence_id,
+                                    status=HypothesisStatus.UNSUPPORTED,
+                                    reason_code=ValidationReasonCode.VALUE_MISMATCH.value,
+                                    value_delta={
+                                        "claimed": mc["value"],
+                                        "claimed_unit": mc["unit"],
+                                        "observed": obs_rep["value"],
+                                        "observed_unit": obs_rep["unit"],
+                                        "mismatch_kind": "RATIO_VS_ABSOLUTE_MISMATCH",
+                                    },
+                                    observed_at=observed_at,
+                                    details=(
+                                        f"RATIO_VS_ABSOLUTE_MISMATCH: claimed {mc['value']} ({mc['unit']}) for {dim} "
+                                        f"cannot match {obs_rep['metric_identity']} ({obs_rep['unit']})."
+                                    ),
+                                )
+                        continue
+
+                    # Evaluate unit compatibility and scaled tolerance against same-dimension observations
+                    compatible_pairs: list[tuple[float, float, dict[str, Any]]] = []
+                    unit_mismatch_detail: tuple[dict[str, Any], str] | None = None
+                    mc_unit = mc["unit"]
+                    for obs in same_dim_obs:
+                        obs_unit = obs["unit"]
+                        if mc_unit in ("%", "ratio") and not obs["is_ratio_or_percent"] and obs_unit in ("ms", "s", "req/s"):
+                            unit_mismatch_detail = (obs, "RATIO_VS_ABSOLUTE_MISMATCH")
+                            continue
+                        if obs["is_ratio_or_percent"] and mc_unit in ("ms", "s", "req/s"):
+                            unit_mismatch_detail = (obs, "RATIO_VS_ABSOLUTE_MISMATCH")
+                            continue
+                        if mc_unit == "req/s" and obs_unit in ("ms", "s"):
+                            unit_mismatch_detail = (obs, "UNIT_MISMATCH")
+                            continue
+                        if mc_unit in ("ms", "s") and obs_unit == "req/s":
+                            unit_mismatch_detail = (obs, "UNIT_MISMATCH")
+                            continue
+
+                        claim_norm = float(mc["value"])
+                        obs_norm = float(obs["value"])
+                        if mc_unit == "s" and obs_unit == "ms":
+                            claim_norm *= 1000.0
+                        elif mc_unit == "ms" and obs_unit == "s":
+                            obs_norm *= 1000.0
+                        elif mc_unit == "%" and obs_unit == "ratio":
+                            claim_norm /= 100.0
+                        elif mc_unit == "ratio" and obs_unit == "%":
+                            obs_norm /= 100.0
+                        compatible_pairs.append((claim_norm, obs_norm, obs))
+
+                    if not compatible_pairs and unit_mismatch_detail is not None:
+                        obs_rep, kind = unit_mismatch_detail
+                        return ValidatedClaim(
+                            claim_text=claim_text,
+                            evidence_id=evidence_id,
+                            status=HypothesisStatus.UNSUPPORTED,
+                            reason_code=ValidationReasonCode.VALUE_MISMATCH.value,
+                            value_delta={
+                                "claimed": mc["value"],
+                                "claimed_unit": mc["unit"],
+                                "observed": obs_rep["value"],
+                                "observed_unit": obs_rep["unit"],
+                                "mismatch_kind": kind,
+                            },
+                            observed_at=observed_at,
+                            details=(
+                                f"{kind}: claimed {mc['value']} ({mc['unit'] or 'unitless'}) "
+                                f"is unit-incompatible with observed {obs_rep['metric_identity']} "
+                                f"{obs_rep['value']} ({obs_rep['unit'] or 'unitless'})."
+                            ),
+                        )
+
+                    if compatible_pairs:
+                        best_claim_n, best_obs_n, best_obs = min(
+                            compatible_pairs,
+                            key=lambda p: abs(p[1] - p[0]),
+                        )
+                        abs_diff = abs(best_obs_n - best_claim_n)
+                        is_ratio_scale = best_obs["is_ratio_or_percent"] or dim in ("error_rate", "ratio_generic")
+                        min_tol = 0.02 if is_ratio_scale else 1.0
+                        threshold = max(abs(best_obs_n) * self.value_tolerance_pct, min_tol)
+                        if abs_diff > threshold:
+                            return ValidatedClaim(
+                                claim_text=claim_text,
+                                evidence_id=evidence_id,
+                                status=HypothesisStatus.UNSUPPORTED,
+                                reason_code=ValidationReasonCode.VALUE_MISMATCH.value,
+                                value_delta={
+                                    "claimed": best_claim_n,
+                                    "claimed_unit": mc["unit"],
+                                    "observed": best_obs_n,
+                                    "observed_unit": best_obs["unit"],
+                                    "dimension": dim,
+                                    "difference": round(abs_diff, 6),
+                                },
+                                observed_at=observed_at,
+                                details=(
+                                    f"Claimed {dim} value {mc['value']} ({mc['unit'] or 'unitless'}) "
+                                    f"mismatches observed {best_obs['metric_identity']} {best_obs['value']} "
+                                    f"({best_obs['unit'] or 'unitless'})."
+                                ),
+                            )
 
         # 5. Check evidence availability, scope, mechanism relevance, and direct contradiction
         relevance_issue = _assess_evidence_relevance(hypothesis_text or claim_text, ev, context)
@@ -575,62 +945,51 @@ class ClaimValidator:
         rejected_citations: list[dict[str, Any]] = []
         reason_codes: list[str] = []
 
+        def reject(reason: ValidationReasonCode, details: str) -> None:
+            # Rejected material may be outside the caller's scope; never echo its metadata.
+            rejected_citations.append({"rejection_reason": reason.value, "details": details})
+            if reason.value not in reason_codes:
+                reason_codes.append(reason.value)
+
         try:
             event_dt = parse_utc_iso(event_time_iso)
-        except Exception:
+        except ValueError:
             event_dt = None
 
+        accepted: dict[str, dict[str, Any]] = {}
+        ambiguous: set[str] = set()
         for cit in citations:
-            chunk_id = cit.get("chunk_id", "unknown")
-            doc_id = cit.get("document_id", "unknown")
-
-            # Check scope: service and environment (RAG-02)
-            svc = cit.get("service_id")
-            env = cit.get("environment")
-            if svc != incident_service or env != incident_environment:
-                rejected_citations.append({
-                    **cit,
-                    "rejection_reason": ValidationReasonCode.SCOPE_MISMATCH.value,
-                    "details": f"Citation service '{svc}' or environment '{env}' mismatches incident [{incident_service}/{incident_environment}].",
-                })
-                reason_codes.append(ValidationReasonCode.SCOPE_MISMATCH.value)
+            if not isinstance(cit, dict) or not incident_service or not incident_environment or (
+                cit.get("service_id") != incident_service or cit.get("environment") != incident_environment
+            ):
+                reject(ValidationReasonCode.SCOPE_MISMATCH, "Citation scope could not be established.")
                 continue
-
-            # Check status: must be approved / active (RAG-01)
-            status = cit.get("status", "active")
-            if status not in ("active", "approved"):
-                rejected_citations.append({
-                    **cit,
-                    "rejection_reason": ValidationReasonCode.OBSOLETE_SOP.value,
-                    "details": f"Citation status '{status}' is not active/approved.",
-                })
-                reason_codes.append(ValidationReasonCode.OBSOLETE_SOP.value)
+            if cit.get("status") in ("draft", "obsolete", "withdrawn"):
+                reject(ValidationReasonCode.OBSOLETE_SOP, "Document is not approved.")
                 continue
+            if not is_runbook_id(cit.get("document_id")) or not has_citation_provenance(cit):
+                reject(ValidationReasonCode.MISSING_EVIDENCE_REF, "Operational citation provenance is incomplete.")
+                continue
+            if event_dt is None:
+                reject(ValidationReasonCode.OUT_OF_WINDOW, "Incident reference time is unavailable.")
+                continue
+            if parse_utc_iso(cit["effective_from"]) > event_dt or (
+                cit["effective_to"] is not None and event_dt >= parse_utc_iso(cit["effective_to"])
+            ):
+                reject(ValidationReasonCode.OBSOLETE_SOP, "Document is outside its effective window.")
+                continue
+            chunk_id = cit["chunk_id"]
+            if chunk_id in accepted and any(
+                accepted[chunk_id][key] != cit[key] for key in (
+                    "document_id", "document_version", "section_path", "source_uri", "content_hash"
+                )
+            ):
+                ambiguous.add(chunk_id)
+                reject(ValidationReasonCode.VALUE_MISMATCH, "Citation identity is ambiguous.")
+            else:
+                accepted.setdefault(chunk_id, cit)
 
-            # Check validity dates (RAG-01, SC-10)
-            if event_dt is not None:
-                eff_from = cit.get("effective_from")
-                eff_to = cit.get("effective_to")
-                is_obsolete = False
-                try:
-                    if eff_from and parse_utc_iso(eff_from) > event_dt:
-                        is_obsolete = True
-                    if eff_to and parse_utc_iso(eff_to) <= event_dt:
-                        is_obsolete = True
-                except Exception:
-                    is_obsolete = True
-
-                if is_obsolete:
-                    rejected_citations.append({
-                        **cit,
-                        "rejection_reason": ValidationReasonCode.OBSOLETE_SOP.value,
-                        "details": f"Citation {doc_id} ({chunk_id}) is obsolete or inactive at incident event time {event_time_iso}.",
-                    })
-                    reason_codes.append(ValidationReasonCode.OBSOLETE_SOP.value)
-                    continue
-
-            # Citation is valid
-            valid_citations.append(cit)
+        valid_citations = [c for key, c in accepted.items() if key not in ambiguous]
 
         return valid_citations, rejected_citations, reason_codes
 
@@ -754,7 +1113,7 @@ class ClaimValidator:
         # 4. SOP Applicability Validation
         citations = context.get("runbook_citations", [])
         service_id = context.get("service_id", "")
-        environment = context.get("environment", "lab")
+        environment = context.get("environment", "")
         event_time = context.get("event_time", "")
 
         valid_citations, rejected_citations, sop_reasons = self.validate_sop_citations(
@@ -777,7 +1136,50 @@ class ClaimValidator:
         if cascade_info["is_multi_fault"]:
             reason_codes.append(ValidationReasonCode.CONCURRENT_INDEPENDENT_FAULT.value)
 
-        # 6. Determine final status and confidence score
+        # 5b. Hypothesis-level no-error assertion vs same-service active error telemetry
+        if _NO_ERROR_PATTERN.search(all_text):
+            hyp_lower = all_text.lower()
+            known_svcs = set(_KNOWN_SERVICES)
+            if isinstance(service_id, str) and service_id:
+                known_svcs.add(service_id)
+            mentioned_svcs = {svc for svc in known_svcs if re.search(rf"\b{re.escape(svc)}\b", hyp_lower)}
+            target_svcs = mentioned_svcs or ({service_id} if isinstance(service_id, str) and service_id else set())
+            for other_ev in evidence_items:
+                if not isinstance(other_ev, dict):
+                    continue
+                other_svc = other_ev.get("service_id")
+                if target_svcs and other_svc and other_svc not in target_svcs:
+                    continue
+                other_sig = _extract_evidence_signals(other_ev)
+                other_tool = str(other_ev.get("tool_name") or "")
+                other_id = other_ev.get("evidence_id")
+                found_msg: str | None = None
+                if other_tool == "get_service_metrics" and "error_rate" in other_sig["metric_names"]:
+                    pos_errs = [v for mn, v in other_sig["metric_values"] if mn == "error_rate" and v > 0.0]
+                    if pos_errs:
+                        found_msg = (
+                            f"Hypothesis asserts no observed errors, contradicted by {other_id} "
+                            f"(error_rate={pos_errs[0]})."
+                        )
+                elif other_tool == "search_error_logs" and (
+                    other_sig["error_codes"]
+                    or any(sc.isdigit() and int(sc) >= 400 for sc in other_sig["status_codes"])
+                ):
+                    found_msg = (
+                        f"Hypothesis asserts no observed errors, contradicted by {other_id} "
+                        f"({sorted(other_sig['status_codes'] | other_sig['error_codes'])})."
+                    )
+                if found_msg:
+                    if other_id and other_id not in validated_contradicting_ids:
+                        validated_contradicting_ids.append(other_id)
+                    if found_msg not in contradictions:
+                        contradictions.append(found_msg)
+                    if ValidationReasonCode.CONTRADICTING_SIGNALS.value not in reason_codes:
+                        reason_codes.append(ValidationReasonCode.CONTRADICTING_SIGNALS.value)
+                    if ValidationReasonCode.CLAIM_CONTRADICTED.value not in reason_codes:
+                        reason_codes.append(ValidationReasonCode.CLAIM_CONTRADICTED.value)
+
+        # 6. Determine final status and deterministic evidence-aware confidence score
         # FAIL-CLOSED principle: never upgrade unvalidated or contradicted claims
         trace_outage = ValidationReasonCode.SOURCE_UNAVAILABLE.value in reason_codes
         has_contradictions = bool(contradictions) or ValidationReasonCode.CONTRADICTING_SIGNALS.value in reason_codes
@@ -787,7 +1189,7 @@ class ClaimValidator:
         has_missing_refs = ValidationReasonCode.MISSING_EVIDENCE_REF.value in reason_codes
         has_out_of_window = ValidationReasonCode.OUT_OF_WINDOW.value in reason_codes
         has_irrelevant = ValidationReasonCode.IRRELEVANT_EVIDENCE.value in reason_codes
-        claims_specific_mechanism = bool(_detect_claim_mechanisms(all_text) - {"failure_assertion"})
+        claims_specific_mechanism = bool(detect_claim_mechanisms(all_text) - {"failure_assertion"})
 
         if not supporting_ids:
             if ValidationReasonCode.MISSING_SUPPORTING_EVIDENCE.value not in reason_codes:
@@ -799,29 +1201,45 @@ class ClaimValidator:
         if has_forbidden_verified:
             # Strictly downgraded per RULE-007
             final_status = HypothesisStatus.INCONCLUSIVE if trace_outage else HypothesisStatus.PARTIAL
-            confidence = min(0.30, hypothesis.get("confidence_score", 0.5))
         elif (contradicted_claims and not supported_claims) or (validated_contradicting_ids and not supporting_ids and not supported_claims):
             final_status = HypothesisStatus.CONTRADICTED
-            confidence = 0.10
         elif (unsupported_claims or has_missing_refs or has_irrelevant) and not supported_claims:
             final_status = HypothesisStatus.UNSUPPORTED
-            confidence = 0.15
         elif trace_outage:
             final_status = HypothesisStatus.INCONCLUSIVE
-            confidence = min(0.40, hypothesis.get("confidence_score", 0.5))
         elif not supporting_ids:
             if claims_specific_mechanism and any(ev.get("records") for ev in evidence_items):
                 final_status = HypothesisStatus.UNSUPPORTED
-                confidence = 0.15
             else:
                 final_status = HypothesisStatus.INCONCLUSIVE
-                confidence = 0.20
         elif has_contradictions or has_out_of_window or contradicted_claims or unsupported_claims or has_irrelevant:
             final_status = HypothesisStatus.PARTIAL
-            confidence = min(0.45, hypothesis.get("confidence_score", 0.5))
         else:
             final_status = HypothesisStatus.SUPPORTED
-            confidence = max(0.60, min(0.85, hypothesis.get("confidence_score", 0.75)))
+
+        manual_fallback = bool(context.get("_manual_fallback")) or context.get("investigation_mode") == "manual_fallback"
+        assessment = compute_evidence_confidence(
+            status=final_status.value,
+            supporting_evidence_ids=validated_supporting_ids,
+            contradicting_evidence_ids=validated_contradicting_ids,
+            evidence_items=evidence_items,
+            claims=claims,
+            contradictions=contradictions,
+            unknowns=unknowns,
+            reason_codes=reason_codes,
+            llm_proposed_confidence=confidence_str,
+            trace_outage=trace_outage,
+            has_forbidden_verified=has_forbidden_verified,
+            manual_fallback=manual_fallback,
+        )
+        confidence = assessment.score
+        confidence_label = assessment.label
+        confidence_breakdown = {
+            **assessment.breakdown,
+            "rationale": assessment.rationale,
+            "score_semantics": assessment.score_semantics,
+            "is_calibrated_probability": assessment.is_calibrated_probability,
+        }
 
         return ValidationReport(
             hypothesis_id=hyp_id,
@@ -838,4 +1256,6 @@ class ClaimValidator:
             origin_service=cascade_info["origin_service"],
             is_cascade=cascade_info["is_cascade"],
             is_multi_fault=cascade_info["is_multi_fault"],
+            confidence_label=confidence_label,
+            confidence_breakdown=confidence_breakdown,
         )

@@ -33,6 +33,7 @@ from rich.text import Text
 
 from gateway.sanitizer import DeterministicSanitizer
 from observability.audit_chain import AuditHashChain
+from orchestrator.confidence import confidence_label_for_score
 from orchestrator.console_config import (
     PROVIDER_PRESETS,
     EnvConfigManager,
@@ -44,6 +45,7 @@ from orchestrator.handover import HandoverExporter
 from orchestrator.llm_provider import OPENROUTER_BASE_URL, OPENROUTER_MODEL
 from orchestrator.review import AuthorizedReviewManager, build_human_correction_payload
 from orchestrator.state_machine import WorkflowStateStore
+from orchestrator.verification_plan import availability_text, hypothesis_label
 from orchestrator.telegram_dispatcher import TelegramDispatcher
 
 
@@ -719,6 +721,9 @@ class SREDashboard:
                                 hyp_conf_map[hid] = {
                                     "confidence_score": h_item.get("confidence_score"),
                                     "confidence": h_item.get("confidence"),
+                                    "confidence_rationale": h_item.get("confidence_rationale"),
+                                    "llm_proposed_confidence": h_item.get("llm_proposed_confidence"),
+                                    "unvalidated": False,
                                 }
                     if not hyp_conf_map:
                         run_row = conn.execute(
@@ -731,14 +736,20 @@ class SREDashboard:
                             prim = cands.get("primary_hypothesis") or {}
                             alts = cands.get("alternative_hypotheses") or []
                             if prim:
+                                p_score = {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(prim.get("confidence"))
                                 hyp_conf_map[f"hyp-{inc_id}-001"] = {
                                     "confidence": prim.get("confidence"),
-                                    "confidence_score": {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(prim.get("confidence")),
+                                    "confidence_score": p_score,
+                                    "unvalidated": True,
+                                    "llm_proposed_confidence": prim.get("confidence"),
                                 }
                             for idx, a in enumerate(alts, start=2):
+                                a_score = {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(a.get("confidence"))
                                 hyp_conf_map[f"hyp-{inc_id}-{idx:03d}"] = {
                                     "confidence": a.get("confidence"),
-                                    "confidence_score": {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(a.get("confidence")),
+                                    "confidence_score": a_score,
+                                    "unvalidated": True,
+                                    "llm_proposed_confidence": a.get("confidence"),
                                 }
             except Exception:
                 pass
@@ -776,26 +787,35 @@ class SREDashboard:
             if not isinstance(hypothesis, Mapping):
                 continue
             statement = hypothesis.get("statement") or hypothesis.get("hypothesis_statement") or hypothesis.get("title") or hypothesis.get("description", "")
-            support = hypothesis.get("support_status") or hypothesis.get("evaluation_status") or hypothesis.get("status", "INCONCLUSIVE")
+            support = hypothesis_label(hypothesis)
             confidence = hypothesis.get("confidence_score")
             conf_str = hypothesis.get("confidence")
+            conf_rationale = hypothesis.get("confidence_rationale")
+            is_unvalidated = False
             hid = str(hypothesis.get("hypothesis_id") or "")
             if confidence is None and hid in hyp_conf_map:
                 confidence = hyp_conf_map[hid].get("confidence_score")
                 conf_str = hyp_conf_map[hid].get("confidence")
+                conf_rationale = conf_rationale or hyp_conf_map[hid].get("confidence_rationale")
+                is_unvalidated = bool(hyp_conf_map[hid].get("unvalidated"))
             elif confidence is None:
                 for candidate_id, cdata in hyp_conf_map.items():
                     if candidate_id.endswith(f"-{rank:03d}"):
                         confidence = cdata.get("confidence_score")
                         conf_str = cdata.get("confidence")
+                        conf_rationale = conf_rationale or cdata.get("confidence_rationale")
+                        is_unvalidated = bool(cdata.get("unvalidated"))
                         break
+            elif hid in hyp_conf_map and not conf_rationale:
+                conf_rationale = hyp_conf_map[hid].get("confidence_rationale")
 
-            if isinstance(confidence, (int, float)):
-                confidence_text = f"{float(confidence):.0%}"
-                if conf_str:
-                    confidence_text += f" ({conf_str})"
+            if isinstance(confidence, (int, float)) and not isinstance(confidence, bool):
+                derived_label = confidence_label_for_score(float(confidence))
+                confidence_text = f"{float(confidence):.0%} ({derived_label})"
+                if is_unvalidated:
+                    confidence_text += " [unvalidated prior]"
             elif conf_str:
-                confidence_text = str(conf_str)
+                confidence_text = f"{conf_str} [unvalidated]"
             else:
                 confidence_text = "N/A"
             rank_label = str(hypothesis.get("rank", rank))
@@ -812,6 +832,7 @@ class SREDashboard:
                 "statement": str(statement),
                 "support": str(support),
                 "confidence": confidence_text,
+                "confidence_rationale": str(conf_rationale) if conf_rationale else "",
                 "reason_summary": str(reason_summary),
                 "supporting": [str(x) for x in sup_ids],
                 "contradicting": [str(x) for x in con_ids],
@@ -829,6 +850,8 @@ class SREDashboard:
             )
             if item["reason_summary"]:
                 reasoning_text.append(f"  Why / Causal Analysis: {item['reason_summary']}\n")
+            if item.get("confidence_rationale"):
+                reasoning_text.append(f"  Confidence Basis    : {item['confidence_rationale']}\n", style="dim")
             sup_str = ", ".join(item["supporting"]) if item["supporting"] else "none"
             reasoning_text.append(f"  Supporting Evidence : {sup_str}\n", style="green")
             if item["contradicting"]:
@@ -869,14 +892,14 @@ class SREDashboard:
         else:
             checks_text.append("No SRE verification steps recorded.", style="dim")
 
-        citation_text = Text()
+        citation_text = Text(availability_text(dossier) + "\n")
         for item in citations:
             if isinstance(item, Mapping):
                 metadata = (
                     f"{item.get('doc_id') or item.get('document_id', 'Runbook')} "
                     f"v{item.get('version') or item.get('document_version', 'unknown')} | "
                     f"{item.get('section_path') or item.get('section', 'section unavailable')} | "
-                    f"applicable={bool(item.get('applicability_verified', False))}"
+                    f"{item.get('chunk_id', 'chunk unavailable')} | {item.get('source_uri', 'source unavailable')}"
                 )
                 excerpt = (
                     item.get("excerpt")
@@ -884,8 +907,6 @@ class SREDashboard:
                     or item.get("summary")
                 )
                 citation_text.append(f"{metadata}\n  {_bounded_sanitized_excerpt(excerpt)}\n")
-        if not citation_text.plain:
-            citation_text.append("No active SOP citations.", style="dim")
 
         evidence_text = Text()
         for item in evidence:

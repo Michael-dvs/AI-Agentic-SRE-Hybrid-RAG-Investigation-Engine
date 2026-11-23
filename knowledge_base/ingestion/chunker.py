@@ -31,13 +31,9 @@ _CONTRACT_PATH = (
     / "knowledge-chunk.v1.schema.json"
 )
 
-# Load and prepare validator once
-_SCHEMA: dict[str, Any] = {}
-_VALIDATOR: Draft202012Validator | None = None
-
-if _CONTRACT_PATH.exists():
-    _SCHEMA = json.loads(_CONTRACT_PATH.read_text(encoding="utf-8"))
-    _VALIDATOR = Draft202012Validator(_SCHEMA, format_checker=FormatChecker())
+CHUNK_SCHEMA = Draft202012Validator(
+    json.loads(_CONTRACT_PATH.read_text(encoding="utf-8")), format_checker=FormatChecker()
+)
 
 
 class StructureAwareChunker:
@@ -63,7 +59,7 @@ class StructureAwareChunker:
         metadata: DocumentMetadata,
         sanitized_body: str,
         index_version: str,
-        source_rel_path: str = "",
+        source_rel_path: str,
     ) -> ChunkerResult:
         """Parse structured sections and produce compliant knowledge chunks."""
         sections = self._parse_heading_sections(metadata.title, sanitized_body)
@@ -88,7 +84,9 @@ class StructureAwareChunker:
         chunks: list[dict[str, Any]] = []
         doc_slug = metadata.document_id.replace("/", "_")
         ver_slug = metadata.document_version.replace("/", "_")
-        source_uri = f"kb://corpus/{metadata.service_id}/{source_rel_path or (doc_slug + '.md')}"
+        if any(part in ("", ".", "..") for part in source_rel_path.split("/")):
+            raise ValueError("A corpus-relative source path is required")
+        source_uri = f"kb://corpus/{source_rel_path}"
 
         for seq_idx, (section_path, content) in enumerate(raw_chunks, start=1):
             chunk_id = f"chk-{doc_slug}-v{ver_slug}-{seq_idx:03d}"
@@ -121,11 +119,7 @@ class StructureAwareChunker:
             }
 
             # Validate against Draft 2020-12 contract
-            if _VALIDATOR is not None:
-                errors = list(_VALIDATOR.iter_errors(chunk_dict))
-                if errors:
-                    err_msg = "; ".join(e.message for e in errors)
-                    raise ValueError(f"Generated chunk {chunk_id} violates knowledge-chunk.v1 schema: {err_msg}")
+            CHUNK_SCHEMA.validate(chunk_dict)
 
             chunks.append(chunk_dict)
 
@@ -221,7 +215,7 @@ def chunk_document(
     metadata: DocumentMetadata,
     sanitized_body: str,
     index_version: str,
-    source_rel_path: str = "",
+    source_rel_path: str,
 ) -> ChunkerResult:
     """Convenience helper to chunk a document using default structure-aware settings."""
     chunker = StructureAwareChunker()

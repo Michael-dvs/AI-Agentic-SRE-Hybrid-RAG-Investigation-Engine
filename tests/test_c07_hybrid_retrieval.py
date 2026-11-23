@@ -69,7 +69,7 @@ def test_schema_compliance_across_modes(
             "max_context_tokens": 1024,
             "index_version_policy": "kb-idx-20261111-v1",
         }
-        result = service.execute_retrieval(req)
+        result = service.execute_retrieval(req, caller_groups=["l1-operator"])
         res_dict = result.to_dict()
 
         errors = list(_VALIDATOR.iter_errors(res_dict))
@@ -113,7 +113,7 @@ def test_rag_01_sc10_obsolete_sop_prevention(
         "max_context_tokens": 2048,
         "index_version_policy": "latest",
     }
-    result = service.execute_retrieval(req)
+    result = service.execute_retrieval(req, caller_groups=["l1-operator"])
     assert result.status == "ok"
     assert len(result.citations) > 0
 
@@ -142,7 +142,7 @@ def test_rag_02_cross_service_isolation(
         "max_context_tokens": 1024,
         "index_version_policy": "latest",
     }
-    gw_result = service.execute_retrieval(gw_req)
+    gw_result = service.execute_retrieval(gw_req, caller_groups=["l1-operator"])
     assert gw_result.status == "ok"
     for cit in gw_result.citations:
         assert cit.service_id == "api-gateway", f"Cross-service document {cit.document_id} from {cit.service_id} leaked to api-gateway!"
@@ -159,7 +159,7 @@ def test_rag_02_cross_service_isolation(
         "max_context_tokens": 1024,
         "index_version_policy": "latest",
     }
-    ledger_result = service.execute_retrieval(ledger_req)
+    ledger_result = service.execute_retrieval(ledger_req, caller_groups=["l1-operator"])
     assert ledger_result.status == "ok"
     for cit in ledger_result.citations:
         assert cit.service_id == "ledger-service", f"Cross-service document {cit.document_id} from {cit.service_id} leaked to ledger-service!"
@@ -218,7 +218,7 @@ def test_honest_gap_handling_no_match(
         "max_context_tokens": 1024,
         "index_version_policy": "latest",
     }
-    result = service.execute_retrieval(unrelated_req)
+    result = service.execute_retrieval(unrelated_req, caller_groups=["l1-operator"])
     assert result.status == "no_match"
     assert result.gap_reason == "NO_APPLICABLE_RUNBOOK"
     assert len(result.citations) == 0
@@ -242,14 +242,14 @@ def test_honest_gap_handling_outage(
 
     # Simulate outage
     engine.set_healthy(False)
-    outage_result = service.execute_retrieval(req)
+    outage_result = service.execute_retrieval(req, caller_groups=["l1-operator"])
     assert outage_result.status == "unavailable"
     assert outage_result.gap_reason == "RETRIEVAL_UNAVAILABLE"
     assert len(outage_result.citations) == 0
 
     # Recover
     engine.set_healthy(True)
-    recovered_result = service.execute_retrieval(req)
+    recovered_result = service.execute_retrieval(req, caller_groups=["l1-operator"])
     assert recovered_result.status == "ok"
     assert len(recovered_result.citations) > 0
 
@@ -269,7 +269,7 @@ def test_citation_provenance_and_hash_integrity(
         "max_context_tokens": 1024,
         "index_version_policy": "latest",
     }
-    result = service.execute_retrieval(req)
+    result = service.execute_retrieval(req, caller_groups=["l1-operator"])
     assert result.status == "ok"
 
     for cit in result.citations:
@@ -297,7 +297,7 @@ def test_context_token_bounding_and_truncation(
         "max_context_tokens": 120,  # very small token cap
         "index_version_policy": "latest",
     }
-    result = service.execute_retrieval(req)
+    result = service.execute_retrieval(req, caller_groups=["l1-operator"])
     assert result.context_tokens_used <= 120
     assert result.truncated is True
 
@@ -322,7 +322,7 @@ def test_dev_benchmark_reproducibility(
             "max_context_tokens": 2048,
             "index_version_policy": "latest",
         }
-        res = service.execute_retrieval(req)
+        res = service.execute_retrieval(req, caller_groups=["l1-operator"])
         assert res.status == "ok", f"Query {q['query_id']} failed with status {res.status}"
 
         # Clean document IDs
@@ -353,7 +353,7 @@ def test_indonesian_technical_semantic_retrieval_and_embedding_metadata(
             "service_id": "db-dummy",
             "query_text": "bagaimana mitigasi sambungan database penuh",
             "expected_doc_id": "SOP-DB-001",
-            "groups": ["sre-core-l1"],
+            "groups": ["l1-operator"],
         },
         {
             "service_id": "auth-service",
@@ -365,19 +365,19 @@ def test_indonesian_technical_semantic_retrieval_and_embedding_metadata(
             "service_id": "transaction-service",
             "query_text": "prosedur eskalasi lonjakan kegagalan transaksi",
             "expected_doc_id": "SOP-TX-001",
-            "groups": ["sre-core-l1"],
+            "groups": ["l1-operator"],
         },
         {
             "service_id": "notification-service",
             "query_text": "mitigasi backlog pesan dan consumer lag rabbitmq",
             "expected_doc_id": "SOP-NOTIF-QUEUE-001",
-            "groups": ["sre-core-l1"],
+            "groups": ["l1-operator"],
         },
         {
             "service_id": "notification-service",
             "query_text": "penanganan lonjakan antrean konsumen notifikasi",
             "expected_doc_id": "SOP-NOTIF-001",
-            "groups": ["sre-core-l1"],
+            "groups": ["l1-operator"],
         },
     ]
 

@@ -107,7 +107,7 @@ def retrieval_request():
 def chunk(**changes):
     value = {"service_id": "auth-service", "environment": "lab", "status": "approved",
              "effective_from": "2026-01-01T00:00:00Z", "effective_to": None,
-             "classification": "synthetic-internal"}
+             "classification": "synthetic-internal", "allowed_groups": ["sre-core-l1"], "index_version": "kb-test-v1"}
     value.update(changes)
     return value
 

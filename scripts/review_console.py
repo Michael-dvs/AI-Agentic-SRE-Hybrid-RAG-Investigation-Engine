@@ -15,10 +15,14 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from orchestrator.confidence import confidence_label_for_score
 from orchestrator.handover import HandoverExporter
 from orchestrator.review import AuthorizedReviewManager, build_human_correction_payload
 from orchestrator.state_machine import InvestigationStateMachine, WorkflowStateStore
 from orchestrator.ticketing import DummyTicketManager
+
+
+from orchestrator.verification_plan import availability_text, hypothesis_label
 
 
 def display_dossier_summary(
@@ -81,19 +85,25 @@ def display_dossier_summary(
     rec = dossier.get("recommended_actions", {})
     sops = dossier.get("sop_citations") or rec.get("sop_citations") or []
     print(f"AUTHORITATIVE RUNBOOK CITATIONS ({len(sops)} citations):")
+    print(f"  {availability_text(dossier)}")
     if sops:
         for idx, sop in enumerate(sops, 1):
             if isinstance(sop, dict):
                 title = sop.get("doc_id") or sop.get("title", sop.get("document_id", "Runbook"))
                 sec = sop.get("section_path") or sop.get("section", "N/A")
                 uri = sop.get("source_uri", "N/A")
-                print(f"  [{idx}] {title} — Section {sec}")
-                print(f"      Source: file://{uri}")
+                print(f"  [{idx}] {title} v{sop.get('version', 'N/A')} | {sec} | {sop.get('chunk_id', 'N/A')}")
+                print(f"      Source: {uri}")
             else:
                 print(f"  [{idx}] {sop}")
     else:
         print("  No relevant SOPs or runbooks cited.")
     print("-" * 76)
+    print("MANUAL VERIFICATION (human review only):")
+    for check in dossier.get("recommended_checks", []):
+        print(f"  {check['check_id']}: {check['description']}")
+    for item in dossier.get("unknowns", []):
+        print(f"  Unknown: {item}")
 
     # 4. Ranked Hypotheses
     rca = dossier.get("root_cause_analysis", {})
@@ -103,9 +113,13 @@ def display_dossier_summary(
         for h in hypos:
             rank = h.get("rank", 1)
             stmt = h.get("statement") or h.get("hypothesis_statement", "")
-            eval_stat = h.get("support_status") or h.get("evaluation_status", "INCONCLUSIVE")
-            conf = h.get("confidence_score", 0.85 if eval_stat == "SUPPORTED" else 0.5)
-            print(f"  #{rank} [{eval_stat} | Conf: {conf:.2f}] {stmt}")
+            eval_stat = hypothesis_label(h)
+            conf = h.get("confidence_score")
+            if isinstance(conf, (int, float)) and not isinstance(conf, bool):
+                conf_display = f"{float(conf):.0%} ({confidence_label_for_score(float(conf))})"
+            else:
+                conf_display = "N/A"
+            print(f"  #{rank} [{eval_stat} | Conf: {conf_display}] {stmt}")
     else:
         pri = rca.get("primary_hypothesis") or dossier.get("primary_hypothesis", "N/A")
         print(f"  Primary: {pri}")
