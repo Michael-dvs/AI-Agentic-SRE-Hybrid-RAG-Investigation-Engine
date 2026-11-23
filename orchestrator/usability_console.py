@@ -42,7 +42,7 @@ from orchestrator.console_config import (
 )
 from orchestrator.handover import HandoverExporter
 from orchestrator.llm_provider import OPENROUTER_BASE_URL, OPENROUTER_MODEL
-from orchestrator.review import AuthorizedReviewManager
+from orchestrator.review import AuthorizedReviewManager, build_human_correction_payload
 from orchestrator.state_machine import WorkflowStateStore
 from orchestrator.telegram_dispatcher import TelegramDispatcher
 
@@ -262,18 +262,12 @@ class ReviewActionController:
             statement = " ".join((corrected_hypothesis or "").split())
             if not statement:
                 raise ValueError("Corrected hypothesis is required")
-            corrections = {
-                "hypotheses": [
-                    {
-                        "hypothesis_id": f"hyp-{dossier.get('incident_id', 'unknown')}-human-001",
-                        "statement": statement[:2048],
-                        "status": "SUPPORTED",
-                        "confidence_score": 1.0,
-                        "supporting_evidence_ids": [],
-                        "refuting_evidence_ids": [],
-                    }
-                ]
-            }
+            corrections = build_human_correction_payload(
+                dossier=dossier,
+                corrected_statement=statement,
+                reviewer_ref=reviewer_ref,
+                reviewer_role=reviewer_role,
+            )
 
         result = self.review_manager.submit_review(
             incident_id=str(dossier.get("incident_id", "inc-unknown")),
@@ -286,18 +280,6 @@ class ReviewActionController:
             escalation_target=escalation_target,
             target_version=int(dossier.get("dossier_version", 1)),
         )
-        if action_upper != "APPROVE":
-            review_event = result["review_event"]
-            self.audit_chain.record_event(
-                actor_ref="principal_reviewer",
-                action="HUMAN_REVIEW_DECISION",
-                target_ref=f"{review_event['incident_id']}:v{review_event['target_dossier_version']}",
-                result_code="ALLOW",
-                reason_code="OK",
-                request_payload=review_event,
-                incident_id=review_event["incident_id"],
-                target_version=str(review_event["target_dossier_version"]),
-            )
         artifacts: dict[str, str] = {}
         if action_upper == "APPROVE":
             incident_id = str(dossier.get("incident_id", "inc-unknown"))
@@ -311,6 +293,7 @@ class ReviewActionController:
         return {
             "action": action_upper,
             "review_result": result,
+            "approval_semantics": result.get("approval_semantics"),
             "artifacts": artifacts,
             "auto_action_triggered": result["review_event"]["auto_action_triggered"],
         }
@@ -1557,6 +1540,10 @@ class SREDashboard:
         if not self.selected_incident_id:
             self.notice = "Select a dossier first."
             return
+        inc = self.store.get_incident(self.selected_incident_id)
+        if inc and inc.get("current_state") != "HUMAN_REVIEW":
+            self.notice = f"Incident is already finalized ({inc.get('current_state')}); review actions are locked."
+            return
         dossier = self.repository.latest_dossier(self.selected_incident_id)
         if dossier is None:
             self.notice = "Dossier not found."
@@ -1581,7 +1568,12 @@ class SREDashboard:
         except Exception as exc:
             self.notice = f"Review failed: {type(exc).__name__}: {exc}"
             return
-        self.notice = f"{action} recorded; auto_action_triggered={result['auto_action_triggered']}."
+        semantics = result.get("approval_semantics") or {}
+        meaning = semantics.get("closure_meaning", action)
+        self.notice = (
+            f"{action} recorded ({meaning}); diagnosis_verified=False; "
+            f"auto_action_triggered={result['auto_action_triggered']}."
+        )
         self.selected_incident_id = None
 
     def run(self) -> None:

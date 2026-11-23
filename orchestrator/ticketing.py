@@ -9,6 +9,8 @@ import pathlib
 import uuid
 from typing import Any, Dict, List, Optional
 
+from orchestrator.dossier import compute_canonical_dossier_hash
+
 _LOG = logging.getLogger(__name__)
 
 
@@ -81,6 +83,12 @@ class DummyTicketManager:
                 "Must be 'APPROVED' by an authorized human reviewer."
             )
 
+        given_hash = dossier.get("dossier_hash")
+        if given_hash and compute_canonical_dossier_hash(dossier) != given_hash:
+            raise InvalidDossierStateError(
+                "INVALID_DOSSIER_STATE: Dossier hash integrity mismatch; refusing ticket creation."
+            )
+
         # 2. Extract Required Metadata
         incident_id = dossier.get("incident_id", "inc-unknown")
         if not incident_id.startswith("inc-"):
@@ -128,12 +136,24 @@ class DummyTicketManager:
         severity = dossier.get("severity") or dossier.get("incident_summary", {}).get("severity", "medium")
         ticket_priority = priority or ("P1" if severity == "critical" else ("P2" if severity == "high" else "P3"))
 
+        primary_support_status = "INCONCLUSIVE"
+        if dossier.get("hypotheses") and isinstance(dossier["hypotheses"], list):
+            first_h = dossier["hypotheses"][0]
+            if isinstance(first_h, dict):
+                primary_support_status = str(first_h.get("support_status") or "INCONCLUSIVE")
+        elif rca.get("ranked_hypotheses"):
+            primary_support_status = str(rca["ranked_hypotheses"][0].get("evaluation_status") or "INCONCLUSIVE")
+
         ticket: Dict[str, Any] = {
             "ticket_id": ticket_id,
             "incident_id": incident_id,
             "revision_number": revision_number,
             "approved_by": approved_by,
             "primary_hypothesis": primary_hypothesis,
+            "diagnosis_support_status": primary_support_status,
+            "diagnosis_verified": False,
+            "remediation_authorized": False,
+            "has_applicable_sop": bool(normalized_sop_refs),
             "sop_references": normalized_sop_refs,
             "status": "OPEN",
             "priority": ticket_priority,

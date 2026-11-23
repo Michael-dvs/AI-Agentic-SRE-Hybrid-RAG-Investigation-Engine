@@ -73,7 +73,7 @@ class DossierSerializer:
         if environment not in ("lab", "sim-staging", "sim-prod-like"):
             environment = "lab"
 
-        raw_priority = str(context.get("priority", "medium")).lower()
+        raw_priority = str(context.get("priority") or context.get("severity") or "medium").lower()
         severity_map = {
             "critical": "critical",
             "p1": "critical",
@@ -259,7 +259,7 @@ class DossierSerializer:
             if not h_id.startswith("hyp-"):
                 h_id = f"hyp-{h_id}"
 
-            raw_val = h.get("status", "INCONCLUSIVE")
+            raw_val = h.get("status") or h.get("support_status") or "INCONCLUSIVE"
             raw_status = str(raw_val.value if hasattr(raw_val, "value") else raw_val).upper()
             v_val = h.get("validation_status") or raw_status
             validation_status = str(v_val.value if hasattr(v_val, "value") else v_val).upper()
@@ -389,6 +389,13 @@ class DossierSerializer:
 
         # 9. Reproducibility
         manifest = context.get("version_manifest") or context.get("reproducibility") or {}
+        raw_corr_ids = manifest.get("correlation_ids")
+        if isinstance(raw_corr_ids, list) and raw_corr_ids:
+            corr_ids = [str(c) for c in raw_corr_ids if isinstance(c, str) and len(c) >= 4] or [
+                context.get("trace_id") or f"corr-{incident_id}"
+            ]
+        else:
+            corr_ids = [context.get("trace_id") or f"corr-{incident_id}"]
         reproducibility = {
             "workflow_version": manifest.get("workflow_version", "1.0.0"),
             "policy_version": manifest.get("policy_version", "1.0.0"),
@@ -396,7 +403,7 @@ class DossierSerializer:
             "prompt_version": manifest.get("prompt_version", "deterministic_baseline_rules_v1"),
             "tool_schema_version": manifest.get("tool_schema_version", "1.0"),
             "kb_index_version": manifest.get("kb_version") or manifest.get("kb_index_version", "kb-idx-20261111-v1"),
-            "correlation_ids": [context.get("trace_id") or f"corr-{incident_id}"],
+            "correlation_ids": corr_ids,
         }
 
         # Construct payload without hash
@@ -683,6 +690,8 @@ class DossierMarkdownRenderer:
             f"- **Latest Review Event ID:** `{rev_summary.get('latest_review_event_id') or 'N/A'}`",
             f"- **Reviewed By / Role:** `{rev_summary.get('reviewed_by') or 'PENDING'}`",
             f"- **Review Timestamp:** `{rev_summary.get('reviewed_at') or 'PENDING'}`",
+            "- **Diagnosis Verified:** `false` (APPROVE signifies dossier handover acceptance only; does not prove unconfirmed root causes)",
+            "- **Remediation Authorized / Auto-Action Triggered:** `false` (HUM-01 & RULE-008)",
             "",
             "```text",
             "┌────────────────────────────────────────────────────────────────────────┐",

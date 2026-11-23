@@ -74,6 +74,14 @@ PERMITTED_ABORT_TARGETS = {
     "REJECTED",
 }
 
+TERMINAL_STATES = {
+    "LEARNED",
+    "CANCELLED",
+    "FAILED_SAFE",
+    "MANUAL_TRIAGE_REQUIRED",
+    "REJECTED",
+}
+
 
 def utc_now_z() -> str:
     """Return ISO 8601 UTC timestamp ending in 'Z'."""
@@ -439,8 +447,10 @@ class InvestigationStateMachine:
 
     def can_transition(self, from_state: str | None, to_state: str) -> bool:
         """Validate if transition from_state -> to_state is strictly permitted."""
+        if from_state in TERMINAL_STATES:
+            return False
         if to_state in PERMITTED_ABORT_TARGETS:
-            return True
+            return from_state != "CLOSED"
         expected = VALID_FORWARD_TRANSITIONS.get(from_state)
         return expected == to_state
 
@@ -474,6 +484,14 @@ class InvestigationStateMachine:
         if to_state == "CLOSED":
             status = "CLOSED"
             terminal_outcome = terminal_outcome or "CLOSED_APPROVED"
+        elif to_state == "LEARNED":
+            status = "CLOSED"
+        elif to_state == "REJECTED":
+            status = "REJECTED"
+            terminal_outcome = terminal_outcome or "TERMINATED_REJECTED"
+        elif to_state == "MANUAL_TRIAGE_REQUIRED":
+            status = "MANUAL_TRIAGE_REQUIRED"
+            terminal_outcome = terminal_outcome or "TERMINATED_MANUAL_TRIAGE"
         elif to_state == "CANCELLED":
             status = "CANCELLED"
             terminal_outcome = terminal_outcome or "TERMINATED_CANCELLED"

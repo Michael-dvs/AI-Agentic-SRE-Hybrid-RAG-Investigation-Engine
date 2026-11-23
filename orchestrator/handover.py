@@ -164,7 +164,22 @@ class HandoverExporter:
         lines.append(f"- **Current Disposition:** `{status}`")
         lines.append(f"- **Final Reviewer:** {reviewed_by}")
         lines.append(f"- **Timestamp:** `{reviewed_at}`")
-        lines.append("- **Automated Remediation Triggered:** `false` (HUM-01 Verified)")
+        lines.append(
+            "- **Diagnostic Support Statuses:** "
+            + (
+                ", ".join(
+                    f"{h.get('hypothesis_id', '-')}: `{h.get('support_status', 'INCONCLUSIVE')}`"
+                    for h in dossier.get("hypotheses", [])
+                )
+                or "`INCONCLUSIVE`"
+            )
+        )
+        lines.append("- **Diagnosis Verified:** `false` (Dossier approval indicates handover acceptance only)")
+        lines.append(
+            f"- **Missing Sources / SOP Disclosure:** {len(dossier.get('missing_sources', []))} missing source(s), "
+            f"{len(dossier.get('sop_citations', []))} applicable SOP citation(s)"
+        )
+        lines.append("- **Automated Remediation Triggered:** `false` (RULE-008 & HUM-01 Enforced)")
         lines.append("")
 
         if review_history:
@@ -278,8 +293,9 @@ class HandoverExporter:
     </div>
 
     <div class="rule-banner">
-      <strong>Zero Auto-Remediation (RULE-008 & HUM-01):</strong>
+      <strong>Zero Auto-Remediation &amp; Approval Semantics (RULE-007, RULE-008 &amp; HUM-01):</strong>
       Automated action triggered: <code>false</code>. Remediation requires explicit human authorization.
+      Dossier <code>APPROVED</code> status represents administrative handover acceptance only and does not prove unconfirmed root causes or satisfy missing SOP/evidence requirements.
     </div>
 
     <div class="card">
