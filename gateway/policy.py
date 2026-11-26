@@ -46,14 +46,15 @@ for name, fname in _SCHEMA_FILES.items():
 
 
 def parse_iso8601_utc(dt_str: str) -> datetime.datetime:
-    """Parse ISO-8601 UTC timestamp ending in Z."""
-    clean = dt_str.rstrip("Z")
-    if "+" in clean:
-        clean = clean.split("+")[0]
-    dt = datetime.datetime.fromisoformat(clean)
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
-    return dt
+    """Parse timezone-aware ISO-8601 timestamp and convert accurately to UTC without guessing naive timezones."""
+    if not isinstance(dt_str, str) or not dt_str.strip():
+        raise ValueError("Timestamp must be a non-empty ISO-8601 string")
+    text = dt_str.strip()
+    iso_candidate = text[:-1] + "+00:00" if text.endswith(("Z", "z")) else text
+    dt = datetime.datetime.fromisoformat(iso_candidate)
+    if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+        raise ValueError(f"Naive timestamp without explicit timezone is ambiguous: {dt_str!r}")
+    return dt.astimezone(datetime.timezone.utc)
 
 
 class PolicyGateway:
@@ -65,12 +66,14 @@ class PolicyGateway:
         audit_logger: SecurityAuditLogger | None = None,
         sanitizer: DeterministicSanitizer | None = None,
         dispatcher: ToolDispatcher | None = None,
+        telemetry_cache: Any = None,
     ) -> None:
         self.policy = policy or GatewayPolicyConfig()
         self.authenticator = Authenticator(self.policy)
         self.audit_logger = audit_logger or SecurityAuditLogger()
         self.sanitizer = sanitizer or DeterministicSanitizer()
         self.dispatcher = dispatcher or ToolDispatcher()
+        self.telemetry_cache = telemetry_cache
         self.tool_call_counters: dict[str, int] = {}  # incident_id -> call count
 
     def execute_tool(
@@ -83,13 +86,14 @@ class PolicyGateway:
         override_groups: list[str] | None = None,
         override_services: set[str] | None = None,
         force_sanitizer_failure: bool = False,
+        assessment_time: str | None = None,
     ) -> dict[str, Any]:
         """Execute 8-step deterministic enforcement pipeline for tool invocation."""
         req_id = f"req-{uuid.uuid4().hex[:12]}"
         now_z = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         default_window = {
-            "start": arguments.get("start", now_z),
-            "end": arguments.get("end", now_z),
+            "start": arguments.get("start") or arguments.get("reference_time") or now_z,
+            "end": arguments.get("end") or arguments.get("reference_time") or now_z,
         }
 
         # Helper to construct and validate tool-result envelope
@@ -101,21 +105,38 @@ class PolicyGateway:
             query_window: dict[str, str] | None = None,
             truncated: bool = False,
             data_quality: str = "complete",
+            observed_at: str | None = None,
+            sampling: dict[str, Any] | None = None,
         ) -> dict[str, Any]:
+            obs_z = (
+                observed_at
+                if isinstance(observed_at, str) and observed_at.endswith("Z")
+                else now_z
+            )
+            sampling_block = (
+                {
+                    "applied": bool(sampling.get("applied", False)),
+                    "method": sampling.get("method"),
+                    "returned_count": int(sampling.get("returned_count", len(records))),
+                    "source_count": int(sampling.get("source_count", len(records))),
+                }
+                if isinstance(sampling, dict)
+                else {
+                    "applied": bool(truncated),
+                    "method": "head_limit" if truncated else None,
+                    "returned_count": len(records),
+                    "source_count": len(records),
+                }
+            )
             envelope = {
                 "schema_version": "1.0",
                 "tool_name": tool_name if tool_name in self.policy.allowed_tools and tool_name != "retrieve_runbooks" else "get_service_metrics",
                 "request_id": req_id,
                 "status": status,
                 "source_ref": source_ref,
-                "observed_at": now_z,
+                "observed_at": obs_z,
                 "query_window": query_window or default_window,
-                "sampling": {
-                    "applied": False,
-                    "method": None,
-                    "returned_count": len(records),
-                    "source_count": len(records),
-                },
+                "sampling": sampling_block,
                 "truncated": truncated,
                 "data_quality": data_quality,
                 "sanitized": True,
@@ -308,8 +329,36 @@ class PolicyGateway:
             self.tool_call_counters[incident_id] = count + 1
 
         # -------------------------------------------------------------
-        # Step 6 — Parameterized Read-Only Dispatch
+        # Step 6 — Optional Scoped Cache Check & Parameterized Read-Only Dispatch
         # -------------------------------------------------------------
+        eval_ref_time = assessment_time or now_z
+        if (
+            self.telemetry_cache is not None
+            and not force_sanitizer_failure
+            and tool_name in ("get_service_metrics", "search_error_logs", "get_trace_summary", "get_service_dependencies")
+        ):
+            cache_lookup = self.telemetry_cache.get(
+                principal_id=context.principal_id,
+                allowed_groups=context.allowed_groups,
+                tool_name=tool_name,
+                arguments=arguments,
+                assessment_time=eval_ref_time,
+            )
+            if cache_lookup.get("hit") and isinstance(cache_lookup.get("envelope"), dict):
+                cached_env = dict(cache_lookup["envelope"])
+                cached_env["request_id"] = req_id
+                self.audit_logger.record_event(
+                    actor_ref=context.actor_ref,
+                    action="TOOL_INVOCATION",
+                    target_ref=tool_name,
+                    result_code="ALLOW",
+                    reason_code="OK",
+                    request_payload=arguments,
+                    incident_id=incident_id,
+                    correlation_id=correlation_id,
+                )
+                return cached_env
+
         dispatch_data, status, error_code, source_ref = self.dispatcher.dispatch(
             tool_name=tool_name,
             arguments=arguments,
@@ -324,6 +373,7 @@ class PolicyGateway:
             action_code = "TOOL_INVOCATION"
 
         if status == "unavailable":
+            # INV-04 / AC-21: Never hide backend unavailability behind stale cached data!
             self.audit_logger.record_event(
                 actor_ref=context.actor_ref,
                 action=action_code,
@@ -411,17 +461,34 @@ class PolicyGateway:
             records = sanitized_data.get("data")
         records = records or []
         truncated = bool(sanitized_data.get("truncated", False))
-        data_quality = str(sanitized_data.get("data_quality", "complete"))
-        return _make_tool_envelope(
+        data_quality = str(sanitized_data.get("data_quality", "partial" if truncated else "complete"))
+        if truncated and data_quality == "complete":
+            data_quality = "partial"
+        adapter_qw = sanitized_data.get("query_window") if isinstance(sanitized_data.get("query_window"), dict) else {}
+        start_w = arguments.get("start") or adapter_qw.get("start") or arguments.get("reference_time") or now_z
+        end_w = arguments.get("end") or adapter_qw.get("end") or arguments.get("reference_time") or now_z
+        built_envelope = _make_tool_envelope(
             status="ok",
             error_code=None,
             records=records,
             source_ref=source_ref,
             query_window={
-                "start": arguments.get("start", now_z),
-                "end": arguments.get("end", now_z),
+                "start": start_w,
+                "end": end_w,
             },
             data_quality=data_quality,
             truncated=truncated,
+            observed_at=sanitized_data.get("observed_at"),
+            sampling=sanitized_data.get("sampling") if isinstance(sanitized_data.get("sampling"), dict) else None,
         )
+        if self.telemetry_cache is not None:
+            self.telemetry_cache.put(
+                principal_id=context.principal_id,
+                allowed_groups=context.allowed_groups,
+                tool_name=tool_name,
+                arguments=arguments,
+                envelope=built_envelope,
+                cached_at=eval_ref_time,
+            )
+        return built_envelope
 

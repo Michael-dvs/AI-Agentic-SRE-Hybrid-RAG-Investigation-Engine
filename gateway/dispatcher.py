@@ -146,8 +146,19 @@ class ToolDispatcher:
         if outage:
             return {}, "unavailable", "SOURCE_UNAVAILABLE", f"src-{tool_name}"
 
-        if tool_name == "get_service_metrics":
-            env = self.metrics_adapter.execute(arguments)
+        if tool_name in (
+            "get_service_metrics",
+            "search_error_logs",
+            "get_trace_summary",
+            "get_service_dependencies",
+        ):
+            adapter_map = {
+                "get_service_metrics": self.metrics_adapter,
+                "search_error_logs": self.logs_adapter,
+                "get_trace_summary": self.traces_adapter,
+                "get_service_dependencies": self.catalog_adapter,
+            }
+            env = adapter_map[tool_name].execute(arguments)
             if env.status != "ok":
                 return {}, env.status, env.error_code, env.source_ref
 
@@ -157,42 +168,10 @@ class ToolDispatcher:
                 "data": records,
                 "truncated": env.truncated,
                 "data_quality": env.data_quality,
-            }, env.status, env.error_code, env.source_ref
-
-        elif tool_name == "search_error_logs":
-            env = self.logs_adapter.execute(arguments)
-            if env.status != "ok":
-                return {}, env.status, env.error_code, env.source_ref
-            records = env.data if isinstance(env.data, list) else []
-            return {
-                "records": records,
-                "data": records,
-                "truncated": env.truncated,
-                "data_quality": env.data_quality,
-            }, env.status, env.error_code, env.source_ref
-
-        elif tool_name == "get_trace_summary":
-            env = self.traces_adapter.execute(arguments)
-            if env.status != "ok":
-                return {}, env.status, env.error_code, env.source_ref
-            records = env.data if isinstance(env.data, list) else []
-            return {
-                "records": records,
-                "data": records,
-                "truncated": env.truncated,
-                "data_quality": env.data_quality,
-            }, env.status, env.error_code, env.source_ref
-
-        elif tool_name == "get_service_dependencies":
-            env = self.catalog_adapter.execute(arguments)
-            if env.status != "ok":
-                return {}, env.status, env.error_code, env.source_ref
-            records = env.data if isinstance(env.data, list) else []
-            return {
-                "records": records,
-                "data": records,
-                "truncated": env.truncated,
-                "data_quality": env.data_quality,
+                "observed_at": env.observed_at,
+                "collected_at": env.collected_at,
+                "query_window": env.query_window,
+                "sampling": env.sampling,
             }, env.status, env.error_code, env.source_ref
 
         elif tool_name == "get_apm_health":

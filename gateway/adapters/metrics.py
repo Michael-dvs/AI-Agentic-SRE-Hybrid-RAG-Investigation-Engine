@@ -63,6 +63,34 @@ METRIC_UNIT_MAP = {
     "process_resident_memory_bytes": "bytes",
 }
 
+METRIC_AGGREGATION_MAP = {
+    "request_rate": "rate",
+    "sim_red_request_rate_rps": "rate",
+    "error_rate": "ratio",
+    "sim_red_error_rate_ratio": "ratio",
+    "latency_p95": "p95",
+    "sim_red_latency_p95_ms": "p95",
+    "http_requests_total": "counter",
+    "http_request_duration_seconds_count": "counter",
+    "http_request_duration_seconds_bucket": "histogram_bucket",
+    "process_cpu_seconds_total": "counter",
+    "process_resident_memory_bytes": "gauge",
+}
+
+METRIC_KIND_MAP = {
+    "request_rate": "rate",
+    "sim_red_request_rate_rps": "rate",
+    "error_rate": "ratio",
+    "sim_red_error_rate_ratio": "ratio",
+    "latency_p95": "quantile",
+    "sim_red_latency_p95_ms": "quantile",
+    "http_requests_total": "counter",
+    "http_request_duration_seconds_count": "counter",
+    "http_request_duration_seconds_bucket": "histogram",
+    "process_cpu_seconds_total": "counter",
+    "process_resident_memory_bytes": "gauge",
+}
+
 # Known services from Service Catalog (C05)
 KNOWN_SERVICES = {
     "api-gateway",
@@ -216,12 +244,30 @@ class MetricsAdapter(BaseTelemetryAdapter):
                 )
 
             body = resp.json()
+            from orchestrator.evidence_lineage import DEFAULT_TEMPORAL_POLICY, normalize_timestamp
+
+            req_env = str(arguments.get("environment") or "").strip()
+            skew_td = datetime.timedelta(seconds=DEFAULT_TEMPORAL_POLICY.max_clock_skew_seconds)
+            raw_scraped_records = body.get("records") if isinstance(body.get("records"), list) else []
+            any_scraped_partial = any(
+                isinstance(r, dict) and r.get("data_quality") == "partial"
+                for r in raw_scraped_records
+            )
+
             # Handle Prometheus matrix result
             data_field = body.get("data", {})
             if isinstance(data_field, dict) and data_field.get("resultType") == "matrix":
                 results = data_field.get("result", [])
                 for series in results:
-                    meta = series.get("metric", {})
+                    meta = series.get("metric", {}) if isinstance(series.get("metric"), dict) else {}
+                    series_env = str(meta.get("environment") or "").strip()
+                    if req_env and series_env and series_env != req_env:
+                        continue
+                    clean_labels = {
+                        str(k): str(v)
+                        for k, v in meta.items()
+                        if k != "__name__" and v is not None
+                    }
                     for val_pair in series.get("values", []):
                         if len(val_pair) >= 2:
                             ts_epoch = float(val_pair[0])
@@ -229,17 +275,60 @@ class MetricsAdapter(BaseTelemetryAdapter):
                                 ts_epoch, datetime.timezone.utc
                             ).isoformat().replace("+00:00", "Z")
                             val_num = float(val_pair[1]) if val_pair[1] is not None else 0.0
-                            records.append({
+                            rec_obj: dict[str, Any] = {
                                 "timestamp": ts_iso,
+                                "sample_at": ts_iso,
                                 "service_id": meta.get("service_id", service_id),
                                 "metric_name": metric_name,
                                 "value": val_num,
                                 "unit": METRIC_UNIT_MAP.get(metric_name, "ms"),
-                            })
+                                "aggregation": METRIC_AGGREGATION_MAP.get(metric_name, "sample"),
+                                "metric_kind": METRIC_KIND_MAP.get(metric_name, "gauge"),
+                                "step": step,
+                            }
+                            if meta.get("metric_enum"):
+                                rec_obj["metric_enum"] = meta["metric_enum"]
+                            elif metric_name in ("request_rate", "error_rate", "latency_p95"):
+                                rec_obj["metric_enum"] = metric_name
+                            if series_env:
+                                rec_obj["environment"] = series_env
+                            if clean_labels:
+                                rec_obj["labels"] = clean_labels
+                            records.append(rec_obj)
             elif "records" in body and isinstance(body["records"], list):
-                records = body["records"]
+                for r in body["records"]:
+                    if not isinstance(r, dict):
+                        continue
+                    r_env = str(r.get("environment") or "").strip()
+                    if req_env and r_env and r_env != req_env:
+                        continue
+                    r_ts = r.get("sample_at") or r.get("timestamp")
+                    if r_ts is not None:
+                        norm_ts = normalize_timestamp(r_ts)
+                        if norm_ts.ok and norm_ts.dt is not None:
+                            if norm_ts.dt < (dt_start - skew_td) or norm_ts.dt > (dt_end + skew_td):
+                                continue
+                    r_copy = dict(r)
+                    r_copy.setdefault("metric_name", metric_name)
+                    r_copy.setdefault("unit", METRIC_UNIT_MAP.get(metric_name, "ms"))
+                    r_copy.setdefault("aggregation", METRIC_AGGREGATION_MAP.get(metric_name, "sample"))
+                    r_copy.setdefault("metric_kind", METRIC_KIND_MAP.get(metric_name, "gauge"))
+                    r_copy.setdefault("step", step)
+                    records.append(r_copy)
             elif "metrics" in body and isinstance(body["metrics"], list):
-                records = body["metrics"]
+                for r in body["metrics"]:
+                    if not isinstance(r, dict):
+                        continue
+                    r_env = str(r.get("environment") or "").strip()
+                    if req_env and r_env and r_env != req_env:
+                        continue
+                    r_copy = dict(r)
+                    r_copy.setdefault("metric_name", metric_name)
+                    r_copy.setdefault("unit", METRIC_UNIT_MAP.get(metric_name, "ms"))
+                    r_copy.setdefault("aggregation", METRIC_AGGREGATION_MAP.get(metric_name, "sample"))
+                    r_copy.setdefault("metric_kind", METRIC_KIND_MAP.get(metric_name, "gauge"))
+                    r_copy.setdefault("step", step)
+                    records.append(r_copy)
 
         except (httpx.TimeoutException, TimeoutError):
             return self._error_envelope(
@@ -257,24 +346,52 @@ class MetricsAdapter(BaseTelemetryAdapter):
             )
 
         # Step H: Truncate to max_points (ADR-S05 cap: 1000)
+        source_count = len(records)
         point_limit = min(req_max_points, self.max_points)
         truncated = False
-        if len(records) > point_limit:
+        if source_count > point_limit:
             records = records[:point_limit]
             truncated = True
 
         # Step I: Pre-sink SEC-03 Sanitization
         sanitized_records, _ = self.sanitizer.sanitize_object(records)
+        scraped_sample_times = [
+            str(r.get("sample_at"))
+            for r in raw_scraped_records
+            if isinstance(r, dict)
+            and (not req_env or not r.get("environment") or str(r.get("environment")).strip() == req_env)
+            and isinstance(r.get("sample_at"), str)
+            and str(r.get("sample_at")).endswith("Z")
+        ]
+        if scraped_sample_times:
+            observed_at_z = max(scraped_sample_times)
+        else:
+            observed_candidates = [
+                str(r.get("sample_at") or r.get("timestamp"))
+                for r in sanitized_records
+                if isinstance(r, dict)
+                and isinstance(r.get("sample_at") or r.get("timestamp"), str)
+                and str(r.get("sample_at") or r.get("timestamp")).endswith("Z")
+            ]
+            observed_at_z = max(observed_candidates) if observed_candidates else now_z
+        is_partial = bool(truncated or any_scraped_partial or body.get("partial"))
 
         return TelemetryResponseEnvelope(
             tool_name=self.tool_name,
             source_ref=self._get_source_ref(),
-            observed_at=now_z,
+            observed_at=observed_at_z,
             query_window=query_window,
-            data_quality="complete",
+            data_quality="partial" if is_partial else "complete",
             truncated=truncated,
             sanitized=True,
             error_code=None,
             data=sanitized_records,
             status="ok",
+            collected_at=now_z,
+            sampling={
+                "applied": truncated,
+                "method": "head_limit" if truncated else None,
+                "returned_count": len(sanitized_records),
+                "source_count": source_count,
+            },
         )

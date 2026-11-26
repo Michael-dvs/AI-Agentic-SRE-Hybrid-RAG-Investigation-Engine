@@ -200,41 +200,112 @@ class TracesAdapter(BaseTelemetryAdapter):
                 status="unavailable",
             )
 
-        # Step F: Filter by service_id if requested
+        # Step F: Check trace completeness prior to service_id projection, then filter scope (P1-05)
+        from orchestrator.evidence_lineage import DEFAULT_TEMPORAL_POLICY, normalize_timestamp
+        import datetime
+
+        all_span_ids = {
+            str(s.get("span_id"))
+            for s in raw_spans
+            if isinstance(s, dict) and s.get("span_id")
+        }
+        missing_parent_span = any(
+            isinstance(s, dict)
+            and s.get("parent_span_id")
+            and str(s.get("parent_span_id")) not in all_span_ids
+            for s in raw_spans
+        )
+        backend_partial = bool(body.get("partial") or body.get("truncated")) if isinstance(body, dict) else False
+
+        req_env = str(arguments.get("environment") or "").strip()
+        if req_env:
+            raw_spans = [
+                s for s in raw_spans
+                if isinstance(s, dict)
+                and (not s.get("environment") or str(s.get("environment")).strip() == req_env)
+            ]
+
+        if start and end:
+            dt_start, dt_end, _ = validate_time_window(
+                start, end, max_window_seconds=self.max_window_seconds
+            )
+            skew_td = datetime.timedelta(seconds=DEFAULT_TEMPORAL_POLICY.max_clock_skew_seconds)
+            windowed_spans: list[dict[str, Any]] = []
+            for s in raw_spans:
+                if not isinstance(s, dict):
+                    continue
+                st_raw = s.get("start_time")
+                et_raw = s.get("end_time") or st_raw
+                if st_raw is not None:
+                    st_norm = normalize_timestamp(st_raw)
+                    et_norm = normalize_timestamp(et_raw) if et_raw is not None else st_norm
+                    if not st_norm.ok or st_norm.dt is None or not et_norm.ok or et_norm.dt is None:
+                        continue
+                    if et_norm.dt < (dt_start - skew_td) or st_norm.dt > (dt_end + skew_td):
+                        continue
+                windowed_spans.append(s)
+            raw_spans = windowed_spans
+
         if service_id:
             raw_spans = [
                 s for s in raw_spans
                 if s.get("service_id") == service_id or s.get("service.name") == service_id
             ]
 
-        # Step G: Summarize span details
+        # Step G: Summarize span details while preserving trace_id, timing, service_id, and environment
         summarized_spans: list[dict[str, Any]] = []
+        observed_candidates: list[str] = []
         for s in raw_spans:
             status_code = s.get("status_code", "OK")
             duration_val = float(s.get("duration_ms", 0.0))
-            summarized_spans.append({
+            svc_id_val = s.get("service_id") or s.get("service.name") or ""
+            span_entry: dict[str, Any] = {
+                "trace_id": str(s.get("trace_id") or trace_id),
                 "span_id": str(s.get("span_id", "")),
                 "parent_span_id": s.get("parent_span_id"),
-                "service_name": s.get("service.name") or s.get("service_id", ""),
+                "service_id": svc_id_val,
+                "service_name": s.get("service.name") or svc_id_val,
                 "operation": s.get("operation") or s.get("operation_name", "UNKNOWN"),
                 "duration_ms": duration_val,
                 "status_code": status_code,
                 "error": s.get("error", status_code == "ERROR"),
                 "attributes": s.get("attributes", {}),
-            })
+            }
+            if s.get("environment"):
+                span_entry["environment"] = s["environment"]
+            for t_key in ("start_time", "end_time"):
+                if s.get(t_key) is not None:
+                    t_norm = normalize_timestamp(s.get(t_key))
+                    if t_norm.ok and t_norm.utc_iso:
+                        span_entry[t_key] = t_norm.utc_iso
+                        observed_candidates.append(t_norm.utc_iso)
+                    else:
+                        span_entry[t_key] = s.get(t_key)
+            if missing_parent_span or backend_partial:
+                span_entry["partial_trace"] = True
+            summarized_spans.append(span_entry)
 
         # Step H: Pre-sink SEC-03 Sanitization on span attributes
         sanitized_spans, _ = self.sanitizer.sanitize_object(summarized_spans)
+        is_partial = bool((missing_parent_span or backend_partial) and sanitized_spans)
+        observed_at_z = max(observed_candidates) if observed_candidates else now_z
 
         return TelemetryResponseEnvelope(
             tool_name=self.tool_name,
             source_ref=self._get_source_ref(),
-            observed_at=now_z,
+            observed_at=observed_at_z,
             query_window=query_window,
-            data_quality="complete",
-            truncated=False,
+            data_quality="partial" if is_partial else "complete",
+            truncated=bool(body.get("truncated", False)) if isinstance(body, dict) else False,
             sanitized=True,
             error_code=None,
             data=sanitized_spans,
             status="ok",
+            collected_at=now_z,
+            sampling={
+                "applied": is_partial,
+                "method": "span_cap" if is_partial else None,
+                "returned_count": len(sanitized_spans),
+                "source_count": len(sanitized_spans),
+            },
         )

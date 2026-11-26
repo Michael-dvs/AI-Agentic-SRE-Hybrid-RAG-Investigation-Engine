@@ -206,6 +206,8 @@ class TelemetryResponseEnvelope:
     error_code: Optional[str]
     data: Any
     status: str = "ok"
+    collected_at: Optional[str] = None
+    sampling: Optional[dict[str, Any]] = None
 
     def __post_init__(self) -> None:
         if self.data_quality not in ("complete", "partial", "unavailable"):
@@ -224,7 +226,7 @@ class TelemetryResponseEnvelope:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert envelope to serializable dictionary."""
-        return {
+        out: dict[str, Any] = {
             "tool_name": self.tool_name,
             "source_ref": self.source_ref,
             "observed_at": self.observed_at,
@@ -236,6 +238,11 @@ class TelemetryResponseEnvelope:
             "status": self.status,
             "data": self.data,
         }
+        if self.collected_at is not None:
+            out["collected_at"] = self.collected_at
+        if self.sampling is not None:
+            out["sampling"] = dict(self.sampling)
+        return out
 
     def to_contract_envelope(self, request_id: str | None = None) -> dict[str, Any]:
         """Convert to strict tool-result.v1.schema.json format."""
@@ -246,6 +253,22 @@ class TelemetryResponseEnvelope:
             records = [r for r in self.data if isinstance(r, dict)]
         elif isinstance(self.data, dict) and "records" in self.data:
             records = self.data["records"]
+
+        sampling_obj = (
+            {
+                "applied": bool(self.sampling.get("applied", False)),
+                "method": self.sampling.get("method"),
+                "returned_count": int(self.sampling.get("returned_count", len(records))),
+                "source_count": int(self.sampling.get("source_count", len(records))),
+            }
+            if isinstance(self.sampling, dict)
+            else {
+                "applied": False,
+                "method": None,
+                "returned_count": len(records),
+                "source_count": len(records),
+            }
+        )
 
         return {
             "schema_version": "1.0",
@@ -260,12 +283,7 @@ class TelemetryResponseEnvelope:
                 "start": self.query_window.get("start", self.observed_at),
                 "end": self.query_window.get("end", self.observed_at),
             },
-            "sampling": {
-                "applied": False,
-                "method": None,
-                "returned_count": len(records),
-                "source_count": len(records),
-            },
+            "sampling": sampling_obj,
             "truncated": self.truncated,
             "data_quality": self.data_quality,
             "sanitized": True,

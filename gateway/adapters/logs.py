@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import re
 from typing import Any, Optional
@@ -225,32 +226,69 @@ class LogsAdapter(BaseTelemetryAdapter):
                 query_window=query_window,
             )
 
-        # Step I: Filter non-error/non-warn records when severity omitted and truncate to max_hits (ADR-S05 cap: 500)
-        if explicit_severity is None and error_code:
-            raw_records = [
-                rec for rec in raw_records
-                if isinstance(rec, dict)
-                and (not rec.get("severity") or str(rec.get("severity")).upper() in ALLOWED_SEVERITIES)
-            ]
+        # Step I: Filter non-error/non-warn, wrong-environment, and out-of-window records (P1-05)
+        from orchestrator.evidence_lineage import DEFAULT_TEMPORAL_POLICY, normalize_timestamp
+
+        req_env = str(arguments.get("environment") or "").strip()
+        skew_td = datetime.timedelta(seconds=DEFAULT_TEMPORAL_POLICY.max_clock_skew_seconds)
+        filtered_records: list[dict[str, Any]] = []
+        for rec in raw_records:
+            if not isinstance(rec, dict):
+                continue
+            if explicit_severity is None and error_code:
+                if rec.get("severity") and str(rec.get("severity")).upper() not in ALLOWED_SEVERITIES:
+                    continue
+            rec_env = str(rec.get("environment") or "").strip()
+            if req_env and rec_env and rec_env != req_env:
+                continue
+            raw_ts = rec.get("timestamp")
+            if raw_ts is not None:
+                norm_ts = normalize_timestamp(raw_ts)
+                if not norm_ts.ok or norm_ts.dt is None:
+                    continue
+                if norm_ts.dt < (dt_start - skew_td) or norm_ts.dt > (dt_end + skew_td):
+                    continue
+                rec_copy = dict(rec)
+                rec_copy["timestamp"] = norm_ts.utc_iso
+                filtered_records.append(rec_copy)
+            else:
+                filtered_records.append(dict(rec))
+
+        source_count = len(filtered_records)
         truncated = False
-        if len(raw_records) > target_limit:
-            records = raw_records[:target_limit]
+        if source_count > target_limit:
+            records = filtered_records[:target_limit]
             truncated = True
         else:
-            records = raw_records
+            records = filtered_records
 
         # Step J: Pre-sink SEC-03 Redaction (Mask synthetic JWT, PAN, credentials)
         sanitized_records, _ = self.sanitizer.sanitize_object(records)
 
+        observed_candidates = [
+            str(r["timestamp"])
+            for r in sanitized_records
+            if isinstance(r, dict) and isinstance(r.get("timestamp"), str) and r["timestamp"].endswith("Z")
+        ]
+        observed_at_z = max(observed_candidates) if observed_candidates else now_z
+        data_quality = "partial" if truncated else "complete"
+
         return TelemetryResponseEnvelope(
             tool_name=self.tool_name,
             source_ref=self._get_source_ref(),
-            observed_at=now_z,
+            observed_at=observed_at_z,
             query_window=query_window,
-            data_quality="complete",
+            data_quality=data_quality,
             truncated=truncated,
             sanitized=True,
             error_code=None,
             data=sanitized_records,
             status="ok",
+            collected_at=now_z,
+            sampling={
+                "applied": truncated,
+                "method": "head_limit" if truncated else None,
+                "returned_count": len(sanitized_records),
+                "source_count": source_count,
+            },
         )
