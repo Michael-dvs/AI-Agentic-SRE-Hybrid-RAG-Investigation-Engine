@@ -1403,6 +1403,9 @@ def test_h01_to_h10_i01_to_i08_scenario15_api_gateway_err_auth_policy_mismatch_e
         handover_root=tmp_path / "tui_handover",
     )
     dash.selected_incident_id = inc_id
+    dash.detail_section = "evidence"
+    dash.selected_evidence_idx = 1
+    dash.evidence_detail_open = True
     tui_console.print(dash.render())
     tui_out = tui_console.file.getvalue()  # type: ignore[attr-defined]
     assert f"ev-{inc_id}-002" in tui_out

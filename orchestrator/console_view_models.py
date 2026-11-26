@@ -267,6 +267,42 @@ def compact_identifier(identifier: Any, *, max_cells: int = 28) -> str:
     return set_cell_size(clean, max_cells - 3) + "..."
 
 
+def build_short_evidence_ids(evidence_ids: Sequence[str], *, max_cells: int = 16) -> Dict[str, str]:
+    """Build concise, collision-free display IDs that preserve canonical suffixes without mutating canonical IDs."""
+    unique_ids = list(dict.fromkeys(evidence_ids))
+    proposals: Dict[str, str] = {}
+    for eid in unique_ids:
+        if cell_len(eid) <= max_cells:
+            proposals[eid] = eid
+        else:
+            parts = eid.rsplit("-", 1)
+            if len(parts) == 2 and 1 <= len(parts[1]) <= 8 and eid.startswith("ev-"):
+                proposals[eid] = f"ev-...-{parts[1]}"
+            else:
+                proposals[eid] = compact_identifier(eid, max_cells=max_cells)
+
+    # Disambiguate any collisions deterministically by widening to longer middle-ellipsis identifiers
+    counts: Dict[str, int] = {}
+    for short in proposals.values():
+        counts[short] = counts.get(short, 0) + 1
+    for idx, eid in enumerate(unique_ids, start=1):
+        if counts.get(proposals[eid], 0) > 1:
+            widened = compact_identifier(eid, max_cells=max(22, max_cells + 8))
+            proposals[eid] = widened if widened != proposals[eid] else f"{proposals[eid]}#{idx}"
+    return proposals
+
+
+_TRAILING_META_BRACKET_RE = re.compile(r"\s*\[svc=[^\]]+\]\s*$")
+
+
+def clean_brief_evidence_summary(summary: str, *, max_chars: int = 92) -> str:
+    """Strip redundant serialized metadata suffix for concise Evidence list rows (canonical summary stays intact)."""
+    stripped = _TRAILING_META_BRACKET_RE.sub("", summary or "").strip()
+    if not stripped:
+        stripped = summary or "Summary unavailable."
+    return sanitize_terminal_text(stripped, max_chars=max_chars, empty_placeholder="Summary unavailable.")
+
+
 def cell_width_truncate(text: str, max_cells: int) -> str:
     """Truncate text accurately by terminal display cell width (CJK/wide-glyph safe)."""
     if max_cells <= 0:
@@ -421,6 +457,10 @@ class HypothesisItemVM:
     reason_summary: str
     confidence_rationale: str
     main_uncertainty: str
+    dossier_support_status: str = ""
+    validation_status: str = ""
+    validation_reason_codes: Tuple[str, ...] = ()
+    status_divergence_note: str = ""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -449,6 +489,8 @@ class EvidenceItemVM:
     integrity_code: str
     content_hash_short: str
     summary: str
+    short_id: str = ""
+    brief_summary: str = ""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -499,6 +541,7 @@ class RAGTransparencyVM:
     delivery_summary: str
     citations: Tuple[SOPCitationVM, ...]
     manual_checks: Tuple[ManualCheckVM, ...]
+    relevance_status: str = ""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -568,6 +611,65 @@ class IncidentDetailVM:
     consistency_warnings: Tuple[str, ...]
     raw_incident: Dict[str, Any]
     raw_dossier: Optional[Dict[str, Any]]
+
+    @property
+    def supporting_evidence_count(self) -> int:
+        return sum(1 for item in self.evidence_items if item.disposition == "ACCEPTED_SUPPORT")
+
+    @property
+    def contradicting_evidence_count(self) -> int:
+        return sum(1 for item in self.evidence_items if item.disposition == "CONTRADICTING")
+
+    @property
+    def rejected_evidence_count(self) -> int:
+        return sum(1 for item in self.evidence_items if item.disposition == "REJECTED")
+
+    @property
+    def current_stage_summary(self) -> str:
+        total = len(self.stages) or 9
+        if self.lifecycle_state == "CLOSED":
+            return f"Finalized: Closed (Admin Handover, {self.completed_stage_count}/{total} stages)"
+        if self.lifecycle_state == "REJECTED":
+            return "Finalized: Rejected (Manual Investigation Required)"
+        if self.lifecycle_state == "MANUAL_TRIAGE_REQUIRED":
+            return "Finalized: Escalated to Manual Triage"
+        if self.lifecycle_state in ("FAILED_SAFE", "CANCELLED"):
+            return f"Halted: {self.lifecycle_state} ({self.completed_stage_count}/{total} completed)"
+        if self.lifecycle_state == "HUMAN_REVIEW":
+            return f"Stage {total}/{total}: Human Review"
+        active_stage = next((s for s in self.stages if s.status == "CURRENT"), None)
+        if active_stage is not None:
+            idx = self.stages.index(active_stage) + 1
+            return f"Stage {idx}/{total}: {active_stage.stage}"
+        return self.lifecycle_display
+
+    @property
+    def primary_uncertainty(self) -> str:
+        if self.hypotheses and self.hypotheses[0].main_uncertainty:
+            return self.hypotheses[0].main_uncertainty
+        if self.unknowns:
+            return self.unknowns[0]
+        if self.missing_sources:
+            ms = self.missing_sources[0]
+            return f"Missing telemetry source ({ms['tool_name']}: {ms['error_code']})."
+        return "Unconfirmed candidate; requires human verification."
+
+    @property
+    def next_action_summary(self) -> str:
+        elig = self.review_eligibility
+        if elig.eligible:
+            return f"Human review required on Revision v{self.dossier_version} (open Review view to decide)."
+        if not self.dossier_available:
+            return f"DOSSIER PENDING - {self.lifecycle_state}. Wait for drafting to complete before review."
+        if elig.lock_code == "REVIEWER_UNAUTHORIZED":
+            return f"Authorized human reviewer required ({elig.reviewer_auth_reason})."
+        if self.lifecycle_state == "CLOSED":
+            return "REVIEW LOCKED - FINALIZED (CLOSED). Administrative handover complete; technical resolution not established."
+        if self.lifecycle_state == "REJECTED":
+            return "REVIEW LOCKED - FINALIZED (REJECTED). Manual engineering investigation required."
+        if self.lifecycle_state == "MANUAL_TRIAGE_REQUIRED":
+            return "REVIEW LOCKED - FINALIZED (MANUAL_TRIAGE_REQUIRED). Escalated to human triage."
+        return elig.lock_message
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1045,6 +1147,10 @@ def build_incident_detail_vm(
     for ch_h in chk_ctx.get("hypotheses") or []:
         if isinstance(ch_h, Mapping) and ch_h.get("hypothesis_id"):
             chk_hyp_map[str(ch_h["hypothesis_id"])] = ch_h
+    val_report_by_hid: Dict[str, Mapping[str, Any]] = {}
+    for vr in chk_ctx.get("validation_reports") or []:
+        if isinstance(vr, Mapping) and vr.get("hypothesis_id"):
+            val_report_by_hid[str(vr["hypothesis_id"])] = vr
 
     prior_label_by_rank: Dict[int, str] = {}
     if isinstance(llm_run, Mapping) and llm_run.get("result"):
@@ -1089,10 +1195,54 @@ def build_incident_detail_vm(
             max_chars=380,
         )
         raw_support = str(hypothesis_label(dict(h))).upper()
+        dossier_sup_status = str(
+            h.get("support_status") or h.get("status") or raw_support
+        ).strip().upper()
         # Enforce RULE-007 in presentation: never display VERIFIED
         if raw_support == "VERIFIED":
             raw_support = "INCONCLUSIVE"
             consistency_warnings.append(f"RULE-007 guard: suppressed invalid VERIFIED label on {hid}.")
+        if dossier_sup_status == "VERIFIED":
+            dossier_sup_status = "INCONCLUSIVE"
+
+        val_rep = val_report_by_hid.get(hid) or {}
+        breakdown_pre = chk_h.get("confidence_breakdown") if isinstance(chk_h.get("confidence_breakdown"), Mapping) else (
+            val_rep.get("confidence_breakdown") if isinstance(val_rep.get("confidence_breakdown"), Mapping) else {}
+        )
+        raw_val_status = (
+            chk_h.get("validation_status")
+            or h.get("validation_status")
+            or val_rep.get("status")
+            or breakdown_pre.get("status")
+            or raw_support
+        )
+        val_status_str = sanitize_terminal_text(raw_val_status, max_chars=24, empty_placeholder=raw_support).upper()
+        if val_status_str == "VERIFIED":
+            val_status_str = "INCONCLUSIVE"
+
+        raw_rcodes = chk_h.get("validation_reason_codes") or val_rep.get("reason_codes") or ()
+        val_rcodes = tuple(
+            sanitize_terminal_text(rc, max_chars=48)
+            for rc in raw_rcodes
+            if isinstance(rc, str) and rc.strip()
+        )
+
+        # Distinguish frozen-contract dossier status vs internal ClaimValidator status honestly (P2-06R Section 8)
+        status_divergence_note = ""
+        if raw_support == "PARTIAL" and val_status_str == "SUPPORTED":
+            status_divergence_note = (
+                "Dossier support_status is capped at PARTIAL for unconfirmed LLM candidates pending human review; "
+                "internal claim validator corroborated cited claims as SUPPORTED (basis for heuristic score)."
+            )
+        elif dossier_sup_status == "INCONCLUSIVE" and raw_support in ("UNSUPPORTED", "CONTRADICTED"):
+            status_divergence_note = (
+                f"Frozen dossier.v1 contract serializes {raw_support} as INCONCLUSIVE; "
+                f"internal claim validation outcome is {raw_support}."
+            )
+        elif val_status_str and val_status_str != raw_support:
+            status_divergence_note = (
+                f"Dossier support_status is {raw_support}; internal claim validation status is {val_status_str}."
+            )
 
         raw_reason = str(h.get("reason_summary") or h.get("description") or "")
         if raw_reason.startswith("[Human Correction"):
@@ -1181,6 +1331,10 @@ def build_incident_detail_vm(
                 reason_summary=sanitize_terminal_text(raw_reason, max_chars=420, empty_placeholder=""),
                 confidence_rationale=conf_rationale,
                 main_uncertainty=main_unc,
+                dossier_support_status=dossier_sup_status,
+                validation_status=val_status_str,
+                validation_reason_codes=val_rcodes,
+                status_divergence_note=status_divergence_note,
             )
         )
 
@@ -1364,7 +1518,7 @@ def build_incident_detail_vm(
             summary_raw = first_rec.get("message")
         summary_clean = sanitize_terminal_text(
             summary_raw,
-            max_chars=240,
+            max_chars=400,
             empty_placeholder="Summary unavailable.",
         )
 
@@ -1394,8 +1548,16 @@ def build_incident_detail_vm(
                 integrity_code=sanitize_terminal_text(integ.get("code") or "OK", max_chars=40),
                 content_hash_short=sanitize_terminal_text(raw_hash[:16], max_chars=20),
                 summary=summary_clean,
+                short_id="",
+                brief_summary=clean_brief_evidence_summary(summary_clean, max_chars=96),
             )
         )
+
+    short_id_map = build_short_evidence_ids([item.evidence_id for item in ev_vms])
+    ev_vms = [
+        dataclasses.replace(item, short_id=short_id_map.get(item.evidence_id, item.evidence_id))
+        for item in ev_vms
+    ]
 
     known_ev_ids = {item.evidence_id for item in ev_vms}
     unresolved_refs: list[UnresolvedEvidenceRefVM] = []
@@ -1491,8 +1653,10 @@ def build_incident_detail_vm(
         avail_expl = gap_desc
         competing_warn = ""
 
-    # Retrieval vs LLM Context Delivery (P1-04 instrumentation)
+    # Retrieval vs LLM Context Delivery (P1-04 instrumentation: supports both rag_diagnostics & llm_context_diagnostics)
     rag_diag = chk_ctx.get("rag_diagnostics") if isinstance(chk_ctx.get("rag_diagnostics"), Mapping) else None
+    if rag_diag is None and isinstance(chk_ctx.get("llm_context_diagnostics"), Mapping):
+        rag_diag = chk_ctx.get("llm_context_diagnostics")
     if rag_diag is None and isinstance(llm_run, Mapping) and llm_run.get("context_diagnostics"):
         try:
             parsed_cd = (
@@ -1505,16 +1669,26 @@ def build_incident_detail_vm(
         except Exception:
             rag_diag = None
 
+    def _first_int(mapping: Mapping[str, Any], *keys: str) -> Optional[int]:
+        for k in keys:
+            v = mapping.get(k)
+            if isinstance(v, int) and not isinstance(v, bool):
+                return v
+        return None
+
     if isinstance(rag_diag, Mapping):
         delivery_recorded = True
-        ret_cnt = rag_diag.get("retrieved_count") if isinstance(rag_diag.get("retrieved_count"), int) else None
-        elig_cnt = rag_diag.get("eligible_count") if isinstance(rag_diag.get("eligible_count"), int) else None
-        deliv_cnt = (
-            rag_diag.get("delivered_sop_count")
-            if isinstance(rag_diag.get("delivered_sop_count"), int)
-            else (rag_diag.get("sop_count_in_prompt") if isinstance(rag_diag.get("sop_count_in_prompt"), int) else None)
+        ret_cnt = _first_int(rag_diag, "retrieved_count", "retrieved_citations_count")
+        elig_cnt = _first_int(rag_diag, "eligible_count", "eligible_passages_count")
+        deliv_cnt = _first_int(
+            rag_diag,
+            "delivered_sop_count",
+            "sop_count_in_prompt",
+            "citations_delivered_count",
+            "included_passages_count",
+            "selected_citations_count",
         )
-        omit_cnt = rag_diag.get("omitted_sop_count") if isinstance(rag_diag.get("omitted_sop_count"), int) else None
+        omit_cnt = _first_int(rag_diag, "omitted_sop_count", "omitted_passages_count")
         omit_reasons = tuple(
             sanitize_terminal_text(r, max_chars=80)
             for r in (rag_diag.get("omission_reasons") or rag_diag.get("omitted_reasons") or [])
@@ -1539,6 +1713,9 @@ def build_incident_detail_vm(
             delivery_summary = "Not applicable / not recorded (no online LLM context request in deterministic or fallback mode)."
         else:
             delivery_summary = "LLM prompt delivery telemetry not recorded in persisted checkpoint (citation presence alone does not prove prompt delivery)."
+
+    sop_rel_map = chk_ctx.get("sop_relevance") if isinstance(chk_ctx.get("sop_relevance"), Mapping) else {}
+    sop_rel_status = sanitize_terminal_text(sop_rel_map.get("status") or "", max_chars=48, empty_placeholder="")
 
     sop_vms: list[SOPCitationVM] = []
     for cit in raw_citations:
@@ -1633,6 +1810,7 @@ def build_incident_detail_vm(
         delivery_summary=delivery_summary,
         citations=tuple(sop_vms),
         manual_checks=tuple(manual_vms),
+        relevance_status=sop_rel_status,
     )
 
     # Human Review Eligibility & Closure Semantics (Work Package K1-K6, E6)

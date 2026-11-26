@@ -1,0 +1,28 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:23  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview  Hypotheses(3)   Evidence(12)   SOP & RAG(3)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Evidence Records: 12 total (2 supporting, 0 contradicting, 10 contextual, 0 rejected)                                  
+                                                                                                                        
+ Evidence Record 2 of 12 ────────────────────────────────────────────────────────────────────────────────────────────── 
+ ev-inc-live-transaction-service-3b7751e91b-002  [ACCEPTED_SUPPORT] [CURRENT_FRESH]                                     
+ Source / Tool         search_error_logs (loki:http://127.0.0.1:13100)                                                  
+ Scope                 service=transaction-service  |  env=lab                                                          
+ Observed At           obs=2026-11-26T03:43:58.222551Z  |  collected=2026-11-26T03:43:58.920589Z                        
+ Query Window          2026-11-26T03:38:58.79673Z..2026-11-26T03:44:58.79673Z                                           
+ Signal / Value        ERR_TX_INTERNAL_EXCEPTION  |  value=30 record(s)  |  agg=unavailable                             
+ Quality / Sample      complete (method=none, returned=-)                                                               
+ Associated With       #1 supports                                                                                      
+ Content Hash          sha256=17fa96dbad4ebf36  (OK)                                                                    
+ Observation           ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception       
+                       during transaction execution @2026-11-26T03:43:50.247216Z; ERR_TX_INTERNAL_EXCEPTION: GET        
+                       /internal/transactions/tx-ea26dae359abd288 -> 500 (0.20ms) @2026-11-26T03:43:50.247363Z;         
+                       ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception       
+                       during transaction execution @2026-1...                                                          
+                                                                                                                        
+ Integrity Note: SHA-256 content_hash verifies post-collection payload consistency against the captured normalized      
+ snapshot only; it does not independently prove upstream source authenticity.                                           
+ Press [Enter] or [B/Esc] to return to Evidence list  |  [[ / ]] prev/next record                                       
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [[ / ]] Prev/Next  [Enter/Esc] List  [Tab] View  [?] Help  [Q] Quit

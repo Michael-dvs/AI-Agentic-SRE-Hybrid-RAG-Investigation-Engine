@@ -1521,9 +1521,13 @@ def test_h5_handover_ticket_cli_and_dashboard_preserve_uncertainty_and_closure_m
         )
         dash.selected_incident_id = inc_id
         console.print(dash.render(width=120))
-        rendered = " ".join(console.export_text().replace("│", " ").split())
-        assert "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED" in rendered
-        assert "Local PoC caller-asserted identity (unauthenticated)" in rendered
-        assert "REVIEW LOCKED - FINALIZED" in rendered
+        rendered_overview = " ".join(console.export_text().replace("│", " ").split())
+        assert "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED" in rendered_overview
+        assert "REVIEW LOCKED - FINALIZED" in rendered_overview
+        dash.detail_section = "review"
+        console.print(dash.render(width=120))
+        rendered_review = " ".join(console.export_text().replace("│", " ").split())
+        assert "Local PoC caller-asserted identity (unauthenticated)" in rendered_review
+        assert "REVIEW LOCKED - FINALIZED" in rendered_review
     finally:
         store.close()

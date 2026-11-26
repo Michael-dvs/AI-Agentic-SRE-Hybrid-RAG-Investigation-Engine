@@ -1,0 +1,16 @@
+{
+  "clean": true,
+  "total_violations": 0,
+  "violations_by_category": {},
+  "scanned_files_count": 7,
+  "scanned_files": [
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/06_before_human_review_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/03_before_dense_all_sections_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/05_before_evidence_details_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/04_before_hypothesis_details_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/02_before_incident_overview_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/before_metrics.json",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/before/01_before_reference_all_207x49.txt"
+  ],
+  "findings": []
+}

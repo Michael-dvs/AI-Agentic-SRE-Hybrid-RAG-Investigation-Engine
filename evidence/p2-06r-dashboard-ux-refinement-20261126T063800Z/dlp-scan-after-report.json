@@ -1,0 +1,30 @@
+{
+  "clean": true,
+  "total_violations": 0,
+  "violations_by_category": {},
+  "scanned_files_count": 21,
+  "scanned_files": [
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/08_sop_and_rag_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/11b_compact_list_80x24.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/14_degraded_stale_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/16_review_confirmation_modal_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/02_default_overview_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/15a_finalized_overview_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/07_evidence_detail_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/12a_responsive_overview_100x30.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/13_empty_state_100x30.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/09_human_review_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/01_incident_list_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/after_metrics.json",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/12c_wide_list_160x50.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/11a_compact_overview_80x24.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/04_hypotheses_list_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/05_expanded_hypothesis_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/15b_finalized_review_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/10_technical_details_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/12b_responsive_overview_140x42.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/06_evidence_list_120x40.txt",
+    "evidence/p2-06r-dashboard-ux-refinement-20261126T063800Z/after/03_wide_overview_207x49.txt"
+  ],
+  "findings": []
+}

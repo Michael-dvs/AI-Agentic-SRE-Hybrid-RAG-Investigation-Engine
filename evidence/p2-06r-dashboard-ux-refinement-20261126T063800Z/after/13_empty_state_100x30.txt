@@ -1,0 +1,11 @@
+SRE INVESTIGATION CONSOLE | env:lab | Store:OK@14:09:26 | Rev:0 Run:0 Arc:0
+────────────────────────────────────────────────────────────────────────────────────────────────────
+Menu                   Active Incidents [FOCUSED]                                                   
+─────────────────────  ─────────────────────────────────────────────────────────────────────────────
+[1] Active (0)         No active investigations or dossiers pending review.                         
+[2] Archive (0)        Cause: zero incidents are currently in RECEIVED..HUMAN_REVIEW states.        
+[3] Health             Next action: press [2] to inspect Archive Dossiers, [U] to refresh, or       
+[4] Model              trigger a synthetic scenario.                                                
+[5] Telegram                                                                                        
+────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select [Enter] Open [S] Sidebar [G] Grafana [U] Refresh [Tab] Menu [?] Help [Q] Quit

@@ -1,0 +1,27 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:23  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview  Hypotheses(3)   Evidence(12)   SOP & RAG(3)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Evidence Records: 12 total (2 supporting, 0 contradicting, 10 contextual, 0 rejected)                                  
+                                                                                                                        
+                                                                                                                        
+  ID                   Source        Observation Summary                           Status       Temporal      Hyp       
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ▶ ev-...-001         prometheus    request_rate=1.65 req/s (rate); request_ra…   Context      Fresh         -         
+    ev-...-002         loki          ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL…   Support      Fresh         #1        
+    ev-...-003         prometheus    request_rate=2.3167 req/s (rate); request_…   Context      Fresh         -         
+    ev-...-004         loki          ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL…   Context      Fresh         -         
+    ev-...-005         prometheus    get_service_metrics queried on db-dummy: 0…   Context      Fresh         -         
+    ev-...-006         loki          search_error_logs queried on db-dummy: 0 r…   Context      Fresh         -         
+    ev-...-007         prometheus    request_rate=1.3167 req/s (rate); request_…   Context      Fresh         -         
+    ev-...-008         loki          search_error_logs queried on ledger-servic…   Context      Fresh         -         
+    ev-...-009         prometheus    request_rate=0.9 req/s (rate); request_rat…   Context      Fresh         -         
+    ev-...-010         loki          search_error_logs queried on notification-…   Context      Fresh         -         
+    ev-...-011         tempo         UNKNOWN [OK 0.108ms] trace=cd0bc6e70521..     Context      Fresh         -         
+    ev-...-012         prometheus    error_rate=0.202 ratio (ratio); error_rate…   Support      Fresh         #1        
+                                                                                                                        
+                                                                                                                        
+ Selected ev-...-001  |  [Enter] Inspect provenance & canonical ID  |  [Up/Dn] Select  (*=partial)                      
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select  [Enter] Provenance  [Tab] View  [B/Esc] Back  [?] Help  [Q] Quit

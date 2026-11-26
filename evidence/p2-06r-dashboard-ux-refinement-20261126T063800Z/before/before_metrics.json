@@ -1,0 +1,62 @@
+{
+  "01_before_reference_all_207x49": {
+    "dimensions": "207x49",
+    "description": "Reference 207x49 default All Sections view on live transaction-service incident (228 lines)",
+    "rendered_lines": 46,
+    "total_unclipped_content_lines": 228,
+    "scroll_indicator": "[Scroll: line 1-38/228",
+    "requires_vertical_scroll": true,
+    "simultaneous_boxed_panels": 6,
+    "bracketed_shortcut_or_tag_tokens": 26
+  },
+  "02_before_incident_overview_120x40": {
+    "dimensions": "120x40",
+    "description": "Baseline 120x40 Incident List overview with permanent sidebar and 3 competing control bars",
+    "rendered_lines": 40,
+    "total_unclipped_content_lines": null,
+    "scroll_indicator": null,
+    "requires_vertical_scroll": false,
+    "simultaneous_boxed_panels": 3,
+    "bracketed_shortcut_or_tag_tokens": 49
+  },
+  "03_before_dense_all_sections_120x40": {
+    "dimensions": "120x40",
+    "description": "Baseline 120x40 default incident detail view (All Sections)",
+    "rendered_lines": 39,
+    "total_unclipped_content_lines": 369,
+    "scroll_indicator": "[Scroll: line 1-29/369",
+    "requires_vertical_scroll": true,
+    "simultaneous_boxed_panels": 5,
+    "bracketed_shortcut_or_tag_tokens": 25
+  },
+  "04_before_hypothesis_details_120x40": {
+    "dimensions": "120x40",
+    "description": "Baseline 120x40 Hypotheses lens",
+    "rendered_lines": 39,
+    "total_unclipped_content_lines": 45,
+    "scroll_indicator": "[Scroll: line 1-29/45",
+    "requires_vertical_scroll": true,
+    "simultaneous_boxed_panels": 4,
+    "bracketed_shortcut_or_tag_tokens": 27
+  },
+  "05_before_evidence_details_120x40": {
+    "dimensions": "120x40",
+    "description": "Baseline 120x40 Evidence Lineage lens (12 raw cards)",
+    "rendered_lines": 39,
+    "total_unclipped_content_lines": 164,
+    "scroll_indicator": "[Scroll: line 1-29/164",
+    "requires_vertical_scroll": true,
+    "simultaneous_boxed_panels": 4,
+    "bracketed_shortcut_or_tag_tokens": 26
+  },
+  "06_before_human_review_120x40": {
+    "dimensions": "120x40",
+    "description": "Baseline 120x40 Review & Audit lens",
+    "rendered_lines": 23,
+    "total_unclipped_content_lines": 14,
+    "scroll_indicator": null,
+    "requires_vertical_scroll": false,
+    "simultaneous_boxed_panels": 4,
+    "bracketed_shortcut_or_tag_tokens": 25
+  }
+}

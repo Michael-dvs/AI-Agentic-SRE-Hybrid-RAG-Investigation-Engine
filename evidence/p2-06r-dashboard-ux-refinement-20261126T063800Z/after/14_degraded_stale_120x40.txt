@@ -1,0 +1,38 @@
+SRE INVESTIGATION CONSOLE | [STALE LAST-KNOWN DATA | sync failed: RuntimeError: SQLite database is locked by external 
+writer | last ok 14:09:26]
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Menu                   Active Incidents [FOCUSED]                                                                       
+─────────────────────  ─────────────────────────────────────────────────────────────────────────────────────────────────
+[1] Active (26)                                                                                                         
+[2] Archive (1)          No.  Time         Incident                       Sev     Service        Mode      State        
+[3] Health              ─────────────────────────────────────────────────────────────────────────────────────────────── 
+[4] Model                ▶ 1  11-26 10:38  inc-live-transact...3b7751e9…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+[5] Telegram               2  11-26 10:37  inc-live-auth-ser...919d9ddd…  [HIGH]  auth-service   AI LLM    NEEDS_REVIEW 
+                           3  11-26 10:37  inc-live-api-gate...bbde216f…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                           4  11-26 10:36  inc-live-transact...3c01ef38…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                           5  11-26 10:36  inc-live-ledger-s...eda3be04…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                           6  11-26 10:36  inc-live-api-gate...753b0e2b…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                           7  11-26 10:36  inc-live-transact...3226316f…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                           8  11-26 10:36  inc-live-ledger-s...4147f256…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                           9  11-26 10:36  inc-live-api-gate...9b019b17…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          10  11-26 10:33  inc-live-transact...131e5827…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          11  11-26 10:33  inc-live-api-gate...654dfb24…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          12  11-23 10:39  inc-live-ledger-s...d8250802…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                          13  11-23 10:39  inc-live-api-gate...4b902a8c…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          14  11-23 10:39  inc-live-transact...3413d130…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          15  11-23 10:39  inc-live-api-gate...f9e49c54…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          16  11-23 10:05  inc-live-transact...1fccf8c0…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          17  11-23 10:05  inc-live-ledger-s...638c8d85…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                          18  11-23 10:05  inc-live-api-gate...48929483…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          19  11-23 10:05  inc-live-transact...d8156a81…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          20  11-23 10:05  inc-live-transact...05a2a5fc…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          21  11-23 10:05  inc-live-ledger-s...e9d60dfb…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                          22  11-23 10:05  inc-live-ledger-s...86aa0122…  [HIGH]  ledger-servi…  AI LLM    NEEDS_REVIEW 
+                          23  11-23 10:05  inc-live-api-gate...832a3e53…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          24  11-23 10:05  inc-live-api-gate...9433beda…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                          25  11-23 10:02  inc-live-transact...7cb84f8a…  [HIGH]  transaction-…  AI LLM    NEEDS_REVIEW 
+                          26  11-23 10:02  inc-live-api-gate...a800d744…  [HIGH]  api-gateway    AI LLM    NEEDS_REVIEW 
+                                                                                                                        
+                       Symptom: Service transaction-service error_rate=0.20 exceeded critical threshold 0.20 (e...      
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select [Enter] Open [S] Sidebar [G] Grafana [U] Refresh [Tab] Menu [?] Help [Q] Quit

@@ -221,13 +221,14 @@ python3 scripts/sre_dashboard.py
 - `Panah Atas / Bawah` (atau `k` / `j` di daftar):
   - Saat fokus di panel **Navigasi**: memindahkan menu aktif `[1]` s/d `[5]` secara langsung.
   - Saat fokus di panel **Daftar Insiden**: memindahkan sorotan baris (stabil terhadap penambahan insiden baru).
-  - Saat berada di **Detail Insiden**: menggulir isi dossier ke atas/bawah (`PgUp` / `PgDn` untuk gulir cepat).
-- `Panah Kanan / Tab / Enter`: Memindahkan fokus dari panel **Navigasi** ke panel **Daftar Insiden** (dan tekan `Enter` / `o` lagi untuk membuka detail insiden).
-- `Tab` / `Shift+Tab` (saat di **Detail Insiden**): Berpindah *View Lens* (`All Sections`, `Triage & Progress`, `Hypotheses`, `Evidence Lineage`, `SOP & RAG`, `Review & Audit`).
-- `[` / `]` dan `i` (saat di **Detail Insiden**): Memilih item hipotesis/bukti berikutnya dan melompat langsung dari hipotesis ke bukti telemetri yang dirujuk (*Reference Resolution*).
-- `Panah Kiri / b / Esc`: Kembali secara bertahap dari modal $\rightarrow$ sub-view $\rightarrow$ tabel daftar insiden $\rightarrow$ panel navigasi.
+  - Saat berada di **Detail Insiden**: memilih item hipotesis/bukti/sitasi SOP (pada tampilan ringkas) atau menggulir isi dossier (`PgUp` / `PgDn` untuk gulir cepat).
+- `Panah Kanan / Tab / Enter`: Memindahkan fokus dari panel **Navigasi** ke panel **Daftar Insiden**; tekan `Enter` / `o` untuk membuka detail insiden (default: **Overview**), dan tekan `Enter` di dalam *Hypotheses*, *Evidence*, atau *SOP & RAG* untuk membuka/menutup detail item yang dipilih (*progressive disclosure*).
+- `Tab` / `Shift+Tab` (saat di **Detail Insiden**): Berpindah *View Lens* (`Overview`, `Hypotheses`, `Evidence`, `SOP & RAG`, `Review`, `Details`).
+- `d` / `v` / `s`: Langsung membuka *Technical Details & Audit* (`d`), beralih ke tampilan opsional *All Sections* (`v`), atau menyembunyikan/menampilkan sidebar navigasi (`s`).
+- `[` / `]` dan `i` (saat di **Detail Insiden**): Memilih item hipotesis/bukti/sitasi berikutnya dan melompat langsung dari hipotesis ke detail bukti kanonikal yang dirujuk (*Reference Resolution*).
+- `Panah Kiri / b / Esc`: Kembali secara bertahap dari modal $\rightarrow$ detail item $\rightarrow$ Overview $\rightarrow$ tabel daftar insiden $\rightarrow$ panel navigasi.
 - `1`, `2`, `3`, `4`, `5`: Langsung melompat ke tab menu tertentu.
-- `a` / `r` / `c` / `e`: Membuka **Modal Konfirmasi Human Review Dua Tahap** (`APPROVE`, `REJECT`, `CORRECT`, atau `ESCALATE`) yang terikat ke versi dan hash dossier; tekan `Tab`/`Enter` untuk berpindah kolom dan konfirmasi, atau `Esc` untuk membatalkan tanpa perubahan state.
+- `a` / `r` / `c` / `e` (ditampilkan lengkap di lensa **Review**): Membuka **Modal Konfirmasi Human Review Dua Tahap** (`APPROVE`, `REJECT`, `CORRECT`, atau `ESCALATE`) yang terikat ke versi dan hash dossier; tekan `Tab`/`Enter` untuk berpindah kolom dan konfirmasi, atau `Esc` untuk membatalkan tanpa perubahan state.
 - `q`: Keluar (*Quit*) dari konsol dashboard secara bersih tanpa mengubah investigasi yang sedang berjalan.
 
 **Konfigurasi Interaktif pada Tab `[4] AI Model Config`:**

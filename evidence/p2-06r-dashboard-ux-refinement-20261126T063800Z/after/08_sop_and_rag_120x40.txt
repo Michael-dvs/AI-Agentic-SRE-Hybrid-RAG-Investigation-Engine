@@ -1,0 +1,40 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:24  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview  Hypotheses(3)  Evidence(12)   SOP & RAG(3)   Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Retrieval & SOP Summary                                                                                                
+ SOP Status            [APPLICABLE_SOP_FOUND] APPLICABLE_SOP_FOUND: see cited sections.                                 
+ Assessment            Authorized active SOP reference matched service, environment, and effective window.              
+ Eligible Sources      3 eligible source(s)  |  Relevance: SPECIFIC_COVERAGE_GAP                                        
+ Context Delivery      Recorded: retrieved=3, eligible=3, included_in_llm_prompt=0, omitted=3 (compaction=2_1_0_0)      
+ Limitations           Compaction omissions: EVIDENCE_BUDGET_OMITTED, CITATION_BUDGET_OMITTED                           
+                                                                                                                        
+ Authorized Citations (3)  (press [Enter] to inspect excerpt, [Up/Dn] select)                                           
+ ▶ 1. SOP-TX-ERR-500 v1.0.0  |  SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik   
+ Insiden                                                                                                                
+   2. SOP-TX-ERR-500 v1.0.0  |  SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan        
+ Diagnostik                                                                                                             
+   3. SOP-TX-ERR-500 v1.0.0  |  SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi                      
+                                                                                                                        
+ Citation Excerpt (SOP-TX-ERR-500 v1.0.0) ───────────────────────────────────────────────────────────────────────────── 
+   SOP-TX-ERR-500 v1.0.0 | SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik        
+ Insiden                                                                                                                
+   Chunk: chk-SOP-TX-ERR-500-v1.0.0-002  |  Source: kb://corpus/transaction_service/SOP-TX-ERR-500.md                   
+   Retrieval score=0.0328 (rrf_fusion: lexical/dense rank relevance only, NOT diagnostic confidence)                    
+   Excerpt: - Respons HTTP 500 dikembalikan oleh endpoint transaksi finansial simulasi. - Error disebabkan oleh anomali 
+ kalkulasi saldo, kegagalan serialisasi data event transaksi, atau race condition pada cache idempotensi lokal. -       
+ Metrik `sim_red_...                                                                                                    
+                                                                                                                        
+ SRE Recommended Verification (Human-Controlled) (9)  status=NOT_PERFORMED | auto_execution_allowed=False               
+   1. [chk-01 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=SOP-TX-ERR-500] [SOP_BACKED]                                      
+      NOT_PERFORMED · SOP-BACKED (source reference only): Review cited section chk-SOP-TX-ERR-500-v1.0.0-002 of         
+ SOP-TX-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections  
+ disagree, escalate; no procedure is authorized for execution.                                                          
+   2. [chk-02 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=SOP-TX-ERR-500] [SOP_BACKED]                                      
+      NOT_PERFORMED · SOP-BACKED (source reference only): Review cited section chk-SOP-TX-ERR-500-v1.0.0-003 of         
+ SOP-TX-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections  
+ disagree, escalate; no procedure is authorized for execution.                                                          
+ [Scroll: line 1-35/70 | Up/Dn or PgUp/PgDn]                                                                            
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Citation  [Enter] Excerpt  [Tab] View  [B/Esc] Back  [?] Help  [Q] Quit

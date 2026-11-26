@@ -1,0 +1,26 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:27  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Archive > transaction-service (...82bdecc894)  |  [HIGH]  |  CLOSED (Admin Handover)  |  v1  |  [FOCUSED]              
+ View Lens:  Overview   Hypotheses(2)  Evidence(12)  SOP & RAG(0)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Stage: Finalized: Closed (Admin Handover, 9/9 stages)  |  Env: lab  |  Mode: AI LLM  |  Time: 11-23 10:39:14           
+ Safety: ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (diagnosis_verified=False, technical_resolved=False,                    
+ auto_action_triggered=False)                                                                                           
+                                                                                                                        
+ Observed Symptom                                                                                                       
+   Downstream dependency unavailable reported by transaction-service (ERR_DEPENDENCY_UNAVAILABLE)                       
+                                                                                                                        
+ Leading Hypothesis  (1 of 2; [Tab] for all)                                                                            
+   #1  Transaction service experiencing intermittent failures due to downstream dependency connection refusal, causing  
+ request rate drop to 0.33.                                                                                             
+   [PARTIAL] | Confidence: 50% (MEDIUM) | Evidence: +2 support, 0 contra (12 total)                                     
+   Status note: Dossier capped at PARTIAL; internal claim validation=SUPPORTED (see Hypotheses/Details).                
+   Note: Uncalibrated heuristic score [5%-85% cap]; not a probability or verified root cause.                           
+                                                                                                                        
+ Key Uncertainty  (+2 more in Details)                                                                                  
+   Exact identity and health of the downstream dependency service                                                       
+                                                                                                                        
+ Next Action  SOP: NO_APPLICABLE_RUNBOOK (0 cited, 4 pending)                                                           
+   REVIEW LOCKED - FINALIZED (CLOSED). Administrative handover complete; technical resolution not established.          
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [REVIEW LOCKED - FINALIZED (CLOSED)]  [Tab] View  [D] Details  [G] Grafana  [B/Esc] Back  [?] Help  [Q] Quit

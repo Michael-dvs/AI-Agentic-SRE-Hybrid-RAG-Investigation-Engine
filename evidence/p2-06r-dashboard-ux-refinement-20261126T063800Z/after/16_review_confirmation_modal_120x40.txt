@@ -1,0 +1,25 @@
+┌────────────────────── Human Review Confirmation - inc-live-transaction-service-3b7751e91b (v1) ──────────────────────┐
+│ CONFIRM HUMAN REVIEW ACTION: Accept Dossier for Handover (APPROVE)                                                   │
+│ Target Incident : inc-live-transaction-service-3b7751e91b | Revision: v1 (sha256: bb1fd41e03a238ae...)               │
+│ Lifecycle State : HUMAN_REVIEW -> CLOSED (Administrative Handover Only)                                              │
+│ Reviewer Actor  : sre_reviewer (L2_SRE) | Local PoC caller-asserted identity (unauthenticated)                       │
+│                                                                                                                      │
+│ Pre-Submission Diagnostic Summary:                                                                                   │
+│   Leading Hypothesis : #1 [PARTIAL | 79% (HIGH)] transaction-service internal runtime exception causing error_rate   │
+│ to exceed critical threshol...                                                                                       │
+│   Evidence Balance   : 2 supporting, 0 contradicting, 12 total                                                       │
+│   SOP Classification : APPLICABLE_SOP_FOUND | Pending Manual Checks: 9 (NOT_PERFORMED)                               │
+│                                                                                                                      │
+│ Operational Meaning & Safety Boundary:                                                                               │
+│   Accepts this dossier revision for administrative handover closure and exports sanitized handover artifacts. Does   │
+│ NOT establish verified root cause (diagnosis_verified=False), resolve the live technical incident                    │
+│ (technical_resolved=False), confirm SOP compliance, or trigger remediation (auto_action_triggered=False).            │
+│                                                                                                                      │
+│ ▶ Reviewer Rationale (required, min 5 chars):                                                                        │
+│     _                                                                                                                │
+│                                                                                                                      │
+│   [ Confirm & Submit APPROVE ]      [ Cancel (Esc) ]                                                                 │
+│                                                                                                                      │
+│ Controls: Type text into active field | [Tab/Up/Dn] Switch field/button | [Enter] Next/Submit | [Esc] Cancel without │
+│ changes                                                                                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

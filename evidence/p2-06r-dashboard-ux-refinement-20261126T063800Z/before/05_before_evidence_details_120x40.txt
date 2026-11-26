@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@13:39:34] Env:lab | ReviewQueue:26 | Running:0 | Archive:1 | 
+Lab:unprobed([3]) | LLM:openrouter/nvidia/nem...ning:free | Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌──── Active Incidents > inc-live-transactio...3b7751e91b [Evidence Lineage] [FOCUSED] ────┐
+│ [1] Active Incidents     ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(3)   Evidence   │
+│ [26]                     ││ Lineage(12)   SOP & RAG(3)   Review & Audit                                              │
+│ [2] Archive Dossiers [1] ││ inc-live-transaction-service-3b7751e91b (v1) | [HIGH] HIGH | transaction-service (lab) | │
+│ [3] Service Health       ││ State: HUMAN_REVIEW | Mode: AI LLM                                                       │
+│ [4] AI Model Config      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [5] Telegram Alerts      ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [?] Keyboard & Guide     ││ ┌──────────────────── Verified Evidence IDs & Temporal Provenance ─────────────────────┐ │
+│ [Q] Quit Console         ││ │ Integrity Note: SHA-256 content_hash verifies post-collection payload consistency    │ │
+│                          ││ │ against the captured normalized snapshot only; it does not independently prove       │ │
+└──────────────────────────┘│ │ upstream source authenticity.                                                        │ │
+                            │ │ ▶ ev-inc-live-transaction-service-3b7751e91b-001 [CONTEXTUAL] [CURRENT_FRESH]        │ │
+                            │ │     get_service_metrics (prometheus:http://127.0.0.1:19090) |                        │ │
+                            │ │ svc=transaction-service (lab) | obs=2026-11-26T03:43:58.79673Z |                     │ │
+                            │ │ win=2026-11-26T03:38:58.79673Z..2026-11-26T03:44:58.79673Z |                         │ │
+                            │ │ collected=2026-11-26T03:43:58.904312Z                                                │ │
+                            │ │     signal=request_rate | val=1.65 req/s | agg=rate | quality=complete (method=none, │ │
+                            │ │ returned=-) | sha256=db4b24017db8ed94 | refs=contextual (not cited as support)       │ │
+                            │ │     Summary: request_rate=1.65 req/s (rate); request_rate=1.65 req/s (rate);         │ │
+                            │ │ request_rate=1.65 req/s (rate) [svc=transaction-service | env=lab |                  │ │
+                            │ │ obs=2026-11-26T03:43:58.79673Z | collected=2026-11-26T03:43:58.904312Z |             │ │
+                            │ │ temporal=TEMPORALLY_RELEVANT]                                                        │ │
+                            │ │                                                                                      │ │
+                            │ │   ev-inc-live-transaction-service-3b7751e91b-002 [ACCEPTED_SUPPORT] [CURRENT_FRESH]  │ │
+                            │ │     search_error_logs (loki:http://127.0.0.1:13100) | svc=transaction-service (lab)  │ │
+                            │ │ | obs=2026-11-26T03:43:58.222551Z |                                                  │ │
+                            │ │ win=2026-11-26T03:38:58.79673Z..2026-11-26T03:44:58.79673Z |                         │ │
+                            │ │ collected=2026-11-26T03:43:58.920589Z                                                │ │
+                            │ │     signal=ERR_TX_INTERNAL_EXCEPTION | val=30 record(s) | agg=unavailable |          │ │
+                            │ │ quality=complete (method=none, returned=-) | sha256=17fa96dbad4ebf36 | refs=#1       │ │
+                            │ [Scroll: line 1-29/164 | Up/Dn or PgUp/PgDn]                                             │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

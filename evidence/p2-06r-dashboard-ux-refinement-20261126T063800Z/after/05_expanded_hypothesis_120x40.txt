@@ -1,0 +1,40 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:22  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview   Hypotheses(3)   Evidence(12)  SOP & RAG(3)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Calibration: Heuristic support score [5%-85% cap], uncalibrated (not an empirical probability; does not prove or       
+ confirm root cause).                                                                                                   
+                                                                                                                        
+                                                                                                                        
+  Rank     Hypothesis                                              Support           Confidence              Evid(+/-)  
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ▶ #1     transaction-service internal runtime exception          [PARTIAL]         79% (HIGH)                +2 / -0  
+           causing error_rate to exceed critical threshold of                                                           
+           0.20                                                                                                         
+    #2     External dependency failure causing                     [INCONCLUSIVE]    20% (LOW)                 +0 / -0  
+           transaction-service internal exceptions                                                                      
+    #3     Configuration drift or resource exhaustion in           [INCONCLUSIVE]    20% (LOW)                 +0 / -0  
+           transaction-service                                                                                          
+                                                                                                                        
+                                                                                                                        
+ Selected Hypothesis #1 Details ─────────────────────────────────────────────────────────────────────────────────────── 
+ #1 [PARTIAL | 79% (HIGH)] transaction-service internal runtime exception causing error_rate to exceed critical         
+ threshold of 0.20                                                                                                      
+ Hypothesis ID         hyp-inc-live-transaction-service-3b7751e91b-001                                                  
+ Mechanism / Why       Mechanism / Why: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception in              
+                       transaction-service | Candidate Root Cause (unconfirmed): Internal runtime exception within      
+                       transaction-service triggering cascading error_rate increase                                     
+ Status Semantics      Dossier=PARTIAL | Internal Claim Validation=SUPPORTED                                            
+                       Dossier support_status is capped at PARTIAL for unconfirmed LLM candidates pending human review; 
+                       internal claim validator corroborated cited claims as SUPPORTED (basis for heuristic score).     
+ Confidence Basis      status=SUPPORTED, unique_support=2 (duplicates_collapsed=0, modalities=2, correlated_pairs=0),   
+                       contradictions=0, rejected_claims=0, unavailable_sources=0; score=79% (heuristic,                
+                       non-probabilistic).                                                                              
+ Main Uncertainty      Full stack trace or detailed exception type for ERR_TX_INTERNAL_EXCEPTION                        
+ Supporting Evid       ev-...-002, ev-...-012                                                                           
+ Validator Codes       CLAIM_CORROBORATED, DOWNSTREAM_SYMPTOM_CASCADE                                                   
+                                                                                                                        
+ Press [Enter] to collapse  |  [[ / ]] prev/next hypothesis  |  [I] inspect linked evidence                             
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select  [Enter] Expand  [I] Evidence  [Tab] View  [B/Esc] Back  [?] Help  [Q] Quit

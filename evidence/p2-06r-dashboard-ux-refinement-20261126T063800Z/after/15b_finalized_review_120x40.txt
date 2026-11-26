@@ -1,0 +1,25 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:27  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Archive > transaction-service (...82bdecc894)  |  [HIGH]  |  CLOSED (Admin Handover)  |  v1  |  [FOCUSED]              
+ View Lens: Overview  Hypotheses(2)  Evidence(12)  SOP & RAG(0)   Review   Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Human Review Summary                                                                                                   
+ Incident              transaction-service (...82bdecc894)  |  [HIGH]  |  env=lab                                       
+ Dossier Revision      v1  (sha256: c70c04356acef596...)                                                                
+ Diagnosis Status      ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (diagnosis_verified=False, technical_resolved=False,      
+                       sop_compliance_confirmed=False, remediation_authorized=False)                                    
+ Leading Candidate     #1 [PARTIAL | 50% (MEDIUM)] Transaction service experiencing intermittent failures due to        
+                       downstream dependency connectio...                                                               
+ Key Uncertainty       Exact identity and health of the downstream dependency service                                   
+ Pending Checks        4 manual verification check(s) (NOT_PERFORMED; auto_execution_allowed=False)                     
+ Reviewer              sre_reviewer (L2_SRE)                                                                            
+ Trust Mode            Local PoC caller-asserted identity (unauthenticated)                                             
+ Review Eligibility    REVIEW LOCKED - FINALIZED (CLOSED): historical dossier is read-only.                             
+                                                                                                                        
+ Review Controls                                                                                                        
+   [REVIEW LOCKED - FINALIZED (CLOSED)] No further review submissions allowed.                                          
+                                                                                                                        
+ Append-Only Review History                                                                                             
+   - 11-23 11:02:23 | v1 | APPROVE by sre_reviewer (L2_SRE_REVIEWER): Approved. Restarted the connection pool on        
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [REVIEW LOCKED - FINALIZED (CLOSED)]  [Tab] View  [G] Grafana  [B/Esc] Back  [?] Help

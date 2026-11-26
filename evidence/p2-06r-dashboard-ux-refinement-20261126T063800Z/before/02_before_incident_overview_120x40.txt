@@ -1,0 +1,40 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@13:39:33] Env:lab | ReviewQueue:26 | Running:0 | Archive:1 | 
+Lab:unprobed([3]) | LLM:openrouter/nvidia/nem...ning:free | Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────────────────────────────── Active Incidents [FOCUSED] ───────────────────────────────┐
+│ [1] Active Incidents     ││                                                                                          │
+│ [26]                     ││   No.  Time         Incident                 Sev     Service     Mode      State         │
+│ [2] Archive Dossiers [1] ││  ──────────────────────────────────────────────────────────────────────────────────────  │
+│ [3] Service Health       ││   ▶ 1  11-26 10:38  inc-live-transact...3b…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+│ [4] AI Model Config      ││     2  11-26 10:37  inc-live-auth-ser...91…  [HIGH]  auth-serv…  AI LLM    NEEDS_REVIEW  │
+│ [5] Telegram Alerts      ││     3  11-26 10:37  inc-live-api-gate...bb…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+│ [?] Keyboard & Guide     ││     4  11-26 10:36  inc-live-transact...3c…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+│ [Q] Quit Console         ││     5  11-26 10:36  inc-live-ledger-s...ed…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+│                          ││     6  11-26 10:36  inc-live-api-gate...75…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+└──────────────────────────┘│     7  11-26 10:36  inc-live-transact...32…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │     8  11-26 10:36  inc-live-ledger-s...41…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+                            │     9  11-26 10:36  inc-live-api-gate...9b…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    10  11-26 10:33  inc-live-transact...13…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │    11  11-26 10:33  inc-live-api-gate...65…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    12  11-23 10:39  inc-live-ledger-s...d8…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+                            │    13  11-23 10:39  inc-live-api-gate...4b…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    14  11-23 10:39  inc-live-transact...34…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │    15  11-23 10:39  inc-live-api-gate...f9…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    16  11-23 10:05  inc-live-transact...1f…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │    17  11-23 10:05  inc-live-ledger-s...63…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+                            │    18  11-23 10:05  inc-live-api-gate...48…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    19  11-23 10:05  inc-live-transact...d8…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │    20  11-23 10:05  inc-live-transact...05…  [HIGH]  transacti…  AI LLM    NEEDS_REVIEW  │
+                            │    21  11-23 10:05  inc-live-ledger-s...e9…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+                            │    22  11-23 10:05  inc-live-ledger-s...86…  [HIGH]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+                            │    23  11-23 10:05  inc-live-api-gate...83…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │    24  11-23 10:05  inc-live-api-gate...94…  [HIGH]  api-gatew…  AI LLM    NEEDS_REVIEW  │
+                            │                                                                                          │
+                            │ Selected Symptom: Service transaction-service error_rate=0.20 exceeded critical thr...   │
+                            │ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |     │
+                            │ [?] Help  |  Showing 1-24 of 26                                                          │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation:   │
+│ [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                                │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

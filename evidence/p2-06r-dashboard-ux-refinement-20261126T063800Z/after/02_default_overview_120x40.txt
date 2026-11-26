@@ -1,0 +1,24 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:21  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens:  Overview   Hypotheses(3)  Evidence(12)  SOP & RAG(3)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Stage: Stage 9/9: Human Review  |  Env: lab  |  Mode: AI LLM  |  Time: 11-26 10:38:58                                  
+ Safety: Diagnosis not verified (RULE-007)  |  Auto-remediation disabled (auto_action_triggered=False)                  
+                                                                                                                        
+ Observed Symptom                                                                                                       
+   Service transaction-service error_rate=0.20 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)  
+                                                                                                                        
+ Leading Hypothesis  (1 of 3; [Tab] for all)                                                                            
+   #1  transaction-service internal runtime exception causing error_rate to exceed critical threshold of 0.20           
+   [PARTIAL] | Confidence: 79% (HIGH) | Evidence: +2 support, 0 contra (12 total)                                       
+   Status note: Dossier capped at PARTIAL; internal claim validation=SUPPORTED (see Hypotheses/Details).                
+   Note: Uncalibrated heuristic score [5%-85% cap]; not a probability or verified root cause.                           
+                                                                                                                        
+ Key Uncertainty  (+6 more in Details)                                                                                  
+   Full stack trace or detailed exception type for ERR_TX_INTERNAL_EXCEPTION                                            
+                                                                                                                        
+ Next Action  SOP: APPLICABLE_SOP_FOUND (3 cited, 9 pending)                                                            
+   Human review required on Revision v1 (open Review view to decide).                                                   
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Tab] View  [D] Details  [S] Sidebar  [G] Grafana  [V] All  [B/Esc] Back  [?] Help  [Q] Quit

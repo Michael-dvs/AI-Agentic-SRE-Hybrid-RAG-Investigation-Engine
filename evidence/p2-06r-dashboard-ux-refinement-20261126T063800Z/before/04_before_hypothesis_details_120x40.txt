@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@13:39:34] Env:lab | ReviewQueue:26 | Running:0 | Archive:1 | 
+Lab:unprobed([3]) | LLM:openrouter/nvidia/nem...ning:free | Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────── Active Incidents > inc-live-transactio...3b7751e91b [Hypotheses] [FOCUSED] ───────┐
+│ [1] Active Incidents     ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(3)   Evidence   │
+│ [26]                     ││ Lineage(12)   SOP & RAG(3)   Review & Audit                                              │
+│ [2] Archive Dossiers [1] ││ inc-live-transaction-service-3b7751e91b (v1) | [HIGH] HIGH | transaction-service (lab) | │
+│ [3] Service Health       ││ State: HUMAN_REVIEW | Mode: AI LLM                                                       │
+│ [4] AI Model Config      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [5] Telegram Alerts      ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [?] Keyboard & Guide     ││ Calibration & Ranking: Heuristic support score [5%-85% cap], uncalibrated (not an        │
+│ [Q] Quit Console         ││ empirical probability; does not prove or confirm root cause).                            │
+│                          ││ Authoritative persisted rank order preserved.                                            │
+└──────────────────────────┘│                                                                                          │
+                            │  Rank     Hypothesis                Support           Confidence              Evid(+/-)  │
+                            │  ──────────────────────────────────────────────────────────────────────────────────────  │
+                            │  ▶ #1     transaction-service       [PARTIAL]         79% (HIGH)                +2 / -0  │
+                            │           internal runtime                                                               │
+                            │           exception causing                                                              │
+                            │           error_rate to exceed                                                           │
+                            │           critical threshold of                                                          │
+                            │           0.20                                                                           │
+                            │    #2     External dependency       [INCONCLUSIVE]    20% (LOW)                 +0 / -0  │
+                            │           failure causing                                                                │
+                            │           transaction-service                                                            │
+                            │           internal exceptions                                                            │
+                            │    #3     Configuration drift or    [INCONCLUSIVE]    20% (LOW)                 +0 / -0  │
+                            │           resource exhaustion in                                                         │
+                            │           transaction-service                                                            │
+                            │                                                                                          │
+                            │ ┌────────────────────── Hypothesis Reasoning Details (Why & How) ──────────────────────┐ │
+                            │ │ #1 (hyp-inc-live-transaction-service-3b7751e91b-001) [PARTIAL | 79% (HIGH)]          │ │
+                            │ │ transaction-service internal runtime exception causing error_rate to exceed critical │ │
+                            │ [Scroll: line 1-29/45 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

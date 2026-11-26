@@ -1,0 +1,27 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:24  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview  Hypotheses(3)  Evidence(12)  SOP & RAG(3)   Review   Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Human Review Summary                                                                                                   
+ Incident              transaction-service (...3b7751e91b)  |  [HIGH]  |  env=lab                                       
+ Dossier Revision      v1  (sha256: bb1fd41e03a238ae...)                                                                
+ Diagnosis Status      PENDING_REVIEW (diagnosis_verified=False, remediation_authorized=False)                          
+ Leading Candidate     #1 [PARTIAL | 79% (HIGH)] transaction-service internal runtime exception causing error_rate to   
+                       exceed critical threshol...                                                                      
+ Key Uncertainty       Full stack trace or detailed exception type for ERR_TX_INTERNAL_EXCEPTION                        
+ Pending Checks        9 manual verification check(s) (NOT_PERFORMED; auto_execution_allowed=False)                     
+ Reviewer              sre_reviewer (L2_SRE)                                                                            
+ Trust Mode            Local PoC caller-asserted identity (unauthenticated)                                             
+ Review Eligibility    Ready for authorized human review on Revision v1.                                                
+                                                                                                                        
+ Authorized Review Actions  opens confirmation modal; never submits automatically                                       
+   [A] Approve     Accept dossier for administrative handover (CLOSED; diagnosis_verified=False)                        
+   [R] Reject      Reject findings and close as REJECTED (preserves original evidence & AI findings)                    
+   [C] Correct     Propose human correction and spawn append-only Revision v(N+1)                                       
+   [E] Escalate    Escalate to human incident triage (MANUAL_TRIAGE_REQUIRED; local PoC log)                            
+                                                                                                                        
+ Append-Only Review History                                                                                             
+   No human review decisions submitted yet for this incident.                                                           
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [A] Approve  [R] Reject  [C] Correct  [E] Escalate  |  [Tab] View  [G] Grafana  [B/Esc] Back  [?] Help  [Q] Quit

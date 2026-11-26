@@ -443,33 +443,40 @@ def test_group_b_navigation_focus_lenses_and_evidence_reference_resolution(tmp_p
         dash.handle_key("ESC")
         assert dash.help_open is False
 
-        # B01-B03: Move focus from menu -> list -> open incident
+        # B01-B03: Move focus from menu -> list -> open incident (defaults to calm Overview per P2-06R)
         dash.handle_key("RIGHT")
         assert dash.focus == "list"
         selected_id = dash.highlighted_incident_id
         dash.handle_key("ENTER")
         assert dash.selected_incident_id == selected_id
-        assert dash.detail_section == "all"
+        assert dash.detail_section == "overview"
 
         # B04-B07 & O4: Cycle lenses via Tab, jump Hypothesis -> Evidence via 'I', and return via 'B'
         dash.handle_key("TAB")
-        assert dash.detail_section == "overview"
-        dash.handle_key("TAB")
         assert dash.detail_section == "hypotheses"
 
-        # Jump from Hypothesis #1 to its linked supporting evidence
+        # Jump from Hypothesis #1 to its linked supporting evidence (opens canonical evidence detail)
         dash.selected_incident_id = "inc-p206-nav-001"
         dash.refresh_snapshot()
         dash.handle_key("I")
         assert dash.detail_section == "evidence"
+        assert dash.evidence_detail_open is True
         ev_txt = _render_text(dash, console, width=120)
-        assert "ev-inc-p206-nav-001-log-01" in ev_txt
+        assert (
+            "ev-inc-p206-nav-001-log-01" in ev_txt
+            or "ev-inc-p206-nav-001-metric-01" in ev_txt
+        )
+        dash.handle_key("]")
+        ev_next_txt = _render_text(dash, console, width=120)
+        combined_ev_txt = ev_txt + "\n" + ev_next_txt
+        assert "ev-inc-p206-nav-001-log-01" in combined_ev_txt
+        assert "ev-inc-p206-nav-001-metric-01" in combined_ev_txt
 
-        # Return navigation restores 'hypotheses' lens, then 'all', then incident list preserving highlighted row!
+        # Return navigation restores 'hypotheses' lens, then 'overview', then incident list preserving highlighted row!
         dash.handle_key("B")
         assert dash.detail_section == "hypotheses"
         dash.handle_key("B")
-        assert dash.detail_section == "all"
+        assert dash.detail_section == "overview"
         dash.handle_key("B")
         assert dash.selected_incident_id is None
         assert dash.focus == "list"
@@ -518,27 +525,36 @@ def test_group_c_presentation_semantics_confidence_rag_and_temporal(tmp_path: pa
 
         dash, console = _build_dashboard(store, tmp_path)
 
-        # Inspect weak hypothesis
+        # Inspect weak hypothesis across Overview, Hypotheses, and SOP lenses
         dash.selected_incident_id = "inc-p206-weak-001"
+        dash.detail_section = "overview"
         weak_render = _render_text(dash, console, width=120)
-        weak_unboxed = " ".join(weak_render.translate(str.maketrans("│┌┐└┘─", "      ")).split())
         assert "14% (LOW)" in weak_render
         assert "[UNSUPPORTED]" in weak_render
-        assert CALIBRATION_LIMITATION_NOTE in weak_unboxed
         assert "RETRIEVAL_UNAVAILABLE" in weak_render
-        assert "NOT_PERFORMED" in weak_render
         assert "VERIFIED" not in weak_render  # RULE-007
+
+        dash.detail_section = "hypotheses"
+        weak_hyp = _render_text(dash, console, width=120)
+        weak_hyp_unboxed = " ".join(weak_hyp.translate(str.maketrans("│┌┐└┘─", "      ")).split())
+        assert CALIBRATION_LIMITATION_NOTE in weak_hyp_unboxed
+
+        dash.detail_section = "sop"
+        weak_sop = _render_text(dash, console, width=120)
+        assert "NOT_PERFORMED" in weak_sop
 
         # Inspect unscored hypothesis: must show "Not scored [prior: HIGH, unvalidated]", NEVER "80%"!
         dash.selected_incident_id = "inc-p206-unscored-002"
+        dash.detail_section = "overview"
         unscored_render = _render_text(dash, console, width=120)
         assert "Not scored [prior: HIGH, unvalidated]" in unscored_render
         assert "80%" not in unscored_render
 
-        # Inspect supported incident with RAG context delivery telemetry
+        # Inspect supported incident with RAG context delivery telemetry (expand citation excerpt to inspect score note)
         _persist_incident_to_review(store, "inc-p206-sup-003", confidence_score=0.76, support_status="SUPPORTED")
         dash.selected_incident_id = "inc-p206-sup-003"
         dash.detail_section = "sop"
+        dash.sop_citation_expanded = True
         sop_render = _render_text(dash, console, width=120)
         sop_unboxed = " ".join(sop_render.translate(str.maketrans("│┌┐└┘─", "      ")).split())
         assert "APPLICABLE_SOP_FOUND" in sop_render
@@ -611,7 +627,11 @@ def test_group_d_human_review_modal_safety_conflicts_and_failures(tmp_path: path
         v2_render = _render_text(dash, console, width=120)
         assert "Revision v2" in v2_render
         assert "[HUMAN EDIT]" in v2_render
-        assert "[ORIG AI]" in v2_render
+        dash.detail_section = "hypotheses"
+        v2_hyps_render = _render_text(dash, console, width=120)
+        assert "[HUMAN EDIT]" in v2_hyps_render
+        assert "[ORIG AI]" in v2_hyps_render
+        dash.detail_section = "overview"
 
         # 4. O8 / D13 / K8: Stale Review Conflict — external process finalizes while operator's modal is open!
         _persist_incident_to_review(store, "inc-p206-rev-race")
@@ -899,6 +919,7 @@ def test_live_synthetic_stack_tui_cli_dossier_consistency_and_frozen_contracts(
 
         dash, console = _build_dashboard(watcher.store, tmp_path, width=120, height=40)
         dash.selected_incident_id = live_inc_id
+        dash.detail_section = "technical"
         tui_text = _render_text(dash, console, width=120)
 
         display_dossier_summary(dossier_json, store=watcher.store)
@@ -916,6 +937,11 @@ def test_live_synthetic_stack_tui_cli_dossier_consistency_and_frozen_contracts(
         handover_dir = tmp_path / "handover" / live_inc_id
         md_text = (handover_dir / "dossier.md").read_text(encoding="utf-8")
         html_text = (handover_dir / "dossier.html").read_text(encoding="utf-8")
+        dash.detail_section = "overview"
+        tui_closed_overview = _render_text(dash, console, width=120)
+        assert "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED" in tui_closed_overview
+        assert "VERIFIED" not in tui_closed_overview
+        dash.detail_section = "technical"
         tui_closed = _render_text(dash, console, width=120)
 
         updated_dossier = watcher.store.get_dossier(live_inc_id)["dossier_json"]

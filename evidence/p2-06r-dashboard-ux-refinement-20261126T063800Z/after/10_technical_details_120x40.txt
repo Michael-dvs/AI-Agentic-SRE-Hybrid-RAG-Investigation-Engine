@@ -1,0 +1,40 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:24  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview  Hypotheses(3)  Evidence(12)  SOP & RAG(3)  Review   Details                                       
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Technical Identity & Runtime Metadata                                                                                  
+ Incident ID           inc-live-transaction-service-3b7751e91b (Revision v1 (initial dossier))                          
+ Dossier Hash          bb1fd41e03a238ae2e834a1e2dc2f0c26d4a6f1b11c239ad45f24dbd9076b84f                                 
+ Severity & Scope      [HIGH] HIGH | env=lab | services: transaction-service, api-gateway, db-dummy, ledger-service,    
+                       notification-service                                                                             
+ Closure / Diagnosis   PENDING_REVIEW (diagnosis_verified=False, remediation_authorized=False)                          
+ Safety & Trust        Auto remediation: DISABLED (auto_action_triggered=False) | Trust: Local PoC caller-asserted      
+                       identity (unauthenticated)                                                                       
+ Reasoning Mode        AI MODEL (ONLINE)                                                                                
+ Provider / Model      openrouter / nvidia/nemotron-3.5-lightning:free                                                  
+ Token Usage           in=1191, out=372, total=1563                                                                     
+ Prompt Fingerprint    163f5083ac55f78a2b5b2d07221d8078068c7...                                                         
+ Timing / Tool Calls   Alert: 2026-11-26T03:43:58.79673Z | Ready: 2026-11-26T03:43:58.79673Z | Duration: unavailable    
+                                                                                                                        
+ Full Observed Symptom                                                                                                  
+   Service transaction-service error_rate=0.20 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)  
+                                                                                                                        
+ Workflow Stage History                                                                                                 
+ Workflow Stages: [x:RCV]->[x:COR]->[x:TRI]->[x:EVD]->[x:RAG]->[x:HYP]->[x:VAL]->[x:DRF]->[*:REV]  (Duration:           
+ unavailable | Stage completion != verified diagnosis)                                                                  
+   Transitions: RECEIVED@10:43:58  CORRELATED@10:43:58  TRIAGED@10:43:58  EVIDENCE_COLLECTED@10:43:59                   
+ RETRIEVED@10:43:59  HYPOTHESES@10:44:09  VALIDATED@10:44:09  DRAFTED@10:44:09  HUMAN_REVIEW@10:44:09                   
+                                                                                                                        
+ Dependency & Cascade Context                                                                                           
+ Error Budget Impact   moderate                                                                                         
+ Topology Flow         [api-gateway] -> transaction-service -> [db-dummy, ledger-service, notification-service]         
+ Cascade Check         origin=api-gateway | is_cascade=True | flags=CLAIM_CORROBORATED, DOWNSTREAM_SYMPTOM_CASCADE      
+ Topology Note         Topology alone does not establish causality; stale edges are unconfirmed.                        
+                                                                                                                        
+ Confidence & Validation Semantics                                                                                      
+   #1 (hyp-inc-live-transaction-service-3b7751e91b-001)  dossier=PARTIAL  internal_validation=SUPPORTED  confidence=79% 
+ (HIGH)                                                                                                                 
+ [Scroll: line 1-35/63 | Up/Dn or PgUp/PgDn]                                                                            
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Scroll  [V] All Sections  [Tab] View  [G] Grafana  [B/Esc] Back  [?] Help  [Q] Quit

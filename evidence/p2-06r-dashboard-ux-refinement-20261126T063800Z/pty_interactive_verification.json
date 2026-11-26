@@ -1,0 +1,51 @@
+{
+  "pty_steps": [
+    {
+      "step": "boot_list",
+      "has_header": true,
+      "has_active": true
+    },
+    {
+      "step": "open_default_overview",
+      "has_overview_lens": true,
+      "has_leading_hyp": true,
+      "has_key_uncertainty": true,
+      "has_next_action": true,
+      "omits_full_review_buttons": true,
+      "omits_token_usage": true
+    },
+    {
+      "step": "hypotheses_expand",
+      "collapsed_has_prompt": true,
+      "expanded_has_status_semantics": true,
+      "expanded_has_confidence_basis": true
+    },
+    {
+      "step": "jump_evidence_detail",
+      "has_canonical_id": true,
+      "has_provenance": true
+    },
+    {
+      "step": "sop_review_details",
+      "sop_has_delivery": true,
+      "review_has_controls": true,
+      "details_has_full_id": true,
+      "details_has_topology": true
+    },
+    {
+      "step": "resize_and_quit",
+      "compact_80_rendered": true,
+      "wide_207_rendered": true,
+      "clean_exit_msg": true,
+      "returncode": 0
+    }
+  ],
+  "avg_render_ms_per_frame_120x40": {
+    "overview": 1.02,
+    "hypotheses": 1.84,
+    "evidence": 3.43,
+    "sop": 3.08,
+    "review": 1.86,
+    "technical": 2.67
+  }
+}

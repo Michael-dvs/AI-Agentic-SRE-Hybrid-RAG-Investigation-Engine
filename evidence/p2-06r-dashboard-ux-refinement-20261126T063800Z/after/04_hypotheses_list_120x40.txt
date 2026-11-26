@@ -1,0 +1,23 @@
+SRE INVESTIGATION CONSOLE  |  env:lab  |  Store:Connected@14:09:22  |  Review:26  Running:0  Archive:1
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Active Incidents > transaction-service (...3b7751e91b)  |  [HIGH]  |  HUMAN_REVIEW  |  v1  |  [FOCUSED]                
+ View Lens: Overview   Hypotheses(3)   Evidence(12)  SOP & RAG(3)  Review  Details                                      
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ Calibration: Heuristic support score [5%-85% cap], uncalibrated (not an empirical probability; does not prove or       
+ confirm root cause).                                                                                                   
+                                                                                                                        
+                                                                                                                        
+  Rank     Hypothesis                                              Support           Confidence              Evid(+/-)  
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ▶ #1     transaction-service internal runtime exception          [PARTIAL]         79% (HIGH)                +2 / -0  
+           causing error_rate to exceed critical threshold of                                                           
+           0.20                                                                                                         
+    #2     External dependency failure causing                     [INCONCLUSIVE]    20% (LOW)                 +0 / -0  
+           transaction-service internal exceptions                                                                      
+    #3     Configuration drift or resource exhaustion in           [INCONCLUSIVE]    20% (LOW)                 +0 / -0  
+           transaction-service                                                                                          
+                                                                                                                        
+                                                                                                                        
+ Selected #1  |  [Enter] Inspect reasoning & confidence basis  |  [Up/Dn] Select  |  [I] Evidence                       
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select  [Enter] Expand  [I] Evidence  [Tab] View  [B/Esc] Back  [?] Help  [Q] Quit

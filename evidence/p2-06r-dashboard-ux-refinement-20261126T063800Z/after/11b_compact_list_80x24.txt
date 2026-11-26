@@ -1,0 +1,24 @@
+SRE CONSOLE | env:lab | Store:OK | Rev:26 Run:0 Arc:1
+────────────────────────────────────────────────────────────────────────────────
+[1] Active(26) [2] Archive(1) [3] Health [4] Model [5] Telegram
+────────────────────────────────────────────────────────────────────────────────
+Active Incidents [FOCUSED]
+────────────────────────────────────────────────────────────────────────────────
+                                                                                
+  No.  Time      Incident                        Sev   Service         Mode     
+ ────────────────────────────────────────────────────────────────────────────── 
+  ▶ 1  10:38:58  inc-live-tr...3b7751e91b        HIGH  transac...erv…  AI LLM   
+    2  10:37:46  inc-live-au...919d9ddd38        HIGH  auth-service    AI LLM   
+    3  10:37:46  inc-live-ap...bbde216f49        HIGH  api-gateway     AI LLM   
+    4  10:36:10  inc-live-tr...3c01ef388d        HIGH  transac...erv…  AI LLM   
+    5  10:36:10  inc-live-le...eda3be0485        HIGH  ledger-service  AI LLM   
+    6  10:36:10  inc-live-ap...753b0e2b70        HIGH  api-gateway     AI LLM   
+    7  10:36:10  inc-live-tr...3226316f9a        HIGH  transac...erv…  AI LLM   
+    8  10:36:10  inc-live-le...4147f25619        HIGH  ledger-service  AI LLM   
+    9  10:36:10  inc-live-ap...9b019b1774        HIGH  api-gateway     AI LLM   
+   10  10:33:58  inc-live-tr...131e5827ad        HIGH  transac...erv…  AI LLM   
+                                                                                
+Symptom: Service transaction-service error_rate=0.20 exceeded critical t...
+Showing 1-10 of 26 (PgUp/PgDn to scroll)
+────────────────────────────────────────────────────────────────────────────────
+ [Up/Dn] Select [Enter] Open [G] Grafana [U] Refresh [?] Help [Q] Quit

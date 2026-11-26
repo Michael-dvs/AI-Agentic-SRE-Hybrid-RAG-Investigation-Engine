@@ -138,12 +138,15 @@ def test_rich_dashboard_renders_wide_narrow_and_detail(tmp_path: pathlib.Path) -
     console.print(dashboard.render(width=120))
     dashboard.selected_incident_id = dossier["incident_id"]
     console.print(dashboard.render(width=72))
+    dashboard.detail_section = "all"
+    console.print(dashboard.render(width=72))
     dashboard.selected_incident_id = None
     dashboard.view = "model"
     console.print(dashboard.render(width=120))
     rendered = console.export_text()
 
     assert "Active Incidents" in rendered
+    assert "Observed Symptom" in rendered
     assert "Observed Symptoms" in rendered
     assert "Ledger connection pool saturation" in rendered
     assert "SOP-LEDGER-002" in rendered
@@ -576,8 +579,9 @@ def test_dossier_detail_shows_ai_llm_vs_offline_reasoning_provenance(
     assert "AI LLM" in list_text
     assert "OFFLINE" in list_text
 
-    # Offline dossier detail
+    # Offline dossier detail (Technical Details lens exposes provider/model/token provenance)
     dashboard.selected_incident_id = offline_dossier["incident_id"]
+    dashboard.detail_section = "technical"
     console.print(dashboard.render(width=120))
     offline_text = console.export_text()
     assert "OFFLINE DETERMINISTIC (NO AI MODEL)" in offline_text
@@ -585,6 +589,7 @@ def test_dossier_detail_shows_ai_llm_vs_offline_reasoning_provenance(
 
     # AI LLM dossier detail
     dashboard.selected_incident_id = "inc-c19-prov-llm"
+    dashboard.detail_section = "technical"
     console.print(dashboard.render(width=120))
     llm_text = console.export_text()
     assert "AI MODEL (ONLINE)" in llm_text
@@ -638,6 +643,7 @@ def test_dossier_detail_renders_causal_reasoning_unknowns_and_checks(tmp_path: p
         costs=CostMetricsReader(tmp_path / "missing-costs.json"),
     )
     dashboard.selected_incident_id = "inc-c19-causal-001"
+    dashboard.detail_section = "all"
     console.print(dashboard.render(width=120))
     rendered = console.export_text()
     collapsed = " ".join(rendered.replace("│", " ").split())
