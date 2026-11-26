@@ -108,10 +108,15 @@ def display_dossier_summary(
     # 4. Ranked Hypotheses
     rca = dossier.get("root_cause_analysis", {})
     hypos = dossier.get("hypotheses") or rca.get("ranked_hypotheses", [])
+    ev_refs: Dict[str, list[str]] = {}
     print(f"ROOT CAUSE HYPOTHESES ({len(hypos)} ranked candidates):")
     if hypos:
         for h in hypos:
             rank = h.get("rank", 1)
+            for eid in h.get("supporting_evidence_ids") or []:
+                ev_refs.setdefault(str(eid), []).append(f"#{rank} supports")
+            for eid in h.get("contradicting_evidence_ids") or []:
+                ev_refs.setdefault(str(eid), []).append(f"#{rank} contradicts")
             stmt = h.get("statement") or h.get("hypothesis_statement", "")
             eval_stat = hypothesis_label(h)
             conf = h.get("confidence_score")
@@ -123,6 +128,35 @@ def display_dossier_summary(
     else:
         pri = rca.get("primary_hypothesis") or dossier.get("primary_hypothesis", "N/A")
         print(f"  Primary: {pri}")
+
+    # 5. Evidence Provenance & Temporal Scope (P1-05)
+    ev_list = dossier.get("evidence") or []
+    missing_list = dossier.get("missing_sources") or []
+    print("-" * 76)
+    print(f"EVIDENCE PROVENANCE & TEMPORAL SCOPE ({len(ev_list)} evidence item(s)):")
+    if ev_list:
+        for ev in ev_list:
+            if not isinstance(ev, dict):
+                continue
+            eid = str(ev.get("evidence_id", "unknown"))
+            qw = ev.get("query_window") if isinstance(ev.get("query_window"), dict) else {}
+            qual = str(ev.get("data_quality", "unknown")) + ("/truncated" if ev.get("truncated") else "")
+            refs = ", ".join(ev_refs.get(eid, [])) or "contextual"
+            print(
+                f"  - {eid} | {ev.get('tool_name', '-')} ({ev.get('source_ref', '-')}) | "
+                f"obs={ev.get('observed_at', '-')} | win={qw.get('start', '-')}..{qw.get('end', '-')} | "
+                f"quality={qual} | refs={refs}"
+            )
+            if ev.get("summary"):
+                print(f"    Summary: {str(ev['summary'])[:220]}")
+    else:
+        print("  No positive telemetry evidence items recorded.")
+    for ms in missing_list:
+        if isinstance(ms, dict):
+            print(
+                f"  - [MISSING] {ms.get('tool_name', 'unknown')} ({ms.get('error_code', 'UNAVAILABLE')}): "
+                f"{ms.get('impact_note', '')}"
+            )
     print("=" * 76)
 
 

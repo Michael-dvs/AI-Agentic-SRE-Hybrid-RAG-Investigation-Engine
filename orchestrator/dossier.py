@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import pathlib
 import re
 from typing import Any, Dict, List, Optional
@@ -193,40 +194,76 @@ class DossierSerializer:
                 })
                 continue
 
-            quality_val = "partial" if dq == "partial" else "complete"
+            truncated_flag = bool(ev.get("truncated", False))
+            quality_val = "partial" if (dq == "partial" or truncated_flag) else "complete"
             ev_id = ev.get("evidence_id", f"ev-{incident_id}-001")
             if not ev_id.startswith("ev-"):
                 ev_id = f"ev-{ev_id}"
             records = ev.get("records", [])
+            ev_svc = str(ev.get("service_id") or service_id)
+            ev_env = str(ev.get("environment") or context.get("environment") or environment)
             summary_source = ev.get("summary")
-            if not summary_source and records:
-                preview_values = []
-                for record in records[:3]:
-                    if isinstance(record, dict):
-                        preview_values.append(
-                            record.get("message")
-                            or record.get("metric")
-                            or record.get("value")
-                            or json.dumps(record, sort_keys=True, default=str)
-                        )
-                summary_source = "; ".join(str(value) for value in preview_values if value is not None)
             if not summary_source:
-                summary_source = (
-                    f"{tname} queried on {ev.get('service_id', service_id)}: "
-                    f"{len(records)} records returned."
-                )
+                preview_values = []
+                for record in (records[:3] if isinstance(records, list) else []):
+                    if isinstance(record, dict):
+                        if tname == "get_service_metrics":
+                            m_key = record.get("metric_enum") or record.get("metric_name") or record.get("metric") or "metric"
+                            u_str = f" {record['unit']}" if record.get("unit") else ""
+                            a_str = f" ({record['aggregation']})" if record.get("aggregation") else ""
+                            preview_values.append(f"{m_key}={record.get('value')}{u_str}{a_str}")
+                        elif tname == "search_error_logs":
+                            ec_part = f"{record['error_code']}: " if record.get("error_code") else ""
+                            ts_part = f" @{record['timestamp']}" if record.get("timestamp") else ""
+                            preview_values.append(f"{ec_part}{record.get('message', '')}{ts_part}".strip())
+                        elif tname == "get_trace_summary":
+                            op_part = record.get("operation") or record.get("span_id") or "span"
+                            st_part = record.get("status_code") or "OK"
+                            dur_part = f"{record.get('duration_ms')}ms" if record.get("duration_ms") is not None else ""
+                            tid_part = f" trace={str(record['trace_id'])[:12]}.." if record.get("trace_id") else ""
+                            preview_values.append(f"{op_part} [{st_part} {dur_part}]{tid_part}".strip())
+                        else:
+                            preview_values.append(
+                                record.get("message")
+                                or record.get("metric")
+                                or record.get("value")
+                                or json.dumps(record, sort_keys=True, default=str)
+                            )
+                base_preview = "; ".join(str(value) for value in preview_values if value is not None)
+                if not base_preview:
+                    base_preview = f"{tname} queried on {ev_svc}: {len(records) if isinstance(records, list) else 0} records returned."
+
+                temp_eval = ev.get("temporal_evaluation") if isinstance(ev.get("temporal_evaluation"), dict) else {}
+                temp_cls = str(ev.get("temporal_status") or temp_eval.get("classification") or "")
+                obs_disp = str(ev.get("observation_time") or temp_eval.get("observation_time") or obs_at)
+                col_disp = str(ev.get("collected_at") or "n/a")
+                meta_parts = [f"svc={ev_svc}", f"env={ev_env}", f"obs={obs_disp}"]
+                if col_disp != "n/a":
+                    meta_parts.append(f"collected={col_disp}")
+                if temp_cls:
+                    meta_parts.append(f"temporal={temp_cls}")
+                if truncated_flag:
+                    meta_parts.append("truncated=true")
+                summary_source = f"{base_preview} [{' | '.join(meta_parts)}]"
+
             ev_window = ev.get("query_window") if isinstance(ev.get("query_window"), dict) else {}
+            w_start = str(ev_window.get("start") or window_start)
+            w_end = str(ev_window.get("end") or window_end)
+            if not w_start.endswith("Z"):
+                w_start = f"{w_start.replace('+00:00', '')}Z"
+            if not w_end.endswith("Z"):
+                w_end = f"{w_end.replace('+00:00', '')}Z"
             evidence_list.append({
                 "evidence_id": ev_id,
                 "tool_name": tname,
                 "source_ref": ev.get("source_ref", "telemetry:adapter")[:128],
                 "observed_at": obs_at,
                 "query_window": {
-                    "start": ev_window.get("start", window_start),
-                    "end": ev_window.get("end", window_end),
+                    "start": w_start,
+                    "end": w_end,
                 },
                 "data_quality": quality_val,
-                "truncated": bool(ev.get("truncated", False)),
+                "truncated": truncated_flag,
                 "sanitized": True,
                 "summary": _bounded_sanitized_text(summary_source, limit=2048),
             })
@@ -425,11 +462,103 @@ class DossierSerializer:
         return dossier_payload
 
     @classmethod
+    def build_evidence_traceability(cls, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Build machine-readable P1-05 evidence lineage, temporal validity, and integrity summary."""
+        from orchestrator.evidence_lineage import (
+            DEFAULT_TEMPORAL_POLICY,
+            INTEGRITY_SEMANTICS_NOTE,
+            compute_evidence_content_hash,
+            evaluate_evidence_temporal_validity,
+            verify_evidence_integrity_and_scope,
+        )
+
+        ev_items = context.get("evidence_items") if isinstance(context.get("evidence_items"), list) else []
+        hyps = context.get("hypotheses") if isinstance(context.get("hypotheses"), list) else []
+        sup_refs: Dict[str, List[str]] = {}
+        con_refs: Dict[str, List[str]] = {}
+        unresolved_refs: List[Dict[str, str]] = []
+        known_ev_ids = {str(e.get("evidence_id")) for e in ev_items if isinstance(e, dict) and e.get("evidence_id")}
+
+        for idx, h in enumerate(hyps, start=1):
+            if not isinstance(h, dict):
+                continue
+            hid = str(h.get("hypothesis_id") or f"hyp-{idx:03d}")
+            for eid in h.get("supporting_evidence_ids") or []:
+                sup_refs.setdefault(str(eid), []).append(hid)
+                if str(eid) not in known_ev_ids:
+                    unresolved_refs.append({"hypothesis_id": hid, "evidence_id": str(eid), "role": "supporting"})
+            for eid in (h.get("contradicting_evidence_ids") or h.get("refuting_evidence_ids") or []):
+                con_refs.setdefault(str(eid), []).append(hid)
+                if str(eid) not in known_ev_ids:
+                    unresolved_refs.append({"hypothesis_id": hid, "evidence_id": str(eid), "role": "contradicting"})
+
+        items_out: List[Dict[str, Any]] = []
+        for ev in ev_items:
+            if not isinstance(ev, dict):
+                continue
+            eid = str(ev.get("evidence_id") or "")
+            integ = verify_evidence_integrity_and_scope(ev, context)
+            temp = (
+                ev["temporal_evaluation"]
+                if isinstance(ev.get("temporal_evaluation"), dict)
+                else evaluate_evidence_temporal_validity(
+                    ev,
+                    incident_window=context.get("query_window") if isinstance(context.get("query_window"), dict) else None,
+                    assessment_time=context.get("assessment_time") if isinstance(context.get("assessment_time"), str) else None,
+                    purpose=str(context.get("investigation_purpose") or "incident_window"),
+                    policy=DEFAULT_TEMPORAL_POLICY,
+                )
+            )
+            disposition = "ACCEPTED_SUPPORT" if eid in sup_refs else (
+                "CONTRADICTING" if eid in con_refs else (
+                    "REJECTED" if (not integ["ok"] or temp.get("classification") in ("OUTSIDE_INCIDENT_WINDOW", "TIMESTAMP_INVALID", "TIMESTAMP_MISSING", "SOURCE_UNAVAILABLE"))
+                    else "CONTEXTUAL"
+                )
+            )
+            items_out.append({
+                "evidence_id": eid,
+                "incident_id": ev.get("incident_id") or context.get("incident_id"),
+                "service_id": ev.get("service_id") or context.get("service_id"),
+                "environment": ev.get("environment") or context.get("environment"),
+                "tool_name": ev.get("tool_name"),
+                "source_ref": ev.get("source_ref"),
+                "request_id": ev.get("request_id"),
+                "query_window": ev.get("query_window"),
+                "observation_time": temp.get("observation_time"),
+                "observation_window": temp.get("observation_window"),
+                "collection_time": ev.get("collected_at"),
+                "assessment_time": temp.get("assessment_time") or context.get("assessment_time"),
+                "temporal_classification": temp.get("classification"),
+                "eligible_for_incident_window": bool(temp.get("eligible_for_incident_window")),
+                "eligible_for_current_state": bool(temp.get("eligible_for_current_state")),
+                "data_quality": ev.get("data_quality", "complete"),
+                "truncated": bool(ev.get("truncated", False)),
+                "supporting_hypotheses": sup_refs.get(eid, []),
+                "contradicting_hypotheses": con_refs.get(eid, []),
+                "disposition": disposition,
+                "integrity_ok": bool(integ["ok"]),
+                "integrity_code": integ["code"],
+                "content_hash": ev.get("content_hash") or compute_evidence_content_hash(ev),
+                "limitations": list(temp.get("limitations") or []),
+            })
+
+        return {
+            "replay_mode": context.get("replay_mode", "LIVE_INVESTIGATION"),
+            "incident_time_status": context.get("incident_time_status", "VALID_UTC"),
+            "assessment_time": context.get("assessment_time"),
+            "investigation_purpose": context.get("investigation_purpose", "incident_window"),
+            "integrity_semantics": INTEGRITY_SEMANTICS_NOTE,
+            "items": items_out,
+            "unresolved_references": unresolved_refs,
+            "signal_correlations": list(context.get("signal_correlations") or []),
+        }
+
+    @classmethod
     def serialize_validation_summary(cls, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Serialize validation separately from the frozen dossier v1 payload."""
-        if "validation_reports" not in context:
+        if "validation_reports" not in context and "evidence_items" not in context:
             return None
-        reports = context["validation_reports"]
+        reports = context.get("validation_reports") or []
         claims = [claim for report in reports for claim in report.get("claims", [])]
         contradictions = list(context.get("contradictions", []))
         rejected_citations = []
@@ -479,14 +608,14 @@ class DossierSerializer:
                 raw_score = report.get("confidence_score")
             score_val = (
                 round(float(raw_score), 4)
-                if isinstance(raw_score, (int, float)) and not isinstance(raw_score, bool)
+                if isinstance(raw_score, (int, float)) and not isinstance(raw_score, bool) and math.isfinite(float(raw_score))
                 else None
             )
             c_label = confidence_label_for_score(score_val) if score_val is not None else None
+            c_breakdown = dict(r_hyp.get("confidence_breakdown") or report.get("confidence_breakdown") or {})
             c_rationale = (
                 r_hyp.get("confidence_rationale")
-                or (r_hyp.get("confidence_breakdown") or {}).get("rationale")
-                or (report.get("confidence_breakdown") or {}).get("rationale")
+                or c_breakdown.get("rationale")
             )
             hypothesis_validations.append({
                 "hypothesis_id": report.get("hypothesis_id"),
@@ -496,6 +625,7 @@ class DossierSerializer:
                 "confidence_score": score_val,
                 "confidence_label": c_label,
                 "confidence_rationale": c_rationale,
+                "confidence_breakdown": c_breakdown,
                 "llm_proposed_confidence": r_hyp.get("llm_proposed_confidence"),
                 "reason_codes": list(report.get("reason_codes", [])),
                 "supporting_evidence_ids": list(report.get("supporting_evidence_ids", [])),
@@ -516,6 +646,7 @@ class DossierSerializer:
             summary_out["sop_relevance"] = dict(context["sop_relevance"])
         if isinstance(context.get("llm_context_diagnostics"), dict):
             summary_out["llm_context_diagnostics"] = dict(context["llm_context_diagnostics"])
+        summary_out["evidence_traceability"] = cls.build_evidence_traceability(context)
         return summary_out
 
 
@@ -561,23 +692,33 @@ class DossierMarkdownRenderer:
         for t in dossier.get("timeline", []):
             md_lines.append(f"| `{t['timestamp']}` | `{t['event_kind']}` | `{t['source_ref']}` | {t['summary']} |")
 
+        ev_ref_map: Dict[str, List[str]] = {}
+        for h in dossier.get("hypotheses", []):
+            h_rank = h.get("rank", "?")
+            for eid in h.get("supporting_evidence_ids", []):
+                ev_ref_map.setdefault(eid, []).append(f"#{h_rank} (supports)")
+            for eid in h.get("contradicting_evidence_ids", []):
+                ev_ref_map.setdefault(eid, []).append(f"#{h_rank} (contradicts)")
+
         md_lines.extend([
             "",
             "## 4. Evidence Table",
             "",
-            "| Evidence ID | Tool / Source | Observation Window | Data Quality | Sanitized | Summary |",
-            "|---|---|---|---|---|---|",
+            "| Evidence ID | Tool / Source | Observed At & Query Window | Quality / Truncated | Referenced By | Sanitized | Summary |",
+            "|---|---|---|---|---|---|---|",
         ])
 
         for ev in dossier.get("evidence", []):
             w = ev.get("query_window", {})
-            window_str = f"{w.get('start')} s/d {w.get('end')}"
+            window_str = f"obs: {ev.get('observed_at', '-')} | win: {w.get('start')} s/d {w.get('end')}"
+            qual_str = f"{ev['data_quality']}" + (" (truncated)" if ev.get("truncated") else "")
+            refs_str = ", ".join(ev_ref_map.get(ev["evidence_id"], [])) or "contextual"
             md_lines.append(
-                f"| `{ev['evidence_id']}` | `{ev['tool_name']}` (`{ev['source_ref']}`) | `{window_str}` | `{ev['data_quality']}` | `{ev['sanitized']}` | {ev['summary']} |"
+                f"| `{ev['evidence_id']}` | `{ev['tool_name']}` (`{ev['source_ref']}`) | `{window_str}` | `{qual_str}` | `{refs_str}` | `{ev['sanitized']}` | {ev['summary']} |"
             )
 
         if not dossier.get("evidence"):
-            md_lines.append("| *None* | *No positive telemetry evidence collected* | - | - | - | - |")
+            md_lines.append("| *None* | *No positive telemetry evidence collected* | - | - | - | - | - |")
 
         md_lines.extend([
             "",
@@ -687,10 +828,34 @@ class DossierMarkdownRenderer:
                         f"coverage_gap: `{bool(sop_rel.get('specific_coverage_gap'))}`)"
                     )
                 if isinstance(ctx_diag, dict):
+                    om_reasons = ", ".join(ctx_diag.get("omission_reasons") or []) or "none"
                     md_lines.append(
                         f"- Prompt context delivery: retrieved={ctx_diag.get('retrieved_citations_count', 0)}, "
                         f"delivered={ctx_diag.get('citations_delivered_count', ctx_diag.get('selected_citations_count', 0))}, "
+                        f"omitted={ctx_diag.get('omitted_passages_count', 0)} (reasons: `{om_reasons}`), "
                         f"rung=`{ctx_diag.get('compaction_rung', 'n/a')}`"
+                    )
+            ev_trace = validation.get("evidence_traceability")
+            if isinstance(ev_trace, dict):
+                md_lines.extend([
+                    "",
+                    "**Evidence Provenance & Temporal Validity:**",
+                    f"- Investigation Mode / Purpose / Assessment Time: `{ev_trace.get('replay_mode', 'LIVE_INVESTIGATION')}` / "
+                    f"`{ev_trace.get('investigation_purpose', 'incident_window')}` / `{ev_trace.get('assessment_time') or 'N/A'}`",
+                    f"- Integrity Guarantee: {ev_trace.get('integrity_semantics', '')}",
+                ])
+                for item in ev_trace.get("items") or []:
+                    lims = "; ".join(item.get("limitations") or [])
+                    lim_note = f" — limitations: {lims}" if lims else ""
+                    md_lines.append(
+                        f"- `{item.get('evidence_id')}` (`{item.get('service_id')}` / `{item.get('environment')}` / `{item.get('tool_name')}`): "
+                        f"disposition=`{item.get('disposition')}`, temporal=`{item.get('temporal_classification')}`, "
+                        f"current_state_ok=`{item.get('eligible_for_current_state')}`, "
+                        f"integrity=`{item.get('integrity_code')}` (`{str(item.get('content_hash') or '')[:12]}...`){lim_note}"
+                    )
+                for unres in ev_trace.get("unresolved_references") or []:
+                    md_lines.append(
+                        f"- Unresolved reference `{unres.get('evidence_id')}` on `{unres.get('hypothesis_id')}` (`{unres.get('role')}`)"
                     )
 
         md_lines.extend([

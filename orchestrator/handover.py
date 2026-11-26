@@ -233,9 +233,14 @@ class HandoverExporter:
         # Hypotheses (support both canonical contract and extended formats)
         rca = dossier.get("root_cause_analysis", {})
         hypotheses = dossier.get("hypotheses") or rca.get("ranked_hypotheses", [])
+        ev_refs_html: Dict[str, List[str]] = {}
         hypo_rows = []
         for h in hypotheses:
             rank = h.get("rank", "-")
+            for eid in h.get("supporting_evidence_ids", []) or []:
+                ev_refs_html.setdefault(str(eid), []).append(f"#{rank} (supports)")
+            for eid in h.get("contradicting_evidence_ids", []) or []:
+                ev_refs_html.setdefault(str(eid), []).append(f"#{rank} (contradicts)")
             stmt = html.escape(h.get("statement") or h.get("hypothesis_statement", ""))
             eval_stat = html.escape(hypothesis_label(h))
             raw_conf = h.get("confidence_score")
@@ -245,6 +250,27 @@ class HandoverExporter:
                 conf = "N/A"
             hypo_rows.append(
                 f"<tr><td>#{rank}</td><td>{stmt}</td><td><span class='badge'>{eval_stat}</span></td><td>{conf}</td></tr>"
+            )
+
+        evidence_rows = []
+        for ev in dossier.get("evidence") or []:
+            if not isinstance(ev, dict):
+                continue
+            eid = html.escape(str(ev.get("evidence_id", "-")))
+            tname = html.escape(str(ev.get("tool_name", "-")))
+            sref = html.escape(str(ev.get("source_ref", "-")))
+            obs_at = html.escape(str(ev.get("observed_at", "-")))
+            qw = ev.get("query_window") if isinstance(ev.get("query_window"), dict) else {}
+            win_txt = html.escape(f"{qw.get('start', '-')} .. {qw.get('end', '-')}")
+            qual_txt = html.escape(
+                f"{ev.get('data_quality', 'unknown')}" + (" (truncated)" if ev.get("truncated") else "")
+            )
+            refs_txt = html.escape(", ".join(ev_refs_html.get(str(ev.get("evidence_id", "")), [])) or "contextual")
+            sum_txt = html.escape(str(ev.get("summary", "")))
+            evidence_rows.append(
+                f"<tr><td><code>{eid}</code></td><td>{tname}<br><small><code>{sref}</code></small></td>"
+                f"<td><code>{obs_at}</code><br><small>{win_txt}</small></td>"
+                f"<td>{qual_txt}</td><td>{refs_txt}</td><td>{sum_txt}</td></tr>"
             )
 
         # SOP References (support both canonical contract and extended formats)
@@ -344,6 +370,14 @@ class HandoverExporter:
       <thead><tr><th>Rank</th><th>Hypothesis Statement</th><th>Evaluation Status</th><th>Confidence</th></tr></thead>
       <tbody>
         {''.join(hypo_rows) if hypo_rows else '<tr><td colspan="4">No hypotheses recorded</td></tr>'}
+      </tbody>
+    </table>
+
+    <h2>1b. Verified Evidence &amp; Temporal Provenance</h2>
+    <table>
+      <thead><tr><th>Evidence ID</th><th>Tool &amp; Source</th><th>Observed At &amp; Window</th><th>Quality</th><th>Referenced By</th><th>Summary &amp; Temporal Scope</th></tr></thead>
+      <tbody>
+        {''.join(evidence_rows) if evidence_rows else '<tr><td colspan="6">No positive telemetry evidence recorded</td></tr>'}
       </tbody>
     </table>
 

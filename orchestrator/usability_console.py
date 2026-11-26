@@ -908,13 +908,30 @@ class SREDashboard:
                 )
                 citation_text.append(f"{metadata}\n  {_bounded_sanitized_excerpt(excerpt)}\n")
 
+        ev_to_hyps: dict[str, list[str]] = {}
+        for item_h in hyp_details:
+            for eid in item_h["supporting"]:
+                ev_to_hyps.setdefault(eid, []).append(f"#{item_h['rank']} supports")
+            for eid in item_h["contradicting"]:
+                ev_to_hyps.setdefault(eid, []).append(f"#{item_h['rank']} contradicts")
+
         evidence_text = Text()
         for item in evidence:
             if isinstance(item, Mapping):
+                eid_str = str(item.get("evidence_id", "unknown"))
+                qw = item.get("query_window") if isinstance(item.get("query_window"), Mapping) else {}
+                win_str = (
+                    f"{qw.get('start', '-')}..{qw.get('end', '-')}"
+                    if qw.get("start") or qw.get("end")
+                    else "n/a"
+                )
+                qual_str = str(item.get("data_quality", "unknown")) + (
+                    "/truncated" if item.get("truncated") else ""
+                )
+                refs_str = ", ".join(ev_to_hyps.get(eid_str, [])) or "contextual"
                 metadata = (
-                    f"{item.get('evidence_id', 'unknown')} | "
-                    f"{item.get('tool_name', 'source unknown')} | "
-                    f"quality={item.get('data_quality', 'unknown')}"
+                    f"{eid_str} | {item.get('tool_name', 'source unknown')} ({item.get('source_ref', '-')}) | "
+                    f"obs={item.get('observed_at', '-')} | win={win_str} | quality={qual_str} | refs={refs_str}"
                 )
                 evidence_text.append(
                     f"{metadata}\n  {_bounded_sanitized_excerpt(item.get('summary'))}\n"
