@@ -2012,3 +2012,434 @@ def test_f12_runtime_modules_never_import_evaluator():
                 elif isinstance(node, ast.ImportFrom):
                     mod = node.module or ""
                     assert not mod.startswith("evaluator"), f"{py_file} imports from {mod}"
+
+
+# ---------------------------------------------------------------------------
+# Carbon High Hardening: Least-Privilege ACL, Omissions/Retries, Ablations C-H,
+# Metric Identity & Empty-vs-Zero Semantics, Correlation/Order/NaN & Frozen Seals
+# ---------------------------------------------------------------------------
+
+
+def test_ch_a04_c5_least_privilege_corpus_acl_isolation(tmp_path):
+    """Verify real corpus internal SOPs remain accessible to L1 investigator while restricted SOPs never leak."""
+    from gateway.dispatcher import ToolDispatcher
+
+    audit = SecurityAuditLogger(tmp_path / "acl_audit.jsonl")
+    disp = ToolDispatcher()
+    assert disp.retrieval_service is not None
+    gw = PolicyGateway(dispatcher=disp, audit_logger=audit)
+
+    # 1. Auth-service query by L1 investigator retrieves SOP-AUTH-001/SOP-AUTH-ERR-500, NEVER SOP-SEC-KEY-ROTATION
+    res_auth = gw.execute_tool(
+        tool_name="retrieve_runbooks",
+        arguments={
+            "service_id": "auth-service",
+            "environment": "lab",
+            "query_text": "SOP-SEC-KEY-ROTATION master secret key rotation ERR_AUTH_POLICY_MISMATCH",
+            "reference_time": EVENT_TIME,
+            "retrieval_mode": "hybrid_rrf",
+            "top_k": 5,
+            "max_context_tokens": 2048,
+            "index_version_policy": "kb_active_alias",
+        },
+        token="Bearer sre-sim-coord-token-secret-2026",
+        incident_id="inc-ch-acl-001",
+    )
+    assert res_auth["status"] == "ok"
+    cited_docs = {c["document_id"] for c in res_auth["citations"]}
+    assert "SOP-AUTH-001" in cited_docs
+    assert "SOP-SEC-KEY-ROTATION" not in cited_docs
+    serialized = json.dumps(res_auth)
+    assert "SOP-SEC-KEY-ROTATION" not in serialized
+    assert "synthetic-restricted" not in serialized
+
+
+def test_ch_a09_a10_unavailable_sources_omission_disclosure_and_retry_preservation(tmp_path):
+    """Verify unavailable backends survive pool capping, omissions are explicit, and retries preserve full context."""
+    from orchestrator.llm_provider import ProviderError, ReplayProvider
+
+    incident_id = "inc-ch-retry-001"
+    ev_log = f"ev-{incident_id}-002"
+    reply_payload = {
+        "primary_hypothesis": {
+            "summary": "Auth policy 403 rejection on api-gateway",
+            "diagnosis": "Observed HTTP 403 ERR_AUTH_POLICY_MISMATCH on api-gateway while trace backend was unavailable.",
+            "confidence": "MEDIUM",
+            "estimated_root_cause": "Auth policy mismatch between api-gateway and auth-service.",
+        },
+        "alternative_hypotheses": [],
+        "supporting_evidence_ids": [ev_log],
+        "contradicting_evidence_ids": [],
+        "unknowns": ["Distributed traces unavailable during observation window."],
+    }
+
+    class TraceOutageLiveDispatcher(LiveIncidentDispatcher):
+        def dispatch(self, tool_name: str, arguments: dict[str, Any], **kwargs):
+            if tool_name == "get_trace_summary":
+                return {}, "unavailable", "SOURCE_UNAVAILABLE", "tempo:lab"
+            return super().dispatch(tool_name, arguments, **kwargs)
+
+    provider = ReplayProvider([
+        ProviderError("PROVIDER_TIMEOUT", retryable=True),
+        ProviderReply(json.dumps(reply_payload), 480, 130, "nemotron-test"),
+    ])
+    audit = SecurityAuditLogger(tmp_path / "audit.jsonl")
+    ledger = LLMRunLedger(tmp_path / "ledger.sqlite3")
+    store = WorkflowStateStore(":memory:")
+    try:
+        llm = LLMInvestigator(provider, ledger, audit)
+        inv = DeterministicInvestigator(
+            InvestigationStateMachine(store),
+            PolicyGateway(dispatcher=TraceOutageLiveDispatcher(kb_service=_live_kb_service()), audit_logger=audit),
+            correlator=FullCorrelator(),
+            llm_investigator=llm,
+        )
+        res = inv.investigate_incident({
+            "incident_id": incident_id,
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "error_code": "ERR_AUTH_POLICY_MISMATCH",
+            "message": "api-gateway error_rate=0.22 (ERR_AUTH_POLICY_MISMATCH)",
+            "event_time": EVENT_TIME,
+            "query_window": {"start": WIN_START, "end": WIN_END},
+        })
+        assert len(provider.calls) == 2
+        # Retry attempt 2 receives byte-identical context as attempt 1 (A10)
+        assert provider.calls[0]["messages"] == provider.calls[1]["messages"]
+        diag = res["llm_context_diagnostics"]
+        assert diag["retry_attempts"] == 2
+        assert diag["retry_context_preserved"] is True
+        assert diag["context_assembly_status"] == "PREPARED"
+        assert diag["reasoning_mode"] == "agentic_llm"
+        assert diag["fallback_reason"] is None
+        assert len(diag["context_fingerprint"]) == 64
+
+        user_obs = json.loads(
+            provider.calls[1]["messages"][1]["content"]
+            .split("<UNTRUSTED_OBSERVATION_DATA>\n", 1)[1]
+            .rsplit("\n</UNTRUSTED_OBSERVATION_DATA>", 1)[0]
+        )
+        # Unavailable trace source survived 12-item evidence pool compaction!
+        assert any(
+            u["tool_name"] == "get_trace_summary" and u["reason_code"] == "SOURCE_UNAVAILABLE"
+            for u in user_obs.get("unavailable_sources", [])
+        )
+        assert diag["citations_delivered_count"] >= 1
+        assert diag["omitted_evidence_count"] > 0
+        assert len(diag["omission_reasons"]) >= 1
+    finally:
+        ledger.close()
+        store.close()
+
+
+def test_ch_ablation_c_d_g_h_no_match_irrelevant_injection_and_utilization(tmp_path):
+    """Cover Controlled RAG Ablation Experiments C, D, G, and H (delivery vs utilization boundaries)."""
+    from orchestrator.llm_investigator import OutputRejected, validate_candidates
+
+    # Experiment C: Successful retrieval with NO_APPLICABLE_RUNBOOK vs RETRIEVAL_UNAVAILABLE
+    other_svc_chunk = _make_kb_chunk(
+        chunk_id="chk-SOP-LEDGER-001-exp-c",
+        document_id="SOP-LEDGER-001",
+        document_version="2.0.0",
+        title="SOP Ledger Latency",
+        section_path="1. Triage",
+        content="Inspect PostgreSQL connection pool latency on ledger-service.",
+        service_id="ledger-service",
+        source_uri="kb://corpus/ledger_service/SOP-LEDGER-001-v2.md",
+    )
+    empty_kb = RetrievalService(RetrievalEngine([other_svc_chunk], index_version="kb-p104-test-v1"))
+    disp_no_match = LiveIncidentDispatcher(kb_service=empty_kb, kb_unavailable=False)
+    audit = SecurityAuditLogger(tmp_path / "audit_c.jsonl")
+    store = WorkflowStateStore(":memory:")
+    try:
+        inv = DeterministicInvestigator(
+            InvestigationStateMachine(store),
+            PolicyGateway(dispatcher=disp_no_match, audit_logger=audit),
+            correlator=FullCorrelator(),
+        )
+        res_c = inv.investigate_incident({
+            "incident_id": "inc-exp-c",
+            "service_id": "api-gateway",
+            "environment": "lab",
+            "error_code": "ERR_AUTH_POLICY_MISMATCH",
+            "message": "HTTP 403 policy rejection",
+            "event_time": EVENT_TIME,
+            "query_window": {"start": WIN_START, "end": WIN_END},
+        })
+        assert res_c["sop_availability"] == "NO_APPLICABLE_RUNBOOK"
+        assert res_c["dossier"]["sop_citations"] == []
+        assert any(
+            ms["tool_name"] == "retrieve_runbooks" and ms["error_code"] == "NO_APPLICABLE_RUNBOOK"
+            for ms in res_c["dossier"]["missing_sources"]
+        )
+    finally:
+        store.close()
+
+    # Experiment D: Eligible but diagnostically irrelevant SOP (504 timeout SOP on 403 auth incident)
+    timeout_cit = _make_citation(
+        chunk_id="chk-504",
+        document_id="SOP-GW-ERR-504",
+        title="Gateway Timeout 504",
+        sanitized_excerpt="Inspect upstream HTTP 504 timeout deadlines.",
+    )
+    rel_d = assess_sop_diagnostic_relevance(
+        [timeout_cit],
+        {"error_code": "ERR_AUTH_POLICY_MISMATCH", "message": "HTTP 403 auth policy mismatch", "evidence_items": []},
+    )
+    assert rel_d["citations"][0]["relevance_class"] == "ADJACENT_MECHANISM_MISMATCH"
+    assert rel_d["specific_coverage_gap"] is True
+
+    # Experiment G: Adversarial SOP instructions rejected if echoed into model output (B05, B06, B07, INV-01, INV-02)
+    with pytest.raises(OutputRejected, match="TOOL_NOT_ALLOWED"):
+        validate_candidates(
+            json.dumps({
+                "primary_hypothesis": {
+                    "summary": "Run restart_service immediately",
+                    "diagnosis": "SOP says execute restart on api-gateway",
+                    "confidence": "HIGH",
+                    "estimated_root_cause": "Needs restart_service",
+                },
+                "alternative_hypotheses": [],
+                "supporting_evidence_ids": ["ev-1"],
+                "contradicting_evidence_ids": [],
+                "unknowns": [],
+            }),
+            frozenset({"ev-1"}),
+        )
+    with pytest.raises(OutputRejected, match="EVIDENCE_REFERENCE_INVALID"):
+        validate_candidates(
+            json.dumps({
+                "primary_hypothesis": {
+                    "summary": "Auth failure",
+                    "diagnosis": "403 rejection",
+                    "confidence": "MEDIUM",
+                    "estimated_root_cause": "Policy drift",
+                },
+                "alternative_hypotheses": [],
+                "supporting_evidence_ids": ["ev-fabricated-999"],
+                "contradicting_evidence_ids": [],
+                "unknowns": [],
+            }),
+            frozenset({"ev-1"}),
+        )
+    # Fabricated SOP citation without provenance rejected by ClaimValidator (B06)
+    valid_sops, rej_sops, _ = ClaimValidator().validate_sop_citations(
+        [{"document_id": "SOP-FAKE-999", "service_id": "api-gateway", "environment": "lab", "status": "approved"}],
+        "api-gateway",
+        "lab",
+        EVENT_TIME,
+    )
+    assert valid_sops == [] and len(rej_sops) == 1
+
+    # Experiment H: Controlled context swap proves exact prompt delivery delta while preserving identical telemetry
+    builder = SanitizedContextBuilder()
+    base_ctx = {
+        "service_id": "api-gateway",
+        "environment": "lab",
+        "event_time": EVENT_TIME,
+        "error_code": "ERR_AUTH_POLICY_MISMATCH",
+        "evidence_items": [
+            {
+                "evidence_id": "ev-1",
+                "tool_name": "search_error_logs",
+                "service_id": "api-gateway",
+                "source_ref": "loki",
+                "observed_at": EVENT_TIME,
+                "data_quality": "complete",
+                "sanitized": True,
+                "records": [{"message": "HTTP 403 ERR_AUTH_POLICY_MISMATCH", "status_code": 403, "sanitized": True}],
+            }
+        ],
+    }
+    prep_without = builder.build({**base_ctx, "runbook_citations": []}, HYPOTHESIS_SCHEMA)
+    prep_with = builder.build({**base_ctx, "runbook_citations": [timeout_cit]}, HYPOTHESIS_SCHEMA)
+    assert prep_without.diagnostics["citations_delivered_count"] == 0
+    assert prep_with.diagnostics["citations_delivered_count"] == 1
+    assert prep_without.diagnostics["context_fingerprint"] != prep_with.diagnostics["context_fingerprint"]
+    assert prep_without.evidence_ids == prep_with.evidence_ids == frozenset({"ev-1"})
+
+
+def test_ch_c02_c09_c10_metric_identity_empty_telemetry_and_negative_evidence():
+    """Verify C02 metric identity mismatch, C09 empty query vs 0.0 observation, and C10 unavailable vs negative evidence."""
+    v = ClaimValidator()
+    req_only_ctx = {
+        "service_id": "api-gateway",
+        "evidence_items": [
+            {
+                "evidence_id": "ev-req",
+                "tool_name": "get_service_metrics",
+                "service_id": "api-gateway",
+                "observed_at": EVENT_TIME,
+                "data_quality": "complete",
+                "records": [{"metric_enum": "request_rate", "value": 6.692, "unit": "req/s"}],
+            }
+        ],
+    }
+    # C02: Claiming p95 latency 6.692 ms against request_rate 6.692 req/s must fail with METRIC_IDENTITY_MISMATCH
+    c_id_mismatch = v.validate_claim("API Gateway p95 latency spiked to 6.692 ms.", "ev-req", req_only_ctx)
+    assert c_id_mismatch.status == HypothesisStatus.UNSUPPORTED
+    assert c_id_mismatch.reason_code == ValidationReasonCode.VALUE_MISMATCH.value
+    assert c_id_mismatch.value_delta["mismatch_kind"] == "METRIC_IDENTITY_MISMATCH"
+
+    # Qualitative latency slowdown claim citing request_rate-only metric is rejected as IRRELEVANT_EVIDENCE
+    c_qual_lat = v.validate_claim("API Gateway latency spike due to downstream slowdown.", "ev-req", req_only_ctx)
+    assert c_qual_lat.status == HypothesisStatus.UNSUPPORTED
+    assert c_qual_lat.reason_code == ValidationReasonCode.IRRELEVANT_EVIDENCE.value
+
+    # C09: Empty search_error_logs (records=[]) does NOT prove "no observed errors"
+    c_empty_logs = v.validate_claim(
+        "Service remained healthy with no observed errors.",
+        "ev-empty-log",
+        {
+            "service_id": "api-gateway",
+            "evidence_items": [
+                {
+                    "evidence_id": "ev-empty-log",
+                    "tool_name": "search_error_logs",
+                    "service_id": "api-gateway",
+                    "observed_at": EVENT_TIME,
+                    "data_quality": "complete",
+                    "records": [],
+                }
+            ],
+        },
+    )
+    assert c_empty_logs.status == HypothesisStatus.UNSUPPORTED
+    assert c_empty_logs.reason_code == ValidationReasonCode.IRRELEVANT_EVIDENCE.value
+
+    # C09 positive counterpart: Explicit error_rate=0.0 metric observation DOES support "no observed errors"
+    c_zero_metric = v.validate_claim(
+        "Service remained nominal with zero errors.",
+        "ev-zero-err",
+        {
+            "service_id": "auth-service",
+            "evidence_items": [
+                {
+                    "evidence_id": "ev-zero-err",
+                    "tool_name": "get_service_metrics",
+                    "service_id": "auth-service",
+                    "observed_at": EVENT_TIME,
+                    "data_quality": "complete",
+                    "records": [{"metric_enum": "error_rate", "value": 0.0, "unit": "ratio"}],
+                }
+            ],
+        },
+    )
+    assert c_zero_metric.status == HypothesisStatus.SUPPORTED
+
+    # C10: Unavailable telemetry returns SOURCE_UNAVAILABLE, never corroborating "no observed errors"
+    c_unavail = v.validate_claim(
+        "Service had no observed errors.",
+        "ev-unavail",
+        {
+            "service_id": "auth-service",
+            "evidence_items": [
+                {
+                    "evidence_id": "ev-unavail",
+                    "tool_name": "get_service_metrics",
+                    "service_id": "auth-service",
+                    "observed_at": EVENT_TIME,
+                    "data_quality": "unavailable",
+                    "error_code": "SOURCE_UNAVAILABLE",
+                    "records": [],
+                }
+            ],
+        },
+    )
+    assert c_unavail.status == HypothesisStatus.UNSUPPORTED
+    assert c_unavail.reason_code == ValidationReasonCode.SOURCE_UNAVAILABLE.value
+
+
+def test_ch_d07_d09_d10_d16_d17_correlation_order_invariance_nan_and_consistency():
+    """Verify cross-modality trace correlation discount, order invariance, NaN/Inf safety, and primary/alt parity."""
+    # D07: Cross-modality observations sharing the exact same trace_id are discounted vs independent traces
+    shared_tid = "4bf92f3577b34da6a3ce929d0e0e4736"
+    coupled_items = [
+        {
+            "evidence_id": "ev-log",
+            "tool_name": "search_error_logs",
+            "service_id": "api-gateway",
+            "data_quality": "complete",
+            "records": [{"trace_id": shared_tid, "status_code": 500, "error_code": "HTTP_500", "message": "boom"}],
+        },
+        {
+            "evidence_id": "ev-trace",
+            "tool_name": "get_trace_summary",
+            "service_id": "api-gateway",
+            "data_quality": "complete",
+            "records": [{"trace_id": shared_tid, "span_id": "sp-1", "duration_ms": 210.0, "status_code": "ERROR", "error": True}],
+        },
+    ]
+    indep_items = [
+        coupled_items[0],
+        {
+            "evidence_id": "ev-trace",
+            "tool_name": "get_trace_summary",
+            "service_id": "api-gateway",
+            "data_quality": "complete",
+            "records": [{"trace_id": "99999999999999999999999999999999", "span_id": "sp-2", "duration_ms": 210.0, "status_code": "ERROR", "error": True}],
+        },
+    ]
+    s_single = compute_evidence_confidence(status="SUPPORTED", supporting_evidence_ids=["ev-log"], contradicting_evidence_ids=[], evidence_items=coupled_items)
+    s_coupled = compute_evidence_confidence(status="SUPPORTED", supporting_evidence_ids=["ev-log", "ev-trace"], contradicting_evidence_ids=[], evidence_items=coupled_items)
+    s_indep = compute_evidence_confidence(status="SUPPORTED", supporting_evidence_ids=["ev-log", "ev-trace"], contradicting_evidence_ids=[], evidence_items=indep_items)
+    assert s_coupled.breakdown["correlated_cross_modal_pairs"] == 1
+    assert s_coupled.breakdown["correlation_discount"] > 0.0
+    assert s_single.score < s_coupled.score < s_indep.score
+    assert "correlated_pairs=1" in s_coupled.rationale
+    assert "heuristic, non-probabilistic" in s_coupled.rationale
+
+    # D09: Evidence order invariance
+    s_rev = compute_evidence_confidence(
+        status="SUPPORTED",
+        supporting_evidence_ids=["ev-trace", "ev-log"],
+        contradicting_evidence_ids=[],
+        evidence_items=list(reversed(coupled_items)),
+    )
+    assert s_coupled == s_rev
+
+    # D10 & D11: Malformed, NaN, Inf, bool, negative, and >1.0 inputs handled safely without exceptions
+    for bad in (float("nan"), float("inf"), float("-inf"), -0.5, True, False, None, "invalid"):
+        assert confidence_label_for_score(bad) == "LOW"  # type: ignore[arg-type]
+    bad_ev = {
+        "evidence_id": "ev-nan",
+        "tool_name": "get_service_metrics",
+        "service_id": "api-gateway",
+        "records": [{"metric_enum": "error_rate", "value": float("nan"), "unit": "ratio"}],
+    }
+    fp = evidence_signal_fingerprint(bad_ev)
+    assert fp[0] == "get_service_metrics"
+    res_null = compute_evidence_confidence(status=None, supporting_evidence_ids=None, contradicting_evidence_ids=None, evidence_items=[bad_ev])  # type: ignore[arg-type]
+    assert DEFAULT_SCORING_CONFIG.min_score <= res_null.score <= DEFAULT_SCORING_CONFIG.max_score
+
+    ranked_nan = rank_hypotheses([
+        {"hypothesis_id": "hyp-nan", "validation_status": "INCONCLUSIVE", "confidence_score": float("nan"), "supporting_evidence_ids": []},
+        {"hypothesis_id": "hyp-ok", "validation_status": "SUPPORTED", "confidence_score": 0.65, "supporting_evidence_ids": ["ev-1"]},
+    ])
+    assert [h["hypothesis_id"] for h in ranked_nan] == ["hyp-ok", "hyp-nan"]
+
+    # D16: Primary vs alternative scoring parity on identical validated inputs
+    v = ClaimValidator()
+    ctx_parity = {"service_id": "api-gateway", "environment": "lab", "event_time": EVENT_TIME, "evidence_items": indep_items, "runbook_citations": []}
+    r_prim = v.validate_hypothesis({"hypothesis_id": "hyp-prim", "title": "Gateway 500", "diagnosis": "HTTP_500 boom", "confidence": "MEDIUM", "supporting_evidence_ids": ["ev-log"]}, ctx_parity)
+    r_alt = v.validate_hypothesis({"hypothesis_id": "hyp-alt", "title": "Gateway 500", "diagnosis": "HTTP_500 boom", "confidence": "MEDIUM", "supporting_evidence_ids": ["ev-log"]}, ctx_parity)
+    assert r_prim.confidence_score == r_alt.confidence_score
+    assert r_prim.confidence_label == r_alt.confidence_label
+
+
+def test_ch_f13_f14_f15_f16_frozen_contracts_and_stage3a_manifest_unchanged():
+    """Verify byte-for-byte preservation of frozen C02 schemas, evaluator scorer, and Stage 3A release manifest."""
+    from evaluator.scorer import score_cases
+
+    manifest_path = REPO_ROOT / "evidence/c21-preflight-20261122T051612608117Z/C21/final-release-manifest.json"
+    raw_manifest = manifest_path.read_bytes()
+    assert len(raw_manifest) == 24913
+    assert hashlib.sha256(raw_manifest).hexdigest() == "b7fcc5484b83b9f5d67766d1a1b4adb21c215f8c25430ee00ecbeb66ae3d1c4f"
+
+    dossier_schema = REPO_ROOT / "evidence/c02-20261109T070500Z/C02/contracts/dossier.v1.schema.json"
+    assert hashlib.sha256(dossier_schema.read_bytes()).hexdigest().startswith("406ec507f3f58aac")
+
+    # E11 / F15: Existing evaluator score_cases contract remains intact
+    scored = score_cases([{"incident_id": "inc-1", "completed": True, "ground_truth": {"scenario_id": "SC-02", "actual_root_cause": {"is_healthy_control": False, "expected_causes": ["api-gateway"]}}, "diagnoses": [{"cause": "api-gateway", "status": "SUPPORTED"}]}])
+    assert scored["metrics"]["KPI-01"]["value"] == 1.0
+    assert scored["metrics"]["KPI-02"]["value"] == 1.0
