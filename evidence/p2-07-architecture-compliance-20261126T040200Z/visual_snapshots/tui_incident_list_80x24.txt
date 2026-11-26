@@ -1,0 +1,23 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@12:04:18] Env:lab | ReviewQueue:1 | 
+Running:0 | Archive:14 | Lab:unprobed([3])
+┌──────────────────────────── Navigation [FOCUSED] ────────────────────────────┐
+│ [1] Active [2] Archive [3] Health [4] Model [5] Telegram [?] Help [Q] Quit   │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────── Archive Dossiers ──────────────────────────────┐
+│                                                                              │
+│   No.  Time      Incident                     Sev   Service        Mode      │
+│  ──────────────────────────────────────────────────────────────────────────  │
+│   ▶ 1  12:03:45  inc-2026112...e14-699a90     HIGH  ledger-servi…  OFFLINE   │
+│     2  12:03:42  inc-2026112...e13-f52567     HIGH  transac...er…  FALLBACK  │
+│     3  12:03:39  inc-2026112...e12-613de4     HIGH  transac...er…  OFFLINE   │
+│     4  12:03:37  inc-2026112...e11-af40c8     HIGH  transac...er…  OFFLINE   │
+│     5  12:03:33  inc-2026112...e10-c03210     HIGH  ledger-servi…  OFFLINE   │
+│                                                                              │
+│ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U]    │
+│ Refresh  |  [?] Help  |  Showing 1-5 of 14                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────── Review Action Bar ──────────────────────────────┐
+│ [Up/Dn] SWITCH MENU  [Right/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [U]        │
+│ REFRESH  [?] HELP  [Q] QUIT | Navigation: [Up/Dn] switch menu,               │
+│ [Right/Enter/Tab] focus incident list, [?] help.                             │
+└──────────────────────────────────────────────────────────────────────────────┘

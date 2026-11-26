@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@09:50:15] Env:lab | ReviewQueue:2 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌──────── Navigation ────────┐┌────────── Active Incidents > inc-p206-ledger-pool-001 [SOP & RAG] [FOCUSED] ───────────┐
+│ [1] Active Incidents [3]   ││ Reasoning Mode          AI MODEL (ONLINE)                                              │
+│ [2] Archive Dossiers [1]   ││ Provider / Model        openrouter / nvidia/nemotron-3.5-lightning:free                │
+│ [3] Service Health         ││ Token Usage             in=980, out=310, total=1290                                    │
+│ [4] AI Model Config        ││ Prompt / Timing         Prompt: p104-grounded-v2 | Alert: 2026-11-26T02:10:00Z |       │
+│ [5] Telegram Alerts        ││                         Ready: 2026-11-26T02:10:00Z                                    │
+│ [?] Keyboard & Guide       ││ Workflow Stages:                                                                       │
+│ [Q] Quit Console           ││ [x:RCV]->[x:COR]->[x:TRI]->[x:EVD]->[x:RAG]->[x:HYP]->[x:VAL]->[x:DRF]->[*:REV]        │
+│                            ││ (Duration: unavailable, ToolCalls: 5 | Stage completion != verified diagnosis)         │
+└────────────────────────────┘│ ┌───────────────────── Runbook SOP Citations & RAG Transparency ─────────────────────┐ │
+                              │ │ SOP Status [APPLICABLE_SOP_FOUND]: SOP_FILTERED_OUT: Returned references did not   │ │
+                              │ │ meet applicability checks (MISSING_EVIDENCE_REF). No eligible reference can be     │ │
+                              │ │ cited.                                                                             │ │
+                              │ │ Assessment: SOP applicability has not been established.                            │ │
+                              │ │ RAG Context Delivery: Recorded: retrieved=4, eligible=2, included_in_llm_prompt=2, │ │
+                              │ │ omitted=0 (compaction=rung_0_full)                                                 │ │
+                              │ │                                                                                    │ │
+                              │ └────────────────────────────────────────────────────────────────────────────────────┘ │
+                              │ ┌───────────────── SRE Recommended Verification (Human-Controlled) ──────────────────┐ │
+                              │ │ 1. [chk-01 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=-] [GENERAL_GUIDANCE (NOT       │ │
+                              │ │ SOP-BACKED)]                                                                       │ │
+                              │ │    NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1,    │ │
+                              │ │ hypothesis #2: ledger-service, get_service_metrics (authorized read-only view).    │ │
+                              │ │ Compare request volume and error-rate series across the incident window. An        │ │
+                              │ │ error-rate rise during traffic supports service impact; traffic volume alone does  │ │
+                              │ │ not establish failures. Window: 2026-11-26T02:05:00Z to 2026-1...                  │ │
+                              │ │ 2. [chk-02 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=-] [GENERAL_GUIDANCE (NOT       │ │
+                              │ │ SOP-BACKED)]                                                                       │ │
+                              │ │    NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1:    │ │
+                              │ │ ledger-service, search_error_logs (authorized read-only view). Look for connection │ │
+                              │ [Scroll: line 11-39/52 | Up/Dn or PgUp/PgDn]                                           │
+                              └────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

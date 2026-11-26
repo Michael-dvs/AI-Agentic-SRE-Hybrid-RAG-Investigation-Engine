@@ -1,0 +1,20 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:06] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────────────────────────────── Active Incidents [FOCUSED] ───────────────────────────────┐
+│ [1] Active Incidents [4] ││                                                                                          │
+│ [2] Archive Dossiers [1] ││   No.  Time         Incident                 Sev     Service     Mode      State         │
+│ [3] Service Health       ││  ──────────────────────────────────────────────────────────────────────────────────────  │
+│ [4] AI Model Config      ││   ▶ 1  11-26 08:55  inc-sim-ledger-pool-001  [CRIT]  ledger-se…  AI LLM    NEEDS_REVIEW  │
+│ [5] Telegram Alerts      ││     2  11-26 09:05  inc-sim-tx-rag-down-004  [HIGH]  transacti…  OFFLINE   NEEDS_REVIEW  │
+│ [?] Keyboard & Guide     ││     3  11-26 08:35  inc-sim-auth-competing…  [HIGH]  auth-serv…  FALLBACK  NEEDS_REVIEW  │
+│ [Q] Quit Console         ││     4  11-26 09:18  inc-sim-notif-lag-runn…  [MED]   notifica.…  RUNNING   RUNNING(4/9)  │
+│                          ││                                                                                          │
+└──────────────────────────┘│ Selected Symptom: PostgreSQL connection pool checkout timeout on ledger-service (HT...   │
+                            │ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |     │
+                            │ [?] Help                                                                                 │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation:   │
+│ [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                                │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

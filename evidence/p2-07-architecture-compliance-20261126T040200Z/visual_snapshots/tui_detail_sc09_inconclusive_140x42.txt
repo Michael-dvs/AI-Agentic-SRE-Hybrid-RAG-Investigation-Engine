@@ -1,0 +1,40 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@12:04:19] Env:lab | ReviewQueue:1 | Running:0 | Archive:14 | Lab:unprobed([3]) | 
+LLM:openrouter/nvidia/nem...ning:free | Reviewer:sre_reviewer_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────────────────── Archive Dossiers > inc-20261126-case09-9ae431 [All Sections] [FOCUSED] ───────────────────┐
+│ [1] Active Incidents [1] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence Lineage(12)   SOP &   │
+│ [2] Archive Dossiers     ││ RAG(3)   Review & Audit                                                                                      │
+│ [14]                     ││ Incident / Revision     inc-20261126-case09-9ae431 (Revision v1 (initial dossier))                           │
+│ [3] Service Health       ││ Severity & Scope        [HIGH] HIGH | env=lab | services: transaction-service, api-gateway, db-dummy,        │
+│ [4] AI Model Config      ││                         ledger-service, notification-service                                                 │
+│ [5] Telegram Alerts      ││ Closure / Diagnosis     ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (diagnosis_verified=False,                    │
+│ [?] Keyboard & Guide     ││                         technical_resolved=False, sop_compliance_confirmed=False,                            │
+│ [Q] Quit Console         ││                         remediation_authorized=False)                                                        │
+│                          ││ Safety & Trust          Auto remediation: DISABLED (auto_action_triggered=False) | Reviewer Trust: Local PoC │
+└──────────────────────────┘│                         caller-asserted identity (unauthenticated)                                           │
+                            │ Reasoning Mode          OFFLINE DETERMINISTIC (NO AI MODEL)                                                  │
+                            │ Provider / Model        local-rule-engine / deterministic_rule_engine_v1                                     │
+                            │ Token Usage             0 tokens (Offline Rule Engine)                                                       │
+                            │ Prompt / Timing         Prompt: deterministic_baseline_rules | Alert: 2026-11-26T05:04:02.788777Z | Ready:   │
+                            │                         2026-11-26T05:04:02.788777Z                                                          │
+                            │ Workflow Stages: [x:RCV]->[x:COR]->[x:TRI]->[x:EVD]->[x:RAG]->[x:HYP]->[x:VAL]->[x:DRF]->[x:REV] => [CLOSED  │
+                            │ (Admin Handover)]  (Duration: unavailable | Stage completion != verified diagnosis)                          │
+                            │ ┌─────────────────────────────────────────── Observed Symptoms ────────────────────────────────────────────┐ │
+                            │ │ Downstream dependency unavailable reported by transaction-service (ERR_LEDGER_UPSTREAM_UNAVAILABLE)      │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌────────────────────────────────────── Impact & Dependency Context ───────────────────────────────────────┐ │
+                            │ │ Error Budget Impact: moderate                                                                            │ │
+                            │ │ Topology Flow: [api-gateway] -> transaction-service -> [db-dummy, ledger-service, notification-service]  │ │
+                            │ │ Topology Note: Topology alone does not establish causality; stale edges are unconfirmed.                 │ │
+                            │ │                                                                                                          │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ Calibration & Ranking: Heuristic support score [5%-85% cap], uncalibrated (not an empirical probability;     │
+                            │ does not prove or confirm root cause).                                                                       │
+                            │ Authoritative persisted rank order preserved.                                                                │
+                            │                                                                                                              │
+                            │  Rank     Hypothesis                                    Support           Confidence              Evid(+/-)  │
+                            │ [Scroll: line 1-31/265 | Up/Dn or PgUp/PgDn]                                                                 │
+                            └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────── Review Action Bar ────────────────────────────────────────────────────────────┐
+│ [REVIEW LOCKED - FINALIZED (CLOSED)]  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT | Reloaded newer dossier revision v1     │
+│ (previously viewing v2).                                                                                                                 │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

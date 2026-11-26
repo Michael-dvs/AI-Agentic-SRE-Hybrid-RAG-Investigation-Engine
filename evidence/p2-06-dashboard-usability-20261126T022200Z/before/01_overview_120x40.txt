@@ -1,0 +1,27 @@
+╭───────── Navigation ─────────╮╭───────────────────────────── Active Incidents [FOCUSED] ─────────────────────────────╮
+│ [1] Active Incidents         ││ ┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┓ │
+│ [2] Archive Dossiers         ││ ┃  No. ┃ Time           ┃ Incident     ┃ Severity ┃ Serv… ┃ Mode    ┃ State        ┃ │
+│ [3] Service Health           ││ ┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩ │
+│ [4] AI Model Config          ││ │  ▶ 1 │ 11-23 10:44:34 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ │
+│ [5] Telegram Alerts          ││ │    2 │ 11-23 10:44:28 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+│ [Q] Quit                     ││ │    3 │ 11-23 10:44:22 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ │
+│                              ││ │    4 │ 11-23 10:44:14 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+╰──────────────────────────────╯│ │    5 │ 11-23 10:11:31 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │    6 │ 11-23 10:11:26 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │    7 │ 11-23 10:11:20 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │    8 │ 11-23 10:11:17 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │    9 │ 11-23 10:11:11 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   10 │ 11-23 10:11:08 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   11 │ 11-23 10:11:03 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   12 │ 11-23 10:10:57 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   13 │ 11-23 10:10:51 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   14 │ 11-23 10:07:59 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ │   15 │ 11-23 10:07:50 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ │
+                                │ └──────┴────────────────┴──────────────┴──────────┴───────┴─────────┴──────────────┘ │
+                                │ Navigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open Grafana      │
+                                ╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────╮
+│ [↑/↓] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [←/Tab] TO MENU  [Q] QUIT | Navigation: [↑/↓] switch menu,            │
+│ [→/Enter/Tab] focus incident list.                                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit

@@ -1,0 +1,24 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:09] Env:lab | ReviewQueue:3 | 
+Running:1 | Archive:1 | Lab:5/5 up
+┌───────────────────────────────── Navigation ─────────────────────────────────┐
+│ [1] Active [2] Archive [3] Health [4] Model [5] Telegram [?] Help [Q] Quit   │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────── Active Incidents [FOCUSED] ─────────────────────────┐
+│                                                                              │
+│   No.  Time      Incident                     Sev   Service        Mode      │
+│  ──────────────────────────────────────────────────────────────────────────  │
+│   ▶ 1  08:55:00  inc-sim-ledger-pool-001      CRIT  ledger-servi…  AI LLM    │
+│     2  09:05:00  inc-sim-tx-rag-down-004      HIGH  transac...er…  OFFLINE   │
+│     3  08:35:00  inc-sim-aut...peting-002     HIGH  auth-service   FALLBACK  │
+│     4  09:18:00  inc-sim-not...unning-003     MED   notific...er…  RUNNING   │
+│                                                                              │
+│ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U]    │
+│ Refresh  |  [?] Help                                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────── Review Action Bar ──────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U]     │
+│ REFRESH  [?] HELP  [Q] QUIT | Navigation: [Up/Dn] switch menu,               │
+│ [Right/Enter/Tab] focus incident list, [?] help.                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | 
+?=Help | B/Esc=Back | Q=Quit

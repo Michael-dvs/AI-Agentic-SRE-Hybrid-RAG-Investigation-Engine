@@ -1,0 +1,18 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:08] Env:lab | ReviewQueue:0 | Running:0 | Archive:0
+| Lab:5/5 up
+┌─────── Navigation ───────┐┌───────────────────── Active Incidents [FOCUSED] ─────────────────────┐
+│ [1] Active Incidents [0] ││ No active investigations or dossiers pending review.                 │
+│ [2] Archive Dossiers [0] ││ Cause: zero incidents are currently in RECEIVED..HUMAN_REVIEW        │
+│ [3] Service Health       ││ states.                                                              │
+│ [4] AI Model Config      ││ Next action: press [2] to inspect Archive Dossiers, [U] to refresh,  │
+│ [5] Telegram Alerts      ││ or trigger a synthetic scenario.                                     │
+│ [?] Keyboard & Guide     │└──────────────────────────────────────────────────────────────────────┘
+│ [Q] Quit Console         │                                                                        
+│                          │                                                                        
+└──────────────────────────┘                                                                        
+┌─────────────────────────────────────── Review Action Bar ────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q]  │
+│ QUIT | Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | 
+Q=Quit

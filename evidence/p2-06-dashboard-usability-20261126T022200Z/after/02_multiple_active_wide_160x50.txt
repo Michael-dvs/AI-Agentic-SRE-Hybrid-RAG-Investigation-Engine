@@ -1,0 +1,18 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:06] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | Mode:Offline-Deterministic($0) | 
+Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────────────────────────────────────────────────── Active Incidents [FOCUSED] ───────────────────────────────────────────────────┐
+│ [1] Active Incidents [4] ││                                                                                                                                  │
+│ [2] Archive Dossiers [1] ││   No.  Time         Incident                          Sev     Service          Mode      State         Observed Symptom          │
+│ [3] Service Health       ││  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  │
+│ [4] AI Model Config      ││   ▶ 1  11-26 08:55  inc-sim-ledger-pool-001           [CRIT]  ledger-service   AI LLM    NEEDS_REVIEW  PostgreSQL connection p…  │
+│ [5] Telegram Alerts      ││     2  11-26 09:05  inc-sim-tx-rag-down-004           [HIGH]  transaction-se…  OFFLINE   NEEDS_REVIEW  Elevated HTTP 502 respo…  │
+│ [?] Keyboard & Guide     ││     3  11-26 08:35  inc-sim-auth-competing-002        [HIGH]  auth-service     FALLBACK  NEEDS_REVIEW  Intermittent HTTP 401/5…  │
+│ [Q] Quit Console         ││     4  11-26 09:18  inc-sim-notif-lag-running-003     [MED]   notification-s…  RUNNING   RUNNING(4/9)  RabbitMQ consumer queue…  │
+│                          ││                                                                                                                                  │
+└──────────────────────────┘│ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |  [?] Help                                   │
+                            └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation: [Up/Dn] switch menu, [Right/Enter/Tab]    │
+│ focus incident list, [?] help.                                                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

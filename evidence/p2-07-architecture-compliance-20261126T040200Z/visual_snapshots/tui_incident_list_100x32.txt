@@ -1,0 +1,29 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@12:04:18] Env:lab | ReviewQueue:1 | Running:0 | 
+Archive:14 | Lab:unprobed([3])
+┌── Navigation [FOCUSED] ──┐┌────────────────────────── Archive Dossiers ──────────────────────────┐
+│ [1] Active Incidents [1] ││                                                                      │
+│ [2] Archive Dossiers     ││   No.  Time      Incident                      Sev   Service         │
+│ [14]                     ││  ──────────────────────────────────────────────────────────────────  │
+│ [3] Service Health       ││   ▶ 1  12:03:45  inc-2026112...e14-699a90      HIGH  ledger-service  │
+│ [4] AI Model Config      ││     2  12:03:42  inc-2026112...e13-f52567      HIGH  transac...erv…  │
+│ [5] Telegram Alerts      ││     3  12:03:39  inc-2026112...e12-613de4      HIGH  transac...erv…  │
+│ [?] Keyboard & Guide     ││     4  12:03:37  inc-2026112...e11-af40c8      HIGH  transac...erv…  │
+│ [Q] Quit Console         ││     5  12:03:33  inc-2026112...e10-c03210      HIGH  ledger-service  │
+│                          ││     6  12:03:31  inc-2026112...e09-9ae431      HIGH  transac...erv…  │
+└──────────────────────────┘│     7  12:03:29  inc-2026112...e08-fc847f      HIGH  auth-service    │
+                            │     8  12:03:27  inc-2026112...e07-6630ae      HIGH  notific...erv…  │
+                            │     9  12:03:25  inc-2026112...e06-83ad3b      HIGH  auth-service    │
+                            │    10  12:03:22  inc-2026112...e05-6b487b      HIGH  ledger-service  │
+                            │    11  12:03:20  inc-2026112...e04-c32f77      HIGH  ledger-service  │
+                            │    12  12:03:14  inc-2026112...e03-edc25c      HIGH  ledger-service  │
+                            │    13  12:03:11  inc-2026112...e02-9fa0b1      HIGH  transac...erv…  │
+                            │    14  12:03:09  inc-2026112...e01-4dd145      HIGH  api-gateway     │
+                            │                                                                      │
+                            │ Selected Symptom: Service ledger-service latency_p95=362.7ms ex...   │
+                            │ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  | │
+                            │ [U] Refresh  |  [?] Help                                             │
+                            └──────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────── Review Action Bar ────────────────────────────────────────┐
+│ [Up/Dn] SWITCH MENU  [Right/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [U] REFRESH  [?] HELP  [Q]     │
+│ QUIT | Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘

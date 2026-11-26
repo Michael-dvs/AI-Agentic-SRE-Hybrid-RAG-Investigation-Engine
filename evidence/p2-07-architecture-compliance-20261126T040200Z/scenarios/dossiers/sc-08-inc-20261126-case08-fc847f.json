@@ -1,0 +1,270 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261126-case08-fc847f",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "auth-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-26T05:04:00.766707Z",
+  "window_start": "2026-11-26T05:03:29.542134Z",
+  "window_end": "2026-11-26T05:04:05.766725Z",
+  "dossier_ready_at": "2026-11-26T05:04:00.766707Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "auth-service",
+      "api-gateway"
+    ],
+    "observed_symptoms": "Authentication verifier policy mismatch spike on auth-service (ERR_AUTH_POLICY_MISMATCH)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-26T05:04:00.777684Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:00.779556Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:00.782114Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:01.065974Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:01.077960Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:01.080724Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:01.085445Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:05.766725Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=1.25 req/s (rate); request_rate=1.25 req/s (rate); request_rate=1.25 req/s (rate) [svc=auth-service | env=lab | obs=2026-11-26T05:04:05.766725Z | collected=2026-11-26T05:04:00.867946Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:59.647204Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_AUTH_POLICY_MISMATCH: ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration @2026-11-26T05:03:55.286203Z; ERR_AUTH_POLICY_MISMATCH: POST /internal/auth/verify -> 403 (0.13ms) @2026-11-26T05:03:55.286297Z; ERR_AUTH_POLICY_MISMATCH: ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration @2026-11-26T05:03:55.330056Z [svc=auth-service | env=lab | obs=2026-11-26T05:03:59.647204Z | collected=2026-11-26T05:04:00.879004Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:05.766725Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=1.25 req/s (rate); request_rate=1.25 req/s (rate); request_rate=1.25 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:04:05.766725Z | collected=2026-11-26T05:04:00.968906Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:59.647885Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_AUTH_POLICY_MISMATCH: ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration @2026-11-26T05:03:55.287302Z; ERR_AUTH_POLICY_MISMATCH: POST /api/v1/transactions -> 403 (7.10ms) @2026-11-26T05:03:55.287414Z; ERR_AUTH_POLICY_MISMATCH: ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration @2026-11-26T05:03:55.330824Z [svc=api-gateway | env=lab | obs=2026-11-26T05:03:59.647885Z | collected=2026-11-26T05:04:00.979114Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-005",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://127.0.0.1:13200",
+      "observed_at": "2026-11-26T05:03:59.569479Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "partial",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "UNKNOWN [OK 0.082ms] trace=f4e7e732334a.. [svc=auth-service | env=lab | obs=2026-11-26T05:03:59.569479Z | collected=2026-11-26T05:04:00.986355Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case08-fc847f-006",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:05.766725Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:29.542134Z",
+        "end": "2026-11-26T05:04:05.766725Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "error_rate=0.1067 ratio (ratio); error_rate=0.1067 ratio (ratio); error_rate=0.1067 ratio (ratio) [svc=auth-service | env=lab | obs=2026-11-26T05:04:05.766725Z | collected=2026-11-26T05:04:01.063507Z | temporal=TEMPORALLY_RELEVANT]"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261126-case08-fc847f-001",
+      "rank": 1,
+      "statement": "Cascading failure from api-gateway propagating error to auth-service",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-20261126-case08-fc847f-002",
+        "ev-inc-20261126-case08-fc847f-004"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Downstream dependency api-gateway logged errors ('ERR_AUTH_POLICY_MISMATCH: Token audience/issuer claim rejected by active verifier configuration'), leading to upstream failure in auth-service.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-002",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 1. Identifikasi Anomali Internal Auth",
+      "source_uri": "kb://corpus/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Error HTTP 500 pada `auth-service` ditandai dengan: - Respons JSON berisi `status_code: 500` dan `service_id: \"auth-service\"`. - Log mencatat pesan unhandled exception pada modul cryptographic decoding atau modul validasi token sintetis. - API Gateway mencatat error pemanggilan dependency auth saat klien mencoba mengakses endpoint privat."
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-003",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi > 2. Tindakan Isolasi dan Pemulihan",
+      "source_uri": "kb://corpus/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "1. **Periksa Memory dan Thread Dump:** - Evaluasi penggunaan RAM kontainer `sre-sim-auth-service` untuk memastikan tidak terjadi kehabisan alokasi memori (*Out Of Memory*). 2. **Restart Layanan Mandiri (Graceful Restart):** - Jalankan restart proses auth service secara terkendali tanpa mempengaruhi kontainer lain. 3. **Verifikasi Post-Restart:** - Kirim synthetic test probe ke endpoint `/health/liveness` dan `/api/v1/auth/verify`. - Pastikan respon kembali bernilai HTTP 200 dengan payload JSON valid."
+    },
+    {
+      "chunk_id": "chk-SOP-AUTH-ERR-500-v1.0.0-001",
+      "doc_id": "SOP-AUTH-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-AUTH-ERR-500: Penanganan Error Internal 500 pada Layanan Autentikasi",
+      "source_uri": "kb://corpus/auth_service/SOP-AUTH-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Dokumen ini memandu penanganan khusus error HTTP 500 yang bersumber dari internal proses `auth-service`. Prosedur ini berbeda dari error HTTP 500 pada `transaction-service`."
+    }
+  ],
+  "unknowns": [
+    "Retrieved auth-service runbook(s) (SOP-AUTH-ERR-500 v1.0.0, SOP-AUTH-ERR-500 v1.0.0, SOP-AUTH-ERR-500 v1.0.0) provide general/adjacent guidance only and do not specifically cover ERR_AUTH_POLICY_MISMATCH (no exact SOP match for auth-service)."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-AUTH-ERR-500-v1.0.0-002 of SOP-AUTH-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-AUTH-ERR-500"
+    },
+    {
+      "check_id": "chk-02",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-AUTH-ERR-500-v1.0.0-003 of SOP-AUTH-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-AUTH-ERR-500"
+    },
+    {
+      "check_id": "chk-03",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-AUTH-ERR-500-v1.0.0-001 of SOP-AUTH-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-AUTH-ERR-500"
+    },
+    {
+      "check_id": "chk-04",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: auth-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:29.542134Z to 2026-11-26T05:04:05.766725Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-05",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:29.542134Z to 2026-11-26T05:04:05.766725Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-06",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: auth-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:29.542134Z to 2026-11-26T05:04:05.766725Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "f4e7e732334a054431c59efb3d5cef47"
+    ]
+  },
+  "dossier_hash": "aa91811303375b4d45918c289b6ede2a9b157bbc535544cc21c35f00f6a63650"
+}

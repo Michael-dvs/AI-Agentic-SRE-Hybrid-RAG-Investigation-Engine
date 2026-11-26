@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:08] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌────── Archive Dossiers > inc-sim-gw-closed-hist-005 [Triage & Progress] [FOCUSED] ───────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(0)   SOP & RAG(0)   Review & Audit                                               │
+│ [3] Service Health       ││ Incident / Revision     inc-sim-gw-closed-hist-005 (Revision v1 (initial dossier))       │
+│ [4] AI Model Config      ││ Severity & Scope        [HIGH] HIGH | env=lab | services: api-gateway, auth-service      │
+│ [5] Telegram Alerts      ││ Closure / Diagnosis     ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED                           │
+│ [?] Keyboard & Guide     ││                         (diagnosis_verified=False, technical_resolved=False,             │
+│ [Q] Quit Console         ││                         sop_compliance_confirmed=False, remediation_authorized=False)    │
+│                          ││ Safety & Trust          Auto remediation: DISABLED (auto_action_triggered=False) |       │
+└──────────────────────────┘│                         Reviewer Trust: Local PoC caller-asserted identity               │
+                            │                         (unauthenticated)                                                │
+                            │ Reasoning Mode          OFFLINE DETERMINISTIC (NO AI MODEL)                              │
+                            │ Provider / Model        local-rule-engine / nvidia/nemotron-3.5-lightning:free           │
+                            │ Token Usage             0 tokens (Offline Rule Engine)                                   │
+                            │ Prompt / Timing         Prompt: p1-05-grounded-v2 | Alert: 2026-11-26T02:00:00Z | Ready: │
+                            │                         2026-11-26T02:00:14Z                                             │
+                            │ Workflow Stages:                                                                         │
+                            │ [x:RCV]->[x:COR]->[x:TRI]->[x:EVD]->[x:RAG]->[x:HYP]->[x:VAL]->[x:DRF]->[x:REV] =>       │
+                            │ [CLOSED (Admin Handover)]  (Duration: unavailable, ToolCalls: 4 | Stage completion !=    │
+                            │ verified diagnosis)                                                                      │
+                            │ ┌───────────────────────────────── Observed Symptoms ──────────────────────────────────┐ │
+                            │ │ Historical API Gateway rate-limit spike; administratively handed over.               │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌──────────────────────────── Impact & Dependency Context ─────────────────────────────┐ │
+                            │ │ Error Budget Impact: moderate                                                        │ │
+                            │ │ Topology Flow: [mobile-banking-edge] -> api-gateway -> [auth-service,                │ │
+                            │ │ transaction-service]                                                                 │ │
+                            │ │ Topology Note: Topology edges reflect static catalog; runtime rate-limiter counters  │ │
+                            │ │ require human check.                                                                 │ │
+                            │ │                                                                                      │ │
+                            │ [Scroll: line 1-29/53 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [REVIEW LOCKED - FINALIZED (CLOSED)]  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT | Navigation:        │
+│ [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                                │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

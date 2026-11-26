@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:07] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌────────── Active Incidents > inc-sim-auth-competing-002 [Hypotheses] [FOCUSED] ──────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(2)   SOP & RAG(2)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-auth-competing-002 (v1) | [HIGH] HIGH | auth-service (lab) | State: HUMAN_REVIEW │
+│ [4] AI Model Config      ││ | Mode: FALLBACK                                                                         │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ Calibration & Ranking: Heuristic support score [5%-85% cap], uncalibrated (not an        │
+│                          ││ empirical probability; does not prove or confirm root cause).                            │
+└──────────────────────────┘│ Authoritative persisted rank order preserved.                                            │
+                            │                                                                                          │
+                            │  Rank     Hypothesis                Support           Confidence              Evid(+/-)  │
+                            │  ──────────────────────────────────────────────────────────────────────────────────────  │
+                            │  ▶ #1     JWKS signing key          [UNSUPPORTED]     14% (LOW)                 +0 / -0  │
+                            │           rotation mismatch                                                              │
+                            │           across auth-service                                                            │
+                            │           replicas.                                                                      │
+                            │                                                                                          │
+                            │ ┌────────────────────── Hypothesis Reasoning Details (Why & How) ──────────────────────┐ │
+                            │ │ #1 (hyp-inc-sim-auth-competing-002-001) [UNSUPPORTED | 14% (LOW)] JWKS signing key   │ │
+                            │ │ rotation mismatch across auth-service replicas.                                      │ │
+                            │ │   Why / Causal Analysis : [UNSUPPORTED] Candidate mechanism lacks corroborated       │ │
+                            │ │ window telemetry; Tempo traces unavailable.                                          │ │
+                            │ │   Confidence Basis      : Zero accepted supporting signals; trace backend            │ │
+                            │ │ unavailable (-0.15 penalty).                                                         │ │
+                            │ │   Main Uncertainty      : Tempo trace backend returned SOURCE_UNAVAILABLE during     │ │
+                            │ │ incident window.                                                                     │ │
+                            │ │   Supporting Evidence   : none (no accepted supporting evidence)                     │ │
+                            │ │   Partial/Truncated Evid: ev-auth-log-partial                                        │ │
+                            │ │   Rejected Association  : ev-auth-stale-99 (OUTSIDE_INCIDENT_WINDOW (observed 3h     │ │
+                            │ [Scroll: line 1-29/34 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

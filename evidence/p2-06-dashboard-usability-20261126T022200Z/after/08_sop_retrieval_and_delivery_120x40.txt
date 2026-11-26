@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:07] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌──────────── Active Incidents > inc-sim-ledger-pool-001 [SOP & RAG] [FOCUSED] ────────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(2)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(2)   SOP & RAG(1)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-ledger-pool-001 (v1) | [CRIT] CRITICAL | ledger-service (lab) | State:           │
+│ [4] AI Model Config      ││ HUMAN_REVIEW | Mode: AI LLM                                                              │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ ┌────────────────────── Runbook SOP Citations & RAG Transparency ──────────────────────┐ │
+│                          ││ │ SOP Status [APPLICABLE_SOP_FOUND]: APPLICABLE_SOP_FOUND: see cited sections.         │ │
+└──────────────────────────┘│ │ Assessment: Authorized active SOP reference matched service, environment, and        │ │
+                            │ │ effective window.                                                                    │ │
+                            │ │ RAG Context Delivery: Recorded: retrieved=4, eligible=2, included_in_llm_prompt=2,   │ │
+                            │ │ omitted=0 (compaction=rung_0_full)                                                   │ │
+                            │ │                                                                                      │ │
+                            │ │ - SOP-LEDGER-002 v2.1.0 | 4.2 Connection Pool Exhaustion Diagnostics |               │ │
+                            │ │ chunk-sop-ledger-002-04 | kb://runbooks/sop-ledger-002.md                            │ │
+                            │ │   Retrieval score=0.0328 (rrf_fusion: lexical/dense rank relevance only, NOT         │ │
+                            │ │ diagnostic confidence)                                                               │ │
+                            │ │   Compare active checkout wait count against error_rate before escalating to DBA.    │ │
+                            │ │                                                                                      │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌────────────────── SRE Recommended Verification (Human-Controlled) ───────────────────┐ │
+                            │ │ 1. [chk-01 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=SOP-LEDGER-002] [SOP_BACKED]      │ │
+                            │ │    NOT_PERFORMED · SOP-BACKED (source reference only): Review cited section          │ │
+                            │ │ chunk-sop-ledger-002-04 of SOP-LEDGER-002 v2.1.0 for diagnostic criteria. Record     │ │
+                            │ │ which criteria match the incident and which do not. If sections disagree, escalate;  │ │
+                            │ │ no procedure is authorized for execution.                                            │ │
+                            │ │ 2. [chk-02 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=-] [GENERAL_GUIDANCE (NOT         │ │
+                            │ │ SOP-BACKED)]                                                                         │ │
+                            │ │    NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1:      │ │
+                            │ [Scroll: line 1-29/50 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

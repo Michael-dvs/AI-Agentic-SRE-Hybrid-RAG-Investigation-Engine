@@ -1,0 +1,22 @@
+┌───────────────────────────── SRE Investigation Console - Keyboard & Semantics Reference ─────────────────────────────┐
+│ KEYBOARD NAVIGATION & INTERACTION REFERENCE                                                                          │
+│   Global          : [1-5] Switch Tab | [U] Manual Refresh | [?] Toggle Help | [Q] Quit Safely                        │
+│   Overview / List : [Up/Dn or j/k] Move Row | [Left/Right/Tab] Menu <-> List | [Enter/O] Open | [G] Grafana          │
+│   Incident Detail : [Tab] Cycle Detail Lens (All/Overview/Hypotheses/Evidence/SOP/Review)                            │
+│                     [[ / ]] Previous/Next Hypothesis or Evidence | [I] Jump Hypothesis -> Evidence                   │
+│                     [Up/Dn or PgUp/PgDn] Scroll | [B / Esc / Left] Return (preserves selection)                      │
+│   Human Review    : [A] Approve | [R] Reject | [C] Correct (vN+1) | [E] Escalate (opens confirmation modal)          │
+│   Review Modal    : Type into focused field | [Tab/Up/Dn] Switch Field/Button | [Enter] Next/Confirm | [Esc] Cancel  │
+│                                                                                                                      │
+│ OPERATIONAL & SAFETY SEMANTICS (NON-NEGOTIABLE)                                                                      │
+│   1. Zero Auto-Remediation (INV-01 / HUM-01): Dashboard and AI never restart, scale, deploy, or mutate services.     │
+│   2. RULE-007 & Heuristic Confidence: Scores in [5%-85%] are uncalibrated support heuristics, NEVER empirical        │
+│      probabilities and never confirmed/proven root causes.                                                           │
+│   3. Administrative Closure (INV-06): APPROVE -> CLOSED accepts dossier handover only                                │
+│      (diagnosis_verified=False, technical_resolved=False, sop_compliance_confirmed=False,                            │
+│ remediation_authorized=False).                                                                                       │
+│   4. Reviewer Identity: Local PoC caller-asserted identifier (unauthenticated; not SSO/OIDC-verified).               │
+│                                                                                                                      │
+│ Press [Esc], [?], or [B] to close help and return to your current view.                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

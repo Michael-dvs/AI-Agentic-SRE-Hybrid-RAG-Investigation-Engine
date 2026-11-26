@@ -1,0 +1,364 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261126-case01-4dd145",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "api-gateway",
+  "environment": "lab",
+  "alert_received_at": "2026-11-26T05:03:40.687634Z",
+  "window_start": "2026-11-26T05:03:09.574513Z",
+  "window_end": "2026-11-26T05:03:45.687651Z",
+  "dossier_ready_at": "2026-11-26T05:03:40.687634Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "api-gateway",
+      "auth-service",
+      "ledger-service",
+      "notification-service",
+      "transaction-service"
+    ],
+    "observed_symptoms": "Downstream dependency unavailable reported by api-gateway (ERR_DEPENDENCY_UNAVAILABLE)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-26T05:03:40.699538Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:40.701610Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:40.703023Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:41.287111Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:41.299752Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:41.302779Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:41.306033Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.15 req/s (rate); request_rate=0.15 req/s (rate); request_rate=0.15 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.778769Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned. [svc=api-gateway | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.785900Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.15 req/s (rate); request_rate=0.15 req/s (rate); request_rate=0.15 req/s (rate) [svc=auth-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.877308Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on auth-service: 0 records returned. [svc=auth-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.882651Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.1167 req/s (rate); request_rate=0.1167 req/s (rate); request_rate=0.1167 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.978197Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:40.985281Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.05 req/s (rate); request_rate=0.05 req/s (rate); request_rate=0.05 req/s (rate) [svc=notification-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:41.073342Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned. [svc=notification-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:41.078730Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.1167 req/s (rate); request_rate=0.1167 req/s (rate); request_rate=0.1167 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:41.188876Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 0 records returned. [svc=transaction-service | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:41.193382Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://127.0.0.1:13200",
+      "observed_at": "2026-11-26T05:03:39.656326Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "partial",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "UNKNOWN [OK 82.08ms] trace=591725888f4f.. [svc=api-gateway | env=lab | obs=2026-11-26T05:03:39.656326Z | collected=2026-11-26T05:03:41.206504Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case01-4dd145-012",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:45.687651Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:09.574513Z",
+        "end": "2026-11-26T05:03:45.687651Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:45.687651Z | collected=2026-11-26T05:03:41.285090Z | temporal=TEMPORALLY_RELEVANT]"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261126-case01-4dd145-001",
+      "rank": 1,
+      "statement": "Transient or unobserved anomaly on api-gateway",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "No definitive error patterns or metric anomalies captured in observation window.",
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-003",
+      "doc_id": "SOP-GW-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API > 2. Prosedur Investigasi Keterlambatan Upstream",
+      "source_uri": "kb://corpus/api_gateway/SOP-GW-ERR-504.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Langkah operasional yang wajib dijalankan operator: 1. **Analisis Trace Span:** - Cari root span transaksi pada Tempo menggunakan `trace_id`. - Identifikasi child span yang belum selesai (*hanging span*) atau memakan waktu di atas ambang batas SLO latensi 250ms. 2. **Pemeriksaan Health Dependency:** - Verifikasi metrik latensi P95 downstream pada Prometheus (`sim_red_latency_p95_ms`). - Apabila downstream transaction service mengalami latensi tinggi akibat antrean database, jangan naikkan ingress timeout ga"
+    },
+    {
+      "chunk_id": "chk-SOP-GW-001-v1.2.0-002",
+      "doc_id": "SOP-GW-001",
+      "version": "1.2.0",
+      "section_path": "SOP-GW-001: Penanganan Lonjakan Error HTTP 5xx pada API Gateway > 1. Identifikasi dan Triage Awal",
+      "source_uri": "kb://corpus/api_gateway/SOP-GW-001.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Saat alert `SimHighErrorRate` atau `SimDependencyUnavailable` terpicu pada API Gateway: 1. Periksa dashboard metrik RED pada Grafana (`sre-sim-overview-v1`) untuk memastikan endpoint mana yang mengalami kegagalan. 2. Identifikasi distribusi status code apakah didominasi oleh HTTP 500 (Internal Server Error), 502 (Bad Gateway), 503 (Service Unavailable), atau 504 (Gateway Timeout). 3. Periksa korelasi `trace_id` pada sampel log API Gateway untuk mengetahui apakah error bersumber dari gateway itu sendiri atau"
+    },
+    {
+      "chunk_id": "chk-SOP-GW-ERR-504-v1.0.0-001",
+      "doc_id": "SOP-GW-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-GW-ERR-504: Penanganan Gateway Timeout 504 pada Ingress API",
+      "source_uri": "kb://corpus/api_gateway/SOP-GW-ERR-504.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "SOP ini digunakan secara spesifik untuk menangani kode error HTTP 504 Gateway Timeout yang terjadi pada lapisan Ingress API Gateway (`api-gateway`). Dokumen ini tidak berlaku untuk timeout database internal ledger."
+    }
+  ],
+  "unknowns": [
+    "Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "NOT_PERFORMED \u00b7 HUMAN ESCALATION REQUIRED: Compare the cited sources with the service owner before using their guidance. Precedence is not established; do not combine instructions.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-02",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-03",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: auth-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-04",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-05",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: notification-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-06",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-07",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: api-gateway, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:09.574513Z to 2026-11-26T05:03:45.687651Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "591725888f4fa6048fa7a8bd9b88fec1"
+    ]
+  },
+  "dossier_hash": "f19d244e1d2a1a4a34738787495862cdfb19d3f83384512b2311709e9ff3b5cd"
+}

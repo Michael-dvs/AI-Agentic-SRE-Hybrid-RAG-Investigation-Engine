@@ -1,0 +1,10 @@
+┌───────────── SRE Console - Resize Required ──────────────┐
+│ TERMINAL VIEWPORT BELOW MINIMUM SUPPORTED SIZE           │
+│ Current: 60 cols x 14 rows | Minimum: 68 cols x 16 rows. │
+│ Enlarge the terminal window to resume inspection.        │
+│ Selection, focus, and unsent review drafts are           │
+│ preserved.                                               │
+│ Controls: [B/Esc] Back | [Q] Quit                        │
+└──────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | 
+Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

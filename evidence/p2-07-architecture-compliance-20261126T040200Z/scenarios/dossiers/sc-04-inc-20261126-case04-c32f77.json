@@ -1,0 +1,316 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261126-case04-c32f77",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "ledger-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-26T05:03:51.480353Z",
+  "window_start": "2026-11-26T05:03:20.209244Z",
+  "window_end": "2026-11-26T05:03:56.480369Z",
+  "dossier_ready_at": "2026-11-26T05:03:51.480353Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "ledger-service",
+      "api-gateway",
+      "transaction-service",
+      "db-dummy"
+    ],
+    "observed_symptoms": "Service ledger-service latency_p95=365.7ms exceeded high SLO threshold 250.0ms",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-26T05:03:51.493401Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.495614Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.497108Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.969785Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.980771Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.982615Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:51.985078Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.4667 req/s (rate); request_rate=0.4667 req/s (rate); request_rate=0.4667 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.586987Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.592163Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.5833 req/s (rate); request_rate=0.5833 req/s (rate); request_rate=0.5833 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.682981Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:50.407236Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_LEDGER_UPSTREAM_UNAVAILABLE: ERR_LEDGER_UPSTREAM_UNAVAILABLE: Ledger service returned status 503 @2026-11-26T05:03:50.284725Z; ERR_LEDGER_UPSTREAM_UNAVAILABLE: POST /api/v1/transactions -> 503 (63.76ms) @2026-11-26T05:03:50.28486Z; ERR_LEDGER_UPSTREAM_UNAVAILABLE: ERR_LEDGER_UPSTREAM_UNAVAILABLE: Ledger service returned status 503 @2026-11-26T05:03:50.382332Z [svc=api-gateway | env=lab | obs=2026-11-26T05:03:50.407236Z | collected=2026-11-26T05:03:51.692327Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.5167 req/s (rate); request_rate=0.5167 req/s (rate); request_rate=0.5167 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.779553Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:50.406542Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_LEDGER_UPSTREAM_UNAVAILABLE: ERR_LEDGER_UPSTREAM_UNAVAILABLE: Ledger service returned status 503 @2026-11-26T05:03:50.283638Z; ERR_LEDGER_UPSTREAM_UNAVAILABLE: POST /internal/transactions/execute -> 503 (47.73ms) @2026-11-26T05:03:50.283785Z; ERR_LEDGER_UPSTREAM_UNAVAILABLE: ERR_LEDGER_UPSTREAM_UNAVAILABLE: Ledger service returned status 503 @2026-11-26T05:03:50.381438Z [svc=transaction-service | env=lab | obs=2026-11-26T05:03:50.406542Z | collected=2026-11-26T05:03:51.789135Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.869953Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.873740Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-009",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://127.0.0.1:13200",
+      "observed_at": "2026-11-26T05:03:50.282853Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "partial",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "UNKNOWN [OK 0.147ms] trace=f7b54ba25ee8.. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:50.282853Z | collected=2026-11-26T05:03:51.878529Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case04-c32f77-010",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:56.480369Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:20.209244Z",
+        "end": "2026-11-26T05:03:56.480369Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "error_rate=0.1071 ratio (ratio); error_rate=0.1071 ratio (ratio); error_rate=0.1071 ratio (ratio) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:56.480369Z | collected=2026-11-26T05:03:51.967364Z | temporal=TEMPORALLY_RELEVANT]"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261126-case04-c32f77-001",
+      "rank": 1,
+      "statement": "Service operational error in ledger-service (ERR_LEDGER_UPSTREAM_UNAVAILABLE)",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-20261126-case04-c32f77-004",
+        "ev-inc-20261126-case04-c32f77-006"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'ERR_LEDGER_UPSTREAM_UNAVAILABLE: Ledger service returned status 503'.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+      "source_uri": "kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Meskipun sama-sama mencatat status timeout 504: - Error pada Ledger Service bersumber dari komunikasi TCP/SQL antara `ledger-service` dan `db-dummy`. - Trace span menunjukkan child span `storage_call` yang melebihi parameter `statement_timeout`. - Error log pada Ledger mencatat pesan kegagalan eksekusi query SQL `ERR_DATABASE_LATENCY`."
+    }
+  ],
+  "unknowns": [
+    "Retrieved ledger-service runbook(s) (SOP-LEDGER-ERR-504 v1.0.0) provide general/adjacent guidance only and do not specifically cover ERR_LEDGER_UPSTREAM_UNAVAILABLE (no exact SOP match for ledger-service)."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-LEDGER-ERR-504-v1.0.0-002 of SOP-LEDGER-ERR-504 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-LEDGER-ERR-504"
+    },
+    {
+      "check_id": "chk-02",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-03",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-04",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-05",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, get_service_metrics (authorized read-only view). Compare request volume and error-rate series across the incident window. An error-rate rise during traffic supports service impact; traffic volume alone does not establish failures. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-06",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-07",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:20.209244Z to 2026-11-26T05:03:56.480369Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "f7b54ba25ee83cf5b2b1ad0b70b54c4e"
+    ]
+  },
+  "dossier_hash": "97fa08eef81d42ad7b7283e24b89f87cfe0e2514f5dfc417fc491237392de91a"
+}

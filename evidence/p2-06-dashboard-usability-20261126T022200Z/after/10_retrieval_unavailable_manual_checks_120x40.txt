@@ -1,0 +1,32 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:08] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌──────────── Active Incidents > inc-sim-tx-rag-down-004 [SOP & RAG] [FOCUSED] ────────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(0)   SOP & RAG(0)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-tx-rag-down-004 (v1) | [HIGH] HIGH | transaction-service (lab) | State:          │
+│ [4] AI Model Config      ││ HUMAN_REVIEW | Mode: OFFLINE                                                             │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ ┌────────────────────── Runbook SOP Citations & RAG Transparency ──────────────────────┐ │
+│                          ││ │ SOP Status [RETRIEVAL_UNAVAILABLE]: RETRIEVAL_UNAVAILABLE: Retrieval or response     │ │
+└──────────────────────────┘│ │ validation did not complete reliably. SOP availability is unknown.                   │ │
+                            │ │ Assessment: Retrieval or response validation did not complete reliably. SOP          │ │
+                            │ │ availability is unknown.                                                             │ │
+                            │ │ RAG Context Delivery: Not applicable / not recorded (no online LLM context request   │ │
+                            │ │ in deterministic or fallback mode).                                                  │ │
+                            │ │                                                                                      │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌────────────────── SRE Recommended Verification (Human-Controlled) ───────────────────┐ │
+                            │ │ 1. [chk-01 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=-] [HUMAN_ESCALATION_REQUIRED]    │ │
+                            │ │    NOT_PERFORMED · HUMAN ESCALATION REQUIRED (NOT SOP-BACKED): Ask the authorized    │ │
+                            │ │ incident owner to identify the service, incident interval and a scoped telemetry     │ │
+                            │ │ source for the unresolved diagnosis. No evidence-linked inspection is available yet. │ │
+                            │ │ Guardrail: status=NOT_PERFORMED | auto_execution_allowed=False |                     │ │
+                            │ │ requires_human_approval=True                                                         │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

@@ -1,0 +1,76 @@
+{
+  "generated_at_utc": "2026-11-26T03:22:25.234344Z",
+  "environment": {
+    "python": "3.12.14",
+    "dataset_incidents": 16
+  },
+  "cli_startup_help": {
+    "median_ms": 1523.82,
+    "p95_ms": 1600.76,
+    "max_ms": 1600.76
+  },
+  "atomic_snapshot_refresh_16_incidents": {
+    "median_ms": 6.83,
+    "p95_ms": 7.67,
+    "max_ms": 8.98
+  },
+  "render_latency_by_viewport": {
+    "80x24_overview": {
+      "median_ms": 9.77,
+      "p95_ms": 11.81,
+      "max_ms": 14.35
+    },
+    "80x24_detail": {
+      "median_ms": 11.08,
+      "p95_ms": 20.18,
+      "max_ms": 23.09
+    },
+    "100x30_overview": {
+      "median_ms": 11.42,
+      "p95_ms": 11.99,
+      "max_ms": 12.42
+    },
+    "100x30_detail": {
+      "median_ms": 12.07,
+      "p95_ms": 15.38,
+      "max_ms": 18.34
+    },
+    "120x40_overview": {
+      "median_ms": 12.64,
+      "p95_ms": 15.65,
+      "max_ms": 16.37
+    },
+    "120x40_detail": {
+      "median_ms": 12.08,
+      "p95_ms": 12.85,
+      "max_ms": 13.36
+    },
+    "160x50_overview": {
+      "median_ms": 14.06,
+      "p95_ms": 14.98,
+      "max_ms": 15.89
+    },
+    "160x50_detail": {
+      "median_ms": 12.22,
+      "p95_ms": 13.64,
+      "max_ms": 13.74
+    }
+  },
+  "keystroke_dispatch_latency_100_steps": {
+    "median_ms": 0.0,
+    "p95_ms": 0.03,
+    "max_ms": 68.21
+  },
+  "memory_100_navigation_steps_kib": {
+    "before_kib": 0.0,
+    "after_kib": 317.2,
+    "delta_kib": 317.2,
+    "peak_kib": 805.99
+  },
+  "backend_probe_frequency": {
+    "health_tab_renders": 25,
+    "subprocess_health_probes_executed": 1,
+    "health_probe_ttl_seconds": 10.0,
+    "llm_requests_triggered_by_rendering": 0
+  }
+}

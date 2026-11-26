@@ -1,8 +1,8 @@
 # AI Agentic SRE & Hybrid RAG Investigation Engine — Simulation PoC
 
-> **Status Proyek:** **SELESAI (Fase 1 s/d Fase 4 — Chapter `C01` s/d `C24`)**  
+> **Status Proyek:** **SELESAI (Fase 1 s/d Fase 4 — Chapter `C01` s/d `C24` + Remediasi `P0-01` s/d `P2-07`)**  
 > **Keputusan Resmi Gate G4:** **`CONDITIONAL GO`** (*Concept Feasibility Approved with Corrective Action Plan `CAP-01` s/d `CAP-05`*)  
-> **Test Suite:** **540/540 Automated Tests Passed** (`pytest -v`)  
+> **Test Suite:** **Seluruh Suite Regresi Aktif Lulus** (`pytest -p anyio`; tes penjaga freeze historis Stage 3A `test_c21_benchmark.py` / `test_c22_reproducibility_handover.py` mendeteksi perubahan pasca-freeze secara sengaja hingga pemilik menyetujui *re-freeze*)  
 > **Panduan Lengkap:** Silakan baca [Handbook Operasional & Panduan Penggunaan Tools](docs/HANDBOOK_OPERASIONAL.md) untuk instruksi mendalam.  
 > **Prinsip Keselamatan Utama:** Seluruh layanan, akun, transaksi, log, dan skenario adalah **100% sintetis**. Agen investigasi beroperasi secara ketat melalui **Read-Only Authenticated Policy Gateway (`KPI-09 = 0`)** tanpa akses ke Ground Truth (`KPI-10 = 0`) dan tanpa auto-remediation (`HUM-01`).
 
@@ -92,8 +92,11 @@ python3 -m traffic.generator --target-url http://127.0.0.1:18080 --profile norma
 
 ### Menjalankan Rangkaian Pengujian Otomatis
 ```bash
-# Menjalankan seluruh test suite repository (540 tests passed):
-pytest -v
+# Menjalankan suite regresi offline repository (sertakan -p anyio jika autoload plugin dinonaktifkan):
+pytest -p anyio -v --ignore=tests/test_c03_compose_live.py
+
+# Menjalankan uji integrasi live Docker Compose (pastikan kontainer lab aktif):
+pytest -v tests/test_c03_compose_live.py
 
 # Menjalankan investigasi dan review console (TUI):
 python3 scripts/sre_dashboard.py

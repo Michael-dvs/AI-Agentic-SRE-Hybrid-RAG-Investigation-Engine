@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:06] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌───── Active Incidents > inc-sim-notif-lag-running-003 [Triage & Progress] [FOCUSED] ─────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(0)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(0)   SOP & RAG(0)   Review & Audit                                               │
+│ [3] Service Health       ││ Incident / Revision     inc-sim-notif-lag-running-003 (Dossier not yet generated         │
+│ [4] AI Model Config      ││                         (investigation has not reached DRAFTED/HUMAN_REVIEW))            │
+│ [5] Telegram Alerts      ││ Severity & Scope        [MED] MEDIUM | env=lab | services: notification-service          │
+│ [?] Keyboard & Guide     ││ Closure / Diagnosis     NOT_GENERATED (diagnosis_verified=False,                         │
+│ [Q] Quit Console         ││                         remediation_authorized=False)                                    │
+│                          ││ Safety & Trust          Auto remediation: DISABLED (auto_action_triggered=False) |       │
+└──────────────────────────┘│                         Reviewer Trust: Local PoC caller-asserted identity               │
+                            │                         (unauthenticated)                                                │
+                            │ Reasoning Mode          INVESTIGATION IN PROGRESS (EVIDENCE_COLLECTED)                   │
+                            │ Provider / Model        local-rule-engine / pending                                      │
+                            │ Token Usage             Pending completion                                               │
+                            │ Prompt / Timing         Prompt: deterministic_baseline_rules | Alert:                    │
+                            │                         2026-11-26T02:18:00Z | Ready: -                                  │
+                            │ Workflow Stages: [x:RCV]->[x:COR]->[x:TRI]->[*:EVD]->[ :RAG]->[ :HYP]->[ :VAL]->[        │
+                            │ :DRF]->[ :REV]  (Duration: 0.00s, ToolCalls: 2 | Stage completion != verified diagnosis) │
+                            │ ┌───────────────────────────────── Observed Symptoms ──────────────────────────────────┐ │
+                            │ │ RabbitMQ consumer queue lag rising on notification-service; collecting telemetry.    │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌───────────────────────────── Unknowns & Missing Sources ─────────────────────────────┐ │
+                            │ │ No uncertainties or missing sources recorded.                                        │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            │ ┌───────────────────────── Human Review Status & Audit Trail ──────────────────────────┐ │
+                            │ │ Eligibility : Review unavailable: dossier not yet generated                          │ │
+                            │ │ (state=EVIDENCE_COLLECTED).                                                          │ │
+                            │ │ Reviewer    : sre_operator_maya (L2_SRE) | Mode: Local PoC caller-asserted identity  │ │
+                            │ │ (unauthenticated)                                                                    │ │
+                            │ │ Semantics   : NOT_GENERATED (diagnosis_verified=False, remediation_authorized=False) │ │
+                            │ [Scroll: line 1-29/31 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [DOSSIER PENDING - EVIDENCE_COLLECTED]  [Tab] LENS  [U] REFRESH  [B/Esc] BACK  [?] HELP  [Q] QUIT | Navigation:      │
+│ [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                                │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

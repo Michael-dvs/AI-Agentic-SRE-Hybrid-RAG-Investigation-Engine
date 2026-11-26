@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@09:50:15] Env:lab | ReviewQueue:2 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌──────── Navigation ────────┐┌───────── Active Incidents > inc-p206-auth-competing-002 [SOP & RAG] [FOCUSED] ─────────┐
+│ [1] Active Incidents [3]   ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence │
+│ [2] Archive Dossiers [1]   ││ Lineage(0)   SOP & RAG(0)   Review & Audit                                             │
+│ [3] Service Health         ││ Incident / Revision     inc-p206-auth-competing-002 (Revision v1 (initial dossier))    │
+│ [4] AI Model Config        ││ Severity & Scope        [HIGH] HIGH | env=lab | services: auth-service, api-gateway    │
+│ [5] Telegram Alerts        ││ Closure / Diagnosis     PENDING_REVIEW (diagnosis_verified=False,                      │
+│ [?] Keyboard & Guide       ││                         remediation_authorized=False)                                  │
+│ [Q] Quit Console           ││ Safety & Trust          Auto remediation: DISABLED (auto_action_triggered=False) |     │
+│                            ││                         Reviewer Trust: Local PoC caller-asserted identity             │
+└────────────────────────────┘│                         (unauthenticated)                                              │
+                              │ Reasoning Mode          MANUAL FALLBACK (UNAVAILABLE)                                  │
+                              │ Provider / Model        local-rule-engine / deterministic_rule_engine_v1               │
+                              │ Token Usage             0 tokens (LLM unavailable; deterministic fallback active)      │
+                              │ Prompt / Timing         Prompt: deterministic_baseline_rules | Alert:                  │
+                              │                         2026-11-26T02:12:00Z | Ready: 2026-11-26T02:12:00Z             │
+                              │ Workflow Stages:                                                                       │
+                              │ [x:RCV]->[x:COR]->[x:TRI]->[x:EVD]->[x:RAG]->[x:HYP]->[x:VAL]->[x:DRF]->[*:REV]        │
+                              │ (Duration: unavailable | Stage completion != verified diagnosis)                       │
+                              │ ┌───────────────────── Runbook SOP Citations & RAG Transparency ─────────────────────┐ │
+                              │ │ SOP Status [CONFLICTING_OR_COMPETING_SOPS]: SOP_FILTERED_OUT: Returned references  │ │
+                              │ │ did not meet applicability checks (MISSING_EVIDENCE_REF). No eligible reference    │ │
+                              │ │ can be cited.                                                                      │ │
+                              │ │ Assessment: SOP applicability has not been established.                            │ │
+                              │ │ RAG Context Delivery: Not applicable / not recorded (no online LLM context request │ │
+                              │ │ in deterministic or fallback mode).                                                │ │
+                              │ │                                                                                    │ │
+                              │ └────────────────────────────────────────────────────────────────────────────────────┘ │
+                              │ ┌───────────────── SRE Recommended Verification (Human-Controlled) ──────────────────┐ │
+                              │ │ 1. [chk-fb-01 | STATUS=NOT_PERFORMED | RISK=LOW | SOP=-]                           │ │
+                              │ │ [HUMAN_ESCALATION_REQUIRED]                                                        │ │
+                              │ [Scroll: line 1-29/36 | Up/Dn or PgUp/PgDn]                                            │
+                              └────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

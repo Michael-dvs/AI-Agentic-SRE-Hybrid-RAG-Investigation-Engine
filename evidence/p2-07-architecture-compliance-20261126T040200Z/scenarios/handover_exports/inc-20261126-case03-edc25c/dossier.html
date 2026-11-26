@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Incident Dossier - inc-20261126-case03-edc25c v2</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 24px; background: #f8fafc; color: #1e293b; }
+    .container { max-width: 960px; margin: 0 auto; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; }
+    h1, h2, h3 { color: #0f172a; margin-top: 0; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 24px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-weight: 600; font-size: 0.85rem; color: #fff; background: #10b981; }
+    .badge-sec { background: #0284c7; }
+    .badge-alert { background: #dc2626; }
+    .hash { font-family: monospace; font-size: 0.85rem; color: #64748b; word-break: break-all; }
+    .card { background: #f1f5f9; border-radius: 6px; padding: 16px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 20px; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+    th { background: #f8fafc; font-weight: 600; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .rule-banner { background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin: 16px 0; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <div>
+        <h1>Incident Handover Dossier</h1>
+        <div><strong>Incident ID:</strong> inc-20261126-case03-edc25c (Revision v2) | <strong>Severity:</strong> <span class="badge badge-alert">HIGH</span></div>
+      </div>
+      <div>
+        <span class="badge">APPROVED</span>
+      </div>
+    </div>
+
+    <div class="rule-banner">
+      <strong>Zero Auto-Remediation &amp; Approval Semantics (RULE-007, RULE-008 &amp; HUM-01):</strong>
+      Closure Meaning: <code>ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED</code> |
+      Diagnosis Verified: <code>false</code> |
+      Technical Incident Resolved: <code>false</code> |
+      Remediation Authorized: <code>false</code> |
+      SOP Compliance Confirmed: <code>false</code> |
+      Automated action triggered: <code>false</code>.
+      Dossier <code>APPROVED</code> status represents administrative handover acceptance only and does not prove unconfirmed root causes or satisfy missing SOP/evidence requirements.
+    </div>
+
+    <div class="card">
+      <h3>Cryptographic Integrity (Canonical SHA-256)</h3>
+      <div class="hash">Hash: c15eb1d2b8a4c1dfeda65ad23a066fdcecf756a3783da2e226680c61068585c9</div>
+    </div>
+
+    <h2>1. Root Cause Analysis & Ranked Hypotheses</h2>
+    <table>
+      <thead><tr><th>Rank</th><th>Hypothesis Statement</th><th>Evaluation Status</th><th>Confidence</th></tr></thead>
+      <tbody>
+        <tr><td>#1</td><td>Candidate PostgreSQL slow query on ledger-service pending explain-analyze check.</td><td><span class='badge'>INCONCLUSIVE</span></td><td>N/A</td></tr><tr><td>#2</td><td>Service operational error in ledger-service (WARN_DB_SLOW_QUERY)</td><td><span class='badge'>SUPPORTED</span></td><td>N/A</td></tr>
+      </tbody>
+    </table>
+
+    <h2>1b. Verified Evidence &amp; Temporal Provenance</h2>
+    <table>
+      <thead><tr><th>Evidence ID</th><th>Tool &amp; Source</th><th>Observed At &amp; Window</th><th>Quality</th><th>Referenced By</th><th>Summary &amp; Temporal Scope</th></tr></thead>
+      <tbody>
+        <tr><td><code>ev-inc-20261126-case03-edc25c-001</code></td><td>get_service_metrics<br><small><code>prometheus:http://127.0.0.1:19090</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.673097Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-002</code></td><td>search_error_logs<br><small><code>loki:http://127.0.0.1:13100</code></small></td><td><code>2026-11-26T05:03:45.604692Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>#2 (supports)</td><td>WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:44.812995Z; WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:45.209691Z; WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:45.604692Z [svc=ledger-service | env=lab | obs=2026-11-26T05:03:45.604692Z | collected=2026-11-26T05:03:46.680608Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-003</code></td><td>get_service_metrics<br><small><code>prometheus:http://127.0.0.1:19090</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.769005Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-004</code></td><td>search_error_logs<br><small><code>loki:http://127.0.0.1:13100</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>search_error_logs queried on api-gateway: 0 records returned. [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.773324Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-005</code></td><td>get_service_metrics<br><small><code>prometheus:http://127.0.0.1:19090</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.867949Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-006</code></td><td>search_error_logs<br><small><code>loki:http://127.0.0.1:13100</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>search_error_logs queried on transaction-service: 0 records returned. [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.872427Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-007</code></td><td>get_service_metrics<br><small><code>prometheus:http://127.0.0.1:19090</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>get_service_metrics queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.907003Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-008</code></td><td>search_error_logs<br><small><code>loki:http://127.0.0.1:13100</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>search_error_logs queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.910524Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-009</code></td><td>get_trace_summary<br><small><code>tempo:http://127.0.0.1:13200</code></small></td><td><code>2026-11-26T05:03:44.824157Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>partial</td><td>contextual</td><td>UNKNOWN [OK 363.036ms] trace=0c9161b5bbf3.. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:44.824157Z | collected=2026-11-26T05:03:46.916089Z | temporal=TEMPORALLY_RELEVANT]</td></tr><tr><td><code>ev-inc-20261126-case03-edc25c-010</code></td><td>get_service_metrics<br><small><code>prometheus:http://127.0.0.1:19090</code></small></td><td><code>2026-11-26T05:03:51.581823Z</code><br><small>2026-11-26T05:03:14.375521Z .. 2026-11-26T05:03:51.581823Z</small></td><td>complete</td><td>contextual</td><td>error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:47.004287Z | temporal=TEMPORALLY_RELEVANT]</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2. Authoritative SOP & Runbook Citations</h2>
+    <p>CONFLICTING_OR_COMPETING_SOPS: multiple distinct eligible SOP sources or versions matched without established precedence; human review and escalation required before following guidance.</p>
+    <ul>
+      <li><strong>SOP-LEDGER-ERR-504</strong> (SOP-LEDGER-ERR-504 v1.0.0) SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service · chk-SOP-LEDGER-ERR-504-v1.0.0-001 · <code>kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md</code></li><li><strong>SOP-LEDGER-ERR-504</strong> (SOP-LEDGER-ERR-504 v1.0.0) SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service &gt; 1. Perbedaan Karakteristik dengan Gateway Timeout · chk-SOP-LEDGER-ERR-504-v1.0.0-002 · <code>kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md</code></li><li><strong>SOP-LEDGER-001</strong> (SOP-LEDGER-001 v2.0.0) SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) · chk-SOP-LEDGER-001-v2.0.0-001 · <code>kb://corpus/ledger_service/SOP-LEDGER-001-v2.md</code></li>
+    </ul>
+
+    <h2>2b. Unknowns &amp; Missing Sources</h2>
+    <ul>
+      <li>Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source.</li>
+    </ul>
+    <h2>Pending manual verification (human decision only)</h2>
+    <ol><li>chk-01: NOT_PERFORMED · HUMAN ESCALATION REQUIRED: Compare the cited sources with the service owner before using their guidance. Precedence is not established; do not combine instructions.</li><li>chk-02: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li><li>chk-03: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li><li>chk-04: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li><li>chk-05: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, get_service_metrics (authorized read-only view). Compare request volume and error-rate series across the incident window. An error-rate rise during traffic supports service impact; traffic volume alone does not establish failures. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li><li>chk-06: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li><li>chk-07: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.</li></ol>
+
+    <h2>3. Review Decision History (Append-Only Audit)</h2>
+    <table>
+      <thead><tr><th>Review ID</th><th>Revision</th><th>Decision</th><th>Reviewer</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td><code>rev-f8abcafee3e54cf2</code></td><td>v1</td><td><strong>EDIT</strong></td><td>sre_reviewer_maya (L2_SRE_REVIEWER)</td><td>Added specific slow-query note while preserving AI finding.</td></tr><tr><td><code>rev-258db9c54c334d1a</code></td><td>v2</td><td><strong>APPROVE</strong></td><td>sre_reviewer_maya (L2_SRE_REVIEWER)</td><td>Accepted v2 dossier for administrative handover.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+╭───────────────────────────────── Navigation ─────────────────────────────────╮
+│ [1] Active  [2] Archive  [3] Health  [4] Model  [5] Telegram  [Q] Quit       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────── Active Incidents [FOCUSED] ─────────────────────────╮
+│ ┏━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┓ │
+│ ┃  No. ┃ Time     ┃ Incident                 ┃ Sev  ┃ Service    ┃ Mode    ┃ │
+│ ┡━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━┩ │
+│ │  ▶ 1 │ 10:44:34 │ inc-live-ledger-service… │ HIGH │ ledger-se… │ AI LLM  │ │
+│ │    2 │ 10:44:28 │ inc-live-api-gateway-4b… │ HIGH │ api-gatew… │ AI LLM  │ │
+│ │    3 │ 10:44:22 │ inc-live-transaction-se… │ HIGH │ transacti… │ AI LLM  │ │
+│ │    4 │ 10:44:14 │ inc-live-api-gateway-f9… │ HIGH │ api-gatew… │ AI LLM  │ │
+│ │    5 │ 10:11:31 │ inc-live-transaction-se… │ HIGH │ transacti… │ AI LLM  │ │
+│ │    6 │ 10:11:26 │ inc-live-ledger-service… │ HIGH │ ledger-se… │ AI LLM  │ │
+│ │    7 │ 10:11:20 │ inc-live-api-gateway-48… │ HIGH │ api-gatew… │ AI LLM  │ │
+│ └──────┴──────────┴──────────────────────────┴──────┴────────────┴─────────┘ │
+│ Navigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open      │
+│ Grafana  |  Showing 1-7 of 15                                                │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────── Review Action Bar ──────────────────────────────╮
+│ [↑/↓] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [←/Tab] TO MENU  [Q] QUIT |   │
+│ Navigation: [↑/↓] switch menu, [→/Enter/Tab] focus incident list.            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | 
+B/Esc=Back | Q=Quit

@@ -1,0 +1,38 @@
+╭───────── Navigation ─────────╮╭───────────────────────────── Active Incidents [FOCUSED] ─────────────────────────────╮
+│ [1] Active Incidents         ││ Incident                    inc-live-ledger-service-d825080201                       │
+│ [2] Archive Dossiers         ││ Severity                    HIGH                                                     │
+│ [3] Service Health           ││ Services                    ledger-service, api-gateway, transaction-service,        │
+│ [4] AI Model Config          ││                             db-dummy                                                 │
+│ [5] Telegram Alerts          ││ Status                      PENDING_REVIEW                                           │
+│ [Q] Quit                     ││ Closure / Diagnosis         PENDING_REVIEW (diagnosis_verified=False,                │
+│                              ││                             remediation_authorized=False)                            │
+╰──────────────────────────────╯│ Reviewer Trust              Local PoC caller-asserted identity (unauthenticated)     │
+                                │ Auto remediation            DISABLED | auto_action_triggered=False                   │
+                                │ Reasoning Mode              AI MODEL (ONLINE)                                        │
+                                │ Provider / Model            openrouter / nvidia/nemotron-3.5-lightning:free          │
+                                │ Prompt / Engine             6a7db2995c35b5cd53e00840…                                │
+                                │ Token Usage                 in=1051, out=623, total=1674                             │
+                                │ ╭─────────────────────────────── Observed Symptoms ────────────────────────────────╮ │
+                                │ │ Database connection pool exhausted on ledger-service                             │ │
+                                │ │ (ERR_CONNECTION_POOL_EXHAUSTED)                                                  │ │
+                                │ ╰──────────────────────────────────────────────────────────────────────────────────╯ │
+                                │ ╭────────────────────────── Impact & Dependency Context ───────────────────────────╮ │
+                                │ │ Error Budget Impact: moderate                                                    │ │
+                                │ │ Topology Flow: [api-gateway, transaction-service] -> ledger-service ->           │ │
+                                │ │ [db-dummy]                                                                       │ │
+                                │ │ Cascade Check: origin=ledger-service | is_cascade=False | flags=VALUE_MISMATCH,  │ │
+                                │ │ CLAIM_CORROBORATED                                                               │ │
+                                │ │ Topology Note: Topology alone does not establish causality; stale edges are      │ │
+                                │ │ unconfirmed.                                                                     │ │
+                                │ │                                                                                  │ │
+                                │ ╰──────────────────────────────────────────────────────────────────────────────────╯ │
+                                │ ┏━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓ │
+                                │ ┃ Rank  ┃ Hypothesis                             ┃ Support        ┃ Confidence     ┃ │
+                                │ ┡━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩ │
+                                │ │ 1     │ Ledger service connection pool         │ INCONCLUSIVE   │ 15% (LOW)      │ │
+                                │ [Scroll: line 1-31/172 | ↑/↓ or PgUp/PgDn]                                           │
+                                ╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────╮
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit

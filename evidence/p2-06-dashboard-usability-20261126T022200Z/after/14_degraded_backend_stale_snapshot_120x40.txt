@@ -1,0 +1,20 @@
+SRE INVESTIGATION CONSOLE [STALE LAST-KNOWN DATA | sync failed: OSError: SQLite disk I/O lock timeout | last ok 
+09:50:16] Env:lab | ReviewQueue:2 | Running:1 | Archive:1 | Lab:UNAVAILABLE | Mode:Offline-Deterministic($0) | 
+Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌──────── Navigation ────────┐┌────────────────────────────── Active Incidents [FOCUSED] ──────────────────────────────┐
+│ [1] Active Incidents [3]   ││                                                                                        │
+│ [2] Archive Dossiers [1]   ││   No.   Time             Incident        Sev      Service    Mode       State          │
+│ [3] Service Health         ││  ────────────────────────────────────────────────────────────────────────────────────  │
+│ [4] AI Model Config        ││   ▶ 1   11-26 09:05:00   inc-p206-led…   [CRIT]   ledger-…   AI LLM     HUMAN_REVIEW*  │
+│ [5] Telegram Alerts        ││     2   11-26 09:07:00   inc-p206-aut…   [HIGH]   auth-se…   FALLBACK   HUMAN_REVIEW*  │
+│ [?] Keyboard & Guide       ││     3   11-26 09:14:10   inc-p206-not…   [MED]    notific…   RUNNING    EVIDENCE_COL…  │
+│ [Q] Quit Console           ││                                                                                        │
+│                            ││ Selected Symptom: PostgreSQL connection pool checkout timeout burst on ledger-ser...   │
+└────────────────────────────┘│ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |   │
+                              │ [?] Help                                                                               │
+                              └────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation:   │
+│ [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                                │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

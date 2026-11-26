@@ -580,6 +580,8 @@ class InvestigationStateMachine:
         artifact_ref: str | None = None,
         input_data: Any = None,
         output_data: Any = None,
+        service_id: str | None = None,
+        environment: str | None = None,
     ) -> dict[str, Any]:
         """Execute and durably record a state transition within an atomic transaction."""
         now = utc_now_z()
@@ -589,6 +591,19 @@ class InvestigationStateMachine:
         formatted_inc_id = incident_id
         if not formatted_inc_id.startswith("inc-"):
             formatted_inc_id = f"inc-{formatted_inc_id}"
+
+        resolved_service_id = service_id.strip() if isinstance(service_id, str) and service_id.strip() else None
+        resolved_environment = environment.strip() if isinstance(environment, str) and environment.strip() else None
+        for candidate in (output_data, input_data):
+            if isinstance(candidate, dict):
+                if resolved_service_id is None:
+                    raw_svc = candidate.get("service_id")
+                    if isinstance(raw_svc, str) and raw_svc.strip():
+                        resolved_service_id = raw_svc.strip()
+                if resolved_environment is None:
+                    raw_env = candidate.get("environment")
+                    if isinstance(raw_env, str) and raw_env.strip():
+                        resolved_environment = raw_env.strip()
 
         # Compute cryptographic fingerprints for audit reproducibility
         in_hash = compute_sha256_hash(input_data) if input_data is not None else None
@@ -654,6 +669,8 @@ class InvestigationStateMachine:
             if not incident:
                 self.store.create_incident(
                     incident_id=formatted_inc_id,
+                    service_id=resolved_service_id,
+                    environment=resolved_environment,
                     initial_state=to_state,
                     status=status,
                 )
@@ -669,6 +686,20 @@ class InvestigationStateMachine:
                     raise InvalidStateTransitionError(
                         f"Concurrent state modification detected for {formatted_inc_id}: expected {from_state!r}"
                     )
+                if (
+                    (incident.get("service_id") is None and resolved_service_id is not None)
+                    or (incident.get("environment") is None and resolved_environment is not None)
+                ):
+                    with self.store._conn_lock:
+                        self.store._conn.execute(
+                            """
+                            UPDATE incidents
+                            SET service_id = COALESCE(service_id, ?),
+                                environment = COALESCE(environment, ?)
+                            WHERE incident_id = ?
+                            """,
+                            (resolved_service_id, resolved_environment, target_db_inc_id),
+                        )
 
             self.store.record_transition(
                 event=event_payload,

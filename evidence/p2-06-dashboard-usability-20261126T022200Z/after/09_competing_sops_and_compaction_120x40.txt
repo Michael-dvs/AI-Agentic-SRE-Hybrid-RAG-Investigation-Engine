@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:07] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌────────── Active Incidents > inc-sim-auth-competing-002 [SOP & RAG] [FOCUSED] ───────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(1)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(2)   SOP & RAG(2)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-auth-competing-002 (v1) | [HIGH] HIGH | auth-service (lab) | State: HUMAN_REVIEW │
+│ [4] AI Model Config      ││ | Mode: FALLBACK                                                                         │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ ┌────────────────────── Runbook SOP Citations & RAG Transparency ──────────────────────┐ │
+│                          ││ │ SOP Status [CONFLICTING_OR_COMPETING_SOPS]: CONFLICTING_OR_COMPETING_SOPS: multiple  │ │
+└──────────────────────────┘│ │ distinct eligible SOP sources or versions matched without established precedence;    │ │
+                            │ │ human review and escalation required before following guidance.                      │ │
+                            │ │ Assessment: Multiple distinct eligible SOP documents/versions matched without        │ │
+                            │ │ precedence; human escalation required.                                               │ │
+                            │ │ [COMPETING SOP WARNING] Do NOT combine instructions across competing runbooks;       │ │
+                            │ │ verify precedence with service owner.                                                │ │
+                            │ │ RAG Context Delivery: Recorded: retrieved=5, eligible=2, included_in_llm_prompt=1,   │ │
+                            │ │ omitted=1 (compaction=rung_2_trim_secondary_sops)                                    │ │
+                            │ │ Compaction Omissions: prompt_byte_budget_4096_rung_2                                 │ │
+                            │ │                                                                                      │ │
+                            │ │ - SOP-AUTH-001 v1.2.0 | 2.1 JWKS Key Cache Skew | chk-auth-101 |                     │ │
+                            │ │ kb://runbooks/sop-auth-001.md                                                        │ │
+                            │ │   Retrieval score=0.0291 (rrf_fusion: lexical/dense rank relevance only, NOT         │ │
+                            │ │ diagnostic confidence)                                                               │ │
+                            │ │   Inspect JWKS kid header alignment across replicas in read-only metrics.            │ │
+                            │ │                                                                                      │ │
+                            │ │ - SOP-AUTH-004 v1.0.0 | 3.4 Upstream OIDC Audience Drift | chk-auth-202 |            │ │
+                            │ │ kb://runbooks/sop-auth-004.md                                                        │ │
+                            │ │   Retrieval score=0.0284 (rrf_fusion: lexical/dense rank relevance only, NOT         │ │
+                            │ │ diagnostic confidence)                                                               │ │
+                            │ │   Compare token audience claim config before escalating to Identity team.            │ │
+                            │ [Scroll: line 1-29/46 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

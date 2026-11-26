@@ -1,0 +1,32 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@09:50:14] Env:lab | ReviewQueue:17 | Running:1 | Archive:2 | Lab:5/5 up | Mode:Offline-Deterministic($0) | 
+Reviewer:sre_reviewer(L2_SRE) [?]Help
+┌──────── Navigation ────────┐┌────────────────────────────────────────────────── Active Incidents [FOCUSED] ──────────────────────────────────────────────────┐
+│ [1] Active Incidents [18]  ││                                                                                                                                │
+│ [2] Archive Dossiers [2]   ││   No.   Time             Incident                 Sev      Service          Mode       State           Observed Symptom        │
+│ [3] Service Health         ││  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  │
+│ [4] AI Model Config        ││   ▶ 1   11-26 09:05:00   inc-p206-ledger-pool-…   [CRIT]   ledger-service   AI LLM     HUMAN_REVIEW*   PostgreSQL connection…  │
+│ [5] Telegram Alerts        ││     2   11-26 09:07:00   inc-p206-auth-competi…   [HIGH]   auth-service     FALLBACK   HUMAN_REVIEW*   Intermittent HTTP 401…  │
+│ [?] Keyboard & Guide       ││     3   11-23 10:39:14   inc-live-ledger-servi…   [HIGH]   ledger-service   AI LLM     HUMAN_REVIEW*   Database connection p…  │
+│ [Q] Quit Console           ││     4   11-23 10:39:14   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Downstream dependency…  │
+│                            ││     5   11-23 10:39:14   inc-live-transaction-…   [HIGH]   transaction-s…   AI LLM     HUMAN_REVIEW*   Service transaction-s…  │
+└────────────────────────────┘│     6   11-23 10:39:14   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Service api-gateway e…  │
+                              │     7   11-23 10:05:51   inc-live-transaction-…   [HIGH]   transaction-s…   AI LLM     HUMAN_REVIEW*   Downstream dependency…  │
+                              │     8   11-23 10:05:51   inc-live-ledger-servi…   [HIGH]   ledger-service   AI LLM     HUMAN_REVIEW*   Database connection p…  │
+                              │     9   11-23 10:05:51   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Downstream dependency…  │
+                              │    10   11-23 10:05:51   inc-live-transaction-…   [HIGH]   transaction-s…   AI LLM     HUMAN_REVIEW*   Service transaction-s…  │
+                              │    11   11-23 10:05:51   inc-live-transaction-…   [HIGH]   transaction-s…   AI LLM     HUMAN_REVIEW*   Service transaction-s…  │
+                              │    12   11-23 10:05:51   inc-live-ledger-servi…   [HIGH]   ledger-service   AI LLM     HUMAN_REVIEW*   Service ledger-servic…  │
+                              │    13   11-23 10:05:51   inc-live-ledger-servi…   [HIGH]   ledger-service   AI LLM     HUMAN_REVIEW*   Service ledger-servic…  │
+                              │    14   11-23 10:05:51   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Service api-gateway l…  │
+                              │    15   11-23 10:05:51   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Service api-gateway e…  │
+                              │    16   11-23 10:02:50   inc-live-transaction-…   [HIGH]   transaction-s…   AI LLM     HUMAN_REVIEW*   Downstream dependency…  │
+                              │    17   11-23 10:02:50   inc-live-api-gateway-…   [HIGH]   api-gateway      AI LLM     HUMAN_REVIEW*   Downstream dependency…  │
+                              │    18   11-26 09:14:10   inc-p206-notif-runnin…   [MED]    notification-…   RUNNING    EVIDENCE_COL…   RabbitMQ consumer lag…  │
+                              │                                                                                                                                │
+                              │ Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |  [?] Help                                 │
+                              └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────────────────────────┐
+│ [Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation: [Up/Dn] switch menu, [Right/Enter/Tab]    │
+│ focus incident list, [?] help.                                                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

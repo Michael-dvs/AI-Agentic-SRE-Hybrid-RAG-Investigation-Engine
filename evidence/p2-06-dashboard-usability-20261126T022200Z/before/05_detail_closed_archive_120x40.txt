@@ -1,0 +1,38 @@
+╭───────── Navigation ─────────╮╭───────────────────────────── Archive Dossiers [FOCUSED] ─────────────────────────────╮
+│ [1] Active Incidents         ││ Incident                    inc-live-transaction-service-82bdecc894                  │
+│ [2] Archive Dossiers         ││ Severity                    HIGH                                                     │
+│ [3] Service Health           ││ Services                    transaction-service, api-gateway, db-dummy,              │
+│ [4] AI Model Config          ││                             ledger-service, notification-service                     │
+│ [5] Telegram Alerts          ││ Status                      APPROVED                                                 │
+│ [Q] Quit                     ││ Closure / Diagnosis         ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED                   │
+│                              ││                             (diagnosis_verified=False, technical_resolved=False,     │
+╰──────────────────────────────╯│                             remediation_authorized=False)                            │
+                                │ Reviewer Trust              Local PoC caller-asserted identity (unauthenticated)     │
+                                │ Auto remediation            DISABLED | auto_action_triggered=False                   │
+                                │ Reasoning Mode              AI MODEL (ONLINE)                                        │
+                                │ Provider / Model            openrouter / nvidia/nemotron-3.5-lightning:free          │
+                                │ Prompt / Engine             6a7db2995c35b5cd53e00840…                                │
+                                │ Token Usage                 in=1047, out=398, total=1445                             │
+                                │ ╭─────────────────────────────── Observed Symptoms ────────────────────────────────╮ │
+                                │ │ Downstream dependency unavailable reported by transaction-service                │ │
+                                │ │ (ERR_DEPENDENCY_UNAVAILABLE)                                                     │ │
+                                │ ╰──────────────────────────────────────────────────────────────────────────────────╯ │
+                                │ ╭────────────────────────── Impact & Dependency Context ───────────────────────────╮ │
+                                │ │ Error Budget Impact: moderate                                                    │ │
+                                │ │ Topology Flow: [api-gateway] -> transaction-service -> [db-dummy,                │ │
+                                │ │ ledger-service, notification-service]                                            │ │
+                                │ │ Cascade Check: origin=api-gateway | is_cascade=True | flags=CLAIM_CORROBORATED,  │ │
+                                │ │ NO_APPLICABLE_RUNBOOK, DOWNSTREAM_SYMPTOM_CASCADE                                │ │
+                                │ │ Topology Note: Topology alone does not establish causality; stale edges are      │ │
+                                │ │ unconfirmed.                                                                     │ │
+                                │ │                                                                                  │ │
+                                │ ╰──────────────────────────────────────────────────────────────────────────────────╯ │
+                                │ ┏━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓ │
+                                │ ┃ Rank  ┃ Hypothesis                             ┃ Support        ┃ Confidence     ┃ │
+                                │ ┡━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩ │
+                                │ [Scroll: line 1-31/154 | ↑/↓ or PgUp/PgDn]                                           │
+                                ╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────╮
+│ [REVIEW LOCKED - FINALIZED]  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit

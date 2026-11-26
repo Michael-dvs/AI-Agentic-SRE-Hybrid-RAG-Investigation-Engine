@@ -1,0 +1,39 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:07] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌─────────── Active Incidents > inc-sim-ledger-pool-001 [Hypotheses] [FOCUSED] ────────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(2)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(2)   SOP & RAG(1)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-ledger-pool-001 (v1) | [CRIT] CRITICAL | ledger-service (lab) | State:           │
+│ [4] AI Model Config      ││ HUMAN_REVIEW | Mode: AI LLM                                                              │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ Calibration & Ranking: Heuristic support score [5%-85% cap], uncalibrated (not an        │
+│                          ││ empirical probability; does not prove or confirm root cause).                            │
+└──────────────────────────┘│ Authoritative persisted rank order preserved.                                            │
+                            │                                                                                          │
+                            │  Rank     Hypothesis                Support           Confidence              Evid(+/-)  │
+                            │  ──────────────────────────────────────────────────────────────────────────────────────  │
+                            │  ▶ #1     PostgreSQL connection     [SUPPORTED]       78% (HIGH)                +2 / -0  │
+                            │           pool saturation on                                                             │
+                            │           ledger-service                                                                 │
+                            │    #2     Network packet loss       [CONTRADICTED]    12% (LOW)                 +0 / -1  │
+                            │           between                                                                        │
+                            │           transaction-service and                                                        │
+                            │           ledger-service.                                                                │
+                            │                                                                                          │
+                            │ ┌────────────────────── Hypothesis Reasoning Details (Why & How) ──────────────────────┐ │
+                            │ │ #1 (hyp-inc-sim-ledger-pool-001-001) [SUPPORTED | 78% (HIGH)] PostgreSQL connection  │ │
+                            │ │ pool saturation on ledger-service                                                    │ │
+                            │ │   Why / Causal Analysis : Correlated ERR_CONNECTION_POOL_EXHAUSTED logs and 0.42     │ │
+                            │ │ error_rate ratio align within 2026-11-26T01:55..02:00Z.                              │ │
+                            │ │   Confidence Basis      : Supported by 2 modalities (logs + metrics) inside incident │ │
+                            │ │ window; capped at heuristic ceiling.                                                 │ │
+                            │ │   Main Uncertainty      : Database server-side max_connections parameter requires    │ │
+                            │ │ read-only DBA inspection.                                                            │ │
+                            │ [Scroll: line 1-29/34 | Up/Dn or PgUp/PgDn]                                              │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

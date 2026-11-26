@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Entrypoint for the Chapter 19 Unified SRE Command Center prototype."""
+"""Entrypoint for the SRE Investigation & Human Review Console (C19, P2-06)."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from orchestrator.usability_console import SREDashboard
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Unified SRE Command Center (Chapter 19 Stage 1A)")
+    parser = argparse.ArgumentParser(description="SRE Investigation & Human Review Console (P2-06)")
     parser.add_argument("--state-db", default=os.getenv("SRE_STATE_DB", "orchestrator_state.db"))
     parser.add_argument("--reviewer-ref", default=os.getenv("SRE_REVIEWER_REF", "sre_reviewer"))
     parser.add_argument("--reviewer-role", default=os.getenv("SRE_REVIEWER_ROLE", "L2_SRE"))
@@ -29,6 +29,17 @@ def main() -> int:
         "--handover-root",
         default=os.getenv("SRE_HANDOVER_ROOT", "artifacts/handover"),
     )
+    parser.add_argument(
+        "--refresh-interval",
+        type=float,
+        default=float(os.getenv("SRE_REFRESH_INTERVAL_SEC", "2.0")),
+        help="Bounded UI poll interval in seconds (minimum 0.5s)",
+    )
+    parser.add_argument(
+        "--ascii",
+        action="store_true",
+        help="Force ASCII-only borders and markers for limited terminal fonts",
+    )
     args = parser.parse_args()
 
     dashboard = SREDashboard(
@@ -37,8 +48,9 @@ def main() -> int:
         reviewer_role=args.reviewer_role,
         audit_path=args.audit_log,
         handover_root=args.handover_root,
+        ascii_mode=True if args.ascii else None,
     )
-    dashboard.run()
+    dashboard.run(refresh_interval=args.refresh_interval)
     return 0
 
 

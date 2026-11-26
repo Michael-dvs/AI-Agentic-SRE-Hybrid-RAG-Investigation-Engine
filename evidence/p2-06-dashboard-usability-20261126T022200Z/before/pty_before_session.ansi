@@ -1,0 +1,158 @@
+	
+[?1049h[H[?1000h[?1006h[96m╭─[0m[96m───[0m[96m Navigation [FOCUSED] [0m[96m───[0m[96m─╮[0m[37m╭─[0m[37m─────────────────────────────────[0m[37m Active Incidents [0m[37m─────────────────────────────────[0m[37m─╮[0m
+[96m│[0m [1;7m[1] Active Incidents[0m         [96m│[0m[37m│[0m ┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┓ [37m│[0m
+[96m│[0m [2] Archive Dossiers         [96m│[0m[37m│[0m ┃[1m [0m[1m No.[0m[1m [0m┃[1m [0m[1mTime          [0m[1m [0m┃[1m [0m[1mIncident    [0m[1m [0m┃[1m [0m[1mSeverity[0m[1m [0m┃[1m [0m[1mServ…[0m[1m [0m┃[1m [0m[1mMode   [0m[1m [0m┃[1m [0m[1mState       [0m[1m [0m┃ [37m│[0m
+[96m│[0m [3] Service Health           [96m│[0m[37m│[0m ┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩ [37m│[0m
+[96m│[0m [4] AI Model Config          [96m│[0m[37m│[0m │[1;36m [0m[1;36m ▶ 1[0m[1;36m [0m│[1;36m [0m[1;36m11-23 10:44:34[0m[1;36m [0m│[1;36m [0m[1;36minc-live-le…[0m[1;36m [0m│[1;36m [0m[1;36mHIGH    [0m[1;36m [0m│[1;36m [0m[1;36mledg…[0m[1;36m [0m│[1;36m [0m[1;36mAI LLM [0m[1;36m [0m│[1;36m [0m[1;36mHUMAN_REVIEW[0m[1;36m [0m│ [37m│[0m
+[96m│[0m [5] Telegram Alerts          [96m│[0m[37m│[0m │    2 │ 11-23 10:44:28 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m [1m[Q] Quit[0m                     [96m│[0m[37m│[0m │    3 │ 11-23 10:44:22 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m                              [96m│[0m[37m│[0m │    4 │ 11-23 10:44:14 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m╰──────────────────────────────╯[0m[37m│[0m │    5 │ 11-23 10:11:31 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    6 │ 11-23 10:11:26 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    7 │ 11-23 10:11:20 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    8 │ 11-23 10:11:17 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    9 │ 11-23 10:11:11 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   10 │ 11-23 10:11:08 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   11 │ 11-23 10:11:03 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   12 │ 11-23 10:10:57 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   13 │ 11-23 10:10:51 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   14 │ 11-23 10:07:59 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   15 │ 11-23 10:07:50 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m └──────┴────────────────┴──────────────┴──────────┴───────┴─────────┴──────────────┘ [37m│[0m
+                                [37m│[0m [1;32mNavigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open Grafana     [0m [37m│[0m
+                                [37m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m────────────────────────────────────────────────[0m[33m Review Action Bar [0m[33m─────────────────────────────────────────────────[0m[33m─╮[0m
+[33m│[0m [1m[↑/↓] SWITCH MENU  [→/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [Q] QUIT | Navigation: [↑/↓] switch menu, [→/Enter/Tab] [0m [33m│[0m
+[33m│[0m [1mfocus incident list.[0m                                                                                                 [33m│[0m
+[33m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[2mControls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit[0m                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        [96m╭─[0m[96m───[0m[96m Navigation [FOCUSED] [0m[96m───[0m[96m─╮[0m[37m╭─[0m[37m─────────────────────────────────[0m[37m Active Incidents [0m[37m─────────────────────────────────[0m[37m─╮[0m
+[96m│[0m [1;7m[1] Active Incidents[0m         [96m│[0m[37m│[0m ┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┓ [37m│[0m
+[96m│[0m [2] Archive Dossiers         [96m│[0m[37m│[0m ┃[1m [0m[1m No.[0m[1m [0m┃[1m [0m[1mTime          [0m[1m [0m┃[1m [0m[1mIncident    [0m[1m [0m┃[1m [0m[1mSeverity[0m[1m [0m┃[1m [0m[1mServ…[0m[1m [0m┃[1m [0m[1mMode   [0m[1m [0m┃[1m [0m[1mState       [0m[1m [0m┃ [37m│[0m
+[96m│[0m [3] Service Health           [96m│[0m[37m│[0m ┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩ [37m│[0m
+[96m│[0m [4] AI Model Config          [96m│[0m[37m│[0m │[1;36m [0m[1;36m ▶ 1[0m[1;36m [0m│[1;36m [0m[1;36m11-23 10:44:34[0m[1;36m [0m│[1;36m [0m[1;36minc-live-le…[0m[1;36m [0m│[1;36m [0m[1;36mHIGH    [0m[1;36m [0m│[1;36m [0m[1;36mledg…[0m[1;36m [0m│[1;36m [0m[1;36mAI LLM [0m[1;36m [0m│[1;36m [0m[1;36mHUMAN_REVIEW[0m[1;36m [0m│ [37m│[0m
+[96m│[0m [5] Telegram Alerts          [96m│[0m[37m│[0m │    2 │ 11-23 10:44:28 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m [1m[Q] Quit[0m                     [96m│[0m[37m│[0m │    3 │ 11-23 10:44:22 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m                              [96m│[0m[37m│[0m │    4 │ 11-23 10:44:14 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m╰──────────────────────────────╯[0m[37m│[0m │    5 │ 11-23 10:11:31 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    6 │ 11-23 10:11:26 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    7 │ 11-23 10:11:20 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    8 │ 11-23 10:11:17 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    9 │ 11-23 10:11:11 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   10 │ 11-23 10:11:08 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   11 │ 11-23 10:11:03 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   12 │ 11-23 10:10:57 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   13 │ 11-23 10:10:51 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   14 │ 11-23 10:07:59 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   15 │ 11-23 10:07:50 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m └──────┴────────────────┴──────────────┴──────────┴───────┴─────────┴──────────────┘ [37m│[0m
+                                [37m│[0m [1;32mNavigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open Grafana     [0m [37m│[0m
+                                [37m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m────────────────────────────────────────────────[0m[33m Review Action Bar [0m[33m─────────────────────────────────────────────────[0m[33m─╮[0m
+[33m│[0m [1m[↑/↓] SWITCH MENU  [→/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [Q] QUIT | Navigation: [↑/↓] switch menu, [→/Enter/Tab] [0m [33m│[0m
+[33m│[0m [1mfocus incident list.[0m                                                                                                 [33m│[0m
+[33m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[2mControls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit[0m                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        [96m╭─[0m[96m───[0m[96m Navigation [FOCUSED] [0m[96m───[0m[96m─╮[0m[37m╭─[0m[37m─────────────────────────────────[0m[37m Active Incidents [0m[37m─────────────────────────────────[0m[37m─╮[0m
+[96m│[0m [1;7m[1] Active Incidents[0m         [96m│[0m[37m│[0m ┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┓ [37m│[0m
+[96m│[0m [2] Archive Dossiers         [96m│[0m[37m│[0m ┃[1m [0m[1m No.[0m[1m [0m┃[1m [0m[1mTime          [0m[1m [0m┃[1m [0m[1mIncident    [0m[1m [0m┃[1m [0m[1mSeverity[0m[1m [0m┃[1m [0m[1mServ…[0m[1m [0m┃[1m [0m[1mMode   [0m[1m [0m┃[1m [0m[1mState       [0m[1m [0m┃ [37m│[0m
+[96m│[0m [3] Service Health           [96m│[0m[37m│[0m ┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩ [37m│[0m
+[96m│[0m [4] AI Model Config          [96m│[0m[37m│[0m │[1;36m [0m[1;36m ▶ 1[0m[1;36m [0m│[1;36m [0m[1;36m11-23 10:44:34[0m[1;36m [0m│[1;36m [0m[1;36minc-live-le…[0m[1;36m [0m│[1;36m [0m[1;36mHIGH    [0m[1;36m [0m│[1;36m [0m[1;36mledg…[0m[1;36m [0m│[1;36m [0m[1;36mAI LLM [0m[1;36m [0m│[1;36m [0m[1;36mHUMAN_REVIEW[0m[1;36m [0m│ [37m│[0m
+[96m│[0m [5] Telegram Alerts          [96m│[0m[37m│[0m │    2 │ 11-23 10:44:28 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m [1m[Q] Quit[0m                     [96m│[0m[37m│[0m │    3 │ 11-23 10:44:22 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m│[0m                              [96m│[0m[37m│[0m │    4 │ 11-23 10:44:14 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+[96m╰──────────────────────────────╯[0m[37m│[0m │    5 │ 11-23 10:11:31 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    6 │ 11-23 10:11:26 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    7 │ 11-23 10:11:20 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    8 │ 11-23 10:11:17 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │    9 │ 11-23 10:11:11 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   10 │ 11-23 10:11:08 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   11 │ 11-23 10:11:03 │ inc-live-le… │ HIGH     │ ledg… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   12 │ 11-23 10:10:57 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   13 │ 11-23 10:10:51 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   14 │ 11-23 10:07:59 │ inc-live-tr… │ HIGH     │ tran… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m │   15 │ 11-23 10:07:50 │ inc-live-ap… │ HIGH     │ api-… │ AI LLM  │ HUMAN_REVIEW │ [37m│[0m
+                                [37m│[0m └──────┴────────────────┴──────────────┴──────────┴───────┴─────────┴──────────────┘ [37m│[0m
+                                [37m│[0m [1;32mNavigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open Grafana     [0m [37m│[0m
+                                [37m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[33m╭─[0m[33m────────────────────────────────────────────────[0m[33m Review Action Bar [0m[33m─────────────────────────────────────────────────[0m[33m─╮[0m
+[33m│[0m [1m[↑/↓] SWITCH MENU  [→/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [Q] QUIT | Navigation: [↑/↓] switch menu, [→/Enter/Tab] [0m [33m│[0m
+[33m│[0m [1mfocus incident list.[0m                                                                                                 [33m│[0m
+[33m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[2mControls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit[0m                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        [96m╭─[0m[96m───[0m[96m Navigation [FOCUSED] [0m[96m───[0m[96m─╮[0m[37m╭─[0m[37m─────────────────────────────────[0m[37m Archive Dossiers [0m[37m─────────────────────────────────[0m[37m─╮[0m
+[96m│[0m [1] Active Incidents         [96m│[0m[37m│[0m ┏━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━┓ [37m│[0m
+[96m│[0m [1;7m[2] Archive Dossiers[0m         [96m│[0m[37m│[0m ┃[1m [0m[1m No.[0m[1m [0m┃[1m [0m[1mTime          [0m[1m [0m┃[1m [0m[1mIncident    [0m[1m [0m┃[1m [0m[1mSeverity[0m[1m [0m┃[1m [0m[1mServ…[0m[1m [0m┃[1m [0m[1mMode   [0m[1m [0m┃[1m [0m[1mState       [0m[1m [0m┃ [37m│[0m
+[96m│[0m [3] Service Health           [96m│[0m[37m│[0m ┡━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩ [37m│[0m
+[96m│[0m [4] AI Model Config          [96m│[0m[37m│[0m │[1;36m [0m[1;36m ▶ 1[0m[1;36m [0m│[1;36m [0m[1;36m11-23 10:44:38[0m[1;36m [0m│[1;36m [0m[1;36minc-live-tr…[0m[1;36m [0m│[1;36m [0m[1;36mHIGH    [0m[1;36m [0m│[1;36m [0m[1;36mtran…[0m[1;36m [0m│[1;36m [0m[1;36mAI LLM [0m[1;36m [0m│[1;36m [0m[1;36mCLOSED      [0m[1;36m [0m│ [37m│[0m
+[96m│[0m [5] Telegram Alerts          [96m│[0m[37m│[0m └──────┴────────────────┴──────────────┴──────────┴───────┴─────────┴──────────────┘ [37m│[0m
+[96m│[0m [1m[Q] Quit[0m                     [96m│[0m[37m│[0m [1;32mNavigation: [↑/↓ or j/k] Select  |  [Enter/O] Open Dossier  |  [G] Open Grafana     [0m [37m│[0m
+[96m│[0m                              [96m│[0m[37m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[96m╰──────────────────────────────╯[0m                                                                                        
+[33m╭─[0m[33m────────────────────────────────────────────────[0m[33m Review Action Bar [0m[33m─────────────────────────────────────────────────[0m[33m─╮[0m
+[33m│[0m [1m[↑/↓] SWITCH MENU  [→/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [Q] QUIT | Switched to tab Archive Dossiers.[0m             [33m│[0m
+[33m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[2mControls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit[0m                          
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        [?1049l[?1006l[?1000l[33mSRE Command Center closed without automated actions.[0m

@@ -1,9 +1,9 @@
 # HANDBOOK OPERASIONAL & PANDUAN PENGGUNAAN TOOLS
 ## AI Agentic SRE & Hybrid RAG Investigation Engine — Simulation PoC
 
-> **Status Proyek:** **SELESAI (Fase 1 s/d Fase 4 — Chapter `C01` s/d `C24`)**  
+> **Status Proyek:** **SELESAI (Fase 1 s/d Fase 4 — Chapter `C01` s/d `C24` + Remediasi `P0-01` s/d `P2-07`)**  
 > **Keputusan Resmi Gate G4:** **`CONDITIONAL GO`** (*Concept Feasibility Approved with Corrective Action Plan `CAP-01` s/d `CAP-05`*)  
-> **Hasil Pengujian Otomatis:** **540/540 Automated Pytest Suite Passed**  
+> **Hasil Pengujian Otomatis:** **Seluruh Suite Regresi Aktif Lulus (`pytest -p anyio`)** *(tes penjaga freeze historis Stage 3A mendeteksi modifikasi pasca-freeze hingga owner re-freeze)*  
 > **Invarian Keselamatan:** **Zero Mutation (`KPI-09 = 0`), Zero Ground Truth Leakage (`KPI-10 = 0`), Zero Obsolete SOP Active (`KPI-11 = 0`), Zero DLP Violation (`SEC-03 PASS`), No Auto-Remediation (`HUM-01 PASS`)**  
 > **Batas Hukum & Keamanan:** Seluruh data, layanan, transaksi, dan akun adalah **100% sintetis**. Maket ini dirancang untuk pembuktian konsep mekanistik dan kelayakan di laboratorium terisolasi; **bukan** izin deployment produksi perbankan nyata.
 
@@ -174,11 +174,14 @@ python3 -m traffic.generator --target-url http://127.0.0.1:18080 --profile spike
 ### 5.4 Menginjeksi dan Mereset Skenario Gangguan (Fault Harness)
 Maket ini menyediakan 14 skenario gangguan deterministik reversibel (`SC-01` s/d `SC-14`):
 ```bash
-# Contoh: Menginjeksi SC-03 (PostgreSQL pool exhaustion pada ledger-service)
-python3 -m fault_harness.runner --scenario SC-03 --target http://127.0.0.1:18080
+# Contoh: Menginjeksi SC-03 (PostgreSQL query latency spike pada ledger-service)
+python3 -m fault_harness.runner --scenario SC-03 --gateway-url http://127.0.0.1:18080
 
-# Contoh: Menginjeksi SC-09 (Tempo trace backend outage untuk uji honest uncertainty)
-python3 -m fault_harness.runner --scenario SC-09 --target http://127.0.0.1:18080
+# Contoh: Menginjeksi SC-05 (Connection pool exhaustion pada ledger-service)
+python3 -m fault_harness.runner --scenario SC-05 --gateway-url http://127.0.0.1:18080
+
+# Contoh: Menginjeksi SC-09 (Trace context drop / trace outage untuk uji honest uncertainty)
+python3 -m fault_harness.runner --scenario SC-09 --gateway-url http://127.0.0.1:18080
 
 # RESET DARURAT: Menghapus seluruh status gangguan dan memulihkan lab ke kondisi nominal
 ./scripts/fault_reset.sh
@@ -209,17 +212,23 @@ python3 scripts/sre_dashboard.py
 - `--reviewer-role`: Peran operator SRE (default: `L2_SRE` atau `L1_SRE`).
 - `--audit-log`: Lokasi log audit keputusan manusia (default: `artifacts/audit/c19-review-audit.jsonl`).
 - `--handover-root`: Direktori ekspor berkas handover (default: `artifacts/handover`).
+- `--refresh-interval`: Interval pembaruan snapshot otoritatif dalam detik (default: `2.0`, minimum `0.5`).
+- `--ascii`: Mode garis batas dan penanda ASCII murni untuk terminal dengan dukungan font terbatas.
 
 **Navigasi Tombol di Konsol (Single-Key Responsive Input + Alternate Screen + Trackpad Scroll Lock):**
+- `?`: Membuka/menutup panel referensi tombol dan invarian keselamatan operasional (*Help & Safety Semantics*).
+- `u`: Menyegarkan (*manual refresh*) snapshot state SQLite dan status probe secara langsung.
 - `Panah Atas / Bawah` (atau `k` / `j` di daftar):
   - Saat fokus di panel **Navigasi**: memindahkan menu aktif `[1]` s/d `[5]` secara langsung.
-  - Saat fokus di panel **Daftar Insiden**: memindahkan sorotan baris `▶` ke atas/bawah.
-- `Panah Kanan / Tab / Enter`: Memindahkan fokus dari panel **Navigasi** ke panel **Daftar Insiden** (dan tekan `Enter` / `o` lagi untuk membuka detail dossier).
-- `Panah Kiri / Tab`: Mengembalikan fokus ke panel **Navigasi**.
+  - Saat fokus di panel **Daftar Insiden**: memindahkan sorotan baris (stabil terhadap penambahan insiden baru).
+  - Saat berada di **Detail Insiden**: menggulir isi dossier ke atas/bawah (`PgUp` / `PgDn` untuk gulir cepat).
+- `Panah Kanan / Tab / Enter`: Memindahkan fokus dari panel **Navigasi** ke panel **Daftar Insiden** (dan tekan `Enter` / `o` lagi untuk membuka detail insiden).
+- `Tab` / `Shift+Tab` (saat di **Detail Insiden**): Berpindah *View Lens* (`All Sections`, `Triage & Progress`, `Hypotheses`, `Evidence Lineage`, `SOP & RAG`, `Review & Audit`).
+- `[` / `]` dan `i` (saat di **Detail Insiden**): Memilih item hipotesis/bukti berikutnya dan melompat langsung dari hipotesis ke bukti telemetri yang dirujuk (*Reference Resolution*).
+- `Panah Kiri / b / Esc`: Kembali secara bertahap dari modal $\rightarrow$ sub-view $\rightarrow$ tabel daftar insiden $\rightarrow$ panel navigasi.
 - `1`, `2`, `3`, `4`, `5`: Langsung melompat ke tab menu tertentu.
-- `b` atau `Esc`: Kembali (*Back*) dari tampilan detail dossier ke tabel daftar insiden.
-- `a` / `r` / `c` / `e`: Memberikan keputusan **APPROVE**, **REJECT**, **CORRECT**, atau **ESCALATE** saat dossier sedang dibuka.
-- `q`: Keluar (*Quit*) dari konsol dashboard dan mengembalikan layar terminal seperti semula.
+- `a` / `r` / `c` / `e`: Membuka **Modal Konfirmasi Human Review Dua Tahap** (`APPROVE`, `REJECT`, `CORRECT`, atau `ESCALATE`) yang terikat ke versi dan hash dossier; tekan `Tab`/`Enter` untuk berpindah kolom dan konfirmasi, atau `Esc` untuk membatalkan tanpa perubahan state.
+- `q`: Keluar (*Quit*) dari konsol dashboard secara bersih tanpa mengubah investigasi yang sedang berjalan.
 
 **Konfigurasi Interaktif pada Tab `[4] AI Model Config`:**
 - `p`: Memilih Provider API (`OpenRouter`, `OpenAI`, `Google Gemini`, `Ollama Local`, atau `Custom OpenAI-Compatible`).
@@ -242,18 +251,20 @@ CLI untuk merender ringkasan dossier, menghitung biaya token LLM, dan menjalanka
 
 **Perintah Menampilkan Ringkasan Dossier:**
 ```bash
-python3 scripts/review_console.py --dossier artifacts/handover/inc-sc03/dossier.json --view-only
+# Menampilkan dossier hasil ekspor handover atau berkas JSON dossier individual:
+python3 scripts/review_console.py --dossier artifacts/handover/inc-sc03/dossier_final.json --view-only
 ```
 
 **Perintah Memberikan Keputusan Review (APPROVE / REJECT / ESCALATE):**
 ```bash
-# Menyetujui dossier dan mengekspor paket handover publik:
+# Menyetujui dossier berstatus HUMAN_REVIEW dan mengekspor paket handover publik:
 python3 scripts/review_console.py \
-  --dossier artifacts/handover/inc-sc03/dossier.json \
+  --dossier path/to/pending_dossier.json \
+  --state-db orchestrator_state.db \
   --action APPROVE \
   --reviewer "michael-sre" \
   --role "L2_SRE" \
-  --rationale "Gejala DB pool exhaustion terkonfirmasi oleh metrik koneksi dan log PostgreSQL." \
+  --rationale "Gejala DB slow query terkonfirmasi oleh metrik latensi dan log PostgreSQL." \
   --export-handover \
   --create-ticket
 ```
@@ -281,11 +292,11 @@ python3 scripts/run_c22_clean_replay.py --mode deterministic_baseline
 Alat uji offline evaluator independen untuk mengukur performa diagnosa root cause terhadap dataset holdout terpisah tanpa membocorkan label ke agen investigasi:
 
 ```bash
-# Pra-pemeriksaan integritas isolasi ground truth:
-python3 scripts/run_c21_preflight.py
+# Pra-pemeriksaan integritas segel ground truth & kandidat freeze:
+python3 scripts/run_c21_preflight.py --tests-completed "pytest -p anyio" --output-dir evidence/preflight-check/
 
-# Eksekusi evaluasi holdout benchmark:
-python3 scripts/run_c21_benchmark.py --split H-G4 --output-dir evidence/benchmark-run/
+# Eksekusi evaluasi final holdout benchmark H-G4 (hanya saat freeze kandidat cocok dengan Stage 3A):
+python3 scripts/run_c21_benchmark.py --output-dir evidence/benchmark-run/
 ```
 
 ---
@@ -294,7 +305,7 @@ python3 scripts/run_c21_benchmark.py --split H-G4 --output-dir evidence/benchmar
 Alat pemindai otomatis untuk memastikan tidak ada data rahasia (API key, token, nomor kartu kredit dummy, atau PII) yang bocor ke sink publik, berkas log, maupun dossier:
 
 ```bash
-python3 scripts/dlp_sink_scanner.py --scan-dir artifacts/ --fail-on-violation
+python3 scripts/dlp_sink_scanner.py artifacts/ --output artifacts/observability/dlp-scan-report.json
 ```
 
 ---

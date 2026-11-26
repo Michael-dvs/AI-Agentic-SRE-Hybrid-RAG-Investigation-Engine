@@ -1,4 +1,4 @@
-"""Unified Rich terminal console for human dossier review in the simulation lab."""
+"""Unified Rich terminal console for SRE incident triage, investigation inspection, and human review (C19, P2-06)."""
 
 from __future__ import annotations
 
@@ -6,24 +6,25 @@ import datetime as dt
 import json
 import os
 import pathlib
-import re
+import sqlite3
 import subprocess
 import sys
 import time
 import webbrowser
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any, Dict, Mapping, Optional, Sequence
 from urllib.parse import urlencode
 
 try:
+    import select
     import termios
     import tty
-    import select
+
     _HAS_TERMIOS = True
 except ImportError:
     _HAS_TERMIOS = False
 
+from rich import box
 from rich.console import Console, ConsoleOptions, Group, RenderableType, RenderResult
-from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.segment import Segment
@@ -31,9 +32,7 @@ from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 
-from gateway.sanitizer import DeterministicSanitizer
 from observability.audit_chain import AuditHashChain
-from orchestrator.confidence import confidence_label_for_score
 from orchestrator.console_config import (
     PROVIDER_PRESETS,
     EnvConfigManager,
@@ -41,58 +40,84 @@ from orchestrator.console_config import (
     TelegramConfigHelper,
     mask_secret,
 )
+from orchestrator.console_view_models import (
+    ADMINISTRATIVE_CLOSURE_SHORT,
+    ARCHIVED_LIFECYCLE_STATES,
+    CALIBRATION_LIMITATION_NOTE,
+    INTEGRITY_SEMANTICS_NOTE,
+    REVIEW_ACTION_SEMANTICS,
+    AuthoritativeSnapshotCoordinator,
+    ConsoleDesignTokens,
+    DashboardSnapshot,
+    EvidenceItemVM,
+    HypothesisItemVM,
+    IncidentDetailVM,
+    build_incident_detail_vm,
+    compact_identifier,
+    format_local_timestamp,
+    sanitize_terminal_text,
+    tokens_for_console,
+)
 from orchestrator.handover import HandoverExporter
 from orchestrator.llm_provider import OPENROUTER_BASE_URL, OPENROUTER_MODEL
-from orchestrator.review import AuthorizedReviewManager, build_human_correction_payload
+from orchestrator.review import (
+    AuthorizedReviewManager,
+    InvalidDossierError,
+    ReviewError,
+    ReviewStateConflictError,
+    StaleDossierVersionError,
+    UnauthorizedReviewerError,
+    build_human_correction_payload,
+)
 from orchestrator.state_machine import WorkflowStateStore
-from orchestrator.verification_plan import availability_text, hypothesis_label
 from orchestrator.telegram_dispatcher import TelegramDispatcher
 
 
-ARCHIVE_STATES = {"CLOSED", "REJECTED", "MANUAL_TRIAGE_REQUIRED"}
+ARCHIVE_STATES = {"CLOSED", "REJECTED", "MANUAL_TRIAGE_REQUIRED", "FAILED_SAFE", "CANCELLED", "LEARNED"}
 
-_DISPLAY_SANITIZER = DeterministicSanitizer()
+MIN_TERMINAL_WIDTH = 68
+MIN_TERMINAL_HEIGHT = 16
+
+DETAIL_LENS_ORDER = ("all", "overview", "hypotheses", "evidence", "sop", "review")
+DETAIL_LENS_LABELS = {
+    "all": "All Sections",
+    "overview": "Triage & Progress",
+    "hypotheses": "Hypotheses",
+    "evidence": "Evidence Lineage",
+    "sop": "SOP & RAG",
+    "review": "Review & Audit",
+}
 
 
 def _bounded_sanitized_excerpt(value: Any, *, limit: int = 240) -> str:
-    raw = " ".join(str(value or "").split())
-    sanitized, _ = _DISPLAY_SANITIZER.sanitize_text(raw)
-    safe = "".join(char for char in sanitized if char >= " " and char != "\x7f")
+    """Sanitize and bound untrusted excerpt text for terminal display (SEC-03, INV-17)."""
+    safe = sanitize_terminal_text(value, max_chars=0, empty_placeholder="")
     if not safe:
         return "Excerpt unavailable."
     if len(safe) <= limit:
         return safe
-    return f"{safe[: limit - 1].rstrip()}…"
+    return f"{safe[: max(1, limit - 3)].rstrip()}..."
 
 
 def _format_incident_time(
     incident: Mapping[str, Any],
-    dossier: Mapping[str, Any],
+    dossier: Mapping[str, Any] | None,
     *,
     compact: bool = False,
 ) -> str:
     """Format incident timestamp into local HH:MM:SS (compact) or MM-DD HH:MM:SS."""
-    window = dossier.get("incident_window") if isinstance(dossier.get("incident_window"), Mapping) else {}
+    dos = dossier or {}
+    window = dos.get("incident_window") if isinstance(dos.get("incident_window"), Mapping) else {}
     raw_ts = (
         window.get("start")
-        or dossier.get("event_time")
-        or dossier.get("created_at")
+        or dos.get("window_start")
+        or dos.get("event_time")
+        or dos.get("alert_received_at")
+        or dos.get("created_at")
         or incident.get("created_at")
         or incident.get("updated_at")
     )
-    if not raw_ts or not isinstance(raw_ts, str):
-        return "-"
-    try:
-        cleaned = raw_ts.strip()
-        if cleaned.endswith("Z"):
-            cleaned = cleaned[:-1] + "+00:00"
-        parsed = dt.datetime.fromisoformat(cleaned)
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
-        local_dt = parsed.astimezone()
-        return local_dt.strftime("%H:%M:%S" if compact else "%m-%d %H:%M:%S")
-    except Exception:
-        return raw_ts[:16]
+    return format_local_timestamp(raw_ts, compact=compact)
 
 
 def build_grafana_incident_url(
@@ -107,11 +132,13 @@ def build_grafana_incident_url(
     window = dossier.get("incident_window") if isinstance(dossier.get("incident_window"), Mapping) else {}
     raw_start = (
         window.get("start")
+        or dossier.get("window_start")
         or dossier.get("event_time")
+        or dossier.get("alert_received_at")
         or dossier.get("created_at")
         or inc.get("created_at")
     )
-    raw_end = window.get("end") or raw_start
+    raw_end = window.get("end") or dossier.get("window_end") or raw_start
     service_id = str(dossier.get("service_id") or inc.get("service_id") or "api-gateway")
 
     def _to_epoch_ms(raw_val: Any) -> int | None:
@@ -152,10 +179,11 @@ def build_grafana_incident_url(
 class _ScrollableContent:
     """Slice any Rich renderable vertically to fit the terminal viewport."""
 
-    def __init__(self, renderable: RenderableType, offset: int, max_lines: int) -> None:
+    def __init__(self, renderable: RenderableType, offset: int, max_lines: int, *, monochrome: bool = False) -> None:
         self.renderable = renderable
         self.offset = max(0, offset)
         self.max_lines = max(4, max_lines)
+        self.monochrome = monochrome
 
     def __rich_console__(
         self,
@@ -173,9 +201,10 @@ class _ScrollableContent:
         off = max(0, min(self.offset, max_off))
         for line in lines[off : off + view_lines]:
             yield from line
+        scroll_style = Style(bold=True) if self.monochrome else Style(color="#38bdf8", bold=True)
         yield Segment(
-            f"[Scroll: line {off + 1}-{min(total, off + view_lines)}/{total} | ↑/↓ or PgUp/PgDn]\n",
-            Style(color="cyan", bold=True),
+            f"[Scroll: line {off + 1}-{min(total, off + view_lines)}/{total} | Up/Dn or PgUp/PgDn]\n",
+            scroll_style,
         )
 
 
@@ -197,16 +226,38 @@ class DashboardViewport:
 
 
 class DashboardRepository:
-    """Read dossiers and incident state through the durable workflow store."""
+    """Read dossiers and authoritative incident state snapshots through WorkflowStateStore."""
 
-    def __init__(self, store: WorkflowStateStore) -> None:
+    def __init__(self, store: WorkflowStateStore, *, probe_ttl_seconds: float = 10.0) -> None:
         self.store = store
+        self.coordinator = AuthoritativeSnapshotCoordinator(store, probe_ttl_seconds=probe_ttl_seconds)
+
+    def read_snapshot(
+        self,
+        *,
+        reviewer_ref: str = "sre_reviewer",
+        reviewer_role: str = "L2_SRE",
+        reviewer_directory: Mapping[str, Any] | None = None,
+        require_registered_reviewer: bool = False,
+        require_authenticated_context: bool = False,
+        generation: int | None = None,
+    ) -> DashboardSnapshot:
+        return self.coordinator.refresh(
+            reviewer_ref=reviewer_ref,
+            reviewer_role=reviewer_role,
+            reviewer_directory=reviewer_directory,
+            require_registered_reviewer=require_registered_reviewer,
+            require_authenticated_context=require_authenticated_context,
+            generation=generation,
+        )
 
     def active_dossiers(self) -> list[dict[str, Any]]:
+        """Return pending HUMAN_REVIEW dossier records (backward-compatible contract)."""
         return self._dossiers_for_states({"HUMAN_REVIEW"}, pending_only=True)
 
     def archived_dossiers(self) -> list[dict[str, Any]]:
-        return self._dossiers_for_states(ARCHIVE_STATES, pending_only=False)
+        """Return finalized dossier records (backward-compatible contract)."""
+        return self._dossiers_for_states(set(ARCHIVED_LIFECYCLE_STATES), pending_only=False)
 
     def latest_dossier(self, incident_id: str) -> dict[str, Any] | None:
         record = self.store.get_dossier(incident_id)
@@ -219,14 +270,16 @@ class DashboardRepository:
         pending_only: bool,
     ) -> list[dict[str, Any]]:
         records: list[dict[str, Any]] = []
-        for incident in self.store.list_incidents(current_states=states):
-            dossier = self.latest_dossier(incident["incident_id"])
-            if not dossier:
-                continue
-            status = dossier.get("review_summary", {}).get("status", "PENDING_REVIEW")
-            if pending_only and status not in ("PENDING_REVIEW", "MANUAL_TRIAGE"):
-                continue
-            records.append({"incident": incident, "dossier": dossier})
+        with self.store.transaction(immediate=False):
+            incidents = self.store.list_incidents(current_states=states)
+            for incident in incidents:
+                dossier = self.latest_dossier(incident["incident_id"])
+                if not dossier:
+                    continue
+                status = dossier.get("review_summary", {}).get("status", "PENDING_REVIEW")
+                if pending_only and status not in ("PENDING_REVIEW", "MANUAL_TRIAGE"):
+                    continue
+                records.append({"incident": incident, "dossier": dossier})
         return records
 
 
@@ -263,6 +316,7 @@ class ReviewActionController:
         rationale: str,
         corrected_hypothesis: str | None = None,
         escalation_target: str | None = None,
+        target_version: int | None = None,
         auth_context: Any = None,
     ) -> dict[str, Any]:
         action_upper = action.upper()
@@ -270,7 +324,7 @@ class ReviewActionController:
         if action_upper == "CORRECT":
             statement = " ".join((corrected_hypothesis or "").split())
             if not statement:
-                raise ValueError("Corrected hypothesis is required")
+                raise InvalidDossierError("Corrected hypothesis statement is required.")
             corrections = build_human_correction_payload(
                 dossier=dossier,
                 corrected_statement=statement,
@@ -278,6 +332,11 @@ class ReviewActionController:
                 reviewer_role=reviewer_role,
             )
 
+        effective_version = (
+            int(target_version)
+            if isinstance(target_version, int) and not isinstance(target_version, bool)
+            else int(dossier.get("dossier_version", 1))
+        )
         result = self.review_manager.submit_review(
             incident_id=str(dossier.get("incident_id", "inc-unknown")),
             dossier_dict=dossier,
@@ -287,7 +346,7 @@ class ReviewActionController:
             rationale=rationale,
             edited_dossier_data=corrections,
             escalation_target=escalation_target,
-            target_version=int(dossier.get("dossier_version", 1)),
+            target_version=effective_version,
             auth_context=auth_context,
         )
         artifacts: dict[str, str] = {}
@@ -328,7 +387,11 @@ class ServiceHealthInspector:
         except (OSError, subprocess.SubprocessError) as exc:
             return {"status": "UNAVAILABLE", "reason": type(exc).__name__, "services": []}
         if result.returncode != 0:
-            return {"status": "UNAVAILABLE", "reason": result.stderr.strip()[:300], "services": []}
+            return {
+                "status": "UNAVAILABLE",
+                "reason": sanitize_terminal_text(result.stderr.strip(), max_chars=240, empty_placeholder="Docker unavailable"),
+                "services": [],
+            }
 
         raw = result.stdout.strip()
         if not raw:
@@ -344,9 +407,9 @@ class ServiceHealthInspector:
 
         services = [
             {
-                "name": row.get("Service") or row.get("Name", "unknown"),
-                "state": row.get("State", "unknown"),
-                "health": row.get("Health", "not-reported"),
+                "name": sanitize_terminal_text(row.get("Service") or row.get("Name", "unknown"), max_chars=64),
+                "state": sanitize_terminal_text(row.get("State", "unknown"), max_chars=32),
+                "health": sanitize_terminal_text(row.get("Health", "not-reported"), max_chars=32),
             }
             for row in rows
             if isinstance(row, Mapping)
@@ -372,7 +435,9 @@ class CostMetricsReader:
 
 
 class SREDashboard:
-    """Render and operate the keyboard-driven Unified SRE Command Center."""
+    """Render and operate the keyboard-driven SRE Investigation & Human Review Console."""
+
+    _MENU_ORDER = ("active", "archive", "health", "model", "telegram")
 
     def __init__(
         self,
@@ -389,16 +454,33 @@ class SREDashboard:
         env_manager: EnvConfigManager | None = None,
         model_catalog: ModelCatalogClient | None = None,
         telegram_helper: TelegramConfigHelper | None = None,
+        reviewer_directory: Mapping[str, Any] | None = None,
+        require_registered_reviewer: bool = False,
+        require_authenticated_context: bool = False,
+        auth_context: Any = None,
+        ascii_mode: bool | None = None,
+        probe_ttl_seconds: float = 10.0,
     ) -> None:
         self.store = store
         self.console = console or Console()
         self.reviewer_ref = reviewer_ref
         self.reviewer_role = reviewer_role
-        self.repository = DashboardRepository(store)
+        self.reviewer_directory = reviewer_directory
+        self.require_registered_reviewer = require_registered_reviewer
+        self.require_authenticated_context = require_authenticated_context
+        self.auth_context = auth_context
+
+        ascii_env = os.getenv("SRE_CONSOLE_ASCII", "").strip().lower() in ("1", "true", "yes")
+        self.ascii_mode = bool(ascii_mode) if ascii_mode is not None else ascii_env
+
+        self.repository = DashboardRepository(store, probe_ttl_seconds=probe_ttl_seconds)
         self.actions = ReviewActionController(
             store,
             audit_path=audit_path,
             handover_root=handover_root,
+            reviewer_directory=reviewer_directory,
+            require_registered_reviewer=require_registered_reviewer,
+            require_authenticated_context=require_authenticated_context,
         )
         self.env_manager = env_manager or EnvConfigManager()
         self.model_catalog = model_catalog or ModelCatalogClient()
@@ -413,52 +495,338 @@ class SREDashboard:
             )
         self.health = health or ServiceHealthInspector()
         self.costs = costs or CostMetricsReader()
+
+        # View State (strictly separated from persisted domain state — Work Package E2)
         self.view = "active"
         self.focus = "menu"  # "menu" | "list"
         self.selected_incident_id: str | None = None
+        self.highlighted_incident_id: str | None = None
         self.selected_index: int = 0
+        self._last_synced_index: int = 0
         self.list_scroll_offset: int = 0
         self.detail_scroll_offset: int = 0
+
+        # Detail sub-navigation & reference resolution state (Work Package D1, I5)
+        self.detail_section: str = "all"  # one of DETAIL_LENS_ORDER
+        self.detail_return_stack: list[tuple[str, int]] = []
+        self.selected_hypothesis_idx: int = 0
+        self.selected_evidence_idx: int = 0
+        self.viewed_dossier_version: int = 0
+        self.viewed_dossier_hash: str = ""
+
+        # Transient Operation & Modal State (never persisted into domain workflow)
+        self.initial_loading: bool = False
+        self.refresh_in_progress: bool = False
+        self.help_open: bool = False
+        self.review_modal: dict[str, Any] | None = None
+        self.unsent_review_draft: dict[str, str] = {}
+        self._skip_next_render_refresh: bool = False
+        self._saved_termios: list[Any] | None = None
+        self._tty_fd: int | None = None
+        self._pending_byte: bytes | None = None
+
         self._screen: Any = None
         self.fetched_models: list[str] = []
         self.last_model_check: str = "Untested"
         self.last_telegram_check: str = "Untested"
-        self.notice = "Navigation: [↑/↓] switch menu, [→/Enter/Tab] focus incident list."
+        self.notice = "Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help."
+
+    # ------------------------------------------------------------------
+    # Glyph & Box Helpers (ASCII fallback for limited fonts/terminals)
+    # ------------------------------------------------------------------
+
+    def _tokens(self) -> ConsoleDesignTokens:
+        return tokens_for_console(self.console)
+
+    def _panel_box(self) -> box.Box:
+        return box.ASCII if self.ascii_mode else box.SQUARE
+
+    def _table_box(self) -> box.Box:
+        return box.ASCII if self.ascii_mode else box.SIMPLE_HEAD
+
+    def _sel_glyph(self) -> str:
+        return ">" if self.ascii_mode else "▶"
+
+    # ------------------------------------------------------------------
+    # Authoritative Snapshot & Stable Selection Synchronization
+    # ------------------------------------------------------------------
+
+    def refresh_snapshot(self, *, generation: int | None = None, force_probes: bool = False) -> DashboardSnapshot:
+        """Read an atomic snapshot from WorkflowStateStore and reconcile selection safely."""
+        self.refresh_in_progress = True
+        try:
+            snap = self.repository.read_snapshot(
+                reviewer_ref=self.reviewer_ref,
+                reviewer_role=self.reviewer_role,
+                reviewer_directory=self.reviewer_directory,
+                require_registered_reviewer=self.require_registered_reviewer,
+                require_authenticated_context=self.require_authenticated_context,
+                generation=generation,
+            )
+            if force_probes:
+                if self.view == "health":
+                    self.repository.coordinator.get_cached_health(self.health.inspect, force=True)
+                elif self.view == "model":
+                    self.repository.coordinator.get_cached_costs(self.costs.read, force=True)
+            self._reconcile_view_with_snapshot(snap)
+            return snap
+        finally:
+            self.refresh_in_progress = False
+            self.initial_loading = False
+
+    def apply_async_snapshot(self, snapshot: DashboardSnapshot, *, expected_incident_id: str | None = None) -> bool:
+        """Apply an async refresh result only if its generation is current and target still matches."""
+        if expected_incident_id is not None and self.selected_incident_id != expected_incident_id:
+            # Operator switched incidents while async load was in flight (A08): update cache only if newer,
+            # without clobbering current selection or scroll offsets.
+            return self.repository.coordinator.apply_external_snapshot(snapshot)
+        accepted = self.repository.coordinator.apply_external_snapshot(snapshot)
+        if accepted:
+            self._reconcile_view_with_snapshot(snapshot)
+        return accepted
+
+    def _entries_for_current_tab(self, snapshot: DashboardSnapshot) -> Sequence[IncidentDetailVM]:
+        if self.view == "archive":
+            return snapshot.archived_entries
+        return snapshot.active_entries
+
+    def _reconcile_view_with_snapshot(self, snapshot: DashboardSnapshot) -> None:
+        """Keep incident selection stable by ID across insertions, state transitions, and revisions."""
+        if self.view in ("active", "archive"):
+            rows = self._entries_for_current_tab(snapshot)
+            if not rows:
+                self.selected_index = 0
+                self._last_synced_index = 0
+                self.list_scroll_offset = 0
+                self.highlighted_incident_id = None
+            else:
+                # Honor explicit programmatic or keyboard changes to selected_index first
+                if self.selected_index != self._last_synced_index:
+                    clamped = max(0, min(self.selected_index, len(rows) - 1))
+                    self.selected_index = clamped
+                    self._last_synced_index = clamped
+                    self.highlighted_incident_id = rows[clamped].incident_id
+                elif self.highlighted_incident_id:
+                    found_idx = next(
+                        (i for i, item in enumerate(rows) if item.incident_id == self.highlighted_incident_id),
+                        None,
+                    )
+                    if found_idx is not None:
+                        self.selected_index = found_idx
+                        self._last_synced_index = found_idx
+                    else:
+                        # Highlighted incident moved to Archive or was removed
+                        moved_vm = snapshot.by_incident_id.get(self.highlighted_incident_id)
+                        clamped = max(0, min(self.selected_index, len(rows) - 1))
+                        self.selected_index = clamped
+                        self._last_synced_index = clamped
+                        old_id = self.highlighted_incident_id
+                        self.highlighted_incident_id = rows[clamped].incident_id
+                        if moved_vm and self.view == "active" and not self.selected_incident_id:
+                            self.notice = (
+                                f"Incident {old_id} transitioned to {moved_vm.lifecycle_state} (available in [2] Archive)."
+                            )
+                else:
+                    clamped = max(0, min(self.selected_index, len(rows) - 1))
+                    self.selected_index = clamped
+                    self._last_synced_index = clamped
+                    self.highlighted_incident_id = rows[clamped].incident_id
+
+        # Reconcile open detail view & active review modal if another process modified the incident
+        if self.selected_incident_id:
+            detail_vm = snapshot.by_incident_id.get(self.selected_incident_id)
+            if detail_vm is not None:
+                if self.review_modal is not None and self.review_modal.get("incident_id") == detail_vm.incident_id:
+                    target_ver = self.review_modal.get("target_version")
+                    if not detail_vm.review_eligibility.eligible:
+                        # Concurrent process finalized the incident while modal was open (Scenario O8)
+                        self._preserve_unsent_modal_draft()
+                        self.review_modal = None
+                        self.viewed_dossier_version = detail_vm.dossier_version
+                        self.viewed_dossier_hash = detail_vm.dossier_hash
+                        self.notice = (
+                            f"[REVIEW CONFLICT] Incident finalized concurrently ({detail_vm.lifecycle_state}); "
+                            "review controls are now locked."
+                        )
+                    elif detail_vm.dossier_version != target_ver:
+                        self._preserve_unsent_modal_draft()
+                        self.review_modal = None
+                        self.viewed_dossier_version = detail_vm.dossier_version
+                        self.viewed_dossier_hash = detail_vm.dossier_hash
+                        self.notice = (
+                            f"[REVISION UPDATED] Dossier advanced from v{target_ver} to v{detail_vm.dossier_version}; "
+                            "reloaded latest revision (draft rationale preserved)."
+                        )
+                else:
+                    if (
+                        self.viewed_dossier_version
+                        and detail_vm.dossier_version
+                        and detail_vm.dossier_version != self.viewed_dossier_version
+                    ):
+                        self.notice = (
+                            f"Reloaded newer dossier revision v{detail_vm.dossier_version} "
+                            f"(previously viewing v{self.viewed_dossier_version})."
+                        )
+                    self.viewed_dossier_version = detail_vm.dossier_version
+                    self.viewed_dossier_hash = detail_vm.dossier_hash
+
+    def _preserve_unsent_modal_draft(self) -> None:
+        if not self.review_modal:
+            return
+        inc_id = str(self.review_modal.get("incident_id") or "")
+        rat = str(self.review_modal.get("rationale") or "").strip()
+        if inc_id and rat:
+            self.unsent_review_draft[inc_id] = rat
+
+    # ------------------------------------------------------------------
+    # Top-Level Render Entrypoint
+    # ------------------------------------------------------------------
 
     def render(self, *, width: int | None = None, height: int | None = None) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
         terminal_width = width or self.console.size.width
-        menu_focused = (self.focus == "menu" and not self.selected_incident_id)
+
+        # Minimum size guard only when explicit viewport dims are smaller than usable threshold (Work Package L1, E10)
+        if terminal_width < MIN_TERMINAL_WIDTH or (height is not None and height < MIN_TERMINAL_HEIGHT):
+            cur_h = height if height is not None else self.console.size.height
+            msg = Text()
+            msg.append("TERMINAL VIEWPORT BELOW MINIMUM SUPPORTED SIZE\n", style=tokens.warning)
+            msg.append(
+                f"Current: {terminal_width} cols x {cur_h} rows | Minimum: {MIN_TERMINAL_WIDTH} cols x {MIN_TERMINAL_HEIGHT} rows.\n",
+                style=tokens.primary,
+            )
+            msg.append(
+                "Enlarge the terminal window to resume inspection. Selection, focus, and unsent review drafts are preserved.\n"
+                "Controls: [B/Esc] Back | [Q] Quit",
+                style=tokens.secondary,
+            )
+            return Panel(msg, title="SRE Console - Resize Required", border_style=tokens.border_modal, box=pbox)
+
+        if self.initial_loading and self.repository.coordinator.current_snapshot is None:
+            loading_txt = Text()
+            loading_txt.append("[LOADING] Reading authoritative state store snapshot...\n", style=tokens.accent)
+            loading_txt.append(
+                "Source: WorkflowStateStore SQLite (read-only transaction). Press [Q] to exit.",
+                style=tokens.secondary,
+            )
+            return Panel(loading_txt, title="SRE Investigation Console", border_style=tokens.border_focused, box=pbox)
+
+        if self._skip_next_render_refresh and self.repository.coordinator.current_snapshot is not None:
+            self._skip_next_render_refresh = False
+            snapshot = self.repository.coordinator.current_snapshot
+        else:
+            self._skip_next_render_refresh = False
+            snapshot = self.refresh_snapshot()
+
+        # Overlay Modals (Help or Two-Step Human Review Confirmation)
+        if self.help_open:
+            return self._render_help_modal(snapshot, width=terminal_width, height=height)
+        if self.review_modal is not None:
+            return self._render_review_modal(snapshot, width=terminal_width, height=height)
+
+        menu_focused = self.focus == "menu" and not self.selected_incident_id
         nav_title = "Navigation [FOCUSED]" if menu_focused else "Navigation"
-        nav_border = "bright_cyan" if menu_focused else "dim"
+        nav_border = tokens.border_focused if menu_focused else tokens.border_inactive
         main_title = f"{self._main_title()} [FOCUSED]" if not menu_focused else self._main_title()
-        main_border = "bright_cyan" if not menu_focused else "white"
+        main_border = tokens.border_focused if not menu_focused else tokens.border_inactive
 
         is_narrow = terminal_width < 100
-        # Only clip/paginate to viewport height when height is explicitly bounded (interactive TUI / viewport)
+        nav_col_width = 28
+        content_width = max(44, terminal_width - 4) if is_narrow else max(60, terminal_width - nav_col_width - 4)
+        show_status_strip = height is None or height >= 22
+        status_strip = self._global_status_strip(snapshot, compact=(terminal_width < 105))
+
         main_height: int | None = None
         if height is not None:
-            reserved_lines = 12 if is_narrow else 8
+            # Preserve exact pagination math on ultra-short 72x18 viewports while fitting status strip on >=22
+            reserved_lines = (14 if show_status_strip else 12) if is_narrow else (10 if show_status_strip else 8)
             main_height = max(6, height - reserved_lines)
 
         main = Panel(
-            self._main_content(width=terminal_width, max_height=main_height),
+            self._main_content(snapshot=snapshot, width=content_width, max_height=main_height),
             title=main_title,
             border_style=main_border,
+            box=pbox,
         )
-        actions = Panel(self._action_bar(), title="Review Action Bar", border_style="yellow")
+        actions = Panel(
+            self._action_bar(snapshot),
+            title="Review Action Bar",
+            border_style=tokens.border_modal if (self.selected_incident_id or snapshot.is_stale_last_known) else tokens.border_inactive,
+            box=pbox,
+        )
+
+        blocks: list[RenderableType] = []
+        if show_status_strip:
+            blocks.append(status_strip)
 
         if is_narrow:
-            navigation = Panel(self._navigation_compact(), title=nav_title, border_style=nav_border)
-            return Group(navigation, main, actions)
+            navigation = Panel(self._navigation_compact(width=terminal_width), title=nav_title, border_style=nav_border, box=pbox)
+            blocks.extend([navigation, main, actions])
+            return Group(*blocks)
 
-        navigation = Panel(self._navigation(), title=nav_title, border_style=nav_border)
+        navigation = Panel(self._navigation(snapshot), title=nav_title, border_style=nav_border, box=pbox)
         two_panel = Table.grid(expand=True)
-        two_panel.add_column(width=32)
+        two_panel.add_column(width=nav_col_width)
         two_panel.add_column(ratio=1)
         two_panel.add_row(navigation, main)
-        return Group(two_panel, actions)
+        blocks.extend([two_panel, actions])
+        return Group(*blocks)
 
-    def _navigation_compact(self) -> Text:
+    # ------------------------------------------------------------------
+    # Global Status Strip & Navigation Sidebar (Work Package B1, D1)
+    # ------------------------------------------------------------------
+
+    def _global_status_strip(self, snapshot: DashboardSnapshot, *, compact: bool = False) -> RenderableType:
+        tokens = self._tokens()
+        cfg = self._current_llm_config()
+        llm_mode_str = (
+            f"LLM:{cfg['provider_key']}/{compact_identifier(cfg['model'], max_cells=22)}"
+            if cfg["api_key"]
+            else "Mode:Offline-Deterministic($0)"
+        )
+        cached_health = self.repository.coordinator.peek_cached_health()
+        if cached_health is None:
+            svc_str = "Lab:unprobed([3])"
+            svc_style = tokens.muted
+        elif cached_health.get("status") == "OK":
+            svcs = cached_health.get("services") or []
+            healthy_n = sum(
+                1 for s in svcs
+                if str(s.get("state", "")).lower() == "running"
+                and str(s.get("health", "")).lower() in ("healthy", "not-reported", "")
+            )
+            svc_str = f"Lab:{healthy_n}/{len(svcs)} up"
+            svc_style = tokens.infra_healthy if healthy_n == len(svcs) and svcs else tokens.warning
+        else:
+            svc_str = f"Lab:{cached_health.get('status', 'DEGRADED')}"
+            svc_style = tokens.warning
+
+        line = Text()
+        line.append("SRE INVESTIGATION CONSOLE ", style=tokens.primary_bold)
+        if snapshot.is_stale_last_known:
+            line.append(
+                f"[STALE LAST-KNOWN DATA | sync failed: {snapshot.refresh_error} | last ok {snapshot.fetched_at_local}] ",
+                style=tokens.critical,
+            )
+        elif not snapshot.store_connected and snapshot.refresh_error:
+            line.append(f"[STORE ERROR: {snapshot.refresh_error}] ", style=tokens.critical)
+        else:
+            line.append(f"[Store:CONNECTED@{snapshot.fetched_at_local}] ", style=tokens.secondary)
+
+        env_label = ",".join(snapshot.environments[:2])
+        line.append(
+            f"Env:{env_label} | ReviewQueue:{snapshot.awaiting_review_count} | "
+            f"Running:{snapshot.in_progress_count} | Archive:{snapshot.archived_count} | ",
+            style=tokens.primary,
+        )
+        line.append(svc_str, style=svc_style)
+        if not compact:
+            line.append(f" | {llm_mode_str} | Reviewer:{self.reviewer_ref}({self.reviewer_role}) [?]Help", style=tokens.secondary)
+        return line
+
+    def _navigation_compact(self, *, width: int = 80) -> Text:
+        tokens = self._tokens()
         selected = {
             "active": "1",
             "archive": "2",
@@ -467,22 +835,25 @@ class SREDashboard:
             "telegram": "5",
         }.get(self.view)
         text = Text()
+        sep = " " if width < 92 else "  "
         items = (
             ("1", "Active"),
             ("2", "Archive"),
             ("3", "Health"),
             ("4", "Model"),
             ("5", "Telegram"),
+            ("?", "Help"),
             ("Q", "Quit"),
         )
         for idx, (key, label) in enumerate(items):
-            style = "bold reverse" if key == selected else "bold" if key == "Q" else ""
+            style = tokens.selected_nav if key == selected else (tokens.primary_bold if key in ("Q", "?") else tokens.secondary)
             if idx > 0:
-                text.append("  ")
+                text.append(sep)
             text.append(f"[{key}] {label}", style=style)
         return text
 
-    def _navigation(self) -> Text:
+    def _navigation(self, snapshot: DashboardSnapshot | None = None) -> Text:
+        tokens = self._tokens()
         selected = {
             "active": "1",
             "archive": "2",
@@ -490,29 +861,50 @@ class SREDashboard:
             "model": "4",
             "telegram": "5",
         }.get(self.view)
+        act_cnt = len(snapshot.active_entries) if snapshot else 0
+        arc_cnt = len(snapshot.archived_entries) if snapshot else 0
         text = Text()
-        for key, label in (
-            ("1", "Active Incidents"),
-            ("2", "Archive Dossiers"),
-            ("3", "Service Health"),
-            ("4", "AI Model Config"),
-            ("5", "Telegram Alerts"),
-            ("Q", "Quit"),
+        for key, label, badge in (
+            ("1", "Active Incidents", f"[{act_cnt}]" if snapshot is not None else ""),
+            ("2", "Archive Dossiers", f"[{arc_cnt}]" if snapshot is not None else ""),
+            ("3", "Service Health", ""),
+            ("4", "AI Model Config", ""),
+            ("5", "Telegram Alerts", ""),
+            ("?", "Keyboard & Guide", ""),
+            ("Q", "Quit Console", ""),
         ):
-            style = "bold reverse" if key == selected else "bold" if key == "Q" else ""
-            text.append(f"[{key}] {label}\n", style=style)
+            style = tokens.selected_nav if key == selected else (tokens.primary_bold if key == "Q" else tokens.primary)
+            suffix = f" {badge}" if badge else ""
+            text.append(f"[{key}] {label}{suffix}\n", style=style)
         return text
 
     def _main_title(self) -> str:
-        return {
+        base = {
             "active": "Active Incidents",
             "archive": "Archive Dossiers",
             "health": "Synthetic Service Health",
             "model": "AI Model and C15 Cost Metrics",
             "telegram": "Telegram Dispatcher",
         }[self.view]
+        if self.selected_incident_id and self.view in ("active", "archive"):
+            lens_name = DETAIL_LENS_LABELS.get(self.detail_section, "All Sections")
+            return f"{base} > {compact_identifier(self.selected_incident_id, max_cells=32)} [{lens_name}]"
+        return base
 
-    def _main_content(self, *, width: int = 120, max_height: int | None = None) -> RenderableType:
+    # ------------------------------------------------------------------
+    # Main Content Router
+    # ------------------------------------------------------------------
+
+    def _main_content(
+        self,
+        *,
+        snapshot: DashboardSnapshot | None = None,
+        width: int = 120,
+        max_height: int | None = None,
+    ) -> RenderableType:
+        tokens = self._tokens()
+        snap = snapshot or self.refresh_snapshot()
+
         def _maybe_scroll(content: RenderableType) -> RenderableType:
             if max_height is None:
                 return content
@@ -520,44 +912,90 @@ class SREDashboard:
                 content,
                 offset=self.detail_scroll_offset,
                 max_lines=max(6, max_height),
+                monochrome=tokens.monochrome,
             )
 
         if self.view in {"active", "archive"}:
-            rows = self.repository.active_dossiers() if self.view == "active" else self.repository.archived_dossiers()
             if self.selected_incident_id:
+                detail_vm = snap.by_incident_id.get(self.selected_incident_id)
+                if detail_vm is not None:
+                    self.viewed_dossier_version = detail_vm.dossier_version
+                    self.viewed_dossier_hash = detail_vm.dossier_hash
+                    return _maybe_scroll(self._render_incident_detail_vm(detail_vm, width=width))
+                # Fallback if dossier exists without incident row
                 dossier = self.repository.latest_dossier(self.selected_incident_id)
                 if dossier:
-                    return _maybe_scroll(self._dossier_detail(dossier))
-            return self._incident_table(rows, width=width, max_height=max_height)
+                    return _maybe_scroll(self._dossier_detail(dossier, width=width))
+                missing_txt = Text()
+                missing_txt.append(
+                    f"Incident '{sanitize_terminal_text(self.selected_incident_id, max_chars=80)}' is not present in the state store.\n",
+                    style=tokens.warning,
+                )
+                missing_txt.append("Press [B] or [Esc] to return to the incident overview.", style=tokens.secondary)
+                return missing_txt
+
+            rows = self._entries_for_current_tab(snap)
+            return self._incident_table(rows, snapshot=snap, width=width, max_height=max_height)
+
         if self.view == "health":
-            return _maybe_scroll(self._health_table(self.health.inspect()))
+            health_snap = self.repository.coordinator.get_cached_health(self.health.inspect)
+            return _maybe_scroll(self._health_table(health_snap))
+
         if self.view == "model":
-            dossiers = self.repository.active_dossiers() or self.repository.archived_dossiers()
-            active_model = "N/A"
-            if dossiers:
-                reproducibility = dossiers[0]["dossier"].get("reproducibility", {})
-                active_model = str(reproducibility.get("model_version", "N/A"))
-            return _maybe_scroll(self._model_panel(self.costs.read(), active_model))
+            all_entries = list(snap.active_entries) + list(snap.archived_entries)
+            active_model = all_entries[0].model_version if all_entries else "N/A"
+            cost_snap = self.repository.coordinator.get_cached_costs(self.costs.read)
+            return _maybe_scroll(self._model_panel(cost_snap, active_model))
+
         return _maybe_scroll(self._telegram_panel())
+
+    # ------------------------------------------------------------------
+    # Incident Overview Table (Work Package B2)
+    # ------------------------------------------------------------------
 
     def _incident_table(
         self,
-        rows: list[dict[str, Any]],
+        rows: Sequence[IncidentDetailVM],
         *,
+        snapshot: DashboardSnapshot | None = None,
         width: int = 120,
         max_height: int | None = None,
     ) -> RenderableType:
+        tokens = self._tokens()
+        if snapshot is not None and not snapshot.store_connected and not rows:
+            err_txt = Text()
+            err_txt.append(f"[BACKEND ERROR] Failed to query WorkflowStateStore: {snapshot.refresh_error}\n", style=tokens.critical)
+            err_txt.append("Next step: verify SQLite file permissions or press [U] to retry refresh.", style=tokens.secondary)
+            return err_txt
+
         if not rows:
-            reason = "No dossiers pending review." if self.view == "active" else "No archived dossiers available."
-            return Text(f"{reason}\nPress [B] to return or select another menu item.", style="dim")
+            empty_txt = Text()
+            if self.view == "active":
+                empty_txt.append("No active investigations or dossiers pending review.\n", style=tokens.primary_bold)
+                empty_txt.append(
+                    "Cause: zero incidents are currently in RECEIVED..HUMAN_REVIEW states.\n"
+                    "Next action: press [2] to inspect Archive Dossiers, [U] to refresh, or trigger a synthetic scenario.",
+                    style=tokens.secondary,
+                )
+            else:
+                empty_txt.append("No archived dossiers recorded yet.\n", style=tokens.primary_bold)
+                empty_txt.append(
+                    "Cause: no incidents have reached CLOSED, REJECTED, ESCALATED, or FAILED_SAFE states.\n"
+                    "Next action: press [1] to inspect Active Incidents or [B] to return.",
+                    style=tokens.secondary,
+                )
+            return empty_txt
+
         if self.selected_index >= len(rows):
             self.selected_index = max(0, len(rows) - 1)
         elif self.selected_index < 0:
             self.selected_index = 0
+        self._last_synced_index = self.selected_index
+        self.highlighted_incident_id = rows[self.selected_index].incident_id
 
         if max_height is not None:
-            # Reserve ~5 lines for table header, borders, and footer hint
-            max_visible = max(3, max_height - 5)
+            reserve_footer = 5 if max_height < 12 else 6
+            max_visible = max(3, max_height - reserve_footer)
             if self.selected_index < self.list_scroll_offset:
                 self.list_scroll_offset = self.selected_index
             elif self.selected_index >= self.list_scroll_offset + max_visible:
@@ -569,404 +1007,1000 @@ class SREDashboard:
             max_visible = len(rows)
             self.list_scroll_offset = 0
             visible_slice = rows
-        is_compact = width < 85
-        show_mode_col = width >= 78
 
-        table = Table(expand=True)
-        table.add_column("No.", justify="right", min_width=4, max_width=5, no_wrap=True)
-        table.add_column("Time", min_width=8 if is_compact else 14, no_wrap=True)
-        table.add_column("Incident", ratio=2, max_width=24 if is_compact else None, no_wrap=True, overflow="ellipsis")
-        table.add_column("Sev" if is_compact else "Severity", min_width=4, max_width=8, no_wrap=True)
-        table.add_column("Service", ratio=1, max_width=14 if is_compact else None, no_wrap=True, overflow="ellipsis")
+        is_compact = width < 80
+        is_wide = width >= 114
+        show_mode_col = width >= 74
+        show_symptom_col = width >= 118
+
+        table = Table(expand=True, box=self._table_box(), pad_edge=False, padding=(0, 1), collapse_padding=True)
+        table.add_column("No.", justify="right", width=4, no_wrap=True)
+        table.add_column("Time", width=8 if is_compact else 11, no_wrap=True)
+        table.add_column("Incident", ratio=4, no_wrap=True, overflow="ellipsis")
+        table.add_column("Sev", width=4 if is_compact else 6, no_wrap=True)
+        table.add_column("Service", ratio=2, no_wrap=True, overflow="ellipsis")
         if show_mode_col:
-            table.add_column("Mode", min_width=7, max_width=8, no_wrap=True)
+            table.add_column("Mode", width=8, no_wrap=True)
         if not is_compact:
-            table.add_column("State", min_width=12, no_wrap=True)
+            table.add_column("State", width=12, no_wrap=True)
+        if show_symptom_col:
+            table.add_column("Observed Symptom", ratio=3, no_wrap=True, overflow="ellipsis")
 
-        for offset_idx, row in enumerate(visible_slice):
+        sel_mark = self._sel_glyph()
+        id_budget = 24 if is_compact else (38 if is_wide else 30)
+        svc_budget = 16 if is_compact else (22 if is_wide else 19)
+        sym_budget = 38 if is_wide else 24
+        compact_sev_map = {
+            "CRITICAL": "CRIT",
+            "HIGH": "HIGH",
+            "MEDIUM": "MED",
+            "LOW": "LOW",
+            "UNKNOWN": "UNK",
+        }
+
+        for offset_idx, vm in enumerate(visible_slice):
             actual_idx = self.list_scroll_offset + offset_idx
-            incident = row["incident"]
-            dossier = row["dossier"]
-            state = str(incident.get("current_state", "unknown"))
-            display_state = "ESCALATED" if state == "MANUAL_TRIAGE_REQUIRED" else state
-            inv_mode = str(dossier.get("investigation_mode") or "deterministic_baseline").lower()
-            mode_badge = "AI LLM" if inv_mode == "agentic_llm" else ("FALLBACK" if inv_mode == "manual_fallback" else "OFFLINE")
-            is_sel = (actual_idx == self.selected_index)
-            no_str = f"▶ {actual_idx + 1}" if is_sel else f"  {actual_idx + 1}"
-            row_style = "bold cyan" if is_sel else ""
-            time_str = _format_incident_time(incident, dossier, compact=is_compact)
-            row_cells = [
-                no_str,
-                time_str,
-                str(dossier.get("incident_id", incident["incident_id"])),
-                str(dossier.get("severity", "unknown")).upper(),
-                str(dossier.get("service_id", incident.get("service_id") or "unknown")),
-            ]
-            if show_mode_col:
-                row_cells.append(mode_badge)
-            if not is_compact:
-                row_cells.append(display_state)
-            table.add_row(*row_cells, style=row_style)
+            is_sel = actual_idx == self.selected_index
+            no_str = f"{sel_mark} {actual_idx + 1}" if is_sel else f"  {actual_idx + 1}"
+            time_str = vm.incident_time_compact if is_compact else vm.incident_time_display[:11]
+            inc_cell = compact_identifier(vm.incident_id, max_cells=id_budget)
+            sev_label = compact_sev_map.get(vm.severity, "UNK") if is_compact else vm.severity_badge.split(" ")[0]
+            sev_cell = Text(
+                sev_label,
+                style=tokens.selected_row if is_sel else tokens.severity_style(vm.severity),
+            )
+            svc_cell = compact_identifier(vm.primary_service, max_cells=svc_budget)
 
-        hint_parts = ["Navigation: [↑/↓ or j/k] Select", "[Enter/O] Open Dossier", "[G] Open Grafana"]
+            if vm.lifecycle_state == "MANUAL_TRIAGE_REQUIRED":
+                state_cell_txt = "ESCALATED"
+            elif vm.lifecycle_state == "HUMAN_REVIEW" and vm.review_eligibility.eligible:
+                state_cell_txt = "NEEDS_REVIEW"
+            elif vm.lifecycle_state == "CLOSED":
+                state_cell_txt = "CLOSED(Adm)"
+            elif "[Running " in vm.lifecycle_display:
+                stage_part = vm.lifecycle_display.split("[Running ", 1)[1].rstrip("]")
+                state_cell_txt = f"RUNNING({stage_part})"
+            else:
+                state_cell_txt = vm.lifecycle_display[:12]
+
+            row_style = tokens.selected_row if is_sel else tokens.primary
+            cells: list[RenderableType] = [no_str, time_str, inc_cell, sev_cell, svc_cell]
+            if show_mode_col:
+                cells.append(vm.mode_badge)
+            if not is_compact:
+                cells.append(state_cell_txt)
+            if show_symptom_col:
+                cells.append(sanitize_terminal_text(vm.observed_symptoms, max_chars=sym_budget))
+            table.add_row(*cells, style=row_style)
+
+        sel_vm = rows[self.selected_index]
+        footer_items: list[RenderableType] = [table]
+        if (max_height is None or max_height >= 12) and not show_symptom_col:
+            preview = Text()
+            preview.append("Selected Symptom: ", style=tokens.secondary)
+            preview.append(
+                sanitize_terminal_text(sel_vm.observed_symptoms, max_chars=max(36, width - 20)),
+                style=tokens.primary,
+            )
+            footer_items.append(preview)
+
+        hint_parts = [
+            "Keys: [Up/Dn or j/k] Select",
+            "[Enter/O] Inspect",
+            "[G] Grafana",
+            "[U] Refresh",
+            "[?] Help",
+        ]
         if len(rows) > max_visible:
             start_num = self.list_scroll_offset + 1
             end_num = self.list_scroll_offset + len(visible_slice)
             hint_parts.append(f"Showing {start_num}-{end_num} of {len(rows)}")
-        return Group(
-            table,
-            Text("  |  ".join(hint_parts), style="bold green"),
-        )
+        footer_items.append(Text("  |  ".join(hint_parts), style=tokens.secondary))
+        return Group(*footer_items)
 
-    def _dossier_detail(self, dossier: Mapping[str, Any]) -> RenderableType:
-        impact = dossier.get("impact_summary") if isinstance(dossier.get("impact_summary"), Mapping) else {}
-        services = impact.get("affected_services") or dossier.get("investigation_scope") or [dossier.get("service_id", "unknown")]
-        hypotheses = dossier.get("hypotheses") if isinstance(dossier.get("hypotheses"), list) else []
-        citations = dossier.get("sop_citations") if isinstance(dossier.get("sop_citations"), list) else []
-        evidence_source = dossier.get("evidence") or dossier.get("evidence_items")
-        evidence = evidence_source if isinstance(evidence_source, list) else []
+    # ------------------------------------------------------------------
+    # Incident Detail Rendering (Backward-Compatible _dossier_detail + Lens Views)
+    # ------------------------------------------------------------------
 
-        repro = dossier.get("reproducibility") if isinstance(dossier.get("reproducibility"), Mapping) else {}
-        inv_mode = str(dossier.get("investigation_mode") or "deterministic_baseline").lower()
-        model_ver = str(repro.get("model_version") or "deterministic_rule_engine_v1")
-        provider_name = str(repro.get("provider") or ("openrouter" if inv_mode == "agentic_llm" else "local-rule-engine"))
-        prompt_ver = str(repro.get("prompt_version") or "deterministic_baseline_rules_v1")
-        in_tok = repro.get("input_tokens")
-        out_tok = repro.get("output_tokens")
-        tot_tok = repro.get("total_tokens")
+    def _dossier_detail(self, dossier: Mapping[str, Any], *, width: int = 120) -> RenderableType:
+        """Render a standalone dossier dictionary using the authoritative IncidentDetailVM builder."""
         inc_id = str(dossier.get("incident_id") or "")
-        db_path = getattr(self.store, "db_path", None)
-        if inv_mode == "agentic_llm" and tot_tok is None:
-            if inc_id and db_path:
-                try:
-                    import sqlite3
-                    with sqlite3.connect(str(db_path)) as conn:
-                        row = conn.execute(
-                            "SELECT input_reported, output_reported FROM c13_llm_runs WHERE incident_id = ?",
-                            (inc_id,),
-                        ).fetchone()
-                        if row and (row[0] or row[1]):
-                            in_tok, out_tok = int(row[0] or 0), int(row[1] or 0)
-                            tot_tok = in_tok + out_tok
-                except Exception:
-                    pass
+        incident_row: Mapping[str, Any] | None = None
+        checkpoint_row: Mapping[str, Any] | None = None
+        transitions: Sequence[Mapping[str, Any]] = ()
+        reviews: Sequence[Mapping[str, Any]] = ()
+        llm_run: Mapping[str, Any] | None = None
+        version_rows: list[Dict[str, Any]] = []
 
-        if inv_mode == "agentic_llm":
-            mode_text = Text("AI MODEL (ONLINE)", style="bold green")
-            tok_str = (
-                f"in={in_tok}, out={out_tok}, total={tot_tok}"
-                if tot_tok is not None
-                else "recorded via AI provider"
-            )
-        elif inv_mode == "manual_fallback":
-            reason_code = repro.get("llm_reason")
-            if not reason_code:
-                for u in dossier.get("unknowns") or []:
-                    m = re.search(r"LLM synthesis unavailable \(([^)]+)\)", str(u))
-                    if m:
-                        reason_code = m.group(1)
-                        break
-            reason_code = str(reason_code or "UNAVAILABLE")
-            mode_text = Text(f"MANUAL FALLBACK ({reason_code})", style="bold red")
-            tok_str = "0 tokens (LLM failed/fallback to rule baseline)"
-        else:
-            mode_text = Text("OFFLINE DETERMINISTIC (NO AI MODEL)", style="bold yellow")
-            tok_str = "0 tokens (Offline Rule Engine)"
-
-        review_status = str(dossier.get("review_summary", {}).get("status", "PENDING_REVIEW"))
-        closure_display = (
-            "ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (diagnosis_verified=False, technical_resolved=False, remediation_authorized=False)"
-            if review_status.upper() == "APPROVED"
-            else f"{review_status} (diagnosis_verified=False, remediation_authorized=False)"
-        )
-
-        header = Table.grid(expand=True)
-        header.add_column(ratio=1)
-        header.add_column(ratio=2)
-        header.add_row("Incident", str(dossier.get("incident_id", "unknown")))
-        header.add_row("Severity", str(dossier.get("severity", "unknown")).upper())
-        header.add_row("Services", ", ".join(str(item) for item in services))
-        header.add_row("Status", review_status)
-        header.add_row("Closure / Diagnosis", closure_display)
-        header.add_row("Reviewer Trust", "Local PoC caller-asserted identity (unauthenticated)")
-        header.add_row("Auto remediation", "DISABLED | auto_action_triggered=False")
-        header.add_row("Reasoning Mode", mode_text)
-        header.add_row("Provider / Model", f"{provider_name} / {model_ver}")
-        header.add_row("Prompt / Engine", prompt_ver[:24] + ("…" if len(prompt_ver) > 24 else ""))
-        header.add_row("Token Usage", tok_str)
-
-        symptom = Text(str(impact.get("observed_symptoms") or dossier.get("message") or "No symptoms recorded."))
-
-        hyp_conf_map: dict[str, dict[str, Any]] = {}
-        impact_graph_data: dict[str, Any] = {}
-        validation_meta: dict[str, Any] = {}
-        if inc_id and db_path:
+        if inc_id:
             try:
-                import sqlite3
-                with sqlite3.connect(str(db_path)) as conn:
-                    row = conn.execute(
-                        "SELECT context_blob FROM checkpoints WHERE incident_id = ? ORDER BY rowid DESC LIMIT 1",
+                with self.store.transaction(immediate=False):
+                    incident_row = self.store.get_incident(inc_id)
+                    checkpoint_row = self.store.get_checkpoint(inc_id)
+                    transitions = self.store.get_transitions(inc_id)
+                    reviews = self.store.get_reviews(inc_id)
+                    conn = self.store._conn
+                    for vr in conn.execute(
+                        "SELECT dossier_version, dossier_hash, created_at FROM dossiers WHERE incident_id = ? ORDER BY dossier_version DESC",
                         (inc_id,),
+                    ).fetchall():
+                        version_rows.append(dict(vr))
+                    has_llm = conn.execute(
+                        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='c13_llm_runs'"
                     ).fetchone()
-                    if row and row[0]:
-                        c_blob = json.loads(row[0])
-                        if isinstance(c_blob.get("impact_graph"), dict):
-                            impact_graph_data = c_blob["impact_graph"]
-                        v_reports = c_blob.get("validation_reports")
-                        if isinstance(v_reports, list) and v_reports and isinstance(v_reports[0], dict):
-                            validation_meta = v_reports[0]
-                        for h_item in c_blob.get("hypotheses", []):
-                            hid = h_item.get("hypothesis_id")
-                            if hid:
-                                hyp_conf_map[hid] = {
-                                    "confidence_score": h_item.get("confidence_score"),
-                                    "confidence": h_item.get("confidence"),
-                                    "confidence_rationale": h_item.get("confidence_rationale"),
-                                    "llm_proposed_confidence": h_item.get("llm_proposed_confidence"),
-                                    "unvalidated": False,
-                                }
-                    if not hyp_conf_map:
-                        run_row = conn.execute(
-                            "SELECT result FROM c13_llm_runs WHERE incident_id = ?",
+                    if has_llm:
+                        cols = {str(c[1]) for c in conn.execute("PRAGMA table_info(c13_llm_runs)").fetchall()}
+                        want = [
+                            c for c in ("incident_id", "provider", "model", "input_reported", "output_reported", "status", "error_code", "result", "context_diagnostics")
+                            if c in cols
+                        ]
+                        lrow = conn.execute(
+                            f"SELECT {', '.join(want)} FROM c13_llm_runs WHERE incident_id = ? ORDER BY rowid DESC LIMIT 1",
                             (inc_id,),
                         ).fetchone()
-                        if run_row and run_row[0]:
-                            res = json.loads(run_row[0])
-                            cands = res.get("candidates") or {}
-                            prim = cands.get("primary_hypothesis") or {}
-                            alts = cands.get("alternative_hypotheses") or []
-                            if prim:
-                                p_score = {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(prim.get("confidence"))
-                                hyp_conf_map[f"hyp-{inc_id}-001"] = {
-                                    "confidence": prim.get("confidence"),
-                                    "confidence_score": p_score,
-                                    "unvalidated": True,
-                                    "llm_proposed_confidence": prim.get("confidence"),
-                                }
-                            for idx, a in enumerate(alts, start=2):
-                                a_score = {"HIGH": 0.8, "MEDIUM": 0.5, "LOW": 0.2}.get(a.get("confidence"))
-                                hyp_conf_map[f"hyp-{inc_id}-{idx:03d}"] = {
-                                    "confidence": a.get("confidence"),
-                                    "confidence_score": a_score,
-                                    "unvalidated": True,
-                                    "llm_proposed_confidence": a.get("confidence"),
-                                }
+                        if lrow:
+                            llm_run = dict(lrow)
             except Exception:
                 pass
 
-        impact_text = Text()
-        budget_imp = impact.get("error_budget_impact")
-        if budget_imp:
-            impact_text.append(f"Error Budget Impact: {budget_imp}\n", style="bold")
-        primary_svc = str(dossier.get("service_id") or impact_graph_data.get("primary_service") or "unknown")
-        upstreams = impact_graph_data.get("upstream_callers") if isinstance(impact_graph_data.get("upstream_callers"), list) else []
-        downstreams = impact_graph_data.get("downstream_dependencies") if isinstance(impact_graph_data.get("downstream_dependencies"), list) else []
-        if upstreams or downstreams:
-            up_str = ", ".join(str(x) for x in upstreams) if upstreams else "-"
-            down_str = ", ".join(str(x) for x in downstreams) if downstreams else "-"
-            impact_text.append(f"Topology Flow: [{up_str}] -> {primary_svc} -> [{down_str}]\n")
-        origin_svc = validation_meta.get("origin_service")
-        is_cascade = validation_meta.get("is_cascade")
-        reason_codes = validation_meta.get("reason_codes") if isinstance(validation_meta.get("reason_codes"), list) else []
-        if origin_svc or is_cascade is not None or reason_codes:
-            flags = ", ".join(str(rc) for rc in reason_codes) if reason_codes else "-"
-            impact_text.append(
-                f"Cascade Check: origin={origin_svc or primary_svc} | is_cascade={bool(is_cascade)} | flags={flags}\n"
-            )
-        topo_unc = impact_graph_data.get("uncertainty")
-        if topo_unc:
-            impact_text.append(f"Topology Note: {topo_unc}\n", style="dim")
+        vm = build_incident_detail_vm(
+            incident=incident_row,
+            dossier=dossier,
+            dossier_versions=version_rows,
+            checkpoint=checkpoint_row,
+            transitions=transitions,
+            reviews=reviews,
+            llm_run=llm_run,
+            reviewer_ref=self.reviewer_ref,
+            reviewer_role=self.reviewer_role,
+            reviewer_directory=self.reviewer_directory,
+            require_registered_reviewer=self.require_registered_reviewer,
+            require_authenticated_context=self.require_authenticated_context,
+        )
+        return self._render_incident_detail_vm(vm, width=width)
 
-        hypothesis_table = Table(expand=True)
-        hypothesis_table.add_column("Rank", width=5)
-        hypothesis_table.add_column("Hypothesis")
-        hypothesis_table.add_column("Support", width=14)
-        hypothesis_table.add_column("Confidence", width=14)
-        hyp_details: list[dict[str, Any]] = []
-        for rank, hypothesis in enumerate(hypotheses, start=1):
-            if not isinstance(hypothesis, Mapping):
-                continue
-            statement = hypothesis.get("statement") or hypothesis.get("hypothesis_statement") or hypothesis.get("title") or hypothesis.get("description", "")
-            support = hypothesis_label(hypothesis)
-            confidence = hypothesis.get("confidence_score")
-            conf_str = hypothesis.get("confidence")
-            conf_rationale = hypothesis.get("confidence_rationale")
-            is_unvalidated = False
-            hid = str(hypothesis.get("hypothesis_id") or "")
-            if confidence is None and hid in hyp_conf_map:
-                confidence = hyp_conf_map[hid].get("confidence_score")
-                conf_str = hyp_conf_map[hid].get("confidence")
-                conf_rationale = conf_rationale or hyp_conf_map[hid].get("confidence_rationale")
-                is_unvalidated = bool(hyp_conf_map[hid].get("unvalidated"))
-            elif confidence is None:
-                for candidate_id, cdata in hyp_conf_map.items():
-                    if candidate_id.endswith(f"-{rank:03d}"):
-                        confidence = cdata.get("confidence_score")
-                        conf_str = cdata.get("confidence")
-                        conf_rationale = conf_rationale or cdata.get("confidence_rationale")
-                        is_unvalidated = bool(cdata.get("unvalidated"))
-                        break
-            elif hid in hyp_conf_map and not conf_rationale:
-                conf_rationale = hyp_conf_map[hid].get("confidence_rationale")
+    def _render_lens_bar(self, vm: IncidentDetailVM) -> Text:
+        tokens = self._tokens()
+        bar = Text("View Lens ([Tab] switch): ", style=tokens.secondary)
+        for idx, lens_key in enumerate(DETAIL_LENS_ORDER):
+            if idx > 0:
+                bar.append(" ")
+            label = DETAIL_LENS_LABELS[lens_key]
+            if lens_key == "hypotheses":
+                label = f"{label}({len(vm.hypotheses)})"
+            elif lens_key == "evidence":
+                label = f"{label}({len(vm.evidence_items)})"
+            elif lens_key == "sop":
+                label = f"{label}({len(vm.rag.citations)})"
+            style = tokens.selected_nav if self.detail_section == lens_key else tokens.muted
+            bar.append(f" {label} ", style=style)
+        return bar
 
-            if isinstance(confidence, (int, float)) and not isinstance(confidence, bool):
-                derived_label = confidence_label_for_score(float(confidence))
-                confidence_text = f"{float(confidence):.0%} ({derived_label})"
-                if is_unvalidated:
-                    confidence_text += " [unvalidated prior]"
-            elif conf_str:
-                confidence_text = f"{conf_str} [unvalidated]"
+    def _render_lifecycle_bar(self, vm: IncidentDetailVM) -> Text:
+        tokens = self._tokens()
+        line = Text("Workflow Stages: ", style=tokens.secondary)
+        short_names = {
+            "RECEIVED": "RCV",
+            "CORRELATED": "COR",
+            "TRIAGED": "TRI",
+            "EVIDENCE_COLLECTED": "EVD",
+            "RETRIEVED": "RAG",
+            "HYPOTHESES": "HYP",
+            "VALIDATED": "VAL",
+            "DRAFTED": "DRF",
+            "HUMAN_REVIEW": "REV",
+        }
+        for idx, st in enumerate(vm.stages):
+            if idx > 0:
+                line.append("->", style=tokens.muted)
+            short = short_names.get(st.stage, st.stage[:3])
+            if st.status == "COMPLETED":
+                line.append(f"[x:{short}]", style=tokens.secondary)
+            elif st.status == "CURRENT":
+                line.append(f"[*:{short}]", style=tokens.accent)
+            elif st.status == "ABORTED":
+                line.append(f"[!:{short}]", style=tokens.critical)
             else:
-                confidence_text = "N/A"
-            rank_label = str(hypothesis.get("rank", rank))
-            hypothesis_table.add_row(rank_label, str(statement), str(support), confidence_text)
-            sup_ids = hypothesis.get("supporting_evidence_ids") if isinstance(hypothesis.get("supporting_evidence_ids"), list) else []
-            con_ids = (
-                hypothesis.get("contradicting_evidence_ids")
-                if isinstance(hypothesis.get("contradicting_evidence_ids"), list)
-                else (hypothesis.get("refuting_evidence_ids") if isinstance(hypothesis.get("refuting_evidence_ids"), list) else [])
+                line.append(f"[ :{short}]", style=tokens.muted)
+
+        if vm.lifecycle_state in ARCHIVED_LIFECYCLE_STATES:
+            term_style = tokens.warning if vm.lifecycle_state in ("CLOSED", "LEARNED") else tokens.critical
+            line.append(f" => [{vm.lifecycle_display}]", style=term_style)
+        line.append(
+            f"  (Duration: {vm.duration_display}"
+            + (f", ToolCalls: {vm.tool_calls_used}" if vm.tool_calls_used is not None else "")
+            + " | Stage completion != verified diagnosis)",
+            style=tokens.muted,
+        )
+        return line
+
+    def _render_incident_header(self, vm: IncidentDetailVM) -> RenderableType:
+        tokens = self._tokens()
+        header = Table.grid(expand=True, padding=(0, 2))
+        header.add_column(width=22, style=tokens.secondary)
+        header.add_column(ratio=1, style=tokens.primary)
+
+        header.add_row(
+            "Incident / Revision",
+            Text.assemble(
+                (f"{vm.incident_id} ", tokens.primary_bold),
+                (f"({vm.revision_history_note})", tokens.secondary),
+            ),
+        )
+        header.add_row(
+            "Severity & Scope",
+            Text.assemble(
+                (f"{vm.severity_badge} ", tokens.severity_style(vm.severity)),
+                (f"| env={vm.environment} | services: {', '.join(vm.affected_services)}", tokens.primary),
+            ),
+        )
+        header.add_row("Closure / Diagnosis", Text(vm.review_eligibility.closure_display, style=tokens.warning_soft))
+        header.add_row(
+            "Safety & Trust",
+            Text(
+                f"Auto remediation: DISABLED (auto_action_triggered=False) | Reviewer Trust: {vm.review_eligibility.identity_disclosure}",
+                style=tokens.secondary,
+            ),
+        )
+        mode_style = (
+            tokens.corroborated
+            if vm.investigation_mode == "agentic_llm"
+            else (tokens.critical if vm.investigation_mode == "manual_fallback" else tokens.warning)
+        )
+        header.add_row("Reasoning Mode", Text(vm.mode_headline, style=mode_style))
+        header.add_row(
+            "Provider / Model",
+            Text(f"{vm.provider_name} / {vm.model_version}", style=tokens.primary),
+        )
+        header.add_row("Token Usage", Text(vm.token_usage_display, style=tokens.primary))
+        header.add_row(
+            "Prompt / Timing",
+            Text(
+                f"Prompt: {vm.prompt_version[:28]} | Alert: {vm.alert_received_at} | Ready: {vm.dossier_ready_at}",
+                style=tokens.muted,
+            ),
+        )
+        return header
+
+    def _render_hypotheses_section(self, vm: IncidentDetailVM, *, interactive_focus: bool = False) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
+        blocks: list[RenderableType] = []
+
+        if not vm.dossier_available and not vm.hypotheses:
+            pending_h = Text()
+            pending_h.append(
+                f"Dossier not yet available: investigation is currently at stage {vm.lifecycle_state}.\n",
+                style=tokens.warning,
             )
-            reason_summary = hypothesis.get("reason_summary") or hypothesis.get("description") or ""
-            hyp_details.append({
-                "rank": rank_label,
-                "statement": str(statement),
-                "support": str(support),
-                "confidence": confidence_text,
-                "confidence_rationale": str(conf_rationale) if conf_rationale else "",
-                "reason_summary": str(reason_summary),
-                "supporting": [str(x) for x in sup_ids],
-                "contradicting": [str(x) for x in con_ids],
-            })
-        if not hypothesis_table.rows:
-            hypothesis_table.add_row("-", "No hypotheses formulated", "INCONCLUSIVE", "N/A")
+            pending_h.append("Hypotheses and confidence scores appear once HYPOTHESES/VALIDATED stages complete.", style=tokens.secondary)
+            return Panel(pending_h, title="Hypotheses & Confidence", border_style=tokens.border_inactive, box=pbox)
+
+        cal_banner = Text()
+        cal_banner.append(f"Calibration & Ranking: {CALIBRATION_LIMITATION_NOTE}\n", style=tokens.secondary)
+        cal_banner.append(vm.ranking_note, style=tokens.warning_soft if "INV-16" in vm.ranking_note else tokens.muted)
+        blocks.append(cal_banner)
+
+        hypothesis_table = Table(expand=True, box=self._table_box(), pad_edge=False)
+        hypothesis_table.add_column("Rank", width=6, no_wrap=True)
+        hypothesis_table.add_column("Hypothesis", ratio=3)
+        hypothesis_table.add_column("Support", width=15, no_wrap=True)
+        hypothesis_table.add_column("Confidence", width=20, no_wrap=True)
+        hypothesis_table.add_column("Evid(+/-)", width=10, justify="right", no_wrap=True)
+
+        if vm.hypotheses:
+            self.selected_hypothesis_idx = max(0, min(self.selected_hypothesis_idx, len(vm.hypotheses) - 1))
+        for idx_h, h_vm in enumerate(vm.hypotheses):
+            is_sel = interactive_focus and idx_h == self.selected_hypothesis_idx
+            prefix = f"{self._sel_glyph()} " if is_sel else "  "
+            origin_badge = (
+                "[HUMAN EDIT] "
+                if h_vm.origin_kind == "HUMAN_CORRECTION"
+                else ("[ORIG AI] " if h_vm.origin_kind == "ORIGINAL_AI_FINDING" else "")
+            )
+            hypothesis_table.add_row(
+                f"{prefix}#{h_vm.rank}",
+                f"{origin_badge}{h_vm.statement}",
+                Text(f"[{h_vm.support_label}]", style=tokens.support_style(h_vm.support_label)),
+                Text(h_vm.confidence_display, style=tokens.primary_bold if not h_vm.is_unvalidated_prior else tokens.warning_soft),
+                f"+{len(h_vm.supporting_ids)} / -{len(h_vm.contradicting_ids)}",
+                style=tokens.selected_row if is_sel else tokens.primary,
+            )
+        if not vm.hypotheses:
+            hypothesis_table.add_row("-", "No hypotheses formulated", "[INCONCLUSIVE]", "Not scored", "0 / 0")
+        blocks.append(hypothesis_table)
 
         reasoning_text = Text()
-        for idx_h, item in enumerate(hyp_details):
-            if idx_h > 0:
+        target_hyps = (
+            [vm.hypotheses[self.selected_hypothesis_idx]]
+            if interactive_focus and vm.hypotheses
+            else list(vm.hypotheses)
+        )
+        for idx_d, h_vm in enumerate(target_hyps):
+            if idx_d > 0:
                 reasoning_text.append("\n")
             reasoning_text.append(
-                f"#{item['rank']} [{item['support']} | {item['confidence']}] {item['statement']}\n",
-                style="bold cyan",
+                f"#{h_vm.rank} ({h_vm.hypothesis_id}) [{h_vm.support_label} | {h_vm.confidence_display}] {h_vm.statement}\n",
+                style=tokens.accent,
             )
-            if item["reason_summary"]:
-                reasoning_text.append(f"  Why / Causal Analysis: {item['reason_summary']}\n")
-            if item.get("confidence_rationale"):
-                reasoning_text.append(f"  Confidence Basis    : {item['confidence_rationale']}\n", style="dim")
-            sup_str = ", ".join(item["supporting"]) if item["supporting"] else "none"
-            reasoning_text.append(f"  Supporting Evidence : {sup_str}\n", style="green")
-            if item["contradicting"]:
+            if h_vm.reason_summary:
+                reasoning_text.append(f"  Why / Causal Analysis : {h_vm.reason_summary}\n", style=tokens.primary)
+            if h_vm.confidence_rationale:
+                reasoning_text.append(f"  Confidence Basis      : {h_vm.confidence_rationale}\n", style=tokens.secondary)
+            reasoning_text.append(f"  Main Uncertainty      : {h_vm.main_uncertainty}\n", style=tokens.warning_soft)
+            sup_str = ", ".join(h_vm.supporting_ids) if h_vm.supporting_ids else "none (no accepted supporting evidence)"
+            reasoning_text.append(f"  Supporting Evidence   : {sup_str}\n", style=tokens.corroborated if h_vm.supporting_ids else tokens.secondary)
+            if h_vm.contradicting_ids:
                 reasoning_text.append(
-                    f"  Contradicting Evid. : {', '.join(item['contradicting'])}\n",
-                    style="yellow",
+                    f"  Contradicting Evidence: {', '.join(h_vm.contradicting_ids)}\n",
+                    style=tokens.critical,
                 )
+            if h_vm.partial_supporting_ids:
+                reasoning_text.append(
+                    f"  Partial/Truncated Evid: {', '.join(h_vm.partial_supporting_ids)}\n",
+                    style=tokens.warning_soft,
+                )
+            for excl in h_vm.excluded_supporting:
+                reasoning_text.append(
+                    f"  Rejected Association  : {excl['evidence_id']} ({excl['reason']})\n",
+                    style=tokens.critical,
+                )
+        if interactive_focus and vm.hypotheses:
+            reasoning_text.append(
+                "\nTip: Press [[ / ]] to switch hypothesis, or [I] to jump directly to its linked Evidence Lineage.",
+                style=tokens.secondary,
+            )
         if not reasoning_text.plain:
-            reasoning_text.append("No hypothesis reasoning available.", style="dim")
+            reasoning_text.append("No hypothesis reasoning available.", style=tokens.muted)
 
-        unknowns_list = dossier.get("unknowns") if isinstance(dossier.get("unknowns"), list) else []
-        missing_sources = dossier.get("missing_sources") if isinstance(dossier.get("missing_sources"), list) else []
-        unknowns_text = Text()
-        for unk in unknowns_list:
-            unknowns_text.append(f"- {unk}\n")
-        for ms in missing_sources:
-            if isinstance(ms, Mapping):
-                unknowns_text.append(
-                    f"- [MISSING SOURCE] {ms.get('tool_name', 'unknown')} ({ms.get('error_code', 'UNAVAILABLE')}): {ms.get('impact_note', '')}\n",
-                    style="yellow",
-                )
-        if not unknowns_text.plain:
-            unknowns_text.append("No uncertainties or missing sources recorded.", style="dim")
+        blocks.append(
+            Panel(
+                reasoning_text,
+                title="Hypothesis Reasoning Details (Why & How)",
+                border_style=tokens.border_focused if interactive_focus else tokens.border_inactive,
+                box=pbox,
+            )
+        )
+        return Group(*blocks)
 
-        rec_checks = dossier.get("recommended_checks") if isinstance(dossier.get("recommended_checks"), list) else []
-        checks_text = Text()
-        for idx_c, chk in enumerate(rec_checks, start=1):
-            if isinstance(chk, Mapping):
-                cid = chk.get("check_id", f"chk-{idx_c:02d}")
-                risk = str(chk.get("risk_level", "medium")).upper()
-                sop_ref = chk.get("related_sop_doc_id") or "-"
-                desc = chk.get("description", "")
-                checks_text.append(f"{idx_c}. [{cid} | RISK={risk} | SOP={sop_ref}] {desc}\n")
-            elif isinstance(chk, str):
-                checks_text.append(f"{idx_c}. {chk}\n")
-        if checks_text.plain:
-            checks_text.append("Guardrail: auto_execution_allowed=False | requires_human_approval=True", style="dim")
-        else:
-            checks_text.append("No SRE verification steps recorded.", style="dim")
-
-        citation_text = Text(availability_text(dossier) + "\n")
-        for item in citations:
-            if isinstance(item, Mapping):
-                metadata = (
-                    f"{item.get('doc_id') or item.get('document_id', 'Runbook')} "
-                    f"v{item.get('version') or item.get('document_version', 'unknown')} | "
-                    f"{item.get('section_path') or item.get('section', 'section unavailable')} | "
-                    f"{item.get('chunk_id', 'chunk unavailable')} | {item.get('source_uri', 'source unavailable')}"
-                )
-                excerpt = (
-                    item.get("excerpt")
-                    or item.get("text_excerpt")
-                    or item.get("summary")
-                )
-                citation_text.append(f"{metadata}\n  {_bounded_sanitized_excerpt(excerpt)}\n")
-
-        ev_to_hyps: dict[str, list[str]] = {}
-        for item_h in hyp_details:
-            for eid in item_h["supporting"]:
-                ev_to_hyps.setdefault(eid, []).append(f"#{item_h['rank']} supports")
-            for eid in item_h["contradicting"]:
-                ev_to_hyps.setdefault(eid, []).append(f"#{item_h['rank']} contradicts")
-
+    def _render_evidence_section(self, vm: IncidentDetailVM, *, interactive_focus: bool = False) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
         evidence_text = Text()
-        for item in evidence:
-            if isinstance(item, Mapping):
-                eid_str = str(item.get("evidence_id", "unknown"))
-                qw = item.get("query_window") if isinstance(item.get("query_window"), Mapping) else {}
-                win_str = (
-                    f"{qw.get('start', '-')}..{qw.get('end', '-')}"
-                    if qw.get("start") or qw.get("end")
-                    else "n/a"
-                )
-                qual_str = str(item.get("data_quality", "unknown")) + (
-                    "/truncated" if item.get("truncated") else ""
-                )
-                refs_str = ", ".join(ev_to_hyps.get(eid_str, [])) or "contextual"
-                metadata = (
-                    f"{eid_str} | {item.get('tool_name', 'source unknown')} ({item.get('source_ref', '-')}) | "
-                    f"obs={item.get('observed_at', '-')} | win={win_str} | quality={qual_str} | refs={refs_str}"
-                )
+        evidence_text.append(f"Integrity Note: {INTEGRITY_SEMANTICS_NOTE}\n", style=tokens.muted)
+
+        if vm.unresolved_evidence_refs:
+            for uref in vm.unresolved_evidence_refs:
                 evidence_text.append(
-                    f"{metadata}\n  {_bounded_sanitized_excerpt(item.get('summary'))}\n"
+                    f"[UNRESOLVED REFERENCE] Hypothesis #{uref.hypothesis_rank} ({uref.hypothesis_id}) cites "
+                    f"{uref.role} evidence '{uref.evidence_id}', which is absent from authorized telemetry.\n",
+                    style=tokens.critical,
                 )
-        if not evidence_text.plain:
-            evidence_text.append("No verified telemetry evidence.", style="dim")
 
-        detail_blocks: list[RenderableType] = [
-            header,
-            Panel(symptom, title="Observed Symptoms"),
+        if vm.evidence_items:
+            self.selected_evidence_idx = max(0, min(self.selected_evidence_idx, len(vm.evidence_items) - 1))
+
+        for idx_e, item in enumerate(vm.evidence_items):
+            if idx_e > 0:
+                evidence_text.append("\n")
+            is_sel = interactive_focus and idx_e == self.selected_evidence_idx
+            marker = f"{self._sel_glyph()} " if is_sel else "  "
+            disp_style = {
+                "ACCEPTED_SUPPORT": tokens.corroborated,
+                "CONTRADICTING": tokens.critical,
+                "REJECTED": tokens.critical,
+                "CONTEXTUAL": tokens.secondary,
+            }.get(item.disposition, tokens.secondary)
+            temp_style = (
+                tokens.critical
+                if item.temporal_classification in ("OUTSIDE_INCIDENT_WINDOW", "TIMESTAMP_INVALID", "TIMESTAMP_MISSING", "SOURCE_UNAVAILABLE")
+                else (tokens.warning_soft if "STALE" in item.temporal_classification or item.truncated or item.data_quality == "partial" else tokens.secondary)
+            )
+            refs_str = ", ".join(item.associated_hypotheses) if item.associated_hypotheses else "contextual (not cited as support)"
+            qual_str = item.data_quality + ("/truncated" if item.truncated else "")
+
+            evidence_text.append(f"{marker}{item.evidence_id} ", style=tokens.selected_row if is_sel else tokens.primary_bold)
+            evidence_text.append(f"[{item.disposition}] ", style=disp_style)
+            evidence_text.append(f"{item.temporal_badge}\n", style=temp_style)
+            evidence_text.append(
+                f"    {item.tool_name} ({item.source_ref}) | svc={item.service_id} ({item.environment}) | "
+                f"obs={item.observed_at} | win={item.query_window_str} | collected={item.collected_at}\n",
+                style=tokens.secondary,
+            )
+            evidence_text.append(
+                f"    signal={item.observation_kind} | val={item.value_and_unit} | agg={item.aggregation} | "
+                f"quality={qual_str} ({item.sampling_note}) | sha256={item.content_hash_short} | refs={refs_str}\n",
+                style=tokens.secondary,
+            )
+            evidence_text.append(f"    Summary: {item.summary}\n", style=tokens.primary)
+            for lim in item.limitations:
+                evidence_text.append(f"    Limitation/Reason: {lim}\n", style=tokens.warning_soft)
+
+        if not vm.evidence_items:
+            evidence_text.append("No verified telemetry evidence recorded for this incident.\n", style=tokens.muted)
+        if interactive_focus and vm.evidence_items:
+            evidence_text.append("\nTip: Press [[ / ]] to step evidence items, or [B/Esc] to return.", style=tokens.secondary)
+
+        return Panel(
+            evidence_text,
+            title="Verified Evidence IDs & Temporal Provenance",
+            border_style=tokens.border_focused if interactive_focus else tokens.border_inactive,
+            box=pbox,
+        )
+
+    def _render_sop_and_checks_section(self, vm: IncidentDetailVM, *, interactive_focus: bool = False) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
+
+        citation_text = Text()
+        avail_style = (
+            tokens.warning
+            if vm.rag.availability_code in ("CONFLICTING_OR_COMPETING_SOPS", "RETRIEVAL_UNAVAILABLE", "SOP_FILTERED_OUT", "NO_APPLICABLE_RUNBOOK")
+            else tokens.corroborated
+        )
+        citation_text.append(f"SOP Status [{vm.rag.availability_code}]: {vm.rag.availability_banner}\n", style=avail_style)
+        citation_text.append(f"Assessment: {vm.rag.availability_explanation}\n", style=tokens.secondary)
+        if vm.rag.competing_sop_warning:
+            citation_text.append(f"[COMPETING SOP WARNING] {vm.rag.competing_sop_warning}\n", style=tokens.critical)
+        citation_text.append(f"RAG Context Delivery: {vm.rag.delivery_summary}\n", style=tokens.secondary)
+        if vm.rag.omitted_reasons:
+            citation_text.append(
+                f"Compaction Omissions: {', '.join(vm.rag.omitted_reasons)}\n",
+                style=tokens.warning_soft,
+            )
+
+        for cit in vm.rag.citations:
+            citation_text.append(
+                f"\n- {cit.doc_id} v{cit.version} | {cit.section_path} | {cit.chunk_id} | {cit.source_uri}\n",
+                style=tokens.primary_bold,
+            )
+            if cit.retrieval_score_note:
+                citation_text.append(f"  {cit.retrieval_score_note}\n", style=tokens.muted)
+            citation_text.append(f"  {cit.excerpt}\n", style=tokens.primary)
+
+        checks_text = Text()
+        for chk in vm.rag.manual_checks:
+            tag_style = tokens.critical if "ESCALATION" in chk.provenance_tag else (
+                tokens.warning_soft if "NOT SOP-BACKED" in chk.provenance_tag else tokens.corroborated
+            )
+            checks_text.append(
+                f"{chk.index}. [{chk.check_id} | STATUS={chk.status} | RISK={chk.risk_level} | SOP={chk.related_sop_doc_id}] ",
+                style=tokens.primary_bold,
+            )
+            checks_text.append(f"[{chk.provenance_tag}]\n", style=tag_style)
+            checks_text.append(f"   {chk.description}\n", style=tokens.primary)
+        if vm.rag.manual_checks:
+            checks_text.append(
+                "Guardrail: status=NOT_PERFORMED | auto_execution_allowed=False | requires_human_approval=True",
+                style=tokens.secondary,
+            )
+        else:
+            checks_text.append("No SRE verification steps recorded.", style=tokens.muted)
+
+        return Group(
+            Panel(
+                citation_text,
+                title="Runbook SOP Citations & RAG Transparency",
+                border_style=tokens.border_focused if interactive_focus else tokens.border_inactive,
+                box=pbox,
+            ),
+            Panel(
+                checks_text,
+                title="SRE Recommended Verification (Human-Controlled)",
+                border_style=tokens.border_inactive,
+                box=pbox,
+            ),
+        )
+
+    def _render_unknowns_section(self, vm: IncidentDetailVM) -> Panel:
+        tokens = self._tokens()
+        unknowns_text = Text()
+        for unk in vm.unknowns:
+            unknowns_text.append(f"- {unk}\n", style=tokens.primary)
+        for ms in vm.missing_sources:
+            unknowns_text.append(
+                f"- [MISSING SOURCE] {ms['tool_name']} ({ms['error_code']}): {ms['impact_note']}\n",
+                style=tokens.warning_soft,
+            )
+        if not unknowns_text.plain:
+            unknowns_text.append("No uncertainties or missing sources recorded.", style=tokens.muted)
+        return Panel(
+            unknowns_text,
+            title="Unknowns & Missing Sources",
+            border_style=tokens.border_inactive,
+            box=self._panel_box(),
+        )
+
+    def _render_review_section(self, vm: IncidentDetailVM) -> Panel:
+        tokens = self._tokens()
+        rev_text = Text()
+        elig = vm.review_eligibility
+        elig_style = tokens.accent if elig.eligible else tokens.warning
+        rev_text.append(f"Eligibility : {elig.lock_message}\n", style=elig_style)
+        rev_text.append(
+            f"Reviewer    : {elig.reviewer_ref} ({elig.reviewer_role}) | Mode: {elig.identity_disclosure}\n",
+            style=tokens.secondary,
+        )
+        rev_text.append(f"Semantics   : {elig.closure_display}\n", style=tokens.secondary)
+        if vm.consistency_warnings:
+            for cw in vm.consistency_warnings:
+                rev_text.append(f"[CONSISTENCY NOTICE] {cw}\n", style=tokens.critical)
+        if vm.review_history:
+            rev_text.append("\nAppend-Only Review History:\n", style=tokens.primary_bold)
+            for rev in vm.review_history:
+                extra = f" -> v{rev['edited_dossier_version']}" if rev.get("edited_dossier_version") else (
+                    f" -> {rev['escalation_target']}" if rev.get("escalation_target") else ""
+                )
+                rev_text.append(
+                    f"  - {rev['reviewed_at']} | v{rev['target_dossier_version']} | {rev['decision']}{extra} "
+                    f"by {rev['reviewer_ref']} ({rev['reviewer_role']}): {rev['rationale']}\n",
+                    style=tokens.primary,
+                )
+        else:
+            rev_text.append("No human review decisions submitted yet for this incident.", style=tokens.muted)
+        return Panel(
+            rev_text,
+            title="Human Review Status & Audit Trail",
+            border_style=tokens.border_inactive,
+            box=self._panel_box(),
+        )
+
+    def _render_incident_detail_vm(self, vm: IncidentDetailVM, *, width: int = 120) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
+
+        symptom_panel = Panel(
+            Text(vm.observed_symptoms, style=tokens.primary),
+            title="Observed Symptoms",
+            border_style=tokens.border_inactive,
+            box=pbox,
+        )
+
+        impact_text = Text()
+        if vm.error_budget_impact:
+            impact_text.append(f"Error Budget Impact: {vm.error_budget_impact}\n", style=tokens.primary_bold)
+        if vm.topology_flow:
+            impact_text.append(f"Topology Flow: {vm.topology_flow}\n", style=tokens.primary)
+        if vm.cascade_summary:
+            impact_text.append(f"Cascade Check: {vm.cascade_summary}\n", style=tokens.primary)
+        if vm.topology_uncertainty:
+            impact_text.append(f"Topology Note: {vm.topology_uncertainty}\n", style=tokens.secondary)
+
+        compact_ctx = Text()
+        compact_ctx.append(f"{vm.incident_id} ", style=tokens.primary_bold)
+        compact_ctx.append(f"(v{vm.dossier_version}) | ", style=tokens.secondary)
+        compact_ctx.append(f"{vm.severity_badge} ", style=tokens.severity_style(vm.severity))
+        compact_ctx.append(f"| {vm.primary_service} ({vm.environment}) | State: {vm.lifecycle_display} | Mode: {vm.mode_badge}\n", style=tokens.primary)
+        compact_ctx.append(
+            f"Closure: {vm.review_eligibility.dossier_review_status} (diagnosis_verified=False, auto_action_triggered=False) | "
+            f"Trust: {vm.review_eligibility.identity_disclosure}",
+            style=tokens.secondary,
+        )
+
+        focused_blocks: list[RenderableType] = [
+            self._render_lens_bar(vm),
+            compact_ctx,
         ]
-        if impact_text.plain.strip():
-            detail_blocks.append(Panel(impact_text, title="Impact & Dependency Context"))
-        detail_blocks.extend([
-            hypothesis_table,
-            Panel(reasoning_text, title="Hypothesis Reasoning Details (Why & How)"),
-            Panel(unknowns_text, title="Unknowns & Missing Sources"),
-            Panel(checks_text, title="SRE Recommended Verification (Human-Controlled)"),
-            Panel(citation_text, title="Runbook SOP Citations"),
-            Panel(evidence_text, title="Verified Evidence IDs"),
-        ])
-        return Group(*detail_blocks)
+        if vm.consistency_warnings:
+            warn_f = Text("\n".join(vm.consistency_warnings), style=tokens.critical)
+            focused_blocks.append(Panel(warn_f, title="State Consistency Notice", border_style=tokens.border_modal, box=pbox))
 
-    @staticmethod
-    def _health_table(snapshot: Mapping[str, Any]) -> RenderableType:
+        if self.detail_section == "hypotheses":
+            focused_blocks.append(self._render_hypotheses_section(vm, interactive_focus=True))
+            return Group(*focused_blocks)
+
+        if self.detail_section == "evidence":
+            focused_blocks.append(self._render_evidence_section(vm, interactive_focus=True))
+            return Group(*focused_blocks)
+
+        if self.detail_section == "sop":
+            focused_blocks.append(self._render_sop_and_checks_section(vm, interactive_focus=True))
+            return Group(*focused_blocks)
+
+        if self.detail_section == "review":
+            focused_blocks.append(self._render_review_section(vm))
+            return Group(*focused_blocks)
+
+        top_blocks: list[RenderableType] = [
+            self._render_lens_bar(vm),
+            self._render_incident_header(vm),
+            self._render_lifecycle_bar(vm),
+        ]
+        if vm.consistency_warnings:
+            warn_t = Text("\n".join(vm.consistency_warnings), style=tokens.critical)
+            top_blocks.append(Panel(warn_t, title="State Consistency Notice", border_style=tokens.border_modal, box=pbox))
+
+        if self.detail_section == "overview":
+            top_blocks.append(symptom_panel)
+            if impact_text.plain.strip():
+                top_blocks.append(Panel(impact_text, title="Impact & Dependency Context", border_style=tokens.border_inactive, box=pbox))
+            if vm.hypotheses:
+                lead = vm.hypotheses[0]
+                lead_txt = Text()
+                lead_txt.append(f"Leading Candidate (#1): [{lead.support_label} | {lead.confidence_display}]\n", style=tokens.accent)
+                lead_txt.append(f"{lead.statement}\n", style=tokens.primary)
+                lead_txt.append(f"Uncertainty: {lead.main_uncertainty}", style=tokens.warning_soft)
+                top_blocks.append(Panel(lead_txt, title="Leading Hypothesis Summary", border_style=tokens.border_inactive, box=pbox))
+            top_blocks.append(self._render_unknowns_section(vm))
+            top_blocks.append(self._render_review_section(vm))
+            return Group(*top_blocks)
+
+        # Default "all" lens: full, structured dossier inspection
+        top_blocks.append(symptom_panel)
+        if impact_text.plain.strip():
+            top_blocks.append(Panel(impact_text, title="Impact & Dependency Context", border_style=tokens.border_inactive, box=pbox))
+        top_blocks.extend([
+            self._render_hypotheses_section(vm, interactive_focus=False),
+            self._render_unknowns_section(vm),
+            self._render_sop_and_checks_section(vm, interactive_focus=False),
+            self._render_evidence_section(vm, interactive_focus=False),
+            self._render_review_section(vm),
+        ])
+        return Group(*top_blocks)
+
+    # ------------------------------------------------------------------
+    # Help Overlay & Two-Step Safe Human Review Modal (Work Package D1, K1-K9)
+    # ------------------------------------------------------------------
+
+    def _render_help_modal(
+        self,
+        snapshot: DashboardSnapshot,
+        *,
+        width: int,
+        height: int | None,
+    ) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
+        body = Text()
+        body.append("KEYBOARD NAVIGATION & INTERACTION REFERENCE\n", style=tokens.primary_bold)
+        body.append(
+            "  Global          : [1-5] Switch Tab | [U] Manual Refresh | [?] Toggle Help | [Q] Quit Safely\n"
+            "  Overview / List : [Up/Dn or j/k] Move Row | [Left/Right/Tab] Menu <-> List | [Enter/O] Open | [G] Grafana\n"
+            "  Incident Detail : [Tab] Cycle Detail Lens (All/Overview/Hypotheses/Evidence/SOP/Review)\n"
+            "                    [[ / ]] Previous/Next Hypothesis or Evidence | [I] Jump Hypothesis -> Evidence\n"
+            "                    [Up/Dn or PgUp/PgDn] Scroll | [B / Esc / Left] Return (preserves selection)\n"
+            "  Human Review    : [A] Approve | [R] Reject | [C] Correct (vN+1) | [E] Escalate (opens confirmation modal)\n"
+            "  Review Modal    : Type into focused field | [Tab/Up/Dn] Switch Field/Button | [Enter] Next/Confirm | [Esc] Cancel\n\n",
+            style=tokens.primary,
+        )
+        body.append("OPERATIONAL & SAFETY SEMANTICS (NON-NEGOTIABLE)\n", style=tokens.warning)
+        body.append(
+            "  1. Zero Auto-Remediation (INV-01 / HUM-01): Dashboard and AI never restart, scale, deploy, or mutate services.\n"
+            "  2. RULE-007 & Heuristic Confidence: Scores in [5%-85%] are uncalibrated support heuristics, NEVER empirical\n"
+            "     probabilities and never confirmed/proven root causes.\n"
+            "  3. Administrative Closure (INV-06): APPROVE -> CLOSED accepts dossier handover only\n"
+            "     (diagnosis_verified=False, technical_resolved=False, sop_compliance_confirmed=False, remediation_authorized=False).\n"
+            "  4. Reviewer Identity: Local PoC caller-asserted identifier (unauthenticated; not SSO/OIDC-verified).\n\n",
+            style=tokens.secondary,
+        )
+        body.append("Press [Esc], [?], or [B] to close help and return to your current view.", style=tokens.accent)
+        return Panel(
+            body,
+            title="SRE Investigation Console - Keyboard & Semantics Reference",
+            border_style=tokens.border_focused,
+            box=pbox,
+        )
+
+    def open_review_modal(self, action: str) -> bool:
+        """Validate authoritative eligibility & revision freshness, then open two-step review modal."""
+        action_upper = action.upper()
+        if action_upper not in REVIEW_ACTION_SEMANTICS:
+            self.notice = f"Unsupported review action: {action_upper}."
+            return False
+        if not self.selected_incident_id:
+            self.notice = "Open an incident dossier first ([Enter] or [O]) before starting a review."
+            return False
+
+        snap = self.refresh_snapshot()
+        vm = snap.by_incident_id.get(self.selected_incident_id)
+        if vm is None or vm.raw_dossier is None:
+            self.notice = "Review unavailable: dossier is not generated for this incident."
+            return False
+
+        if not vm.review_eligibility.eligible:
+            self.notice = vm.review_eligibility.lock_message
+            return False
+
+        # K8 Stale Revision Pre-Check: ensure operator actually inspected the latest persisted revision
+        if (
+            self.viewed_dossier_version
+            and vm.dossier_version != self.viewed_dossier_version
+        ) or (
+            self.viewed_dossier_hash
+            and self.viewed_dossier_hash != "unavailable"
+            and vm.dossier_hash != self.viewed_dossier_hash
+        ):
+            old_v = self.viewed_dossier_version
+            self.viewed_dossier_version = vm.dossier_version
+            self.viewed_dossier_hash = vm.dossier_hash
+            self.notice = (
+                f"[REVISION CHANGED] Dossier updated from v{old_v} to v{vm.dossier_version}; "
+                f"reloaded v{vm.dossier_version}. Inspect changes and press [{action_upper[0]}] again."
+            )
+            return False
+
+        fields: list[str] = []
+        if action_upper == "CORRECT":
+            fields.append("corrected_hypothesis")
+        elif action_upper == "ESCALATE":
+            fields.append("escalation_target")
+        fields.append("rationale")
+        fields.extend(["confirm", "cancel"])
+
+        saved_draft = self.unsent_review_draft.get(vm.incident_id, "")
+        self.review_modal = {
+            "action": action_upper,
+            "incident_id": vm.incident_id,
+            "target_version": vm.dossier_version,
+            "target_hash": vm.dossier_hash,
+            "dossier_snapshot": dict(vm.raw_dossier),
+            "fields": fields,
+            "focus_idx": 0,
+            "rationale": saved_draft,
+            "corrected_hypothesis": "",
+            "escalation_target": "SRE_LEAD_ONCALL" if action_upper == "ESCALATE" else "",
+            "error": "",
+            "submitting": False,
+        }
+        self.notice = f"Review confirmation opened for {vm.incident_id} v{vm.dossier_version} ({action_upper})."
+        return True
+
+    def cancel_review_modal(self) -> None:
+        """Cancel open review confirmation without mutating domain state (D07, B09)."""
+        if self.review_modal is not None:
+            inc_id = self.review_modal.get("incident_id", "")
+            act = self.review_modal.get("action", "REVIEW")
+            self._preserve_unsent_modal_draft()
+            self.review_modal = None
+            self.notice = f"{act} cancelled for {inc_id}; no state or audit changes were made."
+
+    def submit_review_modal(self) -> bool:
+        """Validate inputs and submit version-bound review decision through AuthorizedReviewManager."""
+        modal = self.review_modal
+        if modal is None:
+            return False
+        if modal.get("submitting"):
+            modal["error"] = "Submission already in progress; duplicate submit ignored."
+            return False
+
+        action = str(modal["action"]).upper()
+        rationale = " ".join(str(modal.get("rationale") or "").split())
+        corrected = " ".join(str(modal.get("corrected_hypothesis") or "").split())
+        esc_target = " ".join(str(modal.get("escalation_target") or "").split()) or "SRE_LEAD_ONCALL"
+
+        if action == "CORRECT":
+            if len(corrected) < 5:
+                modal["error"] = "Validation error: Corrected hypothesis must be at least 5 characters."
+                return False
+            if "verified" in corrected.lower().split() or "VERIFIED" in corrected.upper():
+                import re as _re
+                if _re.search(r"\bVERIFIED\b", corrected, _re.IGNORECASE):
+                    modal["error"] = "RULE-007 violation: Human correction cannot claim 'VERIFIED' status."
+                    return False
+
+        if len(rationale) < 5:
+            modal["error"] = "Validation error: Rationale is required (minimum 5 characters)."
+            return False
+
+        modal["submitting"] = True
+        modal["error"] = ""
+        try:
+            result = self.actions.apply(
+                modal["dossier_snapshot"],
+                action,
+                reviewer_ref=self.reviewer_ref,
+                reviewer_role=self.reviewer_role,
+                rationale=rationale,
+                corrected_hypothesis=corrected if action == "CORRECT" else None,
+                escalation_target=esc_target if action == "ESCALATE" else None,
+                target_version=int(modal["target_version"]),
+                auth_context=self.auth_context,
+            )
+        except (StaleDossierVersionError, ReviewStateConflictError) as exc:
+            modal["submitting"] = False
+            self._preserve_unsent_modal_draft()
+            code = getattr(exc, "code", "VERSION_CONFLICT")
+            safe_msg = sanitize_terminal_text(str(exc), max_chars=180)
+            snap = self.refresh_snapshot()
+            updated_vm = snap.by_incident_id.get(str(modal["incident_id"]))
+            self.review_modal = None
+            if updated_vm is not None:
+                self.viewed_dossier_version = updated_vm.dossier_version
+                self.viewed_dossier_hash = updated_vm.dossier_hash
+            self.notice = f"[REVIEW CONFLICT - {code}] {safe_msg} (authoritative state reloaded)."
+            return False
+        except (UnauthorizedReviewerError, InvalidDossierError, ReviewError) as exc:
+            modal["submitting"] = False
+            code = getattr(exc, "code", "REVIEW_ERROR")
+            safe_msg = sanitize_terminal_text(str(exc), max_chars=180)
+            modal["error"] = f"Rejected ({code}): {safe_msg}"
+            self.refresh_snapshot()
+            self.notice = f"Review rejected ({code}): {safe_msg}"
+            return False
+        except (sqlite3.Error, OSError, ValueError) as exc:
+            modal["submitting"] = False
+            safe_msg = sanitize_terminal_text(f"{type(exc).__name__}: {exc}", max_chars=160)
+            modal["error"] = f"Persistence/audit failure (no changes committed): {safe_msg}"
+            self.refresh_snapshot()
+            self.notice = f"Review submission failed safely: {safe_msg}"
+            return False
+        except Exception as exc:
+            modal["submitting"] = False
+            safe_msg = sanitize_terminal_text(type(exc).__name__, max_chars=80)
+            modal["error"] = f"Unexpected error ({safe_msg}); review was not marked completed."
+            self.refresh_snapshot()
+            self.notice = f"Review submission failed ({safe_msg})."
+            return False
+
+        inc_id = str(modal["incident_id"])
+        self.unsent_review_draft.pop(inc_id, None)
+        self.review_modal = None
+        snap = self.refresh_snapshot()
+        updated_vm = snap.by_incident_id.get(inc_id)
+        if updated_vm is not None:
+            self.viewed_dossier_version = updated_vm.dossier_version
+            self.viewed_dossier_hash = updated_vm.dossier_hash
+
+        semantics = result.get("approval_semantics") or {}
+        meaning = semantics.get("closure_meaning", action)
+        if action == "CORRECT":
+            new_rev = (result.get("review_result") or {}).get("new_dossier_revision") or {}
+            new_v = new_rev.get("dossier_version", (updated_vm.dossier_version if updated_vm else 2))
+            self.notice = (
+                f"CORRECT recorded: spawned append-only Revision v{new_v} (PENDING_REVIEW); "
+                "original AI findings preserved."
+            )
+        else:
+            self.notice = (
+                f"{action} confirmed ({meaning}); diagnosis_verified=False; technical_resolved=False; "
+                f"auto_action_triggered={result['auto_action_triggered']}."
+            )
+        return True
+
+    def _render_review_modal(
+        self,
+        snapshot: DashboardSnapshot,
+        *,
+        width: int,
+        height: int | None,
+    ) -> RenderableType:
+        tokens = self._tokens()
+        pbox = self._panel_box()
+        modal = self.review_modal or {}
+        action = str(modal.get("action") or "APPROVE")
+        inc_id = str(modal.get("incident_id") or "")
+        vm = snapshot.by_incident_id.get(inc_id)
+        sem = REVIEW_ACTION_SEMANTICS[action]
+
+        body = Text()
+        body.append(f"CONFIRM HUMAN REVIEW ACTION: {sem['label']}\n", style=tokens.warning)
+        body.append(
+            f"Target Incident : {inc_id} | Revision: v{modal.get('target_version')} "
+            f"(sha256: {str(modal.get('target_hash', ''))[:16]}...)\n",
+            style=tokens.primary_bold,
+        )
+        body.append(
+            f"Lifecycle State : {vm.lifecycle_state if vm else 'HUMAN_REVIEW'} -> {sem['resulting_state']}\n",
+            style=tokens.primary,
+        )
+        body.append(
+            f"Reviewer Actor  : {self.reviewer_ref} ({self.reviewer_role}) | "
+            "Local PoC caller-asserted identity (unauthenticated)\n\n",
+            style=tokens.secondary,
+        )
+
+        if vm is not None:
+            lead_str = (
+                f"#{vm.hypotheses[0].rank} [{vm.hypotheses[0].support_label} | {vm.hypotheses[0].confidence_display}] "
+                f"{sanitize_terminal_text(vm.hypotheses[0].statement, max_chars=96)}"
+                if vm.hypotheses
+                else "No hypotheses recorded"
+            )
+            sup_cnt = sum(1 for e in vm.evidence_items if e.disposition == "ACCEPTED_SUPPORT")
+            con_cnt = sum(1 for e in vm.evidence_items if e.disposition == "CONTRADICTING")
+            body.append("Pre-Submission Diagnostic Summary:\n", style=tokens.primary_bold)
+            body.append(f"  Leading Hypothesis : {lead_str}\n", style=tokens.primary)
+            body.append(
+                f"  Evidence Balance   : {sup_cnt} supporting, {con_cnt} contradicting, {len(vm.evidence_items)} total\n"
+                f"  SOP Classification : {vm.rag.availability_code} | Pending Manual Checks: {len(vm.rag.manual_checks)} (NOT_PERFORMED)\n\n",
+                style=tokens.secondary,
+            )
+
+        body.append("Operational Meaning & Safety Boundary:\n", style=tokens.primary_bold)
+        body.append(f"  {sem['summary']}\n\n", style=tokens.warning_soft)
+
+        fields: list[str] = list(modal.get("fields") or ["rationale", "confirm", "cancel"])
+        focus_idx = max(0, min(int(modal.get("focus_idx", 0)), len(fields) - 1))
+        focused_field = fields[focus_idx]
+
+        def _render_input_line(field_key: str, label: str, placeholder: str) -> None:
+            is_f = focused_field == field_key
+            val = str(modal.get(field_key) or "")
+            cursor = "_" if is_f else ""
+            prefix = f"{self._sel_glyph()} " if is_f else "  "
+            body.append(f"{prefix}{label}:\n", style=tokens.accent if is_f else tokens.secondary)
+            if val or is_f:
+                body.append(f"    {val}{cursor}\n", style=tokens.primary_bold if is_f else tokens.primary)
+            else:
+                body.append(f"    {placeholder}\n", style=tokens.muted)
+
+        if "corrected_hypothesis" in fields:
+            _render_input_line(
+                "corrected_hypothesis",
+                "Corrected Hypothesis (min 5 chars, cannot claim VERIFIED)",
+                "[Type candidate root-cause hypothesis...]",
+            )
+        if "escalation_target" in fields:
+            _render_input_line(
+                "escalation_target",
+                "Escalation Target",
+                "SRE_LEAD_ONCALL",
+            )
+        _render_input_line(
+            "rationale",
+            "Reviewer Rationale (required, min 5 chars)",
+            "[Type justification grounded in observed telemetry...]",
+        )
+
+        body.append("\n")
+        confirm_style = tokens.selected_nav if focused_field == "confirm" else tokens.primary_bold
+        cancel_style = tokens.selected_nav if focused_field == "cancel" else tokens.secondary
+        body.append(f"  [ Confirm & Submit {action} ]  ", style=confirm_style)
+        body.append("  ")
+        body.append("  [ Cancel (Esc) ]  \n", style=cancel_style)
+
+        if modal.get("error"):
+            body.append(f"\n[!] {modal['error']}\n", style=tokens.critical)
+
+        body.append(
+            "\nControls: Type text into active field | [Tab/Up/Dn] Switch field/button | "
+            "[Enter] Next/Submit | [Esc] Cancel without changes",
+            style=tokens.secondary,
+        )
+        return Panel(
+            body,
+            title=f"Human Review Confirmation - {inc_id} (v{modal.get('target_version')})",
+            border_style=tokens.border_modal,
+            box=pbox,
+        )
+
+    # ------------------------------------------------------------------
+    # Secondary Tabs: Health, AI Model Config, Telegram Dispatcher
+    # ------------------------------------------------------------------
+
+    def _health_table(self, snapshot: Mapping[str, Any]) -> RenderableType:
+        tokens = self._tokens()
         services = snapshot.get("services", [])
+        checked_at = snapshot.get("checked_at_local", "-")
+        note = Text(
+            f"Read-only container probe (last checked: {checked_at} | press [U] to refresh). "
+            "Process connectivity does not imply live synthetic banking health.\n",
+            style=tokens.secondary,
+        )
         if not services:
-            return Text(f"Status: {snapshot.get('status')}\n{snapshot.get('reason', 'No health data available.')}", style="yellow")
-        table = Table(expand=True)
+            msg = Text()
+            msg.append(f"Container Status: {snapshot.get('status')}\n", style=tokens.warning)
+            msg.append(
+                f"Detail: {snapshot.get('reason', 'No health data available.')}\n"
+                "Next action: run ./scripts/lab_up.sh if you wish to start the Docker simulation stack.",
+                style=tokens.secondary,
+            )
+            return Group(note, msg)
+
+        table = Table(expand=True, box=self._table_box())
         table.add_column("Service")
         table.add_column("Container State")
         table.add_column("Health")
         for service in services:
-            table.add_row(str(service["name"]), str(service["state"]), str(service["health"]))
-        return table
+            st = str(service["state"])
+            hl = str(service["health"])
+            hl_style = (
+                tokens.infra_healthy
+                if st.lower() == "running" and hl.lower() in ("healthy", "not-reported")
+                else tokens.critical
+            )
+            table.add_row(str(service["name"]), st, Text(hl, style=hl_style))
+        return Group(note, table)
 
     def _current_llm_config(self) -> dict[str, str]:
         vals = self.env_manager.read_all()
@@ -986,11 +2020,14 @@ class SREDashboard:
         }
 
     def _model_panel(self, snapshot: Mapping[str, Any], active_model: str) -> RenderableType:
+        tokens = self._tokens()
         cfg = self._current_llm_config()
         table = Table.grid(padding=(0, 2))
+        table.add_column(style=tokens.secondary)
+        table.add_column(style=tokens.primary)
         table.add_row("Provider API", f"{cfg['provider_name']} ({cfg['provider_key']})")
         table.add_row("API Base URL", cfg["base_url"] or "NOT CONFIGURED")
-        api_status = f"CONFIGURED ({mask_secret(cfg['api_key'])})" if cfg["api_key"] else "EMPTY (Offline / Mock Mode)"
+        api_status = f"CONFIGURED ({mask_secret(cfg['api_key'])})" if cfg["api_key"] else "EMPTY (Offline / Deterministic Rule Mode)"
         table.add_row("API Key", api_status)
         table.add_row("Configured model", cfg["model"])
         table.add_row("Active model", active_model if active_model != "N/A" else cfg["model"])
@@ -1017,57 +2054,109 @@ class SREDashboard:
             "\nModel & API Configuration:\n"
             "  [P] Select API Provider   [K] Set API Key   [F] Fetch & Select Model from API\n"
             "  [M] Manual Model Input    [T] Test Conn.    [X] Reset to Default Offline",
-            style="bold cyan",
+            style=tokens.accent,
         )
         return Group(table, controls)
 
     def _telegram_panel(self) -> RenderableType:
+        tokens = self._tokens()
         mode = "ACTIVE OUTBOUND" if self.telegram.configured else "DRY-RUN"
         details = Text()
-        details.append(f"Status: {mode}\n", style="bold green" if self.telegram.configured else "bold yellow")
-        details.append(f"Bot Token : {mask_secret(self.telegram.bot_token)}\n")
-        details.append(f"Chat ID   : {self.telegram.chat_id or 'NOT CONFIGURED'}\n")
-        details.append(f"Last Test : {self.last_telegram_check}\n\n")
-        details.append("Security Policy:\n", style="bold")
-        details.append("  Direction: outbound notification only\n")
-        details.append("  Inbound listener: DISABLED\n")
-        details.append("  Remote command execution: NOT IMPLEMENTED\n")
-        details.append("  Credentials synced to .env (TELEGRAM_BOT_TOKEN & TELEGRAM_CHAT_ID).\n\n")
+        details.append(f"Status: {mode}\n", style=tokens.infra_healthy if self.telegram.configured else tokens.warning)
+        details.append(f"Bot Token : {mask_secret(self.telegram.bot_token)}\n", style=tokens.primary)
+        details.append(f"Chat ID   : {self.telegram.chat_id or 'NOT CONFIGURED'}\n", style=tokens.primary)
+        details.append(f"Last Test : {self.last_telegram_check}\n\n", style=tokens.secondary)
+        details.append("Security Policy:\n", style=tokens.primary_bold)
+        details.append(
+            "  Direction: outbound notification only\n"
+            "  Inbound listener: DISABLED\n"
+            "  Remote command execution: NOT IMPLEMENTED\n"
+            "  Credentials synced to .env (TELEGRAM_BOT_TOKEN & TELEGRAM_CHAT_ID).\n\n",
+            style=tokens.secondary,
+        )
         details.append(
             "Telegram Configuration:\n"
             "  [K] Set Bot Token   [C] Set / Detect Chat ID   [T] Test Bot & Send Alert   [X] Reset Dry-Run",
-            style="bold cyan",
+            style=tokens.accent,
         )
         return details
 
-    _MENU_ORDER = ("active", "archive", "health", "model", "telegram")
+    def _action_bar(self, snapshot: DashboardSnapshot | None = None) -> Text:
+        tokens = self._tokens()
+        snap = snapshot or self.repository.coordinator.current_snapshot
+        safe_notice = sanitize_terminal_text(self.notice, max_chars=140, empty_placeholder="")
 
-    def _action_bar(self) -> Text:
         if self.selected_incident_id:
+            vm = snap.by_incident_id.get(self.selected_incident_id) if snap else None
+            if vm is not None and not vm.review_eligibility.eligible:
+                if not vm.dossier_available:
+                    return Text(
+                        f"[DOSSIER PENDING - {vm.lifecycle_state}]  [Tab] LENS  [U] REFRESH  [B/Esc] BACK  [?] HELP  [Q] QUIT | {safe_notice}",
+                        style=tokens.warning,
+                    )
+                if vm.review_eligibility.lock_code == "REVIEWER_UNAUTHORIZED":
+                    return Text(
+                        f"[REVIEW DISABLED - UNAUTHORIZED ROLE]  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT | {safe_notice}",
+                        style=tokens.critical,
+                    )
+                return Text(
+                    f"[REVIEW LOCKED - FINALIZED ({vm.lifecycle_state})]  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT | {safe_notice}",
+                    style=tokens.warning,
+                )
             inc = self.store.get_incident(self.selected_incident_id)
             if inc and inc.get("current_state") != "HUMAN_REVIEW":
-                return Text("[REVIEW LOCKED - FINALIZED]  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT", style="bold yellow")
-            return Text("[A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT", style="bold yellow")
+                return Text(
+                    f"[REVIEW LOCKED - FINALIZED ({inc.get('current_state')})]  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT",
+                    style=tokens.warning,
+                )
+            return Text(
+                f"[A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT | {safe_notice}",
+                style=tokens.warning,
+            )
+
         if self.view == "model":
-            return Text(f"[P] PROVIDER  [K] API KEY  [F] FETCH MODEL  [M] MANUAL  [T] TEST  [X] RESET | {self.notice}", style="bold")
+            return Text(
+                f"[P] PROVIDER  [K] API KEY  [F] FETCH MODEL  [M] MANUAL  [T] TEST  [X] RESET  [?] HELP | {safe_notice}",
+                style=tokens.primary_bold,
+            )
         if self.view == "telegram":
-            return Text(f"[K] BOT TOKEN  [C] CHAT ID  [T] TEST ALERT  [X] RESET DRY-RUN | {self.notice}", style="bold")
+            return Text(
+                f"[K] BOT TOKEN  [C] CHAT ID  [T] TEST ALERT  [X] RESET DRY-RUN  [?] HELP | {safe_notice}",
+                style=tokens.primary_bold,
+            )
         if self.focus == "list":
-            return Text(f"[↑/↓] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [←/Tab] TO MENU  [Q] QUIT | {self.notice}", style="bold")
-        return Text(f"[↑/↓] SWITCH MENU  [→/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [Q] QUIT | {self.notice}", style="bold")
+            return Text(
+                f"[Up/Dn] SELECT ROW  [Enter/O] OPEN  [G] GRAFANA  [Left/Tab] TO MENU  [U] REFRESH  [?] HELP  [Q] QUIT | {safe_notice}",
+                style=tokens.primary_bold,
+            )
+        return Text(
+            f"[Up/Dn] SWITCH MENU  [Right/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [U] REFRESH  [?] HELP  [Q] QUIT | {safe_notice}",
+            style=tokens.primary_bold,
+        )
+
+    # ------------------------------------------------------------------
+    # Actions & Interactive Configuration Helpers
+    # ------------------------------------------------------------------
 
     def _open_grafana_for_selected(self) -> None:
         """Open Grafana dashboard zoomed to the selected incident's anomaly time window."""
+        snap = self.repository.coordinator.current_snapshot or self.refresh_snapshot()
         incident: Mapping[str, Any] | None = None
         dossier: Mapping[str, Any] | None = None
         if self.selected_incident_id:
-            dossier = self.repository.latest_dossier(self.selected_incident_id)
-            incident = self.repository.store.get_incident(self.selected_incident_id)
+            vm = snap.by_incident_id.get(self.selected_incident_id)
+            if vm and vm.raw_dossier:
+                incident = vm.raw_incident
+                dossier = vm.raw_dossier
+            else:
+                dossier = self.repository.latest_dossier(self.selected_incident_id)
+                incident = self.repository.store.get_incident(self.selected_incident_id)
         elif self.view in ("active", "archive"):
-            rows = self.repository.active_dossiers() if self.view == "active" else self.repository.archived_dossiers()
+            rows = self._entries_for_current_tab(snap)
             if rows and 0 <= self.selected_index < len(rows):
-                incident = rows[self.selected_index]["incident"]
-                dossier = rows[self.selected_index]["dossier"]
+                vm = rows[self.selected_index]
+                incident = vm.raw_incident
+                dossier = vm.raw_dossier or {"service_id": vm.primary_service, "event_time": vm.alert_received_at}
 
         if not dossier:
             self.notice = "Select an incident first to open Grafana."
@@ -1078,23 +2167,61 @@ class SREDashboard:
             opened = webbrowser.open(url)
         except Exception:
             opened = False
-        svc = str(dossier.get("service_id") or (incident or {}).get("service_id") or "unknown")
+        svc = sanitize_terminal_text(dossier.get("service_id") or (incident or {}).get("service_id") or "unknown", max_chars=48)
         if opened:
             self.notice = f"Grafana opened ({svc}): {url}"
         else:
             self.notice = f"Open Grafana URL ({svc}): {url}"
 
     def _select_by_index(self) -> None:
-        rows = self.repository.active_dossiers() if self.view == "active" else self.repository.archived_dossiers()
+        snap = self.refresh_snapshot()
+        rows = self._entries_for_current_tab(snap)
         if not rows:
-            self.notice = "No dossiers available to open."
+            self.notice = "No incidents available to open."
             return
         if 0 <= self.selected_index < len(rows):
             selected = rows[self.selected_index]
-            self.selected_incident_id = str(selected["dossier"]["incident_id"])
-            self.notice = f"Dossier {self.selected_incident_id} opened."
+            self.selected_incident_id = selected.incident_id
+            self.highlighted_incident_id = selected.incident_id
+            self.viewed_dossier_version = selected.dossier_version
+            self.viewed_dossier_hash = selected.dossier_hash
+            self.detail_section = "all"
+            self.detail_return_stack.clear()
+            self.selected_hypothesis_idx = 0
+            self.selected_evidence_idx = 0
+            self.detail_scroll_offset = 0
+            self.notice = f"Incident {self.selected_incident_id} opened (Revision v{selected.dossier_version})."
         else:
-            self.notice = "Invalid dossier selection."
+            self.notice = "Invalid incident selection."
+
+    def _jump_hypothesis_to_evidence(self) -> None:
+        """Follow selected hypothesis's supporting/contradicting evidence reference (Work Package I5)."""
+        if not self.selected_incident_id:
+            return
+        snap = self.repository.coordinator.current_snapshot or self.refresh_snapshot()
+        vm = snap.by_incident_id.get(self.selected_incident_id)
+        if vm is None or not vm.hypotheses:
+            self.notice = "No hypotheses available for evidence reference resolution."
+            return
+        h_idx = max(0, min(self.selected_hypothesis_idx, len(vm.hypotheses) - 1))
+        h_vm = vm.hypotheses[h_idx]
+        ref_ids = list(h_vm.supporting_ids) + list(h_vm.contradicting_ids)
+        if not ref_ids:
+            self.notice = f"Hypothesis #{h_vm.rank} has no linked supporting or contradicting evidence IDs."
+            return
+        target_eid = ref_ids[0]
+        ev_idx = next((i for i, e in enumerate(vm.evidence_items) if e.evidence_id == target_eid), None)
+        self.detail_return_stack.append((self.detail_section, self.detail_scroll_offset))
+        self.detail_section = "evidence"
+        self.detail_scroll_offset = 0
+        if ev_idx is not None:
+            self.selected_evidence_idx = ev_idx
+            self.notice = f"Resolved #{h_vm.rank} -> evidence {target_eid} (press [B/Esc] to return to Hypotheses)."
+        else:
+            self.notice = (
+                f"Reference '{target_eid}' from #{h_vm.rank} is UNRESOLVED in authorized telemetry "
+                "(shown in Evidence Lineage warnings)."
+            )
 
     def _set_mouse_tracking(self, enabled: bool) -> None:
         """Enable or disable SGR/X10 mouse tracking to block trackpad wheel scrolling."""
@@ -1108,8 +2235,13 @@ class SREDashboard:
             pass
 
     def _prompt_text(self, prompt: str, *, password: bool = False, default: str = "") -> str:
-        """Temporarily suspend mouse tracking, prompt user cleanly, and re-enable mouse tracking."""
+        """Temporarily suspend cbreak & mouse tracking, prompt user cleanly, and restore cbreak."""
         self._set_mouse_tracking(False)
+        if self._tty_fd is not None and self._saved_termios is not None:
+            try:
+                termios.tcsetattr(self._tty_fd, termios.TCSADRAIN, self._saved_termios)
+            except termios.error:
+                pass
         self.console.clear()
         self.console.print(self.render())
         self.console.print()
@@ -1118,6 +2250,11 @@ class SREDashboard:
                 return Prompt.ask(prompt, console=self.console, password=password, default=default).strip()
             return Prompt.ask(prompt, console=self.console, password=password).strip()
         finally:
+            if self._tty_fd is not None and self._saved_termios is not None:
+                try:
+                    tty.setcbreak(self._tty_fd)
+                except termios.error:
+                    pass
             self._set_mouse_tracking(True)
 
     def _prompt_cancellable(
@@ -1139,7 +2276,7 @@ class SREDashboard:
     def _configure_model_provider(self) -> None:
         self._set_mouse_tracking(False)
         self.console.clear()
-        table = Table(title="Select AI API Provider", expand=False)
+        table = Table(title="Select AI API Provider", expand=False, box=self._table_box())
         table.add_column("No.", justify="right")
         table.add_column("Provider")
         table.add_column("Default Base URL")
@@ -1176,7 +2313,7 @@ class SREDashboard:
             self.fetched_models = []
             self.notice = f"Provider set to {preset['name']} ({updates['LLM_BASE_URL']})."
         except (KeyboardInterrupt, EOFError, ValueError) as exc:
-            self.notice = f"Provider configuration cancelled: {exc}"
+            self.notice = f"Provider configuration cancelled: {type(exc).__name__}"
         finally:
             self._set_mouse_tracking(True)
 
@@ -1216,13 +2353,15 @@ class SREDashboard:
         height: int | None = None,
         active_model: str = "",
     ) -> Panel:
+        tokens = self._tokens()
         term_h = height or self.console.size.height
         max_visible = max(5, term_h - 10)
         total = len(models)
+        sel_mark = self._sel_glyph()
         if total == 0:
             body: RenderableType = Text(
                 "No models match the filter.\nPress [/] to edit filter or [Esc/B] to cancel.",
-                style="yellow",
+                style=tokens.warning,
             )
         else:
             sel = max(0, min(selected_idx, total - 1))
@@ -1233,32 +2372,33 @@ class SREDashboard:
             scroll_offset = max(0, min(scroll_offset, max(0, total - max_visible)))
             visible = models[scroll_offset : scroll_offset + max_visible]
 
-            table = Table(expand=True, show_header=True)
+            table = Table(expand=True, show_header=True, box=self._table_box())
             table.add_column("No.", justify="right", width=6, no_wrap=True)
-            table.add_column("Model ID", no_wrap=True, overflow="ellipsis")
+            table.add_column("Model ID", no_wrap=True)
             table.add_column("Status", width=10, no_wrap=True)
             for offset_i, m_id in enumerate(visible):
                 actual_i = scroll_offset + offset_i
                 is_sel = actual_i == sel
                 is_active = m_id == active_model
-                no_str = f"▶ {actual_i + 1}" if is_sel else f"  {actual_i + 1}"
+                no_str = f"{sel_mark} {actual_i + 1}" if is_sel else f"  {actual_i + 1}"
                 status_str = "ACTIVE" if is_active else ""
-                row_style = "bold cyan" if is_sel else ("green" if is_active else "")
-                table.add_row(no_str, m_id, status_str, style=row_style)
+                row_style = tokens.selected_row if is_sel else (tokens.infra_healthy if is_active else tokens.primary)
+                table.add_row(no_str, sanitize_terminal_text(m_id, max_chars=96), status_str, style=row_style)
 
             end_i = scroll_offset + len(visible)
             info = Text(
                 f"Showing {scroll_offset + 1}-{end_i} of {total} models"
                 + (f" (filter: '{keyword}', total {total_count})" if keyword else "")
-                + "\nNavigation: [↑/↓ or j/k] Select  |  [PgUp/PgDn] Page Scroll  |  [/] Filter  |  [Enter] Save  |  [Esc/B] Cancel",
-                style="bold green",
+                + "\nNavigation: [Up/Dn or j/k] Select  |  [PgUp/PgDn] Page Scroll  |  [/] Filter  |  [Enter] Save  |  [Esc/B] Cancel",
+                style=tokens.secondary,
             )
             body = Group(table, info)
 
         return Panel(
             body,
             title="Select Model from API (Arrow Key Scrollable)",
-            border_style="bright_cyan",
+            border_style=tokens.border_focused,
+            box=self._panel_box(),
         )
 
     def _fetch_and_select_model(self) -> None:
@@ -1266,8 +2406,9 @@ class SREDashboard:
         self.notice = f"Fetching model list from {cfg['base_url']}..."
         res = self.model_catalog.fetch_models(cfg["base_url"], cfg["api_key"])
         if res["status"] != "OK":
-            self.last_model_check = f"ERROR: {res['error'][:65]}"
-            self.notice = f"Failed to fetch models: {res['error'][:80]}"
+            err_clean = sanitize_terminal_text(res.get("error"), max_chars=80)
+            self.last_model_check = f"ERROR: {err_clean[:65]}"
+            self.notice = f"Failed to fetch models: {err_clean}"
             return
 
         self.fetched_models = list(res["models"])
@@ -1310,7 +2451,8 @@ class SREDashboard:
                     self.console.clear()
                     self.console.print(picker_panel)
 
-                key = self._read_key(timeout=None)
+                raw_key = self._read_key(timeout=None)
+                key = raw_key.upper()
                 if key in ("ESC", "B", "Q"):
                     self.notice = "Model selection cancelled."
                     return
@@ -1322,7 +2464,7 @@ class SREDashboard:
                     selected_idx = max(0, selected_idx - max_visible)
                 elif key == "PGDN" and filtered:
                     selected_idx = min(len(filtered) - 1, selected_idx + max_visible)
-                elif key == "/":
+                elif raw_key == "/":
                     self._set_mouse_tracking(False)
                     try:
                         self.console.clear()
@@ -1374,10 +2516,11 @@ class SREDashboard:
                 self.notice = f"Connection to {cfg['provider_name']} OK! Model '{cfg['model']}' available."
             else:
                 self.last_model_check = f"CONNECTED ({res['latency_ms']} ms, custom model)"
-                self.notice = res.get("error") or "Endpoint connection successful."
+                self.notice = sanitize_terminal_text(res.get("error") or "Endpoint connection successful.", max_chars=96)
         else:
-            self.last_model_check = f"FAILED ({res['error'][:60]})"
-            self.notice = f"Connection test failed: {res['error'][:80]}"
+            err_s = sanitize_terminal_text(res.get("error"), max_chars=80)
+            self.last_model_check = f"FAILED ({err_s[:60]})"
+            self.notice = f"Connection test failed: {err_s}"
 
     def _reset_model_config(self) -> None:
         self.env_manager.set_values({
@@ -1411,8 +2554,9 @@ class SREDashboard:
                     self.last_telegram_check = f"Bot verified: @{check['username']}"
                     self.notice = f"Bot Token saved (@{check['username']})."
                 else:
-                    self.last_telegram_check = f"Token saved, verification: {check['error']}"
-                    self.notice = f"Token saved but verification failed: {check['error']}"
+                    err_s = sanitize_terminal_text(check.get("error"), max_chars=80)
+                    self.last_telegram_check = f"Token saved, verification: {err_s}"
+                    self.notice = f"Token saved but verification failed: {err_s}"
             else:
                 self.last_telegram_check = "Dry-run (token cleared)"
                 self.notice = "Bot Token cleared (DRY-RUN mode)."
@@ -1428,15 +2572,15 @@ class SREDashboard:
                 res = self.telegram_helper.discover_chats(self.telegram.bot_token)
                 if res["status"] == "OK" and res["chats"]:
                     discovered = res["chats"]
-                    table = Table(title="Detected Chat IDs from Bot getUpdates")
+                    table = Table(title="Detected Chat IDs from Bot getUpdates", box=self._table_box())
                     table.add_column("No.", justify="right")
                     table.add_column("Chat ID")
                     table.add_column("Info")
                     for idx, (cid, desc) in enumerate(discovered, 1):
-                        table.add_row(str(idx), cid, desc)
+                        table.add_row(str(idx), sanitize_terminal_text(cid, max_chars=40), sanitize_terminal_text(desc, max_chars=80))
                     self.console.print(table)
                 else:
-                    self.console.print("[dim]No incoming messages to bot yet or unable to detect. Enter Chat ID manually.[/dim]")
+                    self.console.print(Text("No incoming messages to bot yet or unable to detect. Enter Chat ID manually."))
 
             val = Prompt.ask(
                 "Select number from list or enter Chat ID manually (e.g., -1001234567890)",
@@ -1452,7 +2596,7 @@ class SREDashboard:
             self.telegram = TelegramDispatcher(bot_token=self.telegram.bot_token, chat_id=chat_id)
             self.notice = f"Telegram Chat ID set to '{chat_id or 'EMPTY'}'."
         except (KeyboardInterrupt, EOFError, ValueError) as exc:
-            self.notice = f"Chat ID configuration cancelled: {exc}"
+            self.notice = f"Chat ID configuration cancelled: {type(exc).__name__}"
         finally:
             self._set_mouse_tracking(True)
 
@@ -1463,8 +2607,9 @@ class SREDashboard:
             return
         bot_check = self.telegram_helper.test_bot(self.telegram.bot_token)
         if bot_check["status"] != "OK":
-            self.last_telegram_check = f"FAILED: {bot_check['error']}"
-            self.notice = f"Bot verification failed: {bot_check['error']}"
+            err_s = sanitize_terminal_text(bot_check.get("error"), max_chars=80)
+            self.last_telegram_check = f"FAILED: {err_s}"
+            self.notice = f"Bot verification failed: {err_s}"
             return
 
         if not self.telegram.chat_id:
@@ -1479,15 +2624,15 @@ class SREDashboard:
             "review_summary": {"status": "PENDING_REVIEW"},
             "impact_summary": {
                 "affected_services": ["sre-command-center"],
-                "observed_symptoms": "Outbound Telegram connectivity test from Unified SRE Command Center.",
+                "observed_symptoms": "Outbound Telegram connectivity test from SRE Investigation Console.",
             },
-            "hypotheses": [{"statement": "Outbound Telegram notification test verified", "confidence_score": 1.0}],
+            "hypotheses": [{"statement": "Outbound Telegram notification test", "confidence_score": 0.50}],
             "sop_citations": [{"doc_id": "SOP-TEST-001", "section_path": "Outbound Alert Verification"}],
         }
         res = self.telegram.dispatch_pending_review(test_dossier)
         if res.delivered:
             self.last_telegram_check = f"DELIVERED to {self.telegram.chat_id} (@{bot_check['username']})"
-            self.notice = f"Test alert delivered to Chat ID {self.telegram.chat_id}!"
+            self.notice = f"Test alert delivered to Chat ID {self.telegram.chat_id}."
         else:
             self.last_telegram_check = f"{res.status}: {res.reason}"
             self.notice = f"Test alert failed ({res.reason})."
@@ -1498,34 +2643,53 @@ class SREDashboard:
         self.last_telegram_check = "Reset to DRY-RUN mode"
         self.notice = "Telegram configuration cleared (DRY-RUN mode)."
 
-    def _read_key(self, timeout: float | None = 2.0) -> str:
+    # ------------------------------------------------------------------
+    # Keyboard Reading & Deterministic Event Dispatch (Work Package D2, D3)
+    # ------------------------------------------------------------------
+
+    def _read_key(self, timeout: float | None = 2.0, *, raw_text_mode: bool = False) -> str:
         """Read a single keypress, arrow key, or escape sequence; return 'REFRESH' on timeout."""
         if not sys.stdin.isatty() or not _HAS_TERMIOS:
             try:
                 line = sys.stdin.readline()
                 if not line:
                     return "Q"
-                cmd = line.strip().upper()
-                if cmd in ("UP", "DOWN", "LEFT", "RIGHT", "PGUP", "PGDN", "TAB", "ENTER", "ESC", "Q", "B", "O", "A", "R", "C", "E", "P", "K", "F", "M", "T", "X"):
+                stripped = line.rstrip("\r\n")
+                if raw_text_mode:
+                    if stripped.upper() in ("ESC", "TAB", "ENTER", "BACKSPACE", "UP", "DOWN"):
+                        return stripped.upper()
+                    return stripped
+                cmd = stripped.strip().upper()
+                if cmd in (
+                    "UP", "DOWN", "LEFT", "RIGHT", "PGUP", "PGDN", "TAB", "ENTER", "ESC",
+                    "BACKSPACE", "Q", "B", "O", "A", "R", "C", "E", "P", "K", "F", "M", "T", "X",
+                    "G", "U", "I", "?", "[", "]",
+                ):
                     return cmd
                 return cmd[:1] if cmd else "ENTER"
             except (OSError, EOFError):
                 return "Q"
 
         fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
+        manage_cbreak_locally = self._tty_fd is None
+        local_saved = termios.tcgetattr(fd) if manage_cbreak_locally else None
         deadline = (time.monotonic() + timeout) if timeout is not None else None
         try:
-            tty.setcbreak(fd)
+            if manage_cbreak_locally:
+                tty.setcbreak(fd)
             while True:
-                if deadline is not None:
-                    remaining = deadline - time.monotonic()
-                    if remaining <= 0:
-                        return "REFRESH"
-                    ready, _, _ = select.select([fd], [], [], remaining)
-                    if not ready:
-                        return "REFRESH"
-                b = os.read(fd, 1)
+                if self._pending_byte is not None:
+                    b = self._pending_byte
+                    self._pending_byte = None
+                else:
+                    if deadline is not None:
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0:
+                            return "REFRESH"
+                        ready, _, _ = select.select([fd], [], [], remaining)
+                        if not ready:
+                            return "REFRESH"
+                    b = os.read(fd, 1)
                 if not b:
                     return "Q"
                 if b == b"\x1b":
@@ -1536,7 +2700,7 @@ class SREDashboard:
                             r2, _, _ = select.select([fd], [], [], 0.05)
                             if r2:
                                 b3 = os.read(fd, 1)
-                                # Consume & discard SGR mouse events (\x1b[<btn;x;yM/m) to disable trackpad scroll
+                                # Consume & discard SGR mouse events (\x1b[<btn;x;yM/m)
                                 if b2 == b"[" and b3 == b"<":
                                     for _ in range(64):
                                         if not select.select([fd], [], [], 0.02)[0]:
@@ -1545,7 +2709,7 @@ class SREDashboard:
                                         if mb in (b"M", b"m"):
                                             break
                                     continue
-                                # Consume & discard legacy X10 mouse events (\x1b[M + 3 bytes)
+                                # Consume & discard legacy X10 mouse events
                                 if b2 == b"[" and b3 == b"M":
                                     for _ in range(3):
                                         if select.select([fd], [], [], 0.02)[0]:
@@ -1559,6 +2723,8 @@ class SREDashboard:
                                     return "RIGHT"
                                 if b3 == b"D":
                                     return "LEFT"
+                                if b3 == b"Z":
+                                    return "SHIFT_TAB"
                                 if b3 == b"5":
                                     while select.select([fd], [], [], 0.01)[0]:
                                         if os.read(fd, 1) == b"~":
@@ -1571,14 +2737,6 @@ class SREDashboard:
                                     return "PGDN"
                                 while select.select([fd], [], [], 0.01)[0]:
                                     extra = os.read(fd, 1)
-                                    if extra == b"A":
-                                        return "UP"
-                                    if extra == b"B":
-                                        return "DOWN"
-                                    if extra == b"C":
-                                        return "RIGHT"
-                                    if extra == b"D":
-                                        return "LEFT"
                                     if extra == b"~":
                                         break
                         return "ESC"
@@ -1587,223 +2745,436 @@ class SREDashboard:
                     return "ENTER"
                 if b == b"\t":
                     return "TAB"
-                if b == b"\x03":  # Ctrl+C
+                if b in (b"\x7f", b"\x08"):
+                    return "BACKSPACE"
+                if b == b"\x03":
                     raise KeyboardInterrupt
-                if b == b" ":
+                # Handle multi-byte UTF-8 input cleanly
+                first = b[0]
+                extra_bytes = 0
+                if (first & 0xE0) == 0xC0:
+                    extra_bytes = 1
+                elif (first & 0xF0) == 0xE0:
+                    extra_bytes = 2
+                elif (first & 0xF8) == 0xF0:
+                    extra_bytes = 3
+                buf = bytearray(b)
+                for _ in range(extra_bytes):
+                    if select.select([fd], [], [], 0.02)[0]:
+                        buf.extend(os.read(fd, 1))
+                ch = bytes(buf).decode("utf-8", errors="ignore")
+                if raw_text_mode:
+                    # Coalesce burst/pasted printable ASCII bytes into one token to avoid per-char redraw lag
+                    out_chars = [ch]
+                    while len(out_chars) < 256 and select.select([fd], [], [], 0.0)[0]:
+                        peek_b = os.read(fd, 1)
+                        if not peek_b:
+                            break
+                        pb = peek_b[0]
+                        if 32 <= pb < 127:
+                            out_chars.append(chr(pb))
+                        else:
+                            # Put control byte back via unconsumed pending buffer
+                            self._pending_byte = peek_b
+                            break
+                    return "".join(out_chars)
+                if ch == " ":
                     return "ENTER"
-                return b.decode("utf-8", errors="ignore").upper()
+                return ch.upper()
         finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            if manage_cbreak_locally and local_saved is not None:
+                termios.tcsetattr(fd, termios.TCSADRAIN, local_saved)
+
+    def _handle_review_modal_key(self, raw_key: str) -> None:
+        """Process keypresses strictly inside the review confirmation modal (isolates global shortcuts)."""
+        modal = self.review_modal
+        if modal is None:
+            return
+
+        if raw_key == "REFRESH":
+            self.refresh_snapshot()
+            return
+        if raw_key == "ESC":
+            self.cancel_review_modal()
+            return
+
+        fields: list[str] = list(modal.get("fields") or ["rationale", "confirm", "cancel"])
+        focus_idx = max(0, min(int(modal.get("focus_idx", 0)), len(fields) - 1))
+        focused_field = fields[focus_idx]
+
+        if raw_key in ("TAB", "DOWN"):
+            modal["focus_idx"] = (focus_idx + 1) % len(fields)
+            self._skip_next_render_refresh = True
+            return
+        if raw_key in ("SHIFT_TAB", "UP"):
+            modal["focus_idx"] = (focus_idx - 1) % len(fields)
+            self._skip_next_render_refresh = True
+            return
+
+        if raw_key == "ENTER":
+            if focused_field == "cancel":
+                self.cancel_review_modal()
+                return
+            if focused_field == "confirm":
+                self.submit_review_modal()
+                return
+            # On a text field, Enter advances focus to the next field / Confirm button (never auto-submits!)
+            modal["focus_idx"] = min(len(fields) - 1, focus_idx + 1)
+            self._skip_next_render_refresh = True
+            return
+
+        if focused_field in ("rationale", "corrected_hypothesis", "escalation_target"):
+            cur_val = str(modal.get(focused_field) or "")
+            if raw_key == "BACKSPACE":
+                modal[focused_field] = cur_val[:-1]
+                self._skip_next_render_refresh = True
+            elif len(raw_key) >= 1 and raw_key not in ("LEFT", "RIGHT", "PGUP", "PGDN"):
+                # Sanitize control sequences immediately while preserving printable user input
+                cleaned = "".join(c for c in raw_key if c >= " " and c != "\x7f")
+                if cleaned:
+                    modal[focused_field] = (cur_val + cleaned)[:512]
+                    self._skip_next_render_refresh = True
+        elif focused_field in ("confirm", "cancel"):
+            if raw_key in ("LEFT", "RIGHT"):
+                modal["focus_idx"] = fields.index("cancel" if focused_field == "confirm" else "confirm")
+                self._skip_next_render_refresh = True
+
+    def handle_key(self, raw_key: str) -> bool:
+        """Process a single navigation or modal event; return False when quitting."""
+        if raw_key == "REFRESH":
+            self.refresh_snapshot()
+            return True
+
+        # Modal focus trap: Help overlay
+        if self.help_open:
+            if raw_key.upper() in ("ESC", "B", "?", "ENTER", "Q"):
+                self.help_open = False
+                self.notice = "Closed help overlay."
+            return True
+
+        # Modal focus trap: Human Review confirmation
+        if self.review_modal is not None:
+            self._handle_review_modal_key(raw_key)
+            return True
+
+        key = raw_key.upper()
+        if key == "Q":
+            self.notice = "Console closed without automated actions."
+            return False
+
+        if raw_key == "?" or key == "?":
+            self.help_open = True
+            self.notice = "Opened keyboard & safety semantics reference."
+            return True
+
+        if key == "U":
+            self.refresh_snapshot(force_probes=True)
+            self.notice = "Refreshed authoritative state snapshot."
+            return True
+
+        snap = self.repository.coordinator.current_snapshot or self.refresh_snapshot()
+        rows = self._entries_for_current_tab(snap)
+        num_rows = len(rows)
+
+        # Tab-specific configuration shortcuts on AI Model Config & Telegram Alerts
+        if self.view == "model" and not self.selected_incident_id:
+            if key == "P":
+                self._configure_model_provider()
+                return True
+            if key == "K":
+                self._configure_model_api_key()
+                return True
+            if key == "F":
+                self._fetch_and_select_model()
+                return True
+            if key == "M":
+                self._configure_model_manual()
+                return True
+            if key == "T":
+                self._test_model_connection()
+                return True
+            if key == "X":
+                self._reset_model_config()
+                return True
+
+        if self.view == "telegram" and not self.selected_incident_id:
+            if key == "K":
+                self._configure_telegram_token()
+                return True
+            if key == "C":
+                self._configure_telegram_chat_id()
+                return True
+            if key == "T":
+                self._test_telegram_alert()
+                return True
+            if key == "X":
+                self._reset_telegram_config()
+                return True
+
+        if key in ("UP", "K"):
+            if self.selected_incident_id:
+                self.detail_scroll_offset = max(0, self.detail_scroll_offset - 2)
+            elif self.focus == "menu":
+                idx = self._MENU_ORDER.index(self.view)
+                self.view = self._MENU_ORDER[(idx - 1) % len(self._MENU_ORDER)]
+                self.selected_index = 0
+                self._last_synced_index = 0
+                self.highlighted_incident_id = None
+                self.list_scroll_offset = 0
+                self.detail_scroll_offset = 0
+                self.notice = f"Menu: {self._main_title()}."
+            elif self.focus == "list" and num_rows > 0:
+                self.selected_index = (self.selected_index - 1) % num_rows
+                self._last_synced_index = self.selected_index
+                self.highlighted_incident_id = rows[self.selected_index].incident_id
+                self.notice = f"Selected row {self.selected_index + 1} ({self.highlighted_incident_id})."
+            return True
+
+        if key in ("DOWN", "J"):
+            if self.selected_incident_id:
+                self.detail_scroll_offset += 2
+            elif self.focus == "menu":
+                idx = self._MENU_ORDER.index(self.view)
+                self.view = self._MENU_ORDER[(idx + 1) % len(self._MENU_ORDER)]
+                self.selected_index = 0
+                self._last_synced_index = 0
+                self.highlighted_incident_id = None
+                self.list_scroll_offset = 0
+                self.detail_scroll_offset = 0
+                self.notice = f"Menu: {self._main_title()}."
+            elif self.focus == "list" and num_rows > 0:
+                self.selected_index = (self.selected_index + 1) % num_rows
+                self._last_synced_index = self.selected_index
+                self.highlighted_incident_id = rows[self.selected_index].incident_id
+                self.notice = f"Selected row {self.selected_index + 1} ({self.highlighted_incident_id})."
+            return True
+
+        if key == "PGUP":
+            if self.selected_incident_id or self.view not in ("active", "archive"):
+                self.detail_scroll_offset = max(0, self.detail_scroll_offset - 6)
+            elif self.focus == "list" and num_rows > 0:
+                self.selected_index = max(0, self.selected_index - 5)
+                self._last_synced_index = self.selected_index
+                self.highlighted_incident_id = rows[self.selected_index].incident_id
+            return True
+
+        if key == "PGDN":
+            if self.selected_incident_id or self.view not in ("active", "archive"):
+                self.detail_scroll_offset += 6
+            elif self.focus == "list" and num_rows > 0:
+                self.selected_index = min(num_rows - 1, self.selected_index + 5)
+                self._last_synced_index = self.selected_index
+                self.highlighted_incident_id = rows[self.selected_index].incident_id
+            return True
+
+        if key in ("[", "]") and self.selected_incident_id:
+            vm = snap.by_incident_id.get(self.selected_incident_id)
+            delta = -1 if key == "[" else 1
+            if vm is not None:
+                if self.detail_section == "evidence" and vm.evidence_items:
+                    self.selected_evidence_idx = (self.selected_evidence_idx + delta) % len(vm.evidence_items)
+                    ev = vm.evidence_items[self.selected_evidence_idx]
+                    self.notice = f"Selected evidence {ev.evidence_id} ({self.selected_evidence_idx + 1}/{len(vm.evidence_items)})."
+                elif vm.hypotheses:
+                    if self.detail_section not in ("hypotheses", "evidence"):
+                        self.detail_section = "hypotheses"
+                    self.selected_hypothesis_idx = (self.selected_hypothesis_idx + delta) % len(vm.hypotheses)
+                    hy = vm.hypotheses[self.selected_hypothesis_idx]
+                    self.notice = f"Selected hypothesis #{hy.rank} ({hy.hypothesis_id})."
+            return True
+
+        if key == "I" and self.selected_incident_id:
+            self._jump_hypothesis_to_evidence()
+            return True
+
+        if key == "RIGHT":
+            if not self.selected_incident_id and self.view in ("active", "archive") and num_rows > 0:
+                self.focus = "list"
+                self.notice = "Focused on incident list."
+            return True
+
+        if key in ("TAB", "SHIFT_TAB"):
+            if self.selected_incident_id:
+                cur_l = DETAIL_LENS_ORDER.index(self.detail_section) if self.detail_section in DETAIL_LENS_ORDER else 0
+                step = -1 if key == "SHIFT_TAB" else 1
+                self.detail_section = DETAIL_LENS_ORDER[(cur_l + step) % len(DETAIL_LENS_ORDER)]
+                self.detail_scroll_offset = 0
+                self.notice = f"Detail lens: {DETAIL_LENS_LABELS[self.detail_section]}."
+            elif self.view in ("active", "archive") and num_rows > 0:
+                self.focus = "list" if self.focus == "menu" else "menu"
+                self.notice = f"Focus switched to {'incident list' if self.focus == 'list' else 'navigation menu'}."
+            return True
+
+        if key == "LEFT":
+            if self.selected_incident_id:
+                if self.detail_return_stack:
+                    prev_sec, prev_off = self.detail_return_stack.pop()
+                    self.detail_section = prev_sec
+                    self.detail_scroll_offset = prev_off
+                    self.notice = f"Returned to {DETAIL_LENS_LABELS.get(prev_sec, prev_sec)}."
+                else:
+                    self.selected_incident_id = None
+                    self.detail_scroll_offset = 0
+                    self.notice = "Returned to incident list."
+            elif self.focus == "list":
+                self.focus = "menu"
+                self.notice = "Focused on navigation menu."
+            return True
+
+        if key in ("ENTER", "O"):
+            if self.selected_incident_id and self.detail_section == "hypotheses" and key == "ENTER":
+                self._jump_hypothesis_to_evidence()
+                return True
+            if not self.selected_incident_id and self.view in ("active", "archive"):
+                if self.focus == "menu" and key == "ENTER" and num_rows > 0:
+                    self.focus = "list"
+                    self.notice = "Focused on incident list. Press [Enter] again to inspect incident."
+                elif num_rows > 0:
+                    self._select_by_index()
+                else:
+                    self.notice = "No incidents available in this tab."
+            return True
+
+        if key in ("B", "ESC"):
+            if self.selected_incident_id:
+                if self.detail_return_stack:
+                    prev_sec, prev_off = self.detail_return_stack.pop()
+                    self.detail_section = prev_sec
+                    self.detail_scroll_offset = prev_off
+                    self.notice = f"Returned to {DETAIL_LENS_LABELS.get(prev_sec, prev_sec)}."
+                elif self.detail_section != "all":
+                    self.detail_section = "all"
+                    self.detail_scroll_offset = 0
+                    self.notice = "Returned to full dossier view."
+                else:
+                    self.selected_incident_id = None
+                    self.detail_scroll_offset = 0
+                    self.notice = "Returned to incident list."
+            elif self.focus == "list":
+                self.focus = "menu"
+                self.notice = "Returned to navigation menu."
+            else:
+                self.view = "active"
+                self.selected_index = 0
+                self._last_synced_index = 0
+                self.list_scroll_offset = 0
+                self.detail_scroll_offset = 0
+            return True
+
+        if key in ("1", "2", "3", "4", "5"):
+            self.view = {
+                "1": "active",
+                "2": "archive",
+                "3": "health",
+                "4": "model",
+                "5": "telegram",
+            }[key]
+            self.selected_incident_id = None
+            self.detail_return_stack.clear()
+            self.selected_index = 0
+            self._last_synced_index = 0
+            self.highlighted_incident_id = None
+            self.list_scroll_offset = 0
+            self.detail_scroll_offset = 0
+            if self.view not in ("active", "archive"):
+                self.focus = "menu"
+            self.notice = f"Switched to tab {self._main_title()}."
+            return True
+
+        if key == "G":
+            if self.selected_incident_id or self.view in ("active", "archive"):
+                self._open_grafana_for_selected()
+            else:
+                self.notice = "Shortcut [G] is available in incident list or incident detail."
+            return True
+
+        if key in ("A", "R", "C", "E"):
+            if self.selected_incident_id:
+                self.open_review_modal(
+                    {"A": "APPROVE", "R": "REJECT", "C": "CORRECT", "E": "ESCALATE"}[key]
+                )
+            else:
+                self.notice = "Open an incident first ([Enter] or [O]) before starting a review."
+            return True
+
+        self.notice = f"Unrecognized key '{sanitize_terminal_text(key, max_chars=16)}'. Press [?] for keyboard reference."
+        return True
 
     def _review_selected(self, action: str) -> None:
-        if not self.selected_incident_id:
-            self.notice = "Select a dossier first."
+        """Programmatic / legacy prompt-driven fallback wrapper around version-bound review."""
+        if not self.open_review_modal(action):
             return
-        inc = self.store.get_incident(self.selected_incident_id)
-        if inc and inc.get("current_state") != "HUMAN_REVIEW":
-            self.notice = f"Incident is already finalized ({inc.get('current_state')}); review actions are locked."
+        modal = self.review_modal
+        if modal is None:
             return
-        dossier = self.repository.latest_dossier(self.selected_incident_id)
-        if dossier is None:
-            self.notice = "Dossier not found."
-            return
-        rationale = self._prompt_text("Rationale")
-        corrected = None
-        target = None
-        if action == "CORRECT":
-            corrected = self._prompt_text("Corrected root-cause hypothesis")
-        elif action == "ESCALATE":
-            target = self._prompt_text("Escalation target", default="SRE_LEAD_ONCALL")
+        action_upper = action.upper()
         try:
-            result = self.actions.apply(
-                dossier,
-                action,
-                reviewer_ref=self.reviewer_ref,
-                reviewer_role=self.reviewer_role,
-                rationale=rationale,
-                corrected_hypothesis=corrected,
-                escalation_target=target,
-            )
-        except Exception as exc:
-            self.notice = f"Review failed: {type(exc).__name__}: {exc}"
-            return
-        semantics = result.get("approval_semantics") or {}
-        meaning = semantics.get("closure_meaning", action)
-        self.notice = (
-            f"{action} recorded ({meaning}); diagnosis_verified=False; "
-            f"auto_action_triggered={result['auto_action_triggered']}."
-        )
-        self.selected_incident_id = None
+            if action_upper == "CORRECT":
+                corrected = self._prompt_cancellable("Corrected root-cause hypothesis [Enter/cancel = Cancel]")
+                if corrected is None:
+                    self.cancel_review_modal()
+                    return
+                modal["corrected_hypothesis"] = corrected
+            elif action_upper == "ESCALATE":
+                target = self._prompt_text("Escalation target", default="SRE_LEAD_ONCALL")
+                modal["escalation_target"] = target or "SRE_LEAD_ONCALL"
+            rationale = self._prompt_cancellable("Rationale (min 5 chars) [Enter/cancel = Cancel]")
+            if rationale is None:
+                self.cancel_review_modal()
+                return
+            modal["rationale"] = rationale
+            self.submit_review_modal()
+        except (KeyboardInterrupt, EOFError):
+            self.cancel_review_modal()
 
-    def run(self) -> None:
-        """Run the interactive keyboard-driven Unified SRE Command Center loop."""
+    # ------------------------------------------------------------------
+    # Interactive Terminal Loop & Clean Shutdown (Work Package M4)
+    # ------------------------------------------------------------------
+
+    def run(self, *, refresh_interval: float = 2.0, close_store_on_exit: bool = True) -> None:
+        """Run the interactive keyboard-driven SRE Investigation Console loop."""
+        bounded_interval = max(0.5, float(refresh_interval))
+        if sys.stdin.isatty() and _HAS_TERMIOS:
+            try:
+                self._tty_fd = sys.stdin.fileno()
+                self._saved_termios = termios.tcgetattr(self._tty_fd)
+                tty.setcbreak(self._tty_fd)
+            except (OSError, termios.error):
+                self._tty_fd = None
+                self._saved_termios = None
         try:
             with self.console.screen(hide_cursor=False) as screen:
                 self._screen = screen
                 self._set_mouse_tracking(True)
                 while True:
+                    tokens = self._tokens()
                     footer = Text(
-                        "Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit",
-                        style="dim",
+                        "Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit",
+                        style=tokens.muted,
                     )
                     screen.update(Group(self.render(height=self.console.size.height), footer))
 
                     try:
-                        key = self._read_key(timeout=2.0)
+                        raw_key = self._read_key(
+                            timeout=bounded_interval,
+                            raw_text_mode=(self.review_modal is not None),
+                        )
                     except KeyboardInterrupt:
-                        self.notice = "Console closed (SIGINT)."
+                        self.notice = "Console closed (SIGINT) without automated actions."
                         break
 
-                    if key == "REFRESH":
-                        continue
-
-                    if key == "Q":
-                        self.notice = "Console closed without automated actions."
+                    if not self.handle_key(raw_key):
                         break
-
-                    rows = self.repository.active_dossiers() if self.view == "active" else self.repository.archived_dossiers()
-                    num_rows = len(rows)
-
-                    # Tab-specific configuration shortcuts on AI Model Config & Telegram Alerts
-                    if self.view == "model" and not self.selected_incident_id:
-                        if key == "P":
-                            self._configure_model_provider()
-                            continue
-                        if key == "K":
-                            self._configure_model_api_key()
-                            continue
-                        if key == "F":
-                            self._fetch_and_select_model()
-                            continue
-                        if key == "M":
-                            self._configure_model_manual()
-                            continue
-                        if key == "T":
-                            self._test_model_connection()
-                            continue
-                        if key == "X":
-                            self._reset_model_config()
-                            continue
-
-                    if self.view == "telegram" and not self.selected_incident_id:
-                        if key == "K":
-                            self._configure_telegram_token()
-                            continue
-                        if key == "C":
-                            self._configure_telegram_chat_id()
-                            continue
-                        if key == "T":
-                            self._test_telegram_alert()
-                            continue
-                        if key == "X":
-                            self._reset_telegram_config()
-                            continue
-
-                    if key in ("UP", "K"):
-                        if self.selected_incident_id:
-                            self.detail_scroll_offset = max(0, self.detail_scroll_offset - 2)
-                        elif self.focus == "menu":
-                            idx = self._MENU_ORDER.index(self.view)
-                            self.view = self._MENU_ORDER[(idx - 1) % len(self._MENU_ORDER)]
-                            self.selected_index = 0
-                            self.list_scroll_offset = 0
-                            self.detail_scroll_offset = 0
-                            self.notice = f"Menu: {self._main_title()}."
-                        elif self.focus == "list" and num_rows > 0:
-                            self.selected_index = (self.selected_index - 1) % num_rows
-                            self.notice = f"Selected row {self.selected_index + 1}."
-                    elif key in ("DOWN", "J"):
-                        if self.selected_incident_id:
-                            self.detail_scroll_offset += 2
-                        elif self.focus == "menu":
-                            idx = self._MENU_ORDER.index(self.view)
-                            self.view = self._MENU_ORDER[(idx + 1) % len(self._MENU_ORDER)]
-                            self.selected_index = 0
-                            self.list_scroll_offset = 0
-                            self.detail_scroll_offset = 0
-                            self.notice = f"Menu: {self._main_title()}."
-                        elif self.focus == "list" and num_rows > 0:
-                            self.selected_index = (self.selected_index + 1) % num_rows
-                            self.notice = f"Selected row {self.selected_index + 1}."
-                    elif key == "PGUP":
-                        if self.selected_incident_id or self.view not in ("active", "archive"):
-                            self.detail_scroll_offset = max(0, self.detail_scroll_offset - 6)
-                        elif self.focus == "list" and num_rows > 0:
-                            self.selected_index = max(0, self.selected_index - 5)
-                    elif key == "PGDN":
-                        if self.selected_incident_id or self.view not in ("active", "archive"):
-                            self.detail_scroll_offset += 6
-                        elif self.focus == "list" and num_rows > 0:
-                            self.selected_index = min(num_rows - 1, self.selected_index + 5)
-                    elif key == "RIGHT":
-                        if not self.selected_incident_id and self.view in ("active", "archive") and num_rows > 0:
-                            self.focus = "list"
-                            self.notice = "Focused on incident list."
-                    elif key == "TAB":
-                        if not self.selected_incident_id and self.view in ("active", "archive") and num_rows > 0:
-                            self.focus = "list" if self.focus == "menu" else "menu"
-                            self.notice = f"Focus switched to {'incident list' if self.focus == 'list' else 'navigation menu'}."
-                    elif key == "LEFT":
-                        if self.selected_incident_id:
-                            self.selected_incident_id = None
-                            self.detail_scroll_offset = 0
-                            self.notice = "Returned to incident list."
-                        elif self.focus == "list":
-                            self.focus = "menu"
-                            self.notice = "Focused on navigation menu."
-                    elif key in ("ENTER", "O"):
-                        if not self.selected_incident_id and self.view in ("active", "archive"):
-                            if self.focus == "menu" and key == "ENTER" and num_rows > 0:
-                                self.focus = "list"
-                                self.notice = "Focused on incident list. Press [Enter] again to open dossier."
-                            elif num_rows > 0:
-                                self.detail_scroll_offset = 0
-                                self._select_by_index()
-                            else:
-                                self.notice = "No dossiers available in this tab."
-                    elif key in ("B", "ESC"):
-                        if self.selected_incident_id:
-                            self.selected_incident_id = None
-                            self.detail_scroll_offset = 0
-                            self.notice = "Returned to incident list."
-                        elif self.focus == "list":
-                            self.focus = "menu"
-                            self.notice = "Returned to navigation menu."
-                        else:
-                            self.view = "active"
-                            self.selected_index = 0
-                            self.list_scroll_offset = 0
-                            self.detail_scroll_offset = 0
-                    elif key in ("1", "2", "3", "4", "5"):
-                        self.view = {
-                            "1": "active",
-                            "2": "archive",
-                            "3": "health",
-                            "4": "model",
-                            "5": "telegram",
-                        }[key]
-                        self.selected_incident_id = None
-                        self.selected_index = 0
-                        self.list_scroll_offset = 0
-                        self.detail_scroll_offset = 0
-                        if self.view not in ("active", "archive"):
-                            self.focus = "menu"
-                        self.notice = f"Switched to tab {self._main_title()}."
-                    elif key == "G":
-                        if self.selected_incident_id or self.view in ("active", "archive"):
-                            self._open_grafana_for_selected()
-                        else:
-                            self.notice = "Shortcut [G] is available in incident list or dossier detail."
-                    elif key in ("A", "R", "C", "E"):
-                        if self.selected_incident_id:
-                            self._review_selected(
-                                {"A": "APPROVE", "R": "REJECT", "C": "CORRECT", "E": "ESCALATE"}[key]
-                            )
-                        else:
-                            self.notice = "Open a dossier first ([Enter] or [O]) before review."
-                    else:
-                        self.notice = f"Unrecognized key '{key}'. Use ↑/↓, ←/→/Tab, Enter, 1-5, B, or Q."
         finally:
+            self._screen = None
             self._set_mouse_tracking(False)
-            self.store.close()
-        self.console.print("[yellow]SRE Command Center closed without automated actions.[/yellow]")
+            if self._tty_fd is not None and self._saved_termios is not None:
+                try:
+                    termios.tcsetattr(self._tty_fd, termios.TCSADRAIN, self._saved_termios)
+                except termios.error:
+                    pass
+                self._tty_fd = None
+                self._saved_termios = None
+            if close_store_on_exit:
+                self.store.close()
+        self.console.print(Text("SRE Investigation Console closed without automated actions.", style=self._tokens().warning_soft))

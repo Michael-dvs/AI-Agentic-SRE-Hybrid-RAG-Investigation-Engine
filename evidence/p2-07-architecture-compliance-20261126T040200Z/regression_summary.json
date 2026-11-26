@@ -1,0 +1,75 @@
+{
+  "audit_run_id": "p2-07-architecture-compliance-20261126T040200Z",
+  "environment": {
+    "python_version": "3.12.14",
+    "pytest_version": "8.3.4",
+    "anyio_version": "4.16.0",
+    "os": "macOS-26.3.1-arm64",
+    "docker_version": "29.8.2",
+    "docker_compose_version": "v5.5.1"
+  },
+  "suites": {
+    "S1_baseline_pre_fix": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -q tests --ignore=tests/test_c03_compose_live.py --tb=short",
+      "exit_code": 1,
+      "passed": 811,
+      "failed": 1,
+      "errors": 4,
+      "skipped": 3,
+      "warnings": 1,
+      "duration_seconds": 46.51
+    },
+    "S2_p207_file_only": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -p anyio -v tests/test_p2_07_architecture_compliance.py --tb=short",
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "duration_seconds": 4.46
+    },
+    "S2_focused_remediations": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -p anyio -q tests/test_p*.py tests/test_c14_claim_validation.py tests/test_c14_contradiction_and_uncertainty.py tests/test_c14_integration.py tests/test_c14_sop_applicability.py --tb=short",
+      "exit_code": 0,
+      "passed": 287,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "duration_seconds": 21.78
+    },
+    "S3_full_suite_with_anyio": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -p anyio -q tests --ignore=tests/test_c03_compose_live.py --tb=short",
+      "exit_code": 1,
+      "passed": 820,
+      "failed": 1,
+      "errors": 4,
+      "skipped": 0,
+      "warnings": 1,
+      "duration_seconds": 69.66,
+      "expected_stage3a_freeze_guard_triggers": 5,
+      "unexpected_failures": 0
+    },
+    "S3_active_excluding_stage3a_freeze_guards": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 HF_HUB_OFFLINE=1 .venv/bin/python -m pytest -p anyio -q tests --ignore=tests/test_c03_compose_live.py --ignore=tests/test_c21_benchmark.py --ignore=tests/test_c22_reproducibility_handover.py --tb=short",
+      "exit_code": 0,
+      "passed": 812,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "duration_seconds": 58.58
+    },
+    "S4_live_docker_compose": {
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -m pytest -q tests/test_c03_compose_live.py --tb=short",
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "warnings": 0,
+      "duration_seconds": 7.69
+    }
+  }
+}

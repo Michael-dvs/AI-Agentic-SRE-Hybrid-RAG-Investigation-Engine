@@ -1,0 +1,335 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261126-case03-edc25c",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "ledger-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-26T05:03:46.581806Z",
+  "window_start": "2026-11-26T05:03:14.375521Z",
+  "window_end": "2026-11-26T05:03:51.581823Z",
+  "dossier_ready_at": "2026-11-26T05:03:46.581806Z",
+  "investigation_mode": "deterministic_baseline",
+  "impact_summary": {
+    "affected_services": [
+      "ledger-service",
+      "api-gateway",
+      "transaction-service",
+      "db-dummy"
+    ],
+    "observed_symptoms": "Service ledger-service latency_p95=365.7ms exceeded high SLO threshold 250.0ms",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-26T05:03:46.593067Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:46.594977Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:46.596905Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:47.006302Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:47.018344Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:47.021318Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-26T05:03:47.024850Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.673097Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:45.604692Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:44.812995Z; WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:45.209691Z; WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:45.604692Z [svc=ledger-service | env=lab | obs=2026-11-26T05:03:45.604692Z | collected=2026-11-26T05:03:46.680608Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.769005Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on api-gateway: 0 records returned. [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.773324Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.867949Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on transaction-service: 0 records returned. [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.872427Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.907003Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.910524Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-009",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://127.0.0.1:13200",
+      "observed_at": "2026-11-26T05:03:44.824157Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "partial",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "UNKNOWN [OK 363.036ms] trace=0c9161b5bbf3.. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:44.824157Z | collected=2026-11-26T05:03:46.916089Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case03-edc25c-010",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:03:51.581823Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:14.375521Z",
+        "end": "2026-11-26T05:03:51.581823Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:47.004287Z | temporal=TEMPORALLY_RELEVANT]"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261126-case03-edc25c-001",
+      "rank": 1,
+      "statement": "Service operational error in ledger-service (WARN_DB_SLOW_QUERY)",
+      "support_status": "SUPPORTED",
+      "supporting_evidence_ids": [
+        "ev-inc-20261126-case03-edc25c-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Error logs indicate failure: 'Database query execution took 350ms (exceeded 200ms SLO)'.",
+      "unknowns": []
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-001",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service",
+      "source_uri": "kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "SOP ini mengatur penanganan timeout pada tingkat internal Ledger Service saat melakukan query ke database PostgreSQL (`db-dummy`). Dokumen ini tidak boleh tertukar dengan timeout ingress pada API Gateway (`SOP-GW-ERR-504`)."
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-ERR-504-v1.0.0-002",
+      "doc_id": "SOP-LEDGER-ERR-504",
+      "version": "1.0.0",
+      "section_path": "SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout",
+      "source_uri": "kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Meskipun sama-sama mencatat status timeout 504: - Error pada Ledger Service bersumber dari komunikasi TCP/SQL antara `ledger-service` dan `db-dummy`. - Trace span menunjukkan child span `storage_call` yang melebihi parameter `statement_timeout`. - Error log pada Ledger mencatat pesan kegagalan eksekusi query SQL `ERR_DATABASE_LATENCY`."
+    },
+    {
+      "chunk_id": "chk-SOP-LEDGER-001-v2.0.0-001",
+      "doc_id": "SOP-LEDGER-001",
+      "version": "2.0.0",
+      "section_path": "SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF)",
+      "source_uri": "kb://corpus/ledger_service/SOP-LEDGER-001-v2.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Prosedur Operasional Standar resmi ini mengatur mitigasi anomali latensi tinggi dan saturasi koneksi database PostgreSQL pada `ledger-service`. Dokumen ini menggantikan seluruh versi sebelumnya."
+    }
+  ],
+  "unknowns": [
+    "Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-01",
+      "description": "NOT_PERFORMED \u00b7 HUMAN ESCALATION REQUIRED: Compare the cited sources with the service owner before using their guidance. Precedence is not established; do not combine instructions.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-02",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-03",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-04",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-05",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, get_service_metrics (authorized read-only view). Compare request volume and error-rate series across the incident window. An error-rate rise during traffic supports service impact; traffic volume alone does not establish failures. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-06",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-07",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "PENDING_REVIEW",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "deterministic_rule_engine_v1",
+    "prompt_version": "deterministic_baseline_rules_v1",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "0c9161b5bbf3b11bedde693df0f60af2"
+    ]
+  },
+  "dossier_hash": "0e4e3ecbbe167606885395ab19cd9678b2df4c0bd6c4bbef6c88befe4cb313b2"
+}

@@ -1,0 +1,29 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@12:04:18] Env:lab | ReviewQueue:1 | Running:0 | Archive:14 | 
+Lab:unprobed([3]) | LLM:openrouter/nvidia/nem...ning:free | Reviewer:sre_reviewer_maya(L2_SRE) [?]Help
++-- Navigation [FOCUSED] --++----------------------------------- Archive Dossiers ------------------------------------+
+| [1] Active Incidents [1] || +-------------------------------------------------------------------------------------+ |
+| [2] Archive Dossiers     || | No. |Time        |Incident               |Sev    |Service    |Mode     |State       | |
+| [14]                     || |-----+------------+-----------------------+-------+-----------+---------+------------| |
+| [3] Service Health       || | > 1 |11-26 12:03 |inc-20261126-case14-6… |[HIGH] |ledger-se… |OFFLINE  |CLOSED(Adm) | |
+| [4] AI Model Config      || |   2 |11-26 12:03 |inc-20261126-case13-f… |[HIGH] |transacti… |FALLBACK |ESCALATED   | |
+| [5] Telegram Alerts      || |   3 |11-26 12:03 |inc-20261126-case12-6… |[HIGH] |transacti… |OFFLINE  |CLOSED(Adm) | |
+| [?] Keyboard & Guide     || |   4 |11-26 12:03 |inc-20261126-case11-a… |[HIGH] |transacti… |OFFLINE  |REJECTED    | |
+| [Q] Quit Console         || |   5 |11-26 12:03 |inc-20261126-case10-c… |[HIGH] |ledger-se… |OFFLINE  |CLOSED(Adm) | |
+|                          || |   6 |11-26 12:03 |inc-20261126-case09-9… |[HIGH] |transacti… |OFFLINE  |CLOSED(Adm) | |
++--------------------------+| |   7 |11-26 12:03 |inc-20261126-case08-f… |[HIGH] |auth-serv… |OFFLINE  |CLOSED(Adm) | |
+                            | |   8 |11-26 12:03 |inc-20261126-case07-6… |[HIGH] |notifica.… |OFFLINE  |CLOSED(Adm) | |
+                            | |   9 |11-26 12:03 |inc-20261126-case06-8… |[HIGH] |auth-serv… |OFFLINE  |CLOSED(Adm) | |
+                            | |  10 |11-26 12:03 |inc-20261126-case05-6… |[HIGH] |ledger-se… |OFFLINE  |CLOSED(Adm) | |
+                            | |  11 |11-26 12:03 |inc-20261126-case04-c… |[HIGH] |ledger-se… |OFFLINE  |CLOSED(Adm) | |
+                            | |  12 |11-26 12:03 |inc-20261126-case03-e… |[HIGH] |ledger-se… |OFFLINE  |CLOSED(Adm) | |
+                            | |  13 |11-26 12:03 |inc-20261126-case02-9… |[HIGH] |transacti… |OFFLINE  |CLOSED(Adm) | |
+                            | |  14 |11-26 12:03 |inc-20261126-case01-4… |[HIGH] |api-gatew… |OFFLINE  |CLOSED(Adm) | |
+                            | +-------------------------------------------------------------------------------------+ |
+                            | Selected Symptom: Service ledger-service latency_p95=362.7ms exceeded high SLO thre...  |
+                            | Keys: [Up/Dn or j/k] Select  |  [Enter/O] Inspect  |  [G] Grafana  |  [U] Refresh  |    |
+                            | [?] Help                                                                                |
+                            +-----------------------------------------------------------------------------------------+
++------------------------------------------------- Review Action Bar -------------------------------------------------+
+| [Up/Dn] SWITCH MENU  [Right/Enter/Tab] INCIDENT LIST  [1-5] JUMP  [U] REFRESH  [?] HELP  [Q] QUIT | Navigation:     |
+| [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                               |
++---------------------------------------------------------------------------------------------------------------------+

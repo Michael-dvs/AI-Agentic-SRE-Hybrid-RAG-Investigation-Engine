@@ -1,0 +1,38 @@
+╭───────── Navigation ─────────╮╭───────────────────────────── Active Incidents [FOCUSED] ─────────────────────────────╮
+│ [1] Active Incidents         ││ ┃ Rank  ┃ Hypothesis                             ┃ Support        ┃ Confidence     ┃ │
+│ [2] Archive Dossiers         ││ ┡━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩ │
+│ [3] Service Health           ││ │ 1     │ Ledger service connection pool         │ INCONCLUSIVE   │ 15% (LOW)      │ │
+│ [4] AI Model Config          ││ │       │ exhaustion causing request failures    │                │                │ │
+│ [5] Telegram Alerts          ││ │       │ and degraded request rates.            │                │                │ │
+│ [Q] Quit                     ││ │ 2     │ External dependency or network latency │ PARTIAL        │ 20% (LOW)      │ │
+│                              ││ │       │ spike causing apparent pool            │                │                │ │
+╰──────────────────────────────╯│ │       │ exhaustion.                            │                │                │ │
+                                │ │ 3     │ Metric collection or reporting         │ PARTIAL        │ 20% (LOW)      │ │
+                                │ │       │ artifact producing false low request   │                │                │ │
+                                │ │       │ rate and error signals.                │                │                │ │
+                                │ └───────┴────────────────────────────────────────┴────────────────┴────────────────┘ │
+                                │ ╭──────────────────── Hypothesis Reasoning Details (Why & How) ────────────────────╮ │
+                                │ │ #1 [INCONCLUSIVE | 15% (LOW)] Ledger service connection pool exhaustion causing  │ │
+                                │ │ request failures and degraded request rates.                                     │ │
+                                │ │   Why / Causal Analysis: Mechanism / Why: The ledger-service is experiencing     │ │
+                                │ │ connection pool exhaustion (ERR_CONNECTION_POOL_EXHAUSTED) observed at 02:41     │ │
+                                │ │ UTC, which correlates with a low request rate of 0.2333 observed at 03:39 UTC.   │ │
+                                │ │ The pool saturation likely limits new request acceptance, explaining the         │ │
+                                │ │ observed metrics drop. | Candidate Root Cause (unconfirmed): Connection pool     │ │
+                                │ │ saturation in ledger-service due to insufficient pool size or sustained high     │ │
+                                │ │ load without adequate recycling.                                                 │ │
+                                │ │   Supporting Evidence : ev-inc-live-ledger-service-d825080201-002                │ │
+                                │ │                                                                                  │ │
+                                │ │ #2 [PARTIAL | 20% (LOW)] External dependency or network latency spike causing    │ │
+                                │ │ apparent pool exhaustion.                                                        │ │
+                                │ │   Why / Causal Analysis: Mechanism / Why: High latency or intermittent           │ │
+                                │ │ connectivity from upstream dependencies could cause request timeouts, leading    │ │
+                                │ │ the connection pool to fill with pending/failed connections and appear           │ │
+                                │ │ exhausted. | Candidate Root Cause (unconfirmed): Alternative upstream or         │ │
+                                │ │ resource contention factor.                                                      │ │
+                                │ [Scroll: line 29-59/172 | ↑/↓ or PgUp/PgDn]                                          │
+                                ╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────╮
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [G] GRAFANA  [B/Esc] BACK  [Q] QUIT                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Controls: ↑/↓ or j/k=Move | ←/→/Tab=Switch Panel | Enter=Open | 1-5=Menu | B/Esc=Back | Q=Quit

@@ -1,0 +1,392 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "inc-20261126-case13-f52567",
+  "dossier_version": 1,
+  "severity": "high",
+  "service_id": "transaction-service",
+  "environment": "lab",
+  "alert_received_at": "2026-11-26T05:04:13.680393Z",
+  "window_start": "2026-11-26T05:03:42.566774Z",
+  "window_end": "2026-11-26T05:04:18.68041Z",
+  "dossier_ready_at": "2026-11-26T05:04:13.680393Z",
+  "investigation_mode": "manual_fallback",
+  "impact_summary": {
+    "affected_services": [
+      "transaction-service",
+      "api-gateway",
+      "db-dummy",
+      "ledger-service",
+      "notification-service"
+    ],
+    "observed_symptoms": "Service transaction-service error_rate=0.20 exceeded critical threshold 0.20 (error_code=ERR_TX_INTERNAL_EXCEPTION)",
+    "error_budget_impact": "moderate"
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-26T05:04:13.694546Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:13.695757Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to CORRELATED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:13.696837Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to TRIAGED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:14.286578Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to EVIDENCE_COLLECTED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:14.293320Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to RETRIEVED"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:14.424133Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to HYPOTHESES"
+    },
+    {
+      "timestamp": "2026-11-26T05:04:14.428203Z",
+      "event_kind": "workflow_event",
+      "source_ref": "orchestrator:coordinator",
+      "summary": "Workflow state transitioned to VALIDATED"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-001",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=1.7167 req/s (rate); request_rate=1.7167 req/s (rate); request_rate=1.7167 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:13.772830Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-002",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:04:12.665433Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception during transaction execution @2026-11-26T05:03:41.839368Z; ERR_TX_INTERNAL_EXCEPTION: POST /internal/transactions/execute -> 500 (0.11ms) @2026-11-26T05:03:41.839458Z; ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception during transaction execution @2026-11-26T05:03:41.859703Z [svc=transaction-service | env=lab | obs=2026-11-26T05:04:12.665433Z | collected=2026-11-26T05:04:13.788081Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-003",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=2.0333 req/s (rate); request_rate=2.0333 req/s (rate); request_rate=2.0333 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:13.872034Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-004",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:04:12.666187Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception during transaction execution @2026-11-26T05:03:41.840378Z; ERR_TX_INTERNAL_EXCEPTION: POST /api/v1/transactions -> 500 (18.98ms) @2026-11-26T05:03:41.840572Z; ERR_TX_INTERNAL_EXCEPTION: ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception during transaction execution @2026-11-26T05:03:41.860321Z [svc=api-gateway | env=lab | obs=2026-11-26T05:04:12.666187Z | collected=2026-11-26T05:04:13.889613Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-005",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "get_service_metrics queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:13.984966Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-006",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:13.990892Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-007",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=1.5167 req/s (rate); request_rate=1.5167 req/s (rate); request_rate=1.5167 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:14.083912Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-008",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on ledger-service: 0 records returned. [svc=ledger-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:14.088579Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-009",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "request_rate=0.8667 req/s (rate); request_rate=0.8667 req/s (rate); request_rate=0.8667 req/s (rate) [svc=notification-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:14.181486Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-010",
+      "tool_name": "search_error_logs",
+      "source_ref": "loki:http://127.0.0.1:13100",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "search_error_logs queried on notification-service: 0 records returned. [svc=notification-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:14.186007Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-011",
+      "tool_name": "get_trace_summary",
+      "source_ref": "tempo:http://127.0.0.1:13200",
+      "observed_at": "2026-11-26T05:04:12.589745Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "partial",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "UNKNOWN [OK 0.079ms] trace=dcfb0d9fbbab.. [svc=transaction-service | env=lab | obs=2026-11-26T05:04:12.589745Z | collected=2026-11-26T05:04:14.200376Z | temporal=TEMPORALLY_RELEVANT]"
+    },
+    {
+      "evidence_id": "ev-inc-20261126-case13-f52567-012",
+      "tool_name": "get_service_metrics",
+      "source_ref": "prometheus:http://127.0.0.1:19090",
+      "observed_at": "2026-11-26T05:04:18.68041Z",
+      "query_window": {
+        "start": "2026-11-26T05:03:42.566774Z",
+        "end": "2026-11-26T05:04:18.68041Z"
+      },
+      "data_quality": "complete",
+      "truncated": false,
+      "sanitized": true,
+      "summary": "error_rate=0.2039 ratio (ratio); error_rate=0.2039 ratio (ratio); error_rate=0.2039 ratio (ratio) [svc=transaction-service | env=lab | obs=2026-11-26T05:04:18.68041Z | collected=2026-11-26T05:04:14.284957Z | temporal=TEMPORALLY_RELEVANT]"
+    }
+  ],
+  "missing_sources": [],
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp-inc-20261126-case13-f52567-001",
+      "rank": 1,
+      "statement": "Cascading failure from api-gateway propagating error to transaction-service",
+      "support_status": "INCONCLUSIVE",
+      "supporting_evidence_ids": [
+        "ev-inc-20261126-case13-f52567-004",
+        "ev-inc-20261126-case13-f52567-002"
+      ],
+      "contradicting_evidence_ids": [],
+      "reason_summary": "Downstream dependency api-gateway logged errors ('ERR_TX_INTERNAL_EXCEPTION: Unhandled internal runtime exception during transaction execution'), leading to upstream failure in transaction-service.",
+      "unknowns": [
+        "Root cause cannot be conclusively proven with available telemetry data."
+      ]
+    }
+  ],
+  "sop_citations": [
+    {
+      "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-002",
+      "doc_id": "SOP-TX-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 1. Karakteristik Insiden",
+      "source_uri": "kb://corpus/transaction_service/SOP-TX-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "- Respons HTTP 500 dikembalikan oleh endpoint transaksi finansial simulasi. - Error disebabkan oleh anomali kalkulasi saldo, kegagalan serialisasi data event transaksi, atau race condition pada cache idempotensi lokal. - Metrik `sim_red_error_rate_ratio` pada `transaction-service` melampaui 0.20."
+    },
+    {
+      "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-003",
+      "doc_id": "SOP-TX-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi > 2. Tindakan Diagnostik",
+      "source_uri": "kb://corpus/transaction_service/SOP-TX-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "1. **Periksa Trace dan Correlation ID:** - Ekstrak `correlation_id` dari header respons gagal. - Telusuri alur eksekusi span internal transaction service untuk melihat fungsi Python mana yang melempar exception tak tertangani. 2. **Pengecekan Konsistensi Format Data:** - Pastikan tipe data nominal transaksi memenuhi skema numerik (bukan string atau nilai negatif). 3. **Penyelarasan Komunikasi Event Queue:** - Cek apakah koneksi publisher ke RabbitMQ mengalami hambatan channel buffer saat menerbitkan event `"
+    },
+    {
+      "chunk_id": "chk-SOP-TX-ERR-500-v1.0.0-001",
+      "doc_id": "SOP-TX-ERR-500",
+      "version": "1.0.0",
+      "section_path": "SOP-TX-ERR-500: Penanganan Error Internal 500 Pemrosesan Transaksi",
+      "source_uri": "kb://corpus/transaction_service/SOP-TX-ERR-500.md",
+      "applicability_verified": true,
+      "sanitized": true,
+      "excerpt": "Dokumen operasional ini menangani kode error HTTP 500 Internal Server Error yang terjadi secara spesifik di dalam komponen logika bisnis `transaction-service`. Prosedur ini berbeda dari error internal autentikasi."
+    }
+  ],
+  "unknowns": [
+    "Retrieved transaction-service runbook(s) (SOP-TX-ERR-500 v1.0.0, SOP-TX-ERR-500 v1.0.0, SOP-TX-ERR-500 v1.0.0) provide general/adjacent guidance only and do not specifically cover ERR_TX_INTERNAL_EXCEPTION (no exact SOP match for transaction-service).",
+    "LLM synthesis unavailable (PROVIDER_TIMEOUT); C11 evidence baseline requires human triage."
+  ],
+  "recommended_checks": [
+    {
+      "check_id": "chk-fb-01",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-TX-ERR-500-v1.0.0-002 of SOP-TX-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-TX-ERR-500"
+    },
+    {
+      "check_id": "chk-fb-02",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-TX-ERR-500-v1.0.0-003 of SOP-TX-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-TX-ERR-500"
+    },
+    {
+      "check_id": "chk-fb-03",
+      "description": "NOT_PERFORMED \u00b7 SOP-BACKED (source reference only): Review cited section chk-SOP-TX-ERR-500-v1.0.0-001 of SOP-TX-ERR-500 v1.0.0 for diagnostic criteria. Record which criteria match the incident and which do not. If sections disagree, escalate; no procedure is authorized for execution.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": "SOP-TX-ERR-500"
+    },
+    {
+      "check_id": "chk-fb-04",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-05",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-06",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, get_service_metrics (authorized read-only view). Compare request volume and error-rate series across the incident window. An error-rate rise during traffic supports service impact; traffic volume alone does not establish failures. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-07",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-08",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-09",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: notification-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    },
+    {
+      "check_id": "chk-fb-10",
+      "description": "NOT_PERFORMED \u00b7 GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: transaction-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:42.566774Z to 2026-11-26T05:04:18.68041Z. Record source, interval and observed signal or missing coverage.",
+      "risk_level": "low",
+      "requires_human_approval": true,
+      "auto_execution_allowed": false,
+      "related_sop_doc_id": null
+    }
+  ],
+  "review_summary": {
+    "status": "MANUAL_TRIAGE",
+    "latest_review_event_id": null,
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "reproducibility": {
+    "workflow_version": "1.0.0",
+    "policy_version": "1.0.0",
+    "model_version": "sc13-timeout-v1",
+    "prompt_version": "163f5083ac55f78a2b5b2d07221d8078068c71f2b421d144313b008f31dd35e8",
+    "tool_schema_version": "1.0",
+    "kb_index_version": "kb-idx-20261111-v1",
+    "correlation_ids": [
+      "dcfb0d9fbbaba618548e43657b84ce17"
+    ]
+  },
+  "dossier_hash": "ddb5631bb99ffd258b742f8587a420eb5bb7f522027881c79c0b3902bc5b333f"
+}

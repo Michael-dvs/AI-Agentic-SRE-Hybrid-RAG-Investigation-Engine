@@ -1,0 +1,208 @@
+{
+  "issue": "P2-06 \u2014 Dashboard Usability & State Consistency",
+  "generated_at_utc": "2026-11-26T03:17:14.319552Z",
+  "before_captures_dir": "evidence/p2-06-dashboard-usability-20261126T022200Z/before",
+  "after_captures_dir": "evidence/p2-06-dashboard-usability-20261126T022200Z/after",
+  "pty_traces_dir": "evidence/p2-06-dashboard-usability-20261126T022200Z/pty",
+  "execution_command": ".venv/bin/python evidence/p2-06-dashboard-usability-20261126T022200Z/capture_after_state.py",
+  "after_captures": [
+    {
+      "id": "01_normal_overview_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Normal incident overview with global status strip, priority triage sorting, and symptom preview",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/01_normal_overview_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/01_normal_overview_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/01_normal_overview_120x40.txt"
+      }
+    },
+    {
+      "id": "02_multiple_active_wide_160x50",
+      "dimensions": "160x50",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Wide 160x50 incident queue showing CRITICAL/HIGH/MEDIUM active & running incidents with inline symptoms",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/02_multiple_active_wide_160x50.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/02_multiple_active_wide_160x50.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/02_multiple_active_wide_160x50.txt"
+      }
+    },
+    {
+      "id": "03_investigation_in_progress_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Active investigation at stage EVIDENCE_COLLECTED (4/9) before dossier generation",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/03_investigation_in_progress_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/03_investigation_in_progress_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/03_investigation_in_progress_120x40.txt"
+      }
+    },
+    {
+      "id": "04_supported_hypothesis_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Supported #1 hypothesis (78% HIGH heuristic, uncalibrated) and contradicted #2 hypothesis",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/04_supported_hypothesis_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/04_supported_hypothesis_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/04_supported_hypothesis_120x40.txt"
+      }
+    },
+    {
+      "id": "05_unsupported_hypothesis_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Unsupported/inconclusive low-confidence hypothesis (14% LOW) with rejected & partial evidence disclosures",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/05_unsupported_hypothesis_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/05_unsupported_hypothesis_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/05_unsupported_hypothesis_120x40.txt"
+      }
+    },
+    {
+      "id": "06_evidence_detail_lineage_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Evidence Lineage view showing Loki/Prometheus provenance, units, windows, and SHA-256 consistency hashes",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/06_evidence_detail_lineage_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/06_evidence_detail_lineage_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/06_evidence_detail_lineage_120x40.txt"
+      }
+    },
+    {
+      "id": "07_historical_partial_and_rejected_evidence_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Evidence Lineage distinguishing [HISTORICAL_VALID][PARTIAL] from REJECTED [OUTSIDE_WINDOW] telemetry",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/07_historical_partial_and_rejected_evidence_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/07_historical_partial_and_rejected_evidence_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/07_historical_partial_and_rejected_evidence_120x40.txt"
+      }
+    },
+    {
+      "id": "08_sop_retrieval_and_delivery_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Applicable SOP citation with P1-04 retrieval vs LLM prompt delivery counts and RRF score disclaimer",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/08_sop_retrieval_and_delivery_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/08_sop_retrieval_and_delivery_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/08_sop_retrieval_and_delivery_120x40.txt"
+      }
+    },
+    {
+      "id": "09_competing_sops_and_compaction_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "CONFLICTING_OR_COMPETING_SOPS escalation warning and prompt byte-budget compaction disclosure",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/09_competing_sops_and_compaction_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/09_competing_sops_and_compaction_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/09_competing_sops_and_compaction_120x40.txt"
+      }
+    },
+    {
+      "id": "10_retrieval_unavailable_manual_checks_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "RETRIEVAL_UNAVAILABLE distinguished from NO_APPLICABLE_RUNBOOK with NOT_PERFORMED human checks",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/10_retrieval_unavailable_manual_checks_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/10_retrieval_unavailable_manual_checks_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/10_retrieval_unavailable_manual_checks_120x40.txt"
+      }
+    },
+    {
+      "id": "11_human_review_readiness_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Human Review readiness panel showing reviewer role, caller-asserted trust boundary, and closure semantics",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/11_human_review_readiness_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/11_human_review_readiness_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/11_human_review_readiness_120x40.txt"
+      }
+    },
+    {
+      "id": "12_review_confirmation_modal_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Version-bound APPROVE confirmation modal displaying administrative handover disclaimers and Cancel(Esc)",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/12_review_confirmation_modal_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/12_review_confirmation_modal_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/12_review_confirmation_modal_120x40.txt"
+      }
+    },
+    {
+      "id": "13_finalized_locked_archive_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Administratively CLOSED historical dossier with locked review controls and technical_resolved=False",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/13_finalized_locked_archive_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/13_finalized_locked_archive_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/13_finalized_locked_archive_120x40.txt"
+      }
+    },
+    {
+      "id": "14_degraded_stale_last_known_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Degraded backend banner marking retained view as STALE LAST-KNOWN DATA alongside unavailable Docker probe",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/14_degraded_stale_last_known_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/14_degraded_stale_last_known_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/14_degraded_stale_last_known_120x40.txt"
+      }
+    },
+    {
+      "id": "15_empty_incident_queue_100x30",
+      "dimensions": "100x30",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Empty incident queue at 100x30 explaining cause and next operator actions",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/15_empty_incident_queue_100x30.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/15_empty_incident_queue_100x30.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/15_empty_incident_queue_100x30.txt"
+      }
+    },
+    {
+      "id": "16_compact_layout_80x24",
+      "dimensions": "80x24",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Compact 80x24 stacked navigation and incident queue preserving priority and unique ID suffixes",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/16_compact_layout_80x24.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/16_compact_layout_80x24.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/16_compact_layout_80x24.txt"
+      }
+    },
+    {
+      "id": "17_keyboard_help_overlay_120x40",
+      "dimensions": "120x40",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Discoverable [?] Keyboard & Safety Semantics Reference modal",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/17_keyboard_help_overlay_120x40.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/17_keyboard_help_overlay_120x40.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/17_keyboard_help_overlay_120x40.txt"
+      }
+    },
+    {
+      "id": "18_minimum_size_guard_60x14",
+      "dimensions": "60x14",
+      "capture_method": "Rich Console render + Menlo SVG-to-PNG rasterization",
+      "scenario": "Recoverable minimum-dimension guard below 68x16 preserving operator state",
+      "files": {
+        "png": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/18_minimum_size_guard_60x14.png",
+        "svg": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/18_minimum_size_guard_60x14.svg",
+        "txt": "evidence/p2-06-dashboard-usability-20261126T022200Z/after/18_minimum_size_guard_60x14.txt"
+      }
+    }
+  ]
+}

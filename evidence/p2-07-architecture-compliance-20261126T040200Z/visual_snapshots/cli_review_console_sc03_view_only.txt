@@ -1,0 +1,70 @@
+============================================================================
+      AI AGENTIC SRE - HUMAN REVIEW AND INVESTIGATION CONSOLE (TBD-11)      
+============================================================================
+Incident ID        : inc-20261126-case03-edc25c (Revision: v2)
+Severity           : [HIGH] HIGH
+Scope & Services   : ledger-service, api-gateway, transaction-service, db-dummy (env=lab)
+Lifecycle / Review : CLOSED (Admin Handover) / APPROVED
+Closure Semantics  : ADMINISTRATIVE_DOSSIER_HANDOVER_CLOSED (technical_resolved=False)
+Canonical Hash     : c15eb1d2b8a4c1dfeda65ad23a066fdc...
+Diagnosis Verified : False (APPROVE = Handover acceptance only)
+Identity Trust     : Local PoC caller-asserted identifier (unauthenticated)
+Auto Remediation   : DISABLED (RULE-008 & HUM-01: auto_action_triggered=False)
+----------------------------------------------------------------------------
+TELEMETRY SYMPTOMS & OBSERVATIONS:
+  Service ledger-service latency_p95=365.7ms exceeded high SLO threshold 250.0ms
+----------------------------------------------------------------------------
+AI REASONING & COST METRICS (C15):
+  Reasoning Mode   : OFFLINE DETERMINISTIC (NO AI MODEL) (local-rule-engine / deterministic_rule_engine_v1)
+  Token Usage      : 0 tokens (Offline Rule Engine)
+----------------------------------------------------------------------------
+AUTHORITATIVE RUNBOOK CITATIONS (3 citations):
+  CONFLICTING_OR_COMPETING_SOPS: multiple distinct eligible SOP sources or versions matched without established precedence; human review and escalation required before following guidance.
+  RAG Delivery     : Not applicable / not recorded (no online LLM context request in deterministic or fallback mode).
+  [WARNING] Do NOT combine instructions across competing runbooks; verify precedence with service owner.
+  [1] SOP-LEDGER-ERR-504 v1.0.0 | SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service | chk-SOP-LEDGER-ERR-504-v1.0.0-001
+      Source: kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md
+  [2] SOP-LEDGER-ERR-504 v1.0.0 | SOP-LEDGER-ERR-504: Penanganan Query Timeout 504 pada Ledger Service > 1. Perbedaan Karakteristik dengan Gateway Timeout | chk-SOP-LEDGER-ERR-504-v1.0.0-002
+      Source: kb://corpus/ledger_service/SOP-LEDGER-ERR-504.md
+  [3] SOP-LEDGER-001 v2.0.0 | SOP-LEDGER-001: Penanganan Latensi Database PostgreSQL Ledger (VERSI RESMI AKTIF) | chk-SOP-LEDGER-001-v2.0.0-001
+      Source: kb://corpus/ledger_service/SOP-LEDGER-001-v2.md
+----------------------------------------------------------------------------
+MANUAL VERIFICATION (human review only):
+  chk-01 [NOT_PERFORMED | HUMAN_ESCALATION_REQUIRED]: NOT_PERFORMED · HUMAN ESCALATION REQUIRED: Compare the cited sources with the service owner before using their guidance. Precedence is not established; do not combine instructions.
+  chk-02 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): hypothesis #1: ledger-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Rec...
+  chk-03 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: api-gateway, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z....
+  chk-04 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: transaction-service, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.5...
+  chk-05 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, get_service_metrics (authorized read-only view). Compare request volume and error-rate series across the incident window. An error-rate rise during traffic supports service impact; traffic volume alone does not establish failures. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:...
+  chk-06 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: db-dummy, search_error_logs (authorized read-only view). Compare sanitized error codes and timestamps with the reported symptom. Matching errors strengthen a service-error explanation; a different error pattern weakens it. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:03:51.581823Z. Rec...
+  chk-07 [NOT_PERFORMED | GENERAL_GUIDANCE (NOT SOP-BACKED)]: NOT_PERFORMED · GENERAL DIAGNOSTIC GUIDANCE (NOT SOP-BACKED): source coverage gap: ledger-service, get_trace_summary (authorized read-only view). Compare span status, duration and parent/child timing for a correlated request. A failing earlier hop supports propagation; healthy sampled hops weaken it for that request only. Window: 2026-11-26T05:03:14.375521Z to 2026-11-26T05:...
+  Unknown: Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source.
+----------------------------------------------------------------------------
+ROOT CAUSE HYPOTHESES (2 ranked candidates):
+  Calibration      : Heuristic support score [5%-85% cap], uncalibrated (not an empirical probability; does not prove or confirm root cause).
+  #1 [INCONCLUSIVE | Conf: Not scored] Candidate PostgreSQL slow query on ledger-service pending explain-analyze check.
+      Evidence(+/-): +0 / -0 | Uncertainty: Human-authored correction has not been verified against automated telemetry evidence.
+  #2 [SUPPORTED | Conf: Not scored] Service operational error in ledger-service (WARN_DB_SLOW_QUERY)
+      Evidence(+/-): +1 / -0 | Uncertainty: Multiple distinct eligible SOP sources or versions matched without established precedence; human review is required before acting on either source.
+----------------------------------------------------------------------------
+EVIDENCE PROVENANCE & TEMPORAL SCOPE (10 evidence item(s)):
+  - ev-inc-20261126-case03-edc25c-001 [REJECTED] [TIMESTAMP_INVALID] | get_service_metrics (prometheus:http://127.0.0.1:19090) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate); request_rate=0.3333 req/s (rate) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.673097Z | temporal=TEMP
+  - ev-inc-20261126-case03-edc25c-002 [ACCEPTED_SUPPORT] [CURRENT_FRESH] | search_error_logs (loki:http://127.0.0.1:13100) | obs=2026-11-26T05:03:45.604692Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=#2 supports
+    Summary: WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:44.812995Z; WARN_DB_SLOW_QUERY: Database query execution took 350ms (exceeded 200ms SLO) @2026-11-26T05:03:45.209691Z; WARN_D
+  - ev-inc-20261126-case03-edc25c-003 [REJECTED] [TIMESTAMP_INVALID] | get_service_metrics (prometheus:http://127.0.0.1:19090) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate); request_rate=0.4333 req/s (rate) [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.769005Z | temporal=TEMPORA
+  - ev-inc-20261126-case03-edc25c-004 [REJECTED] [TIMESTAMP_INVALID] | search_error_logs (loki:http://127.0.0.1:13100) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: search_error_logs queried on api-gateway: 0 records returned. [svc=api-gateway | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.773324Z | temporal=TEMPORALLY_RELEVANT]
+  - ev-inc-20261126-case03-edc25c-005 [REJECTED] [TIMESTAMP_INVALID] | get_service_metrics (prometheus:http://127.0.0.1:19090) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate); request_rate=0.3833 req/s (rate) [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.867949Z | temporal
+  - ev-inc-20261126-case03-edc25c-006 [REJECTED] [TIMESTAMP_INVALID] | search_error_logs (loki:http://127.0.0.1:13100) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: search_error_logs queried on transaction-service: 0 records returned. [svc=transaction-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.872427Z | temporal=TEMPORALLY_RELEVANT]
+  - ev-inc-20261126-case03-edc25c-007 [REJECTED] [TIMESTAMP_INVALID] | get_service_metrics (prometheus:http://127.0.0.1:19090) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: get_service_metrics queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.907003Z | temporal=TEMPORALLY_RELEVANT]
+  - ev-inc-20261126-case03-edc25c-008 [REJECTED] [TIMESTAMP_INVALID] | search_error_logs (loki:http://127.0.0.1:13100) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: search_error_logs queried on db-dummy: 0 records returned. [svc=db-dummy | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:46.910524Z | temporal=TEMPORALLY_RELEVANT]
+  - ev-inc-20261126-case03-edc25c-009 [CONTEXTUAL] [CURRENT_FRESH][PARTIAL] | get_trace_summary (tempo:http://127.0.0.1:13200) | obs=2026-11-26T05:03:44.824157Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=partial | refs=contextual
+    Summary: UNKNOWN [OK 363.036ms] trace=0c9161b5bbf3.. [svc=ledger-service | env=lab | obs=2026-11-26T05:03:44.824157Z | collected=2026-11-26T05:03:46.916089Z | temporal=TEMPORALLY_RELEVANT]
+  - ev-inc-20261126-case03-edc25c-010 [REJECTED] [TIMESTAMP_INVALID] | get_service_metrics (prometheus:http://127.0.0.1:19090) | obs=2026-11-26T05:03:51.581823Z | win=2026-11-26T05:03:14.375521Z..2026-11-26T05:03:51.581823Z | quality=complete | refs=contextual
+    Summary: error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio); error_rate=0.0 ratio (ratio) [svc=ledger-service | env=lab | obs=2026-11-26T05:03:51.581823Z | collected=2026-11-26T05:03:47.004287Z | temporal=TEMPORALLY_RELEV
+============================================================================

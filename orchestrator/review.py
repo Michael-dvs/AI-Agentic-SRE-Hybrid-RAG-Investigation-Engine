@@ -1010,17 +1010,31 @@ class AuthorizedReviewManager:
                             code=err_code,
                         )
                     else:
-                        dossier_review_status = str(
-                            (dossier_dict.get("review_summary") or {}).get("status", "PENDING_REVIEW")
-                        ).upper()
-                        stored_status = "PENDING_REVIEW"
-                        if stored_dossier is not None:
-                            stored_json = stored_dossier.get("dossier_json") or {}
-                            stored_status = str(
-                                (stored_json.get("review_summary") or {}).get("status", "PENDING_REVIEW")
-                            ).upper()
+                        def _is_finalized_review_summary(doc_obj: Mapping[str, Any] | None) -> tuple[bool, str]:
+                            rev_sum = (doc_obj or {}).get("review_summary")
+                            rev_sum = rev_sum if isinstance(rev_sum, Mapping) else {}
+                            status_val = str(rev_sum.get("status", "PENDING_REVIEW")).upper()
+                            if status_val in ("APPROVED", "REJECTED", "EDITED"):
+                                return True, status_val
+                            if status_val == "MANUAL_TRIAGE":
+                                # Unreviewed manual_fallback drafts enter HUMAN_REVIEW with status="MANUAL_TRIAGE"
+                                # and null review markers; human ESCALATE sets latest_review_event_id and reviewed_by.
+                                has_human_marker = bool(
+                                    rev_sum.get("latest_review_event_id")
+                                    or rev_sum.get("reviewed_by")
+                                    or rev_sum.get("reviewed_at")
+                                )
+                                return has_human_marker, status_val
+                            return False, status_val
 
-                        if dossier_review_status in ("APPROVED", "REJECTED", "EDITED", "MANUAL_TRIAGE"):
+                        input_finalized, dossier_review_status = _is_finalized_review_summary(dossier_dict)
+                        stored_finalized, stored_status = (
+                            _is_finalized_review_summary(stored_dossier.get("dossier_json") or {})
+                            if stored_dossier is not None
+                            else (False, "PENDING_REVIEW")
+                        )
+
+                        if input_finalized:
                             pending_denied_kwargs = {
                                 "incident_id": formatted_inc_id,
                                 "target_version": effective_target_version,
@@ -1034,7 +1048,7 @@ class AuthorizedReviewManager:
                                 f"Dossier v{effective_target_version} for {formatted_inc_id} is already finalized ({dossier_review_status}).",
                                 code="ALREADY_FINALIZED",
                             )
-                        elif stored_status in ("APPROVED", "REJECTED", "EDITED", "MANUAL_TRIAGE"):
+                        elif stored_finalized:
                             pending_denied_kwargs = {
                                 "incident_id": formatted_inc_id,
                                 "target_version": effective_target_version,

@@ -1,0 +1,23 @@
+SRE INVESTIGATION CONSOLE [Store:CONNECTED@10:17:08] Env:lab | ReviewQueue:3 | Running:1 | Archive:1 | Lab:5/5 up | 
+Mode:Offline-Deterministic($0) | Reviewer:sre_operator_maya(L2_SRE) [?]Help
+┌─────── Navigation ───────┐┌───────── Active Incidents > inc-sim-ledger-pool-001 [Review & Audit] [FOCUSED] ──────────┐
+│ [1] Active Incidents [4] ││ View Lens ([Tab] switch):  All Sections   Triage & Progress   Hypotheses(2)   Evidence   │
+│ [2] Archive Dossiers [1] ││ Lineage(2)   SOP & RAG(1)   Review & Audit                                               │
+│ [3] Service Health       ││ inc-sim-ledger-pool-001 (v1) | [CRIT] CRITICAL | ledger-service (lab) | State:           │
+│ [4] AI Model Config      ││ HUMAN_REVIEW | Mode: AI LLM                                                              │
+│ [5] Telegram Alerts      ││ Closure: PENDING_REVIEW (diagnosis_verified=False, auto_action_triggered=False) | Trust: │
+│ [?] Keyboard & Guide     ││ Local PoC caller-asserted identity (unauthenticated)                                     │
+│ [Q] Quit Console         ││ ┌───────────────────────── Human Review Status & Audit Trail ──────────────────────────┐ │
+│                          ││ │ Eligibility : Ready for authorized human review on Revision v1.                      │ │
+└──────────────────────────┘│ │ Reviewer    : sre_operator_maya (L2_SRE) | Mode: Local PoC caller-asserted identity  │ │
+                            │ │ (unauthenticated)                                                                    │ │
+                            │ │ Semantics   : PENDING_REVIEW (diagnosis_verified=False,                              │ │
+                            │ │ remediation_authorized=False)                                                        │ │
+                            │ │ No human review decisions submitted yet for this incident.                           │ │
+                            │ └──────────────────────────────────────────────────────────────────────────────────────┘ │
+                            └──────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────── Review Action Bar ──────────────────────────────────────────────────┐
+│ [A] APPROVE  [R] REJECT  [C] CORRECT  [E] ESCALATE  [Tab] LENS  [G] GRAFANA  [B/Esc] BACK  [?] HELP  [Q] QUIT |      │
+│ Navigation: [Up/Dn] switch menu, [Right/Enter/Tab] focus incident list, [?] help.                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit

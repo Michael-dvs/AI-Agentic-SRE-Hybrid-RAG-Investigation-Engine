@@ -1,0 +1,25 @@
+┌────────────────────────────── Human Review Confirmation - inc-sim-ledger-pool-001 (v1) ──────────────────────────────┐
+│ CONFIRM HUMAN REVIEW ACTION: Accept Dossier for Handover (APPROVE)                                                   │
+│ Target Incident : inc-sim-ledger-pool-001 | Revision: v1 (sha256: 1ba248e29fd18310...)                               │
+│ Lifecycle State : HUMAN_REVIEW -> CLOSED (Administrative Handover Only)                                              │
+│ Reviewer Actor  : sre_operator_maya (L2_SRE) | Local PoC caller-asserted identity (unauthenticated)                  │
+│                                                                                                                      │
+│ Pre-Submission Diagnostic Summary:                                                                                   │
+│   Leading Hypothesis : #1 [SUPPORTED | 78% (HIGH)] PostgreSQL connection pool saturation on ledger-service           │
+│   Evidence Balance   : 2 supporting, 0 contradicting, 2 total                                                        │
+│   SOP Classification : APPLICABLE_SOP_FOUND | Pending Manual Checks: 4 (NOT_PERFORMED)                               │
+│                                                                                                                      │
+│ Operational Meaning & Safety Boundary:                                                                               │
+│   Accepts this dossier revision for administrative handover closure and exports sanitized handover artifacts. Does   │
+│ NOT establish verified root cause (diagnosis_verified=False), resolve the live technical incident                    │
+│ (technical_resolved=False), confirm SOP compliance, or trigger remediation (auto_action_triggered=False).            │
+│                                                                                                                      │
+│   Reviewer Rationale (required, min 5 chars):                                                                        │
+│     Pool checkout saturation corroborated by Loki 503 logs and Prometheus error_rate.                                │
+│                                                                                                                      │
+│   [ Confirm & Submit APPROVE ]      [ Cancel (Esc) ]                                                                 │
+│                                                                                                                      │
+│ Controls: Type text into active field | [Tab/Up/Dn] Switch field/button | [Enter] Next/Submit | [Esc] Cancel without │
+│ changes                                                                                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Controls: Up/Dn or j/k=Move | Left/Right/Tab=Switch | Enter=Open | 1-5=Tab | ?=Help | B/Esc=Back | Q=Quit
