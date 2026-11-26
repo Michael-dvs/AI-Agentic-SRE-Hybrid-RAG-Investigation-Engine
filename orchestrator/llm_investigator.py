@@ -276,16 +276,24 @@ class LLMInvestigator:
         incident_id = context["incident_id"]
         resilience.check_cancellation(incident_id)
         if context.get("llm_context_error"):
-            return self._fallback(incident_id, "SCHEMA_INVALID", context_diagnostics={"context_rejected": "SCHEMA_INVALID"})
+            return self._fallback(
+                incident_id,
+                "SCHEMA_INVALID",
+                context_diagnostics={"context_assembly_status": "REJECTED", "context_rejected": "SCHEMA_INVALID"},
+            )
         try:
             prepared = self.builder.build(context, HYPOTHESIS_SCHEMA)
         except ContextRejected as exc:
-            return self._fallback(incident_id, exc.code, context_diagnostics={"context_rejected": exc.code})
+            return self._fallback(
+                incident_id,
+                exc.code,
+                context_diagnostics={"context_assembly_status": "REJECTED", "context_rejected": exc.code},
+            )
         if prepared.input_tokens_upper_bound > self.limits.max_input_tokens:
             return self._fallback(
                 incident_id,
                 "LIMIT_EXCEEDED",
-                context_diagnostics={**prepared.diagnostics, "limit_exceeded": True},
+                context_diagnostics={**prepared.diagnostics, "context_assembly_status": "LIMIT_EXCEEDED", "limit_exceeded": True},
             )
         identity = {"messages": prepared.messages, "manifest": self.manifest()}
         fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -301,15 +309,35 @@ class LLMInvestigator:
     async def _generate(self, context: dict, prepared: Any, resilience: ResilienceController) -> dict:
         incident_id = context["incident_id"]
         last_error = "SOURCE_UNAVAILABLE"
+        attempt_fingerprints: list[str] = []
+        base_diag = dict(getattr(prepared, "diagnostics", {}) or {})
         for attempt in range(1 + self.limits.max_retries):
             resilience.check_cancellation(incident_id)
             elapsed = resilience.check_deadline(incident_id)
             remaining = resilience.default_deadline_seconds - elapsed - 1.0
             if remaining <= 0:
-                return self._fallback(incident_id, "DEADLINE_EXCEEDED")
+                return self._fallback(
+                    incident_id,
+                    "DEADLINE_EXCEEDED",
+                    context_diagnostics={
+                        **base_diag,
+                        "retry_attempts": attempt,
+                        "retry_context_preserved": len(set(attempt_fingerprints)) <= 1,
+                    },
+                )
             timeout = min(self.limits.timeout_seconds, remaining)
             if not self.ledger.reserve(incident_id, prepared.input_tokens_upper_bound, self.limits):
-                return self._fallback(incident_id, "BUDGET_EXHAUSTED")
+                return self._fallback(
+                    incident_id,
+                    "BUDGET_EXHAUSTED",
+                    context_diagnostics={
+                        **base_diag,
+                        "retry_attempts": attempt,
+                        "retry_context_preserved": len(set(attempt_fingerprints)) <= 1,
+                    },
+                )
+            msg_fp = hashlib.sha256(json.dumps(prepared.messages, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+            attempt_fingerprints.append(msg_fp)
             self._audit(incident_id, "OK", dispatch=True)
             self._append("sanitized-model-io.jsonl", {"incident_id": incident_id, "attempt": attempt + 1,
                          "direction": "input", "sanitized": True, "messages": prepared.messages,
@@ -342,7 +370,11 @@ class LLMInvestigator:
                     "candidates": candidates,
                     "usage": self.ledger.usage(incident_id),
                     "manifest": self.manifest(),
-                    "context_diagnostics": dict(getattr(prepared, "diagnostics", {}) or {}),
+                    "context_diagnostics": {
+                        **base_diag,
+                        "retry_attempts": attempt + 1,
+                        "retry_context_preserved": len(set(attempt_fingerprints)) <= 1,
+                    },
                 }
             except OutputRejected as exc:
                 self._append("sanitized-model-io.jsonl", {
@@ -352,7 +384,11 @@ class LLMInvestigator:
                 return self._fallback(
                     incident_id,
                     exc.code,
-                    context_diagnostics=dict(getattr(prepared, "diagnostics", {}) or {}),
+                    context_diagnostics={
+                        **base_diag,
+                        "retry_attempts": attempt + 1,
+                        "retry_context_preserved": len(set(attempt_fingerprints)) <= 1,
+                    },
                 )
             except (ProviderError, TimeoutError) as exc:
                 last_error = exc.code if isinstance(exc, ProviderError) else "BACKEND_TIMEOUT"
@@ -368,5 +404,9 @@ class LLMInvestigator:
         return self._fallback(
             incident_id,
             last_error,
-            context_diagnostics=dict(getattr(prepared, "diagnostics", {}) or {}),
+            context_diagnostics={
+                **base_diag,
+                "retry_attempts": len(attempt_fingerprints),
+                "retry_context_preserved": len(set(attempt_fingerprints)) <= 1,
+            },
         )

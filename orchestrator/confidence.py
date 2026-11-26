@@ -8,6 +8,7 @@ probabilities and never imply `VERIFIED` root cause status (RULE-007).
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import math
 import re
 from typing import Any, Mapping, Sequence
 
@@ -28,6 +29,8 @@ class ConfidenceScoringConfig:
     support_increments: tuple[float, ...] = (0.12, 0.08, 0.04)
     two_modalities_bonus: float = 0.06
     three_plus_modalities_bonus: float = 0.10
+    trace_coupled_modality_discount: float = 0.05
+    max_correlation_discount: float = 0.10
     coverage_weight: float = 0.08
     contradiction_penalty_per_signal: float = 0.18
     max_contradiction_penalty: float = 0.36
@@ -76,14 +79,22 @@ _ERROR_CODE_RE = re.compile(r"\b(?:ERR|WARN)_[A-Z0-9_]{2,64}\b")
 _HTTP_CODE_RE = re.compile(r"\b(401|403|404|429|500|502|503|504)\b")
 
 
+def _safe_finite_float(value: Any) -> float | None:
+    """Return a finite float or None for bool, None, malformed, NaN, or infinite inputs."""
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return None
+    val = float(value)
+    return val if math.isfinite(val) else None
+
+
 def confidence_label_for_score(
     score: float,
     config: ConfidenceScoringConfig = DEFAULT_SCORING_CONFIG,
 ) -> str:
     """Map numeric confidence score monotonically to LOW / MEDIUM / HIGH."""
-    if not isinstance(score, (int, float)) or isinstance(score, bool):
+    val = _safe_finite_float(score)
+    if val is None or val < 0.0:
         return "LOW"
-    val = float(score)
     if val >= config.high_threshold:
         return "HIGH"
     if val >= config.medium_threshold:
@@ -94,30 +105,56 @@ def confidence_label_for_score(
 def _normalize_record_signature(tool_name: str, rec: Mapping[str, Any]) -> tuple[Any, ...]:
     if tool_name == "get_service_metrics":
         metric = str(rec.get("metric_enum") or rec.get("metric_name") or "").strip().lower()
-        val = rec.get("value")
-        val_norm = round(float(val), 4) if isinstance(val, (int, float)) and not isinstance(val, bool) else None
+        f_val = _safe_finite_float(rec.get("value"))
+        val_norm = round(f_val, 4) if f_val is not None else None
         unit = str(rec.get("unit") or "").strip().lower()
-        return ("metric", metric, val_norm, unit)
+        agg = str(rec.get("aggregation") or "").strip().lower()
+        ts = str(rec.get("sample_at") or rec.get("timestamp") or "").strip()
+        return ("metric", metric, val_norm, unit, agg, ts)
     if tool_name == "search_error_logs":
         sc = rec.get("status_code")
         ec = str(rec.get("error_code") or "").strip().upper()
         msg = " ".join(str(rec.get("message") or "").strip().lower().split())[:120]
-        return ("log", sc, ec, msg)
+        ev_id = str(rec.get("log_id") or rec.get("event_id") or "").strip()
+        ts = str(rec.get("timestamp") or rec.get("event_time") or "").strip()
+        tid = str(rec.get("trace_id") or "").strip().lower()
+        sid = str(rec.get("span_id") or "").strip().lower()
+        cid = str(rec.get("correlation_id") or "").strip()
+        return ("log", ev_id, ts, tid, sid, cid, str(sc) if sc is not None else "", ec, msg)
     if tool_name == "get_trace_summary":
         sc = str(rec.get("status_code") or "").strip().upper()
         op = str(rec.get("operation") or rec.get("operation_name") or "").strip().lower()
         err = bool(rec.get("error"))
-        dur = rec.get("duration_ms")
-        dur_bucket = round(float(dur), 1) if isinstance(dur, (int, float)) and not isinstance(dur, bool) else None
-        return ("trace", sc, op, err, dur_bucket)
+        f_dur = _safe_finite_float(rec.get("duration_ms"))
+        dur_bucket = round(f_dur, 1) if f_dur is not None else None
+        tid = str(rec.get("trace_id") or "").strip().lower()
+        sid = str(rec.get("span_id") or "").strip().lower()
+        st = str(rec.get("start_time") or "").strip()
+        return ("trace", tid, sid, st, sc, op, err, dur_bucket)
     return ("other", tuple(sorted((str(k), str(v)[:40]) for k, v in rec.items())))
+
+
+def _extract_trace_keys(ev: Mapping[str, Any]) -> frozenset[str]:
+    """Extract non-empty trace_id / correlation_id keys for cross-modality coupling checks."""
+    keys: set[str] = set()
+    for rec in ev.get("records") or []:
+        if not isinstance(rec, Mapping):
+            continue
+        for field_name in ("trace_id", "correlation_id"):
+            raw = rec.get(field_name)
+            if isinstance(raw, str) and raw.strip():
+                keys.add(raw.strip().lower())
+    return frozenset(keys)
 
 
 def evidence_signal_fingerprint(ev: Mapping[str, Any]) -> tuple[Any, ...]:
     """Build a canonical signal fingerprint so identical duplicate artifacts collapse to one unit."""
+    if not isinstance(ev, Mapping):
+        return ("invalid", "", ("empty", "", ""))
     tool_name = str(ev.get("tool_name") or "")
     service_id = str(ev.get("service_id") or "")
-    records = [r for r in (ev.get("records") or []) if isinstance(r, Mapping)]
+    raw_records = ev.get("records")
+    records = [r for r in raw_records if isinstance(r, Mapping)] if isinstance(raw_records, Sequence) and not isinstance(raw_records, (str, bytes)) else []
     if not records:
         return (tool_name, service_id, ("empty", str(ev.get("error_code") or ""), str(ev.get("data_quality") or "")))
     sigs = tuple(sorted({_normalize_record_signature(tool_name, r) for r in records}))
@@ -140,15 +177,18 @@ class ConfidenceAssessment:
 
 
 def _clamp(value: float, low: float, high: float) -> float:
-    return round(max(low, min(high, value)), 4)
+    f_val = _safe_finite_float(value)
+    if f_val is None:
+        return round(low, 4)
+    return round(max(low, min(high, f_val)), 4)
 
 
 def compute_evidence_confidence(
     *,
     status: str,
-    supporting_evidence_ids: Sequence[str],
-    contradicting_evidence_ids: Sequence[str],
-    evidence_items: Sequence[Mapping[str, Any]],
+    supporting_evidence_ids: Sequence[str] | None,
+    contradicting_evidence_ids: Sequence[str] | None,
+    evidence_items: Sequence[Mapping[str, Any]] | None,
     claims: Sequence[Mapping[str, Any]] | Sequence[Any] = (),
     contradictions: Sequence[str] = (),
     unknowns: Sequence[str] = (),
@@ -159,39 +199,99 @@ def compute_evidence_confidence(
     manual_fallback: bool = False,
     config: ConfidenceScoringConfig = DEFAULT_SCORING_CONFIG,
 ) -> ConfidenceAssessment:
-    """Compute bounded, deterministic, evidence-aware confidence score and rationale."""
-    norm_status = str(status.value if hasattr(status, "value") else status).upper()
-    ev_map: dict[str, Mapping[str, Any]] = {
-        str(ev.get("evidence_id")): ev
-        for ev in evidence_items
-        if isinstance(ev, Mapping) and ev.get("evidence_id")
-    }
+    """Compute bounded, deterministic, order-invariant, evidence-aware confidence score and rationale."""
+    raw_stat = status.value if hasattr(status, "value") else (status if status is not None else "INCONCLUSIVE")
+    norm_status = str(raw_stat).strip().upper() or "INCONCLUSIVE"
+    safe_ev_items = evidence_items if isinstance(evidence_items, Sequence) and not isinstance(evidence_items, (str, bytes)) else ()
+    safe_sup_ids = supporting_evidence_ids if isinstance(supporting_evidence_ids, Sequence) and not isinstance(supporting_evidence_ids, (str, bytes)) else ()
+    safe_con_ids = contradicting_evidence_ids if isinstance(contradicting_evidence_ids, Sequence) and not isinstance(contradicting_evidence_ids, (str, bytes)) else ()
+    safe_claims = claims if isinstance(claims, Sequence) and not isinstance(claims, (str, bytes)) else ()
+    safe_contradictions = contradictions if isinstance(contradictions, Sequence) and not isinstance(contradictions, (str, bytes)) else ()
+    safe_unknowns = unknowns if isinstance(unknowns, Sequence) and not isinstance(unknowns, (str, bytes)) else ()
+    safe_reasons = reason_codes if isinstance(reason_codes, Sequence) and not isinstance(reason_codes, (str, bytes)) else ()
 
-    # Deduplicate exact IDs and collapse duplicate/identical signal payloads
-    unique_sup_ids = list(dict.fromkeys(str(eid) for eid in supporting_evidence_ids if eid))
-    seen_fps: set[tuple[Any, ...]] = set()
-    unique_signal_ids: list[str] = []
+    ev_map: dict[str, Mapping[str, Any]] = {}
+    conflicting_ids: set[str] = set()
+    id_hashes: dict[str, str] = {}
+    from orchestrator.evidence_lineage import compute_evidence_content_hash
+
+    for ev in safe_ev_items:
+        if not isinstance(ev, Mapping) or not ev.get("evidence_id"):
+            continue
+        eid_key = str(ev.get("evidence_id"))
+        cur_h = compute_evidence_content_hash(ev)
+        if eid_key in id_hashes and id_hashes[eid_key] != cur_h:
+            conflicting_ids.add(eid_key)
+        else:
+            id_hashes[eid_key] = cur_h
+            ev_map[eid_key] = ev
+
+    # Order-invariant deduplication and P1-05 eligibility filtering of supporting evidence
+    unique_sup_ids = sorted({str(eid) for eid in safe_sup_ids if isinstance(eid, str) and eid.strip()})
+    fp_to_ev: dict[tuple[Any, ...], Mapping[str, Any]] = {}
     duplicate_count = 0
-    modalities: set[str] = set()
+    excluded_supporting: list[str] = []
+    partial_supporting: list[str] = []
     for eid in unique_sup_ids:
+        if eid in conflicting_ids:
+            excluded_supporting.append(f"{eid}:DUPLICATE_EVIDENCE_ID_CONFLICT")
+            continue
         ev = ev_map.get(eid)
         if ev is None:
+            excluded_supporting.append(f"{eid}:UNRESOLVED_REFERENCE")
             continue
+        # Reject empty/error/tampered/temporally-ineligible items from boosting confidence
+        if ev.get("error_code") or ev.get("data_quality") == "unavailable" or not ev.get("records"):
+            excluded_supporting.append(f"{eid}:EMPTY_OR_UNAVAILABLE")
+            continue
+        expected_hash = ev.get("content_hash")
+        if isinstance(expected_hash, str) and expected_hash and expected_hash != compute_evidence_content_hash(ev):
+            excluded_supporting.append(f"{eid}:CONTENT_INTEGRITY_MISMATCH")
+            continue
+        temp_eval = ev.get("temporal_evaluation")
+        if isinstance(temp_eval, Mapping):
+            t_cls = str(temp_eval.get("classification") or "")
+            if t_cls in ("OUTSIDE_INCIDENT_WINDOW", "TIMESTAMP_INVALID", "TIMESTAMP_MISSING", "SOURCE_UNAVAILABLE"):
+                excluded_supporting.append(f"{eid}:{t_cls}")
+                continue
+            if t_cls == "STALE_FOR_CURRENT_ASSESSMENT" and not temp_eval.get("eligible_for_current_state", False):
+                excluded_supporting.append(f"{eid}:STALE_FOR_CURRENT_ASSESSMENT")
+                continue
+        if bool(ev.get("truncated", False)) or ev.get("data_quality") == "partial":
+            partial_supporting.append(eid)
         fp = evidence_signal_fingerprint(ev)
-        if fp in seen_fps:
+        if fp in fp_to_ev:
             duplicate_count += 1
             continue
-        seen_fps.add(fp)
-        unique_signal_ids.append(eid)
-        tool_name = str(ev.get("tool_name") or "").strip()
-        if tool_name:
-            modalities.add(tool_name)
+        fp_to_ev[fp] = ev
 
-    unique_count = len(unique_signal_ids)
+    ordered_unique_evs = [fp_to_ev[fp] for fp in sorted(fp_to_ev, key=repr)]
+    unique_count = len(ordered_unique_evs)
+    modalities = {
+        str(ev.get("tool_name") or "").strip()
+        for ev in ordered_unique_evs
+        if str(ev.get("tool_name") or "").strip()
+    }
     modality_tuple = tuple(sorted(modalities))
 
-    # Deduplicate contradicting evidence signals
-    unique_con_ids = list(dict.fromkeys(str(eid) for eid in contradicting_evidence_ids if eid))
+    # Cross-modality event correlation check: different telemetry projections of the exact same trace_id
+    # are not statistically independent observations.
+    correlated_cross_modal_pairs = 0
+    ev_trace_info = [
+        (str(ev.get("tool_name") or "").strip(), _extract_trace_keys(ev))
+        for ev in ordered_unique_evs
+    ]
+    for i in range(len(ev_trace_info)):
+        t_i, keys_i = ev_trace_info[i]
+        if not keys_i:
+            continue
+        for j in range(i + 1, len(ev_trace_info)):
+            t_j, keys_j = ev_trace_info[j]
+            if t_i != t_j and keys_j and keys_i == keys_j:
+                correlated_cross_modal_pairs += 1
+
+    # Deduplicate contradicting evidence signals order-invariantly
+    unique_con_ids = sorted({str(eid) for eid in safe_con_ids if isinstance(eid, str) and eid.strip()})
     con_fps: set[tuple[Any, ...]] = set()
     for eid in unique_con_ids:
         ev = ev_map.get(eid)
@@ -199,13 +299,14 @@ def compute_evidence_confidence(
             con_fps.add(evidence_signal_fingerprint(ev))
         else:
             con_fps.add(("raw_id", eid))
-    contradiction_signals_count = max(len(con_fps), len(list(dict.fromkeys(contradictions))))
+    unique_contra_texts = {str(c).strip() for c in safe_contradictions if isinstance(c, str) and str(c).strip()}
+    contradiction_signals_count = max(len(con_fps), len(unique_contra_texts))
 
     # Inspect validated claims when provided
-    total_claims = len(claims)
+    total_claims = len(safe_claims)
     supported_claim_count = 0
     rejected_claim_count = 0
-    for c in claims:
+    for c in safe_claims:
         c_stat = c.get("status") if isinstance(c, Mapping) else getattr(c, "status", None)
         c_stat_str = str(c_stat.value if hasattr(c_stat, "value") else c_stat).upper()
         if c_stat_str == "SUPPORTED":
@@ -215,7 +316,7 @@ def compute_evidence_confidence(
 
     # Count unavailable telemetry sources in evidence_items
     unavailable_tools: set[tuple[str, str]] = set()
-    for ev in evidence_items:
+    for ev in safe_ev_items:
         if not isinstance(ev, Mapping):
             continue
         if ev.get("data_quality") == "unavailable" or ev.get("error_code") in (
@@ -226,7 +327,7 @@ def compute_evidence_confidence(
             unavailable_tools.add((str(ev.get("tool_name") or ""), str(ev.get("service_id") or "")))
     unavailable_count = len(unavailable_tools)
 
-    reason_set = set(str(r) for r in reason_codes)
+    reason_set = {str(r) for r in safe_reasons if r is not None}
     prior_map = dict(config.corroborated_llm_prior_adjustment)
     prior_key = str(llm_proposed_confidence or "").strip().upper()
 
@@ -234,7 +335,10 @@ def compute_evidence_confidence(
         "status": norm_status,
         "unique_supporting_count": unique_count,
         "duplicate_supporting_count": duplicate_count,
+        "excluded_supporting": excluded_supporting,
+        "partial_supporting_ids": partial_supporting,
         "distinct_modalities": list(modality_tuple),
+        "correlated_cross_modal_pairs": correlated_cross_modal_pairs,
         "contradiction_signals_count": contradiction_signals_count,
         "rejected_claim_count": rejected_claim_count,
         "unavailable_sources_count": unavailable_count,
@@ -252,14 +356,14 @@ def compute_evidence_confidence(
         score = _clamp(base - penalty, config.min_score, config.manual_fallback_cap)
         rationale = (
             f"Manual fallback active; capped at {score:.0%} ({confidence_label_for_score(score, config)}) "
-            f"with {unique_count} unique supporting signal(s)."
+            f"with {unique_count} unique supporting signal(s) (heuristic, non-probabilistic)."
         )
     elif has_forbidden_verified:
         raw_cap = config.rule007_cap - (0.05 if trace_outage else 0.0)
         score = _clamp(raw_cap, config.min_score, config.rule007_cap)
         rationale = (
             f"RULE-007 downgrade applied (forbidden VERIFIED claim); "
-            f"score capped at {score:.0%}."
+            f"score capped at {score:.0%} (heuristic, non-probabilistic)."
         )
     elif norm_status == "CONTRADICTED":
         extra_con = max(0, contradiction_signals_count - 1)
@@ -267,7 +371,7 @@ def compute_evidence_confidence(
         score = _clamp(raw, config.contradicted_min, config.contradicted_max)
         rationale = (
             f"Hypothesis contradicted by {contradiction_signals_count} signal(s); "
-            f"score bounded in [{config.contradicted_min:.0%}, {config.contradicted_max:.0%}]."
+            f"score bounded in [{config.contradicted_min:.0%}, {config.contradicted_max:.0%}] (heuristic, non-probabilistic)."
         )
     elif norm_status == "UNSUPPORTED" or (unique_count == 0 and norm_status != "INCONCLUSIVE"):
         penalty = 0.0
@@ -279,7 +383,7 @@ def compute_evidence_confidence(
         score = _clamp(raw, config.unsupported_min, config.unsupported_max)
         rationale = (
             f"No corroborated supporting evidence (rejected_claims={rejected_claim_count}); "
-            f"LLM prior ignored; score={score:.0%}."
+            f"LLM prior ignored; score={score:.0%} (heuristic, non-probabilistic)."
         )
     elif norm_status == "INCONCLUSIVE" and unique_count == 0:
         penalty = 0.04 if (trace_outage or unavailable_count > 0) else 0.0
@@ -287,7 +391,7 @@ def compute_evidence_confidence(
         score = _clamp(raw, config.inconclusive_no_support_min, config.inconclusive_no_support_max)
         rationale = (
             f"Inconclusive with 0 unique supporting signals "
-            f"(unavailable_sources={unavailable_count}); score={score:.0%}."
+            f"(unavailable_sources={unavailable_count}); score={score:.0%} (heuristic, non-probabilistic)."
         )
     else:
         # SUPPORTED, PARTIAL, or INCONCLUSIVE with >=1 unique supporting signal (e.g. trace outage)
@@ -299,6 +403,10 @@ def compute_evidence_confidence(
             config.three_plus_modalities_bonus
             if len(modalities) >= 3
             else (config.two_modalities_bonus if len(modalities) == 2 else 0.0)
+        )
+        correlation_discount = min(
+            config.max_correlation_discount,
+            correlated_cross_modal_pairs * config.trace_coupled_modality_discount,
         )
         if total_claims > 0:
             coverage_bonus = config.coverage_weight * (supported_claim_count / total_claims)
@@ -323,7 +431,7 @@ def compute_evidence_confidence(
                 config.max_unavailable_source_penalty,
                 unavailable_count * config.unavailable_source_penalty,
             )
-        unknowns_pen = config.excess_unknowns_penalty if len(unknowns) > config.excess_unknowns_threshold else 0.0
+        unknowns_pen = config.excess_unknowns_penalty if len(safe_unknowns) > config.excess_unknowns_threshold else 0.0
         llm_adj = prior_map.get(prior_key, 0.0) if unique_count > 0 and norm_status in ("SUPPORTED", "PARTIAL") else 0.0
 
         raw = (
@@ -332,6 +440,7 @@ def compute_evidence_confidence(
             + modality_bonus
             + coverage_bonus
             + llm_adj
+            - correlation_discount
             - contra_pen
             - rejected_pen
             - unavail_pen
@@ -348,6 +457,7 @@ def compute_evidence_confidence(
             "base": config.base_supported,
             "support_bonus": round(support_bonus, 4),
             "modality_bonus": round(modality_bonus, 4),
+            "correlation_discount": round(correlation_discount, 4),
             "coverage_bonus": round(coverage_bonus, 4),
             "llm_prior_adjustment": round(llm_adj, 4),
             "contradiction_penalty": round(contra_pen, 4),
@@ -358,10 +468,19 @@ def compute_evidence_confidence(
         })
         rationale = (
             f"status={norm_status}, unique_support={unique_count} "
-            f"(duplicates_collapsed={duplicate_count}, modalities={len(modalities)}), "
+            f"(duplicates_collapsed={duplicate_count}, modalities={len(modalities)}, "
+            f"correlated_pairs={correlated_cross_modal_pairs}), "
             f"contradictions={contradiction_signals_count}, rejected_claims={rejected_claim_count}, "
-            f"unavailable_sources={unavailable_count}; score={score:.0%}."
+            f"unavailable_sources={unavailable_count}; score={score:.0%} (heuristic, non-probabilistic)."
         )
+
+    extra_notes: list[str] = []
+    if excluded_supporting:
+        extra_notes.append(f"excluded=[{', '.join(excluded_supporting[:3])}]")
+    if partial_supporting:
+        extra_notes.append(f"partial_evidence=[{', '.join(partial_supporting[:3])}]")
+    if extra_notes:
+        rationale = rationale.rstrip(".") + f"; {'; '.join(extra_notes)}."
 
     label = confidence_label_for_score(score, config)
     components["final_score"] = score
@@ -381,17 +500,19 @@ def compute_evidence_confidence(
 
 def rank_hypotheses(hypotheses: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Deterministically rank hypotheses by support tier, evidence-aware score, evidence count, and input order."""
-    indexed = list(enumerate(hypotheses))
+    if not isinstance(hypotheses, Sequence) or isinstance(hypotheses, (str, bytes)):
+        return []
+    indexed = [(idx, h) for idx, h in enumerate(hypotheses) if isinstance(h, Mapping)]
 
     def _sort_key(pair: tuple[int, Mapping[str, Any]]) -> tuple[int, float, int, int]:
         idx, h = pair
         raw_status = h.get("validation_status") or h.get("status") or h.get("support_status") or "INCONCLUSIVE"
         status_str = str(raw_status.value if hasattr(raw_status, "value") else raw_status).upper()
         tier = _STATUS_ORDER.get(status_str, 2)
-        raw_score = h.get("confidence_score")
-        score = round(float(raw_score), 4) if isinstance(raw_score, (int, float)) and not isinstance(raw_score, bool) else 0.0
+        f_score = _safe_finite_float(h.get("confidence_score"))
+        score = round(max(0.0, min(1.0, f_score)), 4) if f_score is not None else 0.0
         sup_ids = h.get("supporting_evidence_ids")
-        sup_count = len(sup_ids) if isinstance(sup_ids, (list, tuple, set)) else 0
+        sup_count = len({str(x) for x in sup_ids if x}) if isinstance(sup_ids, (list, tuple, set)) else 0
         return (-tier, -score, -sup_count, idx)
 
     indexed.sort(key=_sort_key)
@@ -500,12 +621,23 @@ def assess_sop_diagnostic_relevance(
         doc_families = _mechanism_families(doc_text)
         exact_code_match = any(ec in doc_text_upper for ec in error_codes)
         is_specific_err_doc = ("-ERR-" in doc_upper or "-QUEUE-" in doc_upper or "KNOWN-ERR-" in doc_upper)
+        err_500_doc_mismatch = ("-ERR-500" in doc_upper and "500" not in http_codes and "http_5xx" not in incident_families)
+        err_504_doc_mismatch = ("-ERR-504" in doc_upper and "504" not in http_codes and "timeout" not in incident_families)
 
         if exact_code_match:
             relevance_cls = "EXACT_ERROR_CODE_MATCH"
             has_specific_or_mech_match = True
+        elif err_500_doc_mismatch or err_504_doc_mismatch:
+            relevance_cls = "ADJACENT_MECHANISM_MISMATCH"
         elif incident_families and (incident_families & doc_families):
-            if not is_specific_err_doc and _is_general_service_sop(doc_id, title, excerpt) and "auth" in incident_families and "http_5xx" not in incident_families:
+            is_5xx_only_general = (
+                not is_specific_err_doc
+                and _is_general_service_sop(doc_id, title, excerpt)
+                and "5xx" in f"{title} {excerpt}".lower()
+                and "auth" in incident_families
+                and "http_5xx" not in incident_families
+            )
+            if is_5xx_only_general:
                 relevance_cls = "GENERAL_SERVICE_GUIDANCE"
             else:
                 relevance_cls = "MECHANISM_MATCH"

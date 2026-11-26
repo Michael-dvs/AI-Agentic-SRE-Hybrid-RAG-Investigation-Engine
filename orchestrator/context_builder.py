@@ -32,11 +32,12 @@ _SERVICES = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 _ENVIRONMENTS = frozenset({"lab", "sim-staging", "sim-prod-like"})
 _TELEMETRY_TOOLS = frozenset({"search_error_logs", "get_service_metrics", "get_trace_summary"})
 _RECORD_FIELDS = frozenset({
-    "timestamp", "sample_at", "severity", "service.name", "service_id", "service_name",
+    "timestamp", "sample_at", "start_time", "end_time", "ingested_at", "log_id", "event_id",
+    "severity", "service.name", "service_id", "service_name",
     "environment", "instance_id", "build_version", "event_type", "correlation_id",
     "trace_id", "span_id", "parent_span_id", "trace_absent_reason", "error_code", "message",
-    "metric_enum", "metric_name", "value", "unit", "window_seconds", "aggregation",
-    "source_ref", "data_quality", "operation", "operation_name", "duration_ms",
+    "metric_enum", "metric_name", "metric_kind", "value", "unit", "window_seconds", "aggregation", "step",
+    "source_ref", "data_quality", "operation", "operation_name", "duration_ms", "partial_trace",
     "status_code", "error", "attributes", "labels", "spans", "records", "name",
     "http.method", "http.status_code", "http.route", "db.system", "db.operation",
     "peer.service", "exception.type", "exception.message", "error.type", "error.message",
@@ -177,9 +178,10 @@ class SanitizedContextBuilder:
             raise ContextRejected()
         # Workflow controls, tokens and evaluator metadata are never projected.
         selected = {key: context[key] for key in (
-            "service_id", "environment", "investigation_scope", "event_time",
-            "evidence_items", "runbook_citations",
+            "incident_id", "service_id", "environment", "investigation_scope", "event_time",
+            "query_window", "evidence_items", "runbook_citations",
             "error_code", "message", "sop_availability", "sop_relevance",
+            "dependency_context", "unavailable_sources", "pre_detected_contradictions", "context_omissions",
         ) if key in context}
         _bounded(selected)
         service = selected.get("service_id")
@@ -203,6 +205,11 @@ class SanitizedContextBuilder:
             "environment": environment,
             "investigation_scope": scope,
         }
+        raw_qw = selected.get("query_window")
+        if type(raw_qw) is dict and type(raw_qw.get("start")) is str and type(raw_qw.get("end")) is str:
+            _bounded(raw_qw, reject_markers=True)
+            if FormatChecker().conforms(raw_qw["start"], "date-time") and FormatChecker().conforms(raw_qw["end"], "date-time"):
+                observations["incident_window"] = {"start": raw_qw["start"], "end": raw_qw["end"]}
         raw_error_code = selected.get("error_code")
         if raw_error_code is not None:
             _bounded(raw_error_code, reject_markers=True)
@@ -270,10 +277,40 @@ class SanitizedContextBuilder:
                     "environment" in record and record["environment"] != environment
                 ):
                     raise ContextRejected("CONTEXT_EVIDENCE_INVALID")
+            if type(item.get("environment")) is str and item["environment"] != environment:
+                raise ContextRejected("CONTEXT_EVIDENCE_INVALID")
+            ctx_inc_id = selected.get("incident_id")
+            if (
+                type(ctx_inc_id) is str
+                and ctx_inc_id
+                and type(item.get("incident_id")) is str
+                and item["incident_id"]
+                and item["incident_id"] != ctx_inc_id
+                and not item.get("shared_evidence_justification")
+            ):
+                raise ContextRejected("CONTEXT_EVIDENCE_INVALID")
+            if type(item.get("content_hash")) is str and item["content_hash"]:
+                from orchestrator.evidence_lineage import compute_evidence_content_hash
+                if item["content_hash"] != compute_evidence_content_hash(item):
+                    raise ContextRejected("CONTEXT_EVIDENCE_INVALID")
             projected = {key: item[key] for key in _EVIDENCE_FIELDS if key in item and item[key] is not None}
             _bounded(projected, reject_markers=True)
             if any(value is not None and type(value) is not str for value in projected.values()):
                 raise ContextRejected("CONTEXT_EVIDENCE_INVALID")
+            if item.get("truncated") is True:
+                projected["truncated"] = True
+            item_qw = item.get("query_window")
+            if type(item_qw) is dict and type(item_qw.get("start")) is str and type(item_qw.get("end")) is str:
+                _bounded(item_qw, reject_markers=True)
+                if FormatChecker().conforms(item_qw["start"], "date-time") and FormatChecker().conforms(item_qw["end"], "date-time"):
+                    norm_iqw = {"start": item_qw["start"], "end": item_qw["end"]}
+                    if norm_iqw != observations.get("incident_window"):
+                        projected["query_window"] = norm_iqw
+            if type(item.get("temporal_status")) is str and item["temporal_status"].strip():
+                t_stat = item["temporal_status"].strip()[:64]
+                _bounded(t_stat, reject_markers=True)
+                if t_stat not in ("TEMPORALLY_RELEVANT", "HISTORICAL_BUT_RELEVANT"):
+                    projected["temporal_status"] = t_stat
             projected["records"] = [_project_record(record) for record in records]
             status = data.get("status", item.get("status", "ok"))
             projected["status"] = status
@@ -339,6 +376,76 @@ class SanitizedContextBuilder:
         observations["evidence_items"] = prepared_evidence
         observations["runbook_citations"] = prepared_citations
         observations["usable_evidence_ids"] = sorted(usable)
+        raw_dep = selected.get("dependency_context")
+        if type(raw_dep) is dict and raw_dep:
+            _bounded(raw_dep, reject_markers=True)
+            dep_out: dict[str, list[str]] = {}
+            for dep_key in ("upstream_impacted", "downstream_dependencies"):
+                vals = raw_dep.get(dep_key)
+                if type(vals) is list:
+                    clean_svcs = [
+                        v for v in vals[:8]
+                        if type(v) is str and _SERVICES.fullmatch(v)
+                    ]
+                    if clean_svcs:
+                        dep_out[dep_key] = clean_svcs
+            if dep_out:
+                observations["dependency_context"] = dep_out
+        raw_unavail = selected.get("unavailable_sources")
+        prepared_unavail: list[dict[str, str]] = []
+        if type(raw_unavail) is list and raw_unavail:
+            _bounded(raw_unavail, reject_markers=True)
+            for u_item in raw_unavail[:8]:
+                if type(u_item) is not dict:
+                    continue
+                t_name = u_item.get("tool_name")
+                s_id = u_item.get("service_id")
+                r_code = u_item.get("reason_code")
+                if (
+                    type(t_name) is str and t_name in _TELEMETRY_TOOLS
+                    and type(s_id) is str and _SERVICES.fullmatch(s_id)
+                    and type(r_code) is str and r_code.strip()
+                ):
+                    entry: dict[str, str] = {
+                        "tool_name": t_name,
+                        "service_id": s_id,
+                        "reason_code": r_code.strip()[:64],
+                    }
+                    ev_ref = u_item.get("evidence_id")
+                    if type(ev_ref) is str and _EVIDENCE_ID.fullmatch(ev_ref):
+                        entry["evidence_id"] = ev_ref
+                    prepared_unavail.append(entry)
+            if prepared_unavail:
+                observations["unavailable_sources"] = prepared_unavail
+        raw_contra = selected.get("pre_detected_contradictions")
+        if type(raw_contra) is list and raw_contra:
+            _bounded(raw_contra, reject_markers=True)
+            clean_contra = [c.strip()[:256] for c in raw_contra[:5] if type(c) is str and c.strip()]
+            if clean_contra:
+                observations["pre_detected_contradictions"] = clean_contra
+        raw_omissions = selected.get("context_omissions")
+        omissions_disclosed = False
+        if type(raw_omissions) is dict and raw_omissions:
+            _bounded(raw_omissions, reject_markers=True)
+            om_ev = raw_omissions.get("omitted_evidence_count", 0)
+            om_cit = raw_omissions.get("omitted_citations_count", 0)
+            tr_cit = raw_omissions.get("truncated_excerpts_count", 0)
+            raw_reasons = raw_omissions.get("omission_reasons", [])
+            if (
+                type(om_ev) is int and om_ev >= 0
+                and type(om_cit) is int and om_cit >= 0
+                and type(tr_cit) is int and tr_cit >= 0
+                and type(raw_reasons) is list
+            ):
+                clean_reasons = [r.strip()[:64] for r in raw_reasons[:6] if type(r) is str and r.strip()]
+                if om_ev > 0 or om_cit > 0 or tr_cit > 0 or clean_reasons:
+                    observations["context_omissions"] = {
+                        "omitted_evidence_count": om_ev,
+                        "omitted_citations_count": om_cit,
+                        "truncated_excerpts_count": tr_cit,
+                        "omission_reasons": clean_reasons,
+                    }
+                    omissions_disclosed = True
         try:
             sanitized, _ = DeterministicSanitizer().sanitize_object(observations)
         except SanitizerFailureError:
@@ -352,9 +459,14 @@ class SanitizedContextBuilder:
         ]
         # Sum raw UTF-8 message bytes plus framing reserve (avoids JSON-in-JSON quote double-escaping penalty).
         upper_bound = sum(len(m["content"].encode("utf-8")) for m in messages) + 256
+        context_fingerprint = hashlib.sha256(_json(messages).encode("utf-8")).hexdigest()
         diagnostics = {
+            "context_assembly_status": "PREPARED",
+            "context_fingerprint": context_fingerprint,
             "evidence_items_delivered_count": len(prepared_evidence),
             "usable_evidence_ids": sorted(usable),
+            "unavailable_sources_delivered_count": len(prepared_unavail),
+            "omissions_disclosed": omissions_disclosed,
             "citations_delivered_count": len(prepared_citations),
             "delivered_citation_chunk_ids": [c.get("chunk_id") for c in prepared_citations if c.get("chunk_id")],
             "delivered_citation_doc_ids": [
